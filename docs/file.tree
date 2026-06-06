@@ -1,0 +1,27 @@
+├── .github
+│  └── ISSUE_TEMPLATE
+│    ├── milestone--alpha-release.md
+│    ├── milestone--back-end-i.md
+│    ├── milestone--back-end-ii.md
+│    ├── milestone--beta-release.md
+│    ├── milestone--design.md
+│    ├── milestone--final-release.md
+│    ├── milestone--front-end-i.md
+│    └── milestone--front-end-ii.md
+├── .gitignore
+├── .prettierignore
+├── dev
+│  ├── portfolio
+│  │  └── README.md
+│  └── README.md
+├── docs
+│  ├── designs
+│  │  └── README.md
+│  ├── changelog.md
+│  ├── ProjectProposal.md
+│  ├── README.md
+│  ├── research
+│  │  ├── R1-Notes.md
+│  │  └── README.md
+│  └── TechStack.md
+└── README.md
