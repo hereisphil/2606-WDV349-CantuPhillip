@@ -15,13 +15,27 @@
 │  │  └── README.md
 │  └── README.md
 ├── docs
-│  ├── designs
-│  │  └── README.md
 │  ├── changelog.md
+│  ├── designs
+│  │  ├── README.md
+│  │  └── style-tile
+│  │    ├── StyleTile.md
+│  │    └── StyleTile.png
+│  ├── file.tree
 │  ├── ProjectProposal.md
 │  ├── README.md
 │  ├── research
 │  │  ├── R1-Notes.md
+│  │  ├── R2-Notes.md
+│  │  ├── R3-Notes.md
 │  │  └── README.md
-│  └── TechStack.md
+│  ├── TechStack.md
+│  └── wires
+│    ├── images
+│    │  ├── 01_visily-landing-page.webp
+│    │  ├── 02_visily-auth-screen.webp
+│    │  ├── 03_visily-user-dashboard.webp
+│    │  └── 04_visily-study-session.webp
+│    ├── prompt.txt
+│    └── wireframe.md
 └── README.md
