@@ -1,0 +1,30 @@
+Create a low-fidelity, clean wireframe for a modern web-app named "StickyMem", which is a community-driven language flashcard platform built on spaced repetition (SRS) and crowdsourced mnemonics. The design should be dark-mode native, high-glanceability, clean, desktop-optimized but fully responsive, using a minimalist design system inspired by linear/shadcn styling. 
+
+Generate four distinct structural views mapped to a unified layout:
+
+1. THE LANDING PAGE
+- Top navbar: App Name (Left), "Why Mnemonics?" text link (Center), "Get Started" ghost button (Right).
+- Hero section: Large bold typography centered: "Stop Brute-Forcing Your Vocabulary." Subtitle: "Spaced repetition meets crowdsourced visual memory hooks." Below it, a high-contrast primary CTA button: "Claim Your Username".
+- Showcase Feature: A large, centered interactive flashcard placeholder container. The card has a front-state showing a large foreign word ("Gato") and an audio icon. An interactive arrow indicator shows it flips to a back-state revealing a literal definition and a dedicated box for a "Top Community Mnemonic Image" placeholder with upvote counter badges.
+
+2. THE AUTH SCREEN
+- A minimalist, centered modal panel on an empty dark grid background.
+- Clean layout featuring a dominant "Continue with Google" button.
+- A faint text divider stating "or use email address" leading to two unstyled text input fields (Email, Password) and a secondary solid button labeled "Sign In / Sign Up".
+
+3. THE USER DASHBOARD
+- Layout split: Fixed minimal left-sidebar navigation and a wide main content panel.
+- Sidebar contains: User avatar profile slot, a prominent "Streak Count 🔥" badge, and text links for [Decks], [Community Gallery], [Settings].
+- Main Content Panel Top: A wide tracking hero banner showing today's workflow load: "[24 Due for Review]" and "[100 Total Learned]".
+- Main Content Panel Body: A clean CSS grid display of language deck cards (e.g., "Spanish Core 1000", "Japanese N5 Kanji"). Each deck card shows a progress bar element, an inline badge showing exactly how many cards are currently due, and a solid action button pinned to the right labeled "Review Now".
+
+4. THE FOCUS STUDY / REVIEW SESSION
+- Immersive, zero-distraction view layout.
+- Top thin tracking bar: progress bar indicator, an ESC exit text label, and a session clock tracker.
+- Central Workspace Stage: A large, prominent flashcard container. 
+  - The upper half displays the target foreign word in an extra-bold massive typeface layout.
+  - The lower half displays the revealed answer states: core definition text, part of speech, and context sentence. 
+  - Right beside or neatly below the definition is a dedicated "Mnemonic Showcase Gallery" frame. This frame contains a prominent placeholder slot for a community-voted meme image, a descriptive short story text block, and a small row of pagination dots or left/right arrow icons to swap out the mnemonic for an alternative community submission.
+- Bottom Scoring Toolbar: Pinned to the very bottom, four distinct equal-width keyboard-mapped buttons using clear structural borders: "[1] Again", "[2] Hard", "[3] Good", "[4] Easy".
+
+Ensure the low-fidelity execution prioritizes clean padding, whitespace layout separation, structural alignment, and completely avoids unnecessary ornamental design clutter.
