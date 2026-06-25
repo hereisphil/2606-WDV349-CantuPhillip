@@ -65,16 +65,16 @@ Some major changes from the wireframe include:
 <img src="./images/03 - User dashboard page.png" alt="User Dashboard" style="max-width: 100%; width: 600px;">
 
 <p style="font-size: 1.3em; font-weight: bold; margin-top: 1.5em;">The Study Session - Typing Test</p>
-<img src="./images/04 - Study session [prompt] page.png" alt="Study Session prompt" style="max-width: 100%; width: 600px;">
+<img src="./images/04 - Study session prompt page.png" alt="Study Session prompt" style="max-width: 100%; width: 600px;">
 
 <p style="font-size: 1.3em; font-weight: bold; margin-top: 1.5em;">The Study Session - answer</p>
-<img src="./images/05 - Study session [answer] page.png" alt="Study Session answer" style="max-width: 100%; width: 600px;">
+<img src="./images/05 - Study session answer page.png" alt="Study Session answer" style="max-width: 100%; width: 600px;">
 
 <p style="font-size: 1.3em; font-weight: bold; margin-top: 1.5em;">The Study Session - Listening Test</p>
-<img src="./images/06 - Study session [prompt] v2 page.png" alt="Study Session prompt" style="max-width: 100%; width: 600px;">
+<img src="./images/06 - Study session prompt v2 page.png" alt="Study Session prompt" style="max-width: 100%; width: 600px;">
 
 <p style="font-size: 1.3em; font-weight: bold; margin-top: 1.5em;">The Study Session - final</p>
-<img src="./images/07 - Study session [final] page.png" alt="Study Session final" style="max-width: 100%; width: 600px;">
+<img src="./images/07 - Study session final page.png" alt="Study Session final" style="max-width: 100%; width: 600px;">
 
 <p style="font-size: 1.3em; font-weight: bold; margin-top: 1.5em;">The Style Tile</p>
 <img src="./images/08 - Style Tile.png" alt="Style Tile" style="max-width: 100%; width: 600px;">
