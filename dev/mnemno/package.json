@@ -8,7 +8,8 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
-    "cloudflare:staging": "curl -s -X POST \"https://api.cloudflare.com/client/v4/workers/builds/deploy_hooks/aec6ce4a-12b4-4024-b5c8-de3c78cad3cf\" > /dev/null && echo \"🚀 Cloudflare staging build successfully triggered!\""
+    "deploy:staging": "turbo build && bunx wrangler deploy --env staging",
+    "deploy:prod": "turbo build && bunx wrangler deploy"
   },
   "devDependencies": {
     "prettier": "^3.8.3",
