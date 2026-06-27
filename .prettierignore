@@ -7,3 +7,4 @@ pnpm-lock.yaml
 *.md
 .vscode/
 routeTree.gen.ts
+wrangler.jsonc

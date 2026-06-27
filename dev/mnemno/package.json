@@ -7,13 +7,15 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "cloudflare:staging": "curl -s -X POST \"https://api.cloudflare.com/client/v4/workers/builds/deploy_hooks/aec6ce4a-12b4-4024-b5c8-de3c78cad3cf\" > /dev/null && echo \"🚀 Cloudflare staging build successfully triggered!\""
   },
   "devDependencies": {
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.15",
-    "typescript": "~6"
+    "typescript": "~6",
+    "wrangler": "^4.103.0"
   },
   "packageManager": "bun@1.3.13",
   "engines": {
