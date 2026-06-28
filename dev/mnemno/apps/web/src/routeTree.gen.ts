@@ -13,6 +13,13 @@ import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as MarketingTermsRouteImport } from './routes/_marketing/terms'
+import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
+import { Route as MarketingPricingRouteImport } from './routes/_marketing/pricing'
+import { Route as MarketingContactRouteImport } from './routes/_marketing/contact'
+import { Route as MarketingCommunityRouteImport } from './routes/_marketing/community'
+import { Route as MarketingBlogRouteImport } from './routes/_marketing/blog'
+import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 
@@ -33,6 +40,41 @@ const MarketingIndexRoute = MarketingIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingTermsRoute = MarketingTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingPricingRoute = MarketingPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingContactRoute = MarketingContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingCommunityRoute = MarketingCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingBlogRoute = MarketingBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingAboutRoute = MarketingAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const AuthSigninRoute = AuthSigninRouteImport.update({
   id: '/signin',
   path: '/signin',
@@ -48,11 +90,25 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/signin': typeof AuthSigninRoute
+  '/about': typeof MarketingAboutRoute
+  '/blog': typeof MarketingBlogRoute
+  '/community': typeof MarketingCommunityRoute
+  '/contact': typeof MarketingContactRoute
+  '/pricing': typeof MarketingPricingRoute
+  '/privacy': typeof MarketingPrivacyRoute
+  '/terms': typeof MarketingTermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/signin': typeof AuthSigninRoute
+  '/about': typeof MarketingAboutRoute
+  '/blog': typeof MarketingBlogRoute
+  '/community': typeof MarketingCommunityRoute
+  '/contact': typeof MarketingContactRoute
+  '/pricing': typeof MarketingPricingRoute
+  '/privacy': typeof MarketingPrivacyRoute
+  '/terms': typeof MarketingTermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,13 +117,40 @@ export interface FileRoutesById {
   '/_marketing': typeof MarketingRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_auth/signin': typeof AuthSigninRoute
+  '/_marketing/about': typeof MarketingAboutRoute
+  '/_marketing/blog': typeof MarketingBlogRoute
+  '/_marketing/community': typeof MarketingCommunityRoute
+  '/_marketing/contact': typeof MarketingContactRoute
+  '/_marketing/pricing': typeof MarketingPricingRoute
+  '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_marketing/terms': typeof MarketingTermsRoute
   '/_marketing/': typeof MarketingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/signin'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/signin'
+    | '/about'
+    | '/blog'
+    | '/community'
+    | '/contact'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/signin'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/signin'
+    | '/about'
+    | '/blog'
+    | '/community'
+    | '/contact'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
   id:
     | '__root__'
     | '/_app'
@@ -75,6 +158,13 @@ export interface FileRouteTypes {
     | '/_marketing'
     | '/_app/dashboard'
     | '/_auth/signin'
+    | '/_marketing/about'
+    | '/_marketing/blog'
+    | '/_marketing/community'
+    | '/_marketing/contact'
+    | '/_marketing/pricing'
+    | '/_marketing/privacy'
+    | '/_marketing/terms'
     | '/_marketing/'
   fileRoutesById: FileRoutesById
 }
@@ -112,6 +202,55 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/terms': {
+      id: '/_marketing/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof MarketingTermsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/privacy': {
+      id: '/_marketing/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof MarketingPrivacyRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/pricing': {
+      id: '/_marketing/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof MarketingPricingRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/contact': {
+      id: '/_marketing/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof MarketingContactRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/community': {
+      id: '/_marketing/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof MarketingCommunityRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/blog': {
+      id: '/_marketing/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof MarketingBlogRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/about': {
+      id: '/_marketing/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_auth/signin': {
@@ -152,10 +291,24 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface MarketingRouteChildren {
+  MarketingAboutRoute: typeof MarketingAboutRoute
+  MarketingBlogRoute: typeof MarketingBlogRoute
+  MarketingCommunityRoute: typeof MarketingCommunityRoute
+  MarketingContactRoute: typeof MarketingContactRoute
+  MarketingPricingRoute: typeof MarketingPricingRoute
+  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingTermsRoute: typeof MarketingTermsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
 
 const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingAboutRoute: MarketingAboutRoute,
+  MarketingBlogRoute: MarketingBlogRoute,
+  MarketingCommunityRoute: MarketingCommunityRoute,
+  MarketingContactRoute: MarketingContactRoute,
+  MarketingPricingRoute: MarketingPricingRoute,
+  MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingTermsRoute: MarketingTermsRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
 
