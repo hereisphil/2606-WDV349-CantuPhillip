@@ -13,6 +13,8 @@ import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as MarketingContactRouteImport } from './routes/_marketing/contact'
+import { Route as MarketingBlogRouteImport } from './routes/_marketing/blog'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 
@@ -33,6 +35,16 @@ const MarketingIndexRoute = MarketingIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingContactRoute = MarketingContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingBlogRoute = MarketingBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const AuthSigninRoute = AuthSigninRouteImport.update({
   id: '/signin',
   path: '/signin',
@@ -48,11 +60,15 @@ export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/signin': typeof AuthSigninRoute
+  '/blog': typeof MarketingBlogRoute
+  '/contact': typeof MarketingContactRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/signin': typeof AuthSigninRoute
+  '/blog': typeof MarketingBlogRoute
+  '/contact': typeof MarketingContactRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,13 +77,15 @@ export interface FileRoutesById {
   '/_marketing': typeof MarketingRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_auth/signin': typeof AuthSigninRoute
+  '/_marketing/blog': typeof MarketingBlogRoute
+  '/_marketing/contact': typeof MarketingContactRoute
   '/_marketing/': typeof MarketingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/signin'
+  fullPaths: '/' | '/dashboard' | '/signin' | '/blog' | '/contact'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/signin'
+  to: '/' | '/dashboard' | '/signin' | '/blog' | '/contact'
   id:
     | '__root__'
     | '/_app'
@@ -75,6 +93,8 @@ export interface FileRouteTypes {
     | '/_marketing'
     | '/_app/dashboard'
     | '/_auth/signin'
+    | '/_marketing/blog'
+    | '/_marketing/contact'
     | '/_marketing/'
   fileRoutesById: FileRoutesById
 }
@@ -112,6 +132,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/contact': {
+      id: '/_marketing/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof MarketingContactRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/blog': {
+      id: '/_marketing/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof MarketingBlogRouteImport
       parentRoute: typeof MarketingRoute
     }
     '/_auth/signin': {
@@ -152,10 +186,14 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface MarketingRouteChildren {
+  MarketingBlogRoute: typeof MarketingBlogRoute
+  MarketingContactRoute: typeof MarketingContactRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
 
 const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingBlogRoute: MarketingBlogRoute,
+  MarketingContactRoute: MarketingContactRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
 
