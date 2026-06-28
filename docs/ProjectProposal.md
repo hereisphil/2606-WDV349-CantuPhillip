@@ -1,69 +1,85 @@
-# [Concept Name]
+# Mnemno: The Community Mnemonic Language Platform
 
 ## Application Definition Statement
 
-_A clear high-level summary should be used to introduce the concept. This should be similar to an elevator pitch or a conversational reply to "What are you building?”. You will explore the audience and their demographics, the problem they are having, and your solution in subsequent sections in more detail but touch on them here._
-
-_Clarity over quantity should be the focus, to that end, creating visuals/charts to explain the more complex data or logical points could help to reinforce your Application’s Definition Statement._
-
-[ Replace this text with your Application Definition Statement ]
+Mnemno, pronounced "NEM-no", is an open, community-driven language learning web application designed to restore the crowd-sourced, association-based learning patterns popularized by early mnemonic platforms. While modern language apps rely heavily on automated, repetitive drill mechanics that lead to user burnout, Mnemno centers the learning process around user-generated mnemonics that are visual images, stories, and humorous hooks. The app is then supercharged by a science-backed Spaced Repetition System (SRS). The platform will deliver instantaneous flashcard interactions with rich media, allowing users to effortlessly build, share, and quick retain vast vocabularies and/or concepts.
 
 ## Target Market
 
-_Using Primary and Secondary research, describe the people most likely to be utilizing your application. What are their ages, education level, employment sector, income level, hobbies, or any other defining characteristics that set them apart from other groups of people? Identifying specific groups will help drive application design choices._
+The primary and secondary target market for Mnemno consists of highly motivated, independent adult language learners, polyglots, and standardized language exam students (e.g., JLPT, TOPIK, CEFR frameworks) aged 18–35.
 
-_Primary Research is research that you have conducted yourself and is not based on secondary sources. Examples of Primary Research include surveys, interviews, and focus groups. This doesn't have to be formal in nature and can include discussions you have with individuals that are likely users of your application. Secondary Research is research that has been conducted by others and is based on their findings. Examples of Secondary Research include market research reports, industry publications, and news articles._
+* Demographics: Tech-literate students or young working professionals. They possess a high school or university education, work across various sectors (with a heavy lean toward tech, international business, and digital nomads), and spend their leisure time on self-improvement, cognitive training, and digital communities (Reddit, Discord).
+* Primary Research: I will post on Reddit!
+* Secondary Research: Language acquisition studies confirm that multi-sensory association (combining textual data with vivid visual imagery or narrative mnemonics) dramatically lowers cognitive load and shortens the path to long-term memory integration when paired with an optimal Leitner or SuperMemo-based SRS algorithm.
 
-[ Replace this text with a description of any Primary and Secondary research you conducted to determine the Target Market for your application. Link to any references used during this research. ]
+### References
+
+Grand View Research. (2025, May). Online Language Learning Market (2025 - 2030). <https://www.grandviewresearch.com/industry-analysis/online-language-learning-market-report>
+
+Valamis. (2025, April 7). Microlearning: What is it, benefits, and examples. <https://www.valamis.com/hub/microlearning>
+
+Eurolinguiste. (n.d.). Memrise is Doing Away with User-Generated Content… Now What? <https://eurolinguiste.com/memrise-is-doing-away-with-user-generated-content-now-what>
 
 ## User Profile / Persona
 
-_User profiles are a snapshot of an actual person and helps to open a window into the mind of an actual user and will provide insight while tailoring and refining interaction details to best fit your ideal users within your Target Market._
-
-[ Replace this text with a User Profile / Persona for your application. If necessary, research 'Web User Persona' to generate ideas. ]
+* **Name**: Alex Michaels
+* **Age**: 26
+* **Occupation**: Junior Software Engineer / Digital Nomad
+* **Education**: B.S. in Computer Science
+* **Income Level**: $75,000/year
+* **Hobbies**: Weightlifting, foreign cinema, traveling, reading.
+* **Goals**: Achieve conversational fluency in Korean within 12 months to comfortably navigate local neighborhoods and connect deeper with the culture.
+* **Frustrations with Existing Solutions**: Finds mainstream apps (like Duolingo) too slow, overly gamified, and restrictive. Used to love old-school Memrise because of the crazy, user-created "mems" that made abstract characters stick instantly, but feels alienated now that those features are completely gone. Needs a highly efficient, customizable tool he can use during quick 15-minute breaks that respects his intelligence and learning style. He's tried Anki but he feels that it's both complicated and boring.
 
 ## Use Cases
 
-_A 'Use Case' describes how a user may interact with your application. It provides a series of steps to reach a desired result. If a user wants to listen to some music during a workout, how many clicks would it take to do that? Begin with a simple question like that and then map out the different steps to reach the desired goal. Use cases help us think through how our application will be used._
+### Use Case 1: Studying an Existing Lesson via the SRS Loop
 
-_Use Cases help drive design decisions as well as testing procedures. During development we regularly test and confirm the work in progress matches up with our Use Cases. This provides valuable insight into how our application is addressing the needs of the user and allows us to correct missteps early. This [article](https://www.softwaretestinghelp.com/use-case-testing/) gives additional background Use Cases and Use Case Testing._
+1. **Initiate**: The user logs into the dashboard via Better Auth and selects their active "Core Korean Verbs" course.
+2. **Review Query**: The client application requests the next set of due cards using a TanStack Query hook, hitting the Hono edge API, which instantly pulls from Cloudflare D1 based on the user's past performance timestamps.
+3. **Card Display**: The user is shown a target prompt. They type their answer and press Enter or click to reveal the answer, displaying the definition alongside a community-voted visual "mem" (served instantly from Backblaze B2).
+4. **Grading**: The system self-grades their recollection as a "pass" or "no pass" and tracks this in the SRS algorithm to determine when the user should be shown the same card again.
+5. **Mutation**: The application fires an optimistic state update. Drizzle ORM updates the UserProgress table on the edge with a new calculated interval, and the next card instantly slides into view without any screen flashing or reloading.
 
-[ Describe two or more Use Cases for your application. Use a bulleted list to describe the steps involved in each Use Case. ]
+### Use Case 2: Creating and Attaching a Custom "Mem" (Mnemonic)
+
+1. **Navigate**: While reviewing a difficult vocabulary card ("공항" - Airport), the user notices the default mnemonic isn't clicking for them.
+2. **Trigger Creation**: The user clicks the "Create New Mem" button, opening an accessible shadcn/ui modal dialog.
+3. **Input Data**: The user types out a quick, humorous association story: "A Gong sounds at the Hangar when you arrive at the airport."
+4. **Media Upload**: The user drags and drops a custom meme image into the upload box.
+5. **Processing**: The frontend sends the image to be compressed and then to the backend bucket (Backblaze B2), stores the text metadata via Hono in D1, and attaches it to the user's profile for that specific card.
+6. **Publish**: The new "mem" is saved to the user's private deck and simultaneously published to the course's community pool for other students to discover, use, and upvote.
 
 ## Problem Statement
 
-_In a few sentences explain the problem your target market is seeing that requires this project to be built. This will identify why is your application needed and needs to be supported by Primary Research._
-
-[ Replace this text with a Problem Statement for your application. Include any Research that supports your Problem Statement. ]
+Modern language learning software has pivoted away from cognitive science and community-driven content in favor of aggressive monetization and corporate uniformity. Independent language learners face an industry-wide gap where platforms have deleted user-generated mnemonic tools ("mems"), forcing students into rigid, pre-made flashcard tracks that do not match individual memory hooks. Studies confirm that without these associative hooks or mnemonics, learners experience rapid mental fatigue, stagnant retention rates, and high drop-off rates during the intermediate plateaus of language acquisition.
 
 ## Pain Points
 
-_Explain your audience’s pain points that are contributing to their defined problem and their impact on the user. Primary Research should support your explanations._
-
-[ Replace this text with a description of the Pain Points your audience is experiencing. Include any Research that supports your Pain Points. ]
+* **The Loss of Personalization**: Learners cannot easily anchor abstract foreign words to things they already know (pop culture references, personal jokes, specific visual memes), resulting in sterile rote memorization that doesn't stick.
+* **High Latency in Interactive Apps**: Heavy, monolithic multi-page apps suffer from noticeable database query lags and asset load delays when flipping through hundreds of media-heavy flashcards, breaking the mental state of "flow" essential for fast cognitive drills.
+* **Algorithmic Disconnect**: Existing open-source alternatives (like basic Anki setups) have incredibly steep learning curves, lack native modern web UI frameworks, and do not easily facilitate the rapid global sharing of learning assets or courses.
 
 ## Solution Statement
 
-_How is your project going to solve the problem outlined above? Consider the competing products in your market space. What makes your solution different from other’s attempts to solve the problem? How are you able to better solve the defined problem for your audience than your competition?_
+Mnemno solves this by combining a modern, accessible user interface with a completely open architecture for community mnemonics. Unlike static flashcard apps, every single item in Mnemno can support an infinite gallery of user-submitted textual and visual "mems," allowing students to browse and select the exact psychological hook that works for their brain.
 
-[ Replace this text with a Solution Statement for your application. Include any Research that supports your Solution Statement. ]
+Architecturally, instead of relying on traditional slow-booting stacks, Mnemno utilizes a cutting-edge edge monorepo (React + Hono + Cloudflare D1). Because the entire application database logic runs on a globally distributed CDN edge right next to the user, card mutations, grading steps, and media calls happen with sub-millisecond execution times. This delivers a level of responsiveness that competing platforms cannot achieve.
 
 ## Competition
 
-_What competing products exist to solve this or a similar problem? Identify and summarize competing products and how their approach to solving your identified problem differ from your own._
-
-[ Replace this text with a description of the Competition for your application. Include any Research that supports your description. Competition can be direct or indirect. Direct competition is a product that solves the same problem as your application. Indirect competition is a product that solves a similar problem as your application. ]
+* **[Anki](https://apps.ankiweb.net/)** _(Indirect/Direct)_: Highly powerful and flexible SRS, but suffers from an archaic UI/UX, complex syncing configurations, a steep learning curve for non-technical users, and zero native community-driven asset discovery within the app. There is a separate website to download other decks, but that too suffers from the same bad UI/UX.
+* **[Duolingo](https://www.duolingo.com/)** / **[Memrise](https://memrise.com/)** _(Direct)_: Massive market share, but highly locked down. They have abandoned crowd-sourced mnemonics entirely in favor of corporate, AI-generated linear paths that prioritize superficial streaks over true deep lexical retention. To be honest, at least for Duolingo, most of its users are not my target market because many are happy with "casually learning" and wouldn't be a fit for a more serious app like Mnemno.
+* **[Quizlet](https://quizlet.com/)** _(Indirect)_: Excellent UX for basic term memorization, but lacks a strict, mathematically sound Spaced Repetition System algorithm out of the box and does not treat relational mnemonic metadata as a priority.
 
 ## Features & Functionality
 
-_Define key features and functionality intended to provide solutions to specific problems and pain points you have identified. These key items should be specifically defined in response to problems / pain points._
-
-_A good way to identify a Key Feature is to use the phrase 'In order to [solve this problem] I need to [do this]'. For example, 'In order to listen to music while I workout I need to be able to create a playlist'._
-
-_Features and functionality should be prioritized based on their importance to the user. This will help you focus on the most important features first and then add additional features as time allows._
-
-[ Replace this text with a list of Key Features and Functionality for your application. Include a description of each feature and how it will solve a specific problem or pain point. For example, 'Playlist: The user will have the ability to create a playlist of songs they want to listen to while working out. This will allow them to listen to the music they want to hear while working out.' ]
+* **Community Courses & Levels**: In order to study specialized topics, users need the ability to build, categorize, and discover custom language courses partitioned into bite-sized levels. The platform will support full relational sorting of user-generated content.
+* **The "Mem" Engine**: In order to prevent rote-learning burnout, users need to upload images and compose short stories linked directly to flashcards. This module manages user contributions, upvotes, and personal selections.
+* **Edge-Native SRS Engine**: In order to optimize cognitive retention, users need a system that calculates exactly when a card is due for review. Built with Drizzle ORM, this engine dynamically updates intervals, ease factors, and timestamps seamlessly on every card grade event.
+* **Type-Safe RPC API & Dashboard**: In order to track progress across devices with zero lag, developers and users need unified data contracts. Hono handles fast routing and serves data instantly to a TanStack-driven client panel.
 
 ## Integrations
 
-_Use of an API is expected. This can be 3rd party APIs, your own API, or a combination of data sets. Identify which integrations are planned for and outline how you will use them transformatively. For 3rd party APIs provide links to their respective documentation and verify that your intended use complies with their Terms of Service._
+* **Mnemno Core Edge API (First-Party)**: A high-performance REST/RPC API layer built using Hono, deployed as a Cloudflare Worker, exposing strict JSON endpoints for course metadata, user progress metrics, and authentication validations.
+* **Backblaze B2 Object Storage via Cloudflare Bandwidth Alliance (Third-Party)**: Used for storing, serving, and caching user-generated visual mnemonics globally. This compliance adheres fully to standard S3-compatible object access policies, providing free egress routing through Cloudflare’s CDN layers for exceptional global delivery speeds.

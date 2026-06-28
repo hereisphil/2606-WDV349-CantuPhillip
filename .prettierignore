@@ -1,1 +1,10 @@
+dist/
+node_modules/
+.turbo/
+coverage/
+pnpm-lock.yaml
+.pnpm-store/
 *.md
+.vscode/
+routeTree.gen.ts
+wrangler.jsonc
