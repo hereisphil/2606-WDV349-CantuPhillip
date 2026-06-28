@@ -39,13 +39,9 @@ export function Nav() {
           >
             Features
           </button>
-          <button
-            type="button"
-            onClick={() => scrollToId("about")}
-            className={navItemClass}
-          >
+          <Link to="/about" className={navItemClass}>
             About
-          </button>
+          </Link>
           <Link to="/contact" className={navItemClass}>
             Contact
           </Link>
