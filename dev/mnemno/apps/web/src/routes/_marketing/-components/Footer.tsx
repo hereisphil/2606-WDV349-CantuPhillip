@@ -4,10 +4,6 @@ import { Button } from "@workspace/ui/components/button"
 const footerLinkClass =
   "text-sm font-medium text-brand-slate transition-colors hover:text-white"
 
-function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
-}
-
 export function Footer() {
   return (
     <footer className="bg-brand-charcoal text-brand-surface">
@@ -39,13 +35,9 @@ export function Footer() {
           <Link to="/" className={footerLinkClass}>
             Home
           </Link>
-          <button
-            type="button"
-            onClick={() => scrollToId("features")}
-            className={footerLinkClass}
-          >
+          <Link to="/" hash="features" className={footerLinkClass}>
             Features
-          </button>
+          </Link>
           <Link to="/about" className={footerLinkClass}>
             About
           </Link>
@@ -55,13 +47,9 @@ export function Footer() {
           <Link to="/blog" className={footerLinkClass}>
             Blog
           </Link>
-          <button
-            type="button"
-            onClick={() => scrollToId("whyMnemonics")}
-            className={footerLinkClass}
-          >
+          <Link to="/" hash="why-mnemonics" className={footerLinkClass}>
             Why Mnemonics?
-          </button>
+          </Link>
           <Link to="/pricing" className={footerLinkClass}>
             Pricing
           </Link>
