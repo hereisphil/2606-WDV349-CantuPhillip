@@ -1,0 +1,36 @@
+name: Continuous Deployment (Production)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "dev/memli/**"
+      - ".github/workflows/*.yml"
+
+jobs:
+  deploy-to-production:
+    if: "!contains(github.event.head_commit.message, '[skip deploy]')"
+    runs-on: ubuntu-latest
+
+    # Forces the runner container to execute commands directly inside the monorepo subfolder
+    defaults:
+      run:
+        working-directory: dev/memli
+
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Install Bun Toolchain
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13 # Pinning to the exact local execution version
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Compile and Deploy Application
+        run: bun run deploy:prod
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -30,10 +30,7 @@ export function FlashcardDemo() {
         </div>
       </article>
 
-      <span
-        aria-hidden="true"
-        className="flex flex-col items-center gap-4 p-6"
-      >
+      <span aria-hidden="true" className="flex flex-col items-center gap-4 p-6">
         <ArrowRight className="size-4" />
         <span>FLIP</span>
       </span>
@@ -74,8 +71,8 @@ export function FlashcardDemo() {
               🐱 🎩
             </div>
             <blockquote className="text-center text-sm italic">
-              &ldquo;Imagine a <span className="font-bold">Cat</span>-o wearing a
-              fancy hat at a Gala. <br />
+              &ldquo;Imagine a <span className="font-bold">Cat</span>-o wearing
+              a fancy hat at a Gala. <br />
               <span className="font-bold">Gato</span> = Gala-Cat.&rdquo;
             </blockquote>
           </div>

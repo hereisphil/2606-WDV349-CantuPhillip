@@ -20,13 +20,18 @@ export default defineConfig([
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
       },
-      rules: {
-        // Needed for TanStack Router file-based routing
-        "react-refresh/only-export-components": [
-          "warn",
-          { allowExportNames: ["Route"] },
-        ],
-      },
+    },
+    rules: {
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
+    },
+  },
+  {
+    files: ["src/routes/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 ])
