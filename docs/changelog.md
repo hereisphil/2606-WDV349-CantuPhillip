@@ -10,6 +10,14 @@ Each week, and/or each major change, I will update this file by summarizing acti
 
 ## 29 June 2026
 
+### `SECURITY` Staging Password Protection
+
+Added HTTP Basic Auth in front of the **staging** environment so pre-release builds stay private to me and my instructor. Production is unaffected and remains publicly accessible.
+
+* Added a zero-dependency Cloudflare Worker guard at `dev/memli/src/index.ts` that intercepts staging requests and prompts for credentials before serving the Vite build.
+* Updated `wrangler.jsonc` to register the Worker entrypoint, add the `ASSETS` binding, and scope `run_worker_first: true` to the staging environment so the guard runs *before* static assets are served (the default serves assets first and would bypass the gate).
+* Credentials live as Cloudflare secrets (`BASIC_AUTH_USER` / `BASIC_AUTH_PASS`) and are recorded for the instructor in [`dev/memli/.cf`](../dev/memli/.cf).
+
 ### `ANNOUNCEMENT` Rebrand: Mnemno → Memli
 
 Rebranded the entire web app from **Mnemno** to **Memli**. The name change had been flagged as likely in the README, and this resolves it.
