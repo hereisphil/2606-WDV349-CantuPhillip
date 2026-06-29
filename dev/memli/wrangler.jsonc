@@ -1,5 +1,5 @@
 {
-  "name": "mnemno",
+  "name": "memli",
   "compatibility_date": "2026-06-27",
   "assets": {
     "directory": "./apps/web/dist",
@@ -7,7 +7,7 @@
   },
   "env": {
     "staging": {
-      "name": "mnemno-staging"
+      "name": "memli-staging"
     }
   }
 }

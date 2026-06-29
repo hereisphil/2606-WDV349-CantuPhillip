@@ -4,15 +4,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "dev/memli/**"
+      - ".github/workflows/*.yml"
 
 jobs:
   deploy-to-production:
+    if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     runs-on: ubuntu-latest
 
     # Forces the runner container to execute commands directly inside the monorepo subfolder
     defaults:
       run:
-        working-directory: dev/mnemno
+        working-directory: dev/memli
 
     steps:
       - name: Checkout Repository Code
