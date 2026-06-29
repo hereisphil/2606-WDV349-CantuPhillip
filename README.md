@@ -6,11 +6,11 @@
 
 ---
 
-**Mnemno** (pronounced "NEM-no") is an open, community-driven language learning web application built to restore the crowd-sourced, association-based learning patterns popularized by early mnemonic platforms. While modern language apps rely heavily on automated, repetitive drill mechanics that lead to user burnout, Mnemno centers the learning process around user-generated mnemonics such as: visual images, stories, and humorous hooks, that's supercharged by a science-backed Spaced Repetition System (SRS).
+**Memli** is an open, community-driven language learning web application built to restore the crowd-sourced, association-based learning patterns popularized by early mnemonic platforms. While modern language apps rely heavily on automated, repetitive drill mechanics that lead to user burnout, Memli centers the learning process around user-generated mnemonics such as: visual images, stories, and humorous hooks, that's supercharged by a science-backed Spaced Repetition System (SRS).
 
-This repository is the capstone project for Full Sail University's Web Development degree program. The first three weeks focused on research and prototyping inside [`docs/`](./docs/). Development of the live application began as a monorepo inside [`dev/mnemno/`](./dev/mnemno/).
+This repository is the capstone project for Full Sail University's Web Development degree program. The first three weeks focused on research and prototyping inside [`docs/`](./docs/). Development of the live application began as a monorepo inside [`dev/memli/`](./dev/memli/).
 
-**Note:**<br />Name change is likely to occur.
+**Note:**<br />Formerly named "Mnemno"; rebranded to "Memli".
 
 ---
 
@@ -18,8 +18,8 @@ This repository is the capstone project for Full Sail University's Web Developme
 
 | Environment | URL |
 | --- | --- |
-| **Staging** | [mnemno-staging.thereisphil.workers.dev](https://mnemno-staging.thereisphil.workers.dev/) |
-| **Production** | [mnemno.thereisphil.workers.dev](https://mnemno.thereisphil.workers.dev/) |
+| **Staging** | [memli-staging.thereisphil.workers.dev](https://memli-staging.thereisphil.workers.dev/) |
+| **Production** | [memli.thereisphil.workers.dev](https://memli.thereisphil.workers.dev/) |
 
 **Repository:** [github.com/hereisphil/2606-WDV349-CantuPhillip](https://github.com/hereisphil/2606-WDV349-CantuPhillip)
 
@@ -31,7 +31,7 @@ This repository is the capstone project for Full Sail University's Web Developme
 
 * **[Project Proposal](./docs/ProjectProposal.md)** — Application definition, target market, user persona, use cases, problem/solution statements, competition analysis, and feature scope.
 * **[Tech Stack](./docs/TechStack.md)** — Edge-native architecture: React + Vite, TanStack Router/Query, Hono, Cloudflare D1, Drizzle ORM, Backblaze B2, Better Auth, and Bun/Turborepo monorepo tooling.
-* **[Changelog](./docs/changelog.md)** — Weekly progress log and source of truth for major changes to the Mnemno app.
+* **[Changelog](./docs/changelog.md)** — Weekly progress log and source of truth for major changes to the Memli app.
 
 ### Design
 
@@ -63,7 +63,7 @@ Weekly research notes covering class assignments and independent study:
 │   ├── designs/           # Wireframes, prototypes, style tile
 │   └── research/          # Weekly R#-Notes.md files
 └── dev/
-    ├── mnemno/            # Mnemno monorepo (the web app)
+    ├── memli/             # Memli monorepo (the web app)
     │   ├── apps/web/      # Vite + React frontend (TanStack Router)
     │   └── packages/ui/   # Shared shadcn/ui component library
     └── portfolio/         # Miscellaneous portfolio work
@@ -73,12 +73,12 @@ Weekly research notes covering class assignments and independent study:
 
 ## Local Development
 
-The web app lives in [`dev/mnemno/`](./dev/mnemno/) — a Turborepo monorepo bootstrapped with the [shadcn/ui Vite template](https://ui.shadcn.com/docs/installation/vite).
+The web app lives in [`dev/memli/`](./dev/memli/) — a Turborepo monorepo bootstrapped with the [shadcn/ui Vite template](https://ui.shadcn.com/docs/installation/vite).
 
 **Prerequisites:** [Bun](https://bun.com/) 1.3+ and Node.js 20+
 
 ```bash
-cd dev/mnemno
+cd dev/memli
 bun install
 bun run lint       # Lint all workspaces
 bun run build      # Production build
