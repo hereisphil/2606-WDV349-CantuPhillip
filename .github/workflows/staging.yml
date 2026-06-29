@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - stage
+    paths:
+      - "dev/memli/**"
+      - ".github/workflows/*.yml"
 
 jobs:
   deploy-to-staging:
+    if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     runs-on: ubuntu-latest
-    
+
     # Force the runner container to execute commands directly inside the monorepo subfolder
     defaults:
       run:
