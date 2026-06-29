@@ -27,7 +27,7 @@ function SignIn() {
             <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <BookOpen className="size-4" aria-hidden="true" />
             </span>
-            <span className="text-lg">Mnemno</span>
+            <span className="text-lg">Memli</span>
           </div>
           <CardTitle className="mt-4 text-2xl font-bold tracking-tight">
             Welcome!
