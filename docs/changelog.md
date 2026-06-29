@@ -6,7 +6,20 @@
 
 ![Degree Program](https://img.shields.io/badge/degree-web%20development-blue.svg)&nbsp;
 
-Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the Mnemno app.
+Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the Memli app.
+
+## 29 June 2026
+
+### `ANNOUNCEMENT` Rebrand: Mnemno → Memli
+
+Rebranded the entire web app from **Mnemno** to **Memli**. The name change had been flagged as likely in the README, and this resolves it.
+
+* Renamed the monorepo directory from `dev/mnemno` to `dev/memli`.
+* Updated all user-facing brand text across the UI (nav, footer, sign-in, about page, page title, copyright).
+* Updated the root package name and Cloudflare Worker names (`memli` / `memli-staging`) in `wrangler.jsonc`. Live URLs become [memli.thereisphil.workers.dev](https://memli.thereisphil.workers.dev/) and [memli-staging.thereisphil.workers.dev](https://memli-staging.thereisphil.workers.dev/) on next deploy.
+* Refreshed the root README with the new name, paths, and URLs.
+
+***
 
 ## 28 June 2026
 
