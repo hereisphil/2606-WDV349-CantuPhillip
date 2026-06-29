@@ -8,6 +8,77 @@
 
 Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the Mnemno app.
 
+## 28 June 2026
+
+### `FEATURE` Sign-In Page
+
+Built out the sign-in screen using shadcn/ui Card, Input, and Label components. Added a Back to Home link and wired up a shared footer nav.
+
+* See merged **[PR #64](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/64)** (*Sign-in page*) — Closes [#44](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/44)
+
+### `FEATURE` Landing Page Sections
+
+Finished the marketing landing page with Hero, Why Mnemonics, and Features sections in prototype order. Added a static FlashcardDemo component and updated Nav/Footer to use hash links instead of buttons.
+
+* See merged **[PR #63](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/63)** (*Hero component*) — Closes [#43](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/43)
+
+### `REFACTOR` Shared Footer Nav
+
+Created `site-footer-nav.tsx` as a reusable footer link component. Refactored the marketing footer and sign-in page to use it.
+
+***
+
+## 27 June 2026
+
+### `ANNOUNCEMENT` Cloudflare Deployment
+
+Set up Wrangler and GitHub Actions for automatic deploys to Cloudflare Workers.
+
+* **Staging:** [mnemno-staging.thereisphil.workers.dev](https://mnemno-staging.thereisphil.workers.dev/) — deploys on push to `stage`
+* **Production:** [mnemno.thereisphil.workers.dev](https://mnemno.thereisphil.workers.dev/) — deploys on push to `main`
+
+### `FEATURE` Nav & Footer
+
+Built the marketing navbar with logo, main nav links, and a Get Started CTA. Scaffolded the footer with about, community, pricing, privacy, and terms links. Also stubbed out `/contact` and `/faq` routes to keep the build clean.
+
+* See merged **[PR #58](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/58)** (*Nav component*) — Closes [#42](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/42)
+
+### `FEATURE` Hero Section (WIP)
+
+Completed the main heading, subtext, and CTA for the Hero. Slight variation from the prototype — no badge and no caption under the CTA.
+
+### `DOCUMENTATION` README Update
+
+Updated the repo README with live app URLs and deployment info.
+
+* Closes [#52](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/52)
+
+***
+
+## 26 June 2026
+
+### `FEATURE` TanStack Router
+
+Installed and configured TanStack Router with pathless layouts for marketing, auth, and app sections. Created the root layout wrapper and basic static routes. Set the app to default to light theme.
+
+* See merged **[PR #55](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/55)** (*TanStack Router*) — Closes [#41](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/41)
+
+### `DOCUMENTATION` R6 Research Notes
+
+Finished notes on ESLint, Husky, and Git hooks.
+
+* See merged **[PR #54](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/54)** (*R6-Notes*)
+
+***
+
+## 25 June 2026
+
+### `FIX` Prototype Image Display
+
+Fixed a few prototype images that weren't showing on GitHub. The filenames had square brackets `[]` in them which broke the markdown image paths.
+
+***
+
 ## 21 June 2026
 
 ### `ANNOUNCEMENT` Monorepo Initialized
