@@ -21,6 +21,8 @@ This repository is the capstone project for Full Sail University's Web Developme
 | **Staging** | [memli-staging.thereisphil.workers.dev](https://memli-staging.thereisphil.workers.dev/) |
 | **Production** | [memli.thereisphil.workers.dev](https://memli.thereisphil.workers.dev/) |
 
+> **Note:** The **staging** environment is password-protected with HTTP Basic Auth so pre-release builds stay private. Production stays publicly accessible.
+
 **Repository:** [github.com/hereisphil/2606-WDV349-CantuPhillip](https://github.com/hereisphil/2606-WDV349-CantuPhillip)
 
 ---
