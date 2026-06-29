@@ -12,7 +12,7 @@ export function Footer() {
           </h2>
           <p className="mt-3 max-w-md text-brand-slate">
             Join other language learners optimizing their brains and learning
-            with Mnemno.
+            with Memli.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button render={<Link to="/signin" />} nativeButton={false}>

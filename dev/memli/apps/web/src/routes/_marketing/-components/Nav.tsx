@@ -29,7 +29,7 @@ export function Nav() {
           <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <BookOpen className="size-4" />
           </span>
-          <span>Mnemno</span>
+          <span>Memli</span>
         </Link>
 
         <div className="flex items-center gap-1">

@@ -51,7 +51,7 @@ export function SiteFooterNav({ tone = "onDark" }: { tone?: Tone }) {
       </nav>
 
       <p className={cn("mt-8 text-center text-sm", copyright)}>
-        &copy; 2026 Mnemno. Learn faster, remember forever.
+        &copy; 2026 Memli. Learn faster, remember forever.
       </p>
     </>
   )
