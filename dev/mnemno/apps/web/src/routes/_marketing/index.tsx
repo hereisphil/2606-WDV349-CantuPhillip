@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
+import { Hero } from "./-components/Hero"
+import { WhyMnemonics } from "./-components/WhyMnemonics"
+import { Features } from "./-components/Features"
 
 export const Route = createFileRoute("/_marketing/")({
   component: Index,
@@ -7,9 +9,10 @@ export const Route = createFileRoute("/_marketing/")({
 
 function Index() {
   return (
-    <section className="mt-8 flex flex-col items-center justify-center">
-      <h1>Hello World</h1>
-      <Button onClick={() => window.alert("Hello!")}>Click</Button>
-    </section>
+    <>
+      <Hero />
+      <WhyMnemonics />
+      <Features />
+    </>
   )
 }

@@ -1,12 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
-
-const footerLinkClass =
-  "text-sm font-medium text-brand-slate transition-colors hover:text-white"
-
-function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
-}
+import { SiteFooterNav } from "@/components/site-footer-nav"
 
 export function Footer() {
   return (
@@ -35,47 +29,9 @@ export function Footer() {
           </div>
         </div>
 
-        <nav className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <Link to="/" className={footerLinkClass}>
-            Home
-          </Link>
-          <button
-            type="button"
-            onClick={() => scrollToId("features")}
-            className={footerLinkClass}
-          >
-            Features
-          </button>
-          <Link to="/about" className={footerLinkClass}>
-            About
-          </Link>
-          <Link to="/contact" className={footerLinkClass}>
-            Contact
-          </Link>
-          <Link to="/blog" className={footerLinkClass}>
-            Blog
-          </Link>
-          <button
-            type="button"
-            onClick={() => scrollToId("whyMnemonics")}
-            className={footerLinkClass}
-          >
-            Why Mnemonics?
-          </button>
-          <Link to="/pricing" className={footerLinkClass}>
-            Pricing
-          </Link>
-          <Link to="/terms" className={footerLinkClass}>
-            Terms of Service
-          </Link>
-          <Link to="/privacy" className={footerLinkClass}>
-            Privacy Policy
-          </Link>
-        </nav>
-
-        <p className="mt-8 text-center text-sm text-brand-slate">
-          &copy; 2026 Mnemno. Learn faster, remember forever.
-        </p>
+        <div className="mt-12">
+          <SiteFooterNav tone="onDark" />
+        </div>
       </div>
     </footer>
   )

@@ -6,10 +6,6 @@ import { cn } from "@workspace/ui/lib/utils"
 const navItemClass =
   "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 
-function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
-}
-
 export function Nav() {
   return (
     <header className="w-full">
@@ -32,13 +28,12 @@ export function Nav() {
           >
             Home
           </Link>
-          <button
-            type="button"
-            onClick={() => scrollToId("features")}
-            className={navItemClass}
-          >
+          <Link to="/" hash="why-mnemonics" className={navItemClass}>
+            Why Mnemonics?
+          </Link>
+          <Link to="/" hash="features" className={navItemClass}>
             Features
-          </button>
+          </Link>
           <Link to="/about" className={navItemClass}>
             About
           </Link>
@@ -48,13 +43,6 @@ export function Nav() {
           <Link to="/blog" className={navItemClass}>
             Blog
           </Link>
-          <button
-            type="button"
-            onClick={() => scrollToId("whyMnemonics")}
-            className={navItemClass}
-          >
-            Why Mnemonics?
-          </button>
         </div>
 
         <div className="flex justify-end">
