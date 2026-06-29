@@ -1,106 +1,112 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { BookOpen } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card"
+import { Input } from "@workspace/ui/components/input"
+import { Label } from "@workspace/ui/components/label"
 
 export const Route = createFileRoute("/_auth/signin")({
   component: SignIn,
 })
 
-const inputClass =
-  "h-11 w-full rounded-lg border border-input bg-secondary px-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+const labelClass = "text-xs font-semibold tracking-wide"
+const inputClass = "h-11 bg-secondary"
 
 function SignIn() {
   return (
     <div className="w-full max-w-md">
-      <section className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-        <div className="flex items-center justify-center gap-2 font-semibold text-primary">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen className="size-4" aria-hidden="true" />
-          </span>
-          <span className="text-lg">Mnemno</span>
-        </div>
-
-        <h1 className="mt-6 text-center text-2xl font-bold tracking-tight">
-          Welcome back
-        </h1>
-        <p className="mt-1 text-center text-sm text-muted-foreground">
-          Master your vocabulary with visual memory.
-        </p>
-
-        <Button variant="outline" className="mt-6 h-11 w-full">
-          <GoogleIcon />
-          Continue with Google
-        </Button>
-
-        <div className="my-6 flex items-center gap-3">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-xs font-medium tracking-wide text-muted-foreground">
-            OR USE EMAIL ADDRESS
-          </span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="email"
-              className="text-xs font-semibold tracking-wide"
-            >
-              EMAIL ADDRESS
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="name@example.com"
-              className={inputClass}
-            />
+      <Card className="shadow-sm [--card-spacing:--spacing(6)]">
+        <CardHeader className="items-center text-center">
+          <div className="flex items-center justify-center gap-2 font-semibold text-primary">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <BookOpen className="size-4" aria-hidden="true" />
+            </span>
+            <span className="text-lg">Mnemno</span>
           </div>
+          <CardTitle className="mt-4 text-2xl font-bold tracking-tight">
+            Welcome!
+          </CardTitle>
+          <CardDescription>
+            Master your vocabulary with visual memory.
+          </CardDescription>
+        </CardHeader>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="text-xs font-semibold tracking-wide"
-              >
-                PASSWORD
-              </label>
-              <button
-                type="button"
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                Forgot?
-              </button>
-            </div>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              className={inputClass}
-            />
-          </div>
-
-          <Button type="submit" className="mt-2 h-11 w-full">
-            Sign In / Sign Up
+        <CardContent className="flex flex-col">
+          <Button variant="outline" className="h-11 w-full">
+            <GoogleIcon />
+            Continue with Google
           </Button>
-        </form>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          By clicking continue, you agree to our{" "}
-          <Link to="/terms" className="underline hover:text-foreground">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link to="/privacy" className="underline hover:text-foreground">
-            Privacy Policy
-          </Link>
-          .
-        </p>
-      </section>
+          <div className="my-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium tracking-wide text-muted-foreground">
+              OR USE EMAIL ADDRESS
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email" className={labelClass}>
+                EMAIL ADDRESS
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="name@example.com"
+                className={inputClass}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className={labelClass}>
+                  PASSWORD
+                </Label>
+                <button
+                  type="button"
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Forgot?
+                </button>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className={inputClass}
+              />
+            </div>
+
+            <Button type="submit" className="mt-2 h-11 w-full">
+              Sign In / Sign Up
+            </Button>
+          </form>
+
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            By clicking continue, you agree to our{" "}
+            <Link to="/terms" className="underline hover:text-foreground">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="underline hover:text-foreground">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
