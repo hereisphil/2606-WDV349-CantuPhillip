@@ -10,7 +10,7 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck",
     "deploy:staging": "turbo build && bunx wrangler deploy --env staging",
-    "deploy:prod": "turbo build && bunx wrangler deploy"
+    "deploy:prod": "turbo build && bunx wrangler deploy --env=\"\""
   },
   "devDependencies": {
     "prettier": "^3.8.3",
