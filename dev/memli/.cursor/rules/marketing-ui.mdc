@@ -1,0 +1,27 @@
+---
+description: Memli marketing pages — layout, branding, and visual restraint
+globs: apps/web/src/routes/_marketing/**/*.{tsx,css},apps/web/src/components/**/*.{tsx,css}
+alwaysApply: false
+---
+
+# Marketing UI
+
+Preserve the established Memli look when editing marketing/auth surfaces.
+
+## Structure
+
+- Marketing shell: `routes/_marketing.tsx` — `Nav` → `main` → `Footer`.
+- Shared footer links: `components/site-footer-nav.tsx` (tones: `onLight` / `onDark`).
+- Co-locate marketing section components under `routes/_marketing/-components/`.
+
+## Visual direction
+
+- One job per section; avoid card-heavy heroes and cluttered pill/stat strips.
+- Brand should read clearly in the first viewport (product name is a hero-level signal, not only tiny nav text).
+- Use existing design tokens and Button variants; do not invent a parallel button style.
+- Motion: intentional (menu icon morph, sticky bar, subtle reveals) — not decorative noise.
+
+## Auth
+
+- Auth layout uses `BackToHome` and light-tone footer nav; keep parity with marketing brand without duplicating a full marketing nav on auth pages unless requested.
+---

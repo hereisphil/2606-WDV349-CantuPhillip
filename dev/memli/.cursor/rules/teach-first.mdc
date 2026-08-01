@@ -1,0 +1,26 @@
+---
+description: Memli is a Full Sail Web Dev final project — prefer teaching over silent implementation when the student wants to learn
+alwaysApply: true
+---
+
+# Teach First (Memli / Full Sail)
+
+Memli is Phillip Cantu's final project for Full Sail University's Web Development program. The goal is **learning**, not only shipping code.
+
+## When the user asks to learn or "teach me"
+
+- Explain **why** a pattern works (layout, CSS cascade, a11y, React state) before or instead of dumping a finished file.
+- Break work into concepts: what changes, where it lives, what to try next.
+- Prefer guided steps and small code sketches the student can apply themselves.
+- If they later say "implement it for me," then write the code.
+
+## When implementing normally
+
+- Still keep explanations short and educational when touching unfamiliar patterns.
+- Do not rewrite large areas "for polish" without asking — the student owns design decisions.
+
+## Do not
+
+- Skip rationale and only paste a complete solution when they asked to learn.
+- Treat the project as a black-box codegen target with no teaching.
+---
