@@ -1,3 +1,4 @@
+import type { JSX } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { BookOpen } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/_auth/signin")({
 const labelClass = "text-xs font-semibold tracking-wide"
 const inputClass = "h-11 bg-secondary"
 
-function SignIn() {
+function SignIn(): JSX.Element {
   return (
     <div className="w-full max-w-md">
       <Card className="shadow-sm [--card-spacing:--spacing(6)]">
@@ -111,7 +112,7 @@ function SignIn() {
   )
 }
 
-function GoogleIcon() {
+function GoogleIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
       <path

@@ -39,7 +39,7 @@ function getSystemTheme(): ResolvedTheme {
   return "light"
 }
 
-function disableTransitionsTemporarily() {
+function disableTransitionsTemporarily(): () => void {
   const style = document.createElement("style")
   style.appendChild(
     document.createTextNode(
@@ -58,7 +58,7 @@ function disableTransitionsTemporarily() {
   }
 }
 
-function isEditableTarget(target: EventTarget | null) {
+function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
     return false
   }
@@ -83,7 +83,7 @@ export function ThemeProvider({
   storageKey = "theme",
   disableTransitionOnChange = true,
   ...props
-}: ThemeProviderProps) {
+}: ThemeProviderProps): React.JSX.Element {
   const [theme, setThemeState] = React.useState<Theme>(() => {
     const storedTheme = localStorage.getItem(storageKey)
     if (isTheme(storedTheme)) {
@@ -128,7 +128,7 @@ export function ThemeProvider({
     }
 
     const mediaQuery = window.matchMedia(COLOR_SCHEME_QUERY)
-    const handleChange = () => {
+    const handleChange = (): void => {
       applyTheme("system")
     }
 
@@ -140,7 +140,7 @@ export function ThemeProvider({
   }, [theme, applyTheme])
 
   React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.repeat) {
         return
       }
@@ -180,7 +180,7 @@ export function ThemeProvider({
   }, [storageKey])
 
   React.useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
+    const handleStorageChange = (event: StorageEvent): void => {
       if (event.storageArea !== localStorage) {
         return
       }
@@ -219,7 +219,7 @@ export function ThemeProvider({
   )
 }
 
-export const useTheme = () => {
+export const useTheme = (): ThemeProviderState => {
   const context = React.useContext(ThemeProviderContext)
 
   if (context === undefined) {
