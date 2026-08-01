@@ -1,0 +1,34 @@
+---
+description: GitHub auth for this private repo — use hereisphil, not phil-hgraph
+alwaysApply: true
+---
+
+# GitHub Access (this repo)
+
+Repo: `hereisphil/2606-WDV349-CantuPhillip` (private). Owner account: **`hereisphil`** (`thereisphil@gmail.com`).
+
+## Auth caveat
+
+This machine may have multiple `gh` logins. A `GITHUB_TOKEN` / `GH_TOKEN` env var often forces **`phil-hgraph`**, which **cannot** see this private repo (API 404 / "Could not resolve").
+
+For any `gh` API work (issues, PRs, checks, releases):
+
+1. Unset the token override: `env -u GITHUB_TOKEN -u GH_TOKEN …`
+2. Ensure active account is `hereisphil`: `gh auth switch --user hereisphil`
+3. Then run the `gh` command
+
+Example:
+
+```bash
+env -u GITHUB_TOKEN -u GH_TOKEN gh auth switch --user hereisphil
+env -u GITHUB_TOKEN -u GH_TOKEN gh issue list -R hereisphil/2606-WDV349-CantuPhillip
+```
+
+## Git push/pull
+
+SSH to `git@github.com` authenticates as **`hereisphil`** — `git push` / `git pull` on `origin` work without the `gh` workaround.
+
+## Permissions
+
+With `hereisphil`, agents have ADMIN on this repo: commit (when asked), push, issues, PRs, merge. Still only commit/push/merge when the user explicitly asks.
+---
