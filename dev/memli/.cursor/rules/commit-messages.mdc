@@ -1,0 +1,50 @@
+---
+description: Commit message convention — bracketed area prefix so the change is obvious at a glance
+alwaysApply: true
+---
+
+# Commit messages
+
+Lead with a **bracketed area tag** so `git log --oneline` readers know the domain immediately, then a concise what/why.
+
+## Format
+
+```
+[area] Short summary of what changed and why.
+
+Optional body for context. Use "Closes #N" when the commit finishes an issue.
+```
+
+## Area tags (pick the best fit)
+
+| Tag | Use for |
+|-----|---------|
+| `[DX]` | Tooling, configs, Cursor rules, lint/format, hooks |
+| `[DX:web]` | DX change scoped to the web app |
+| `[web:marketing]` | Marketing UI / landing routes |
+| `[web:auth]` | Auth/signin surfaces |
+| `[web]` | Other web app work |
+| `[ui]` | Shared `packages/ui` components |
+| `[DEPLOY]` / `[STAGING]` | Deploy pipeline or staging-only infra |
+| `[BRANDING]` | Product naming / brand assets |
+
+Use `[area:subarea]` when it helps (e.g. `[DX:web]`, `[web:marketing]`).
+
+## Examples (from this repo)
+
+- `[DX] Document GitHub auth caveat for hereisphil vs phil-hgraph token.`
+- `[web:marketing] WhyMnemonics.tsx - put h1/p atop of flashcarddemo, better ui/ux, especially for mobile.`
+- `[DX] Created .cursor/rules and added basic .mdc files to assist the Cursor IDE's AI agents.`
+
+## Do
+
+- Prefer present/past tense consistency with nearby commits; keep the subject readable without opening the diff
+- Mention the *reason* when the diff is large for a mechanical reason (e.g. ESLint return-type annotations)
+- Add `Closes #N` in the body when the commit completes that issue
+
+## Do not
+
+- Vague subjects like "updates" or "fix stuff"
+- Skip the `[area]` prefix on feature/fix commits
+---
+

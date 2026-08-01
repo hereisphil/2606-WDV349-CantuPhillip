@@ -1,0 +1,33 @@
+---
+description: Branch from a fresh pull; name branches by issue + change type + slug
+alwaysApply: true
+---
+
+# Git workflow (new work)
+
+Unless the user says otherwise, start new work like this:
+
+1. `git pull` on the base branch (usually `dev`)
+2. `git checkout -b {issue#}-{type}-{slug}`
+
+## Branch naming
+
+Format: `{issue#}-{type}-{slug}`
+
+- **issue#**: GitHub issue number (required when work tracks an issue)
+- **type**: short area tag, e.g. `dx`, `marketing-ui`, `web-auth`, `branding`, `bugfix`
+- **slug**: snake_case summary of the change
+
+Examples:
+
+- `78-dx-shared_eslint_rules`
+- `77-marketing-ui-header_nav`
+- `44-web-auth-signin_page`
+
+## Do not
+
+- Start coding on a stale `dev` without pulling first
+- Invent random branch names when an issue number exists
+- Reuse a branch for unrelated issues
+---
+
