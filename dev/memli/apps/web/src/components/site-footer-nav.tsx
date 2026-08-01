@@ -1,3 +1,4 @@
+import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -14,7 +15,7 @@ const tones: Record<Tone, { link: string; copyright: string }> = {
   },
 }
 
-export function SiteFooterNav({ tone = "onDark" }: { tone?: Tone }) {
+export function SiteFooterNav({ tone = "onDark" }: { tone?: Tone }): JSX.Element {
   const { link, copyright } = tones[tone]
   const linkClass = cn("text-sm font-medium transition-colors", link)
 

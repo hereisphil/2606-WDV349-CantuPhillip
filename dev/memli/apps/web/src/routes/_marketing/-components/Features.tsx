@@ -1,3 +1,4 @@
+import type { JSX } from "react"
 import { RefreshCw, Share2, ShieldCheck } from "lucide-react"
 
 const features = [
@@ -21,7 +22,7 @@ const features = [
   },
 ]
 
-export function Features() {
+export function Features(): JSX.Element {
   return (
     <section id="features" className="scroll-mt-16">
       <div className="mx-auto max-w-6xl px-6 py-20">
