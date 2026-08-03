@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260626.1",
+    "@workspace/typescript-config": "workspace:*",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "turbo": "^2.9.15",
