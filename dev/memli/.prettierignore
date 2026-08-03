@@ -1,0 +1,17 @@
+# Build / tooling
+dist/
+node_modules/
+.turbo/
+.wrangler/
+coverage/
+*.tsbuildinfo
+
+# Locks & generated
+bun.lock
+routeTree.gen.ts
+wrangler.jsonc
+
+# Editor / docs (optional to format later)
+.vscode/
+*.md
+.cursor/
