@@ -30,3 +30,5 @@ export default defineConfig([
 ```
 
 Strict custom rules (unused vars + `_` prefix, no `any`, explicit return types, type-only imports, `no-console`, `eqeqeq`, etc.) live here so every package stays consistent.
+
+`eslint-config-prettier` is applied last in `base.js` so ESLint never fights Prettier on formatting.

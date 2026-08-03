@@ -15,7 +15,11 @@ const tones: Record<Tone, { link: string; copyright: string }> = {
   },
 }
 
-export function SiteFooterNav({ tone = "onDark" }: { tone?: Tone }): JSX.Element {
+export function SiteFooterNav({
+  tone = "onDark",
+}: {
+  tone?: Tone
+}): JSX.Element {
   const { link, copyright } = tones[tone]
   const linkClass = cn("text-sm font-medium transition-colors", link)
 
