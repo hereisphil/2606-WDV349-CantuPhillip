@@ -19,6 +19,7 @@ bun install
 | `bun run lint` | ESLint via Turbo |
 | `bun run format` / `format:check` | Prettier write / check |
 | `bun run typecheck` | TypeScript via Turbo |
+| `bun run knip` | Unused deps, exports, and files |
 | `bun run build` | Production build |
 
 ## Git hooks (Lefthook)
@@ -47,6 +48,15 @@ Prefer `LEFTHOOK=0` when you only need to skip Memli quality gates. Re-install h
 ```bash
 cd dev/memli && bunx lefthook install
 ```
+
+## Knip (unused code / deps)
+
+```bash
+cd dev/memli
+bun run knip
+```
+
+Config: [`knip.json`](./knip.json). Treat a clean Knip run as the bar before wiring it into pre-push/CI. `useTheme` is ignored as intentional ThemeProvider API until a UI control consumes it. Zod belongs in a future shared schemas package (#83), not in `@workspace/ui`.
 
 ## Adding shadcn/ui components
 
