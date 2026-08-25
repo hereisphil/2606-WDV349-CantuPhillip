@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "project": ["src/**/*.ts"]
+    },
+    "apps/web": {
+      "project": ["src/**/*.{ts,tsx}", "!src/routeTree.gen.ts"]
+    },
+    "packages/ui": {
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "packages/eslint-config": {
+      "entry": ["*.{js,mjs,cjs}"],
+      "project": ["*.{js,mjs,cjs}"]
+    },
+    "packages/typescript-config": {
+      "entry": [],
+      "project": []
+    }
+  },
+  "ignoreIssues": {
+    "apps/web/src/components/theme-provider.tsx": ["exports"]
+  }
+}
