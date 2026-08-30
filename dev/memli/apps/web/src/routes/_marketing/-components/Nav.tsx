@@ -1,3 +1,4 @@
+import type { JSX } from "react"
 import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
 import { BookOpen } from "lucide-react"
@@ -19,7 +20,7 @@ const navLinks = [
   { to: "/blog" as const, label: "Blog", scrollToTop: true },
 ]
 
-const scrollToTop = () =>
+const scrollToTop = (): void =>
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
 
 const NavLinks = ({
@@ -28,7 +29,7 @@ const NavLinks = ({
 }: {
   className: string
   onNavigate?: () => void
-}) => {
+}): JSX.Element[] => {
   return navLinks.map(({ to, label, hash, scrollToTop: toTop }) => (
     <Link
       key={label}
@@ -45,14 +46,14 @@ const NavLinks = ({
   ))
 }
 
-export function Nav() {
+export function Nav(): JSX.Element {
   const [mobileOpen, setMobileOpen] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!mobileOpen) return
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "Escape") {
         setMobileOpen(false)
         return

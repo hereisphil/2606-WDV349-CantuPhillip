@@ -1,6 +1,7 @@
+import type { JSX } from "react"
 import { ThumbsUp, Volume2, ArrowRight } from "lucide-react"
 
-export function FlashcardDemo() {
+export function FlashcardDemo(): JSX.Element {
   return (
     <figure className="mx-auto flex w-full flex-col items-center justify-between md:flex-row">
       <figcaption className="sr-only">
