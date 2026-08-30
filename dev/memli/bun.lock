@@ -21,6 +21,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@tanstack/react-router": "^1.170.16",
+        "@workspace/schemas": "workspace:*",
         "@workspace/ui": "workspace:*",
         "lucide-react": "^1.21.0",
         "react": "^19.2.6",
@@ -52,6 +53,17 @@
         "eslint-plugin-react-refresh": "^0.5.2",
         "globals": "^17",
         "typescript-eslint": "^8",
+      },
+    },
+    "packages/schemas": {
+      "name": "@workspace/schemas",
+      "version": "0.0.0",
+      "dependencies": {
+        "zod": "^4.4.3",
+      },
+      "devDependencies": {
+        "@workspace/typescript-config": "workspace:*",
+        "typescript": "~6",
       },
     },
     "packages/typescript-config": {
@@ -566,6 +578,8 @@
     "@vitejs/plugin-react": ["@vitejs/plugin-react@6.0.2", "", { "dependencies": { "@rolldown/pluginutils": "^1.0.0" }, "peerDependencies": { "@rolldown/plugin-babel": "^0.1.7 || ^0.2.0", "babel-plugin-react-compiler": "^1.0.0", "vite": "^8.0.0" }, "optionalPeers": ["@rolldown/plugin-babel", "babel-plugin-react-compiler"] }, "sha512-DlSMqo4WhThw4vB8Mpn0Woe9J+Jfq1geJ61AKW0QEgLzGMNwtIMdxbDUzLxcun8W7NbJO0e2Jg/Nxm3cCSVzzg=="],
 
     "@workspace/eslint-config": ["@workspace/eslint-config@workspace:packages/eslint-config"],
+
+    "@workspace/schemas": ["@workspace/schemas@workspace:packages/schemas"],
 
     "@workspace/typescript-config": ["@workspace/typescript-config@workspace:packages/typescript-config"],
 

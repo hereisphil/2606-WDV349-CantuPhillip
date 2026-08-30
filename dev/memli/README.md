@@ -56,7 +56,7 @@ cd dev/memli
 bun run knip
 ```
 
-Config: [`knip.json`](./knip.json). Treat a clean Knip run as the bar before wiring it into pre-push/CI. `useTheme` is ignored as intentional ThemeProvider API until a UI control consumes it. Zod belongs in a future shared schemas package (#83), not in `@workspace/ui`.
+Config: [`knip.json`](./knip.json). Treat a clean Knip run as the bar before wiring it into pre-push/CI. `useTheme` is ignored as intentional ThemeProvider API until a UI control consumes it. Shared Zod schemas live in `@workspace/schemas` (#83), not in `@workspace/ui`.
 
 ## Adding shadcn/ui components
 
