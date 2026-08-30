@@ -1,7 +1,8 @@
+import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 
-export function Hero() {
+export function Hero(): JSX.Element {
   return (
     <section className="mx-auto flex max-w-3xl flex-col items-center px-6 py-20 text-center">
       <h1 className="text-4xl font-extrabold sm:text-5xl">

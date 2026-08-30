@@ -1,6 +1,7 @@
+import type { JSX } from "react"
 import { FlashcardDemo } from "./FlashcardDemo"
 
-export function WhyMnemonics() {
+export function WhyMnemonics(): JSX.Element {
   return (
     <section id="why-mnemonics" className="scroll-mt-16 bg-secondary">
       <div className="mx-auto max-w-6xl px-6 py-20">

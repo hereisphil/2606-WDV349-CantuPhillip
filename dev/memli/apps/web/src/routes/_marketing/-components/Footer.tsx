@@ -1,8 +1,9 @@
+import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { SiteFooterNav } from "@/components/site-footer-nav"
 
-export function Footer() {
+export function Footer(): JSX.Element {
   return (
     <footer className="bg-brand-charcoal text-brand-surface">
       <div className="mx-auto max-w-6xl px-6 py-16">
