@@ -19,6 +19,7 @@ bun install
 | `bun run lint` | ESLint via Turbo |
 | `bun run format` / `format:check` | Prettier write / check |
 | `bun run typecheck` | TypeScript via Turbo |
+| `bun run test` | Vitest via Turbo (`@workspace/core` SRS logic) |
 | `bun run knip` | Unused deps, exports, and files |
 | `bun run build` | Production build |
 
@@ -57,6 +58,15 @@ bun run knip
 ```
 
 Config: [`knip.json`](./knip.json). Treat a clean Knip run as the bar before wiring it into pre-push/CI. `useTheme` is ignored as intentional ThemeProvider API until a UI control consumes it. Shared Zod schemas live in `@workspace/schemas` (#83), not in `@workspace/ui`.
+
+## Tests (Vitest)
+
+```bash
+cd dev/memli
+bun run test
+```
+
+Pure SRS/domain logic lives in [`packages/core`](./packages/core) and is tested with Vitest. We intentionally skip marketing UI and route components; see the package README for scope.
 
 ## Adding shadcn/ui components
 

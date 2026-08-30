@@ -13,6 +13,9 @@
     "packages/schemas": {
       "project": ["src/**/*.ts"]
     },
+    "packages/core": {
+      "project": ["src/**/*.ts", "vitest.config.ts"]
+    },
     "packages/eslint-config": {
       "entry": ["*.{js,mjs,cjs}"],
       "project": ["*.{js,mjs,cjs}"]
