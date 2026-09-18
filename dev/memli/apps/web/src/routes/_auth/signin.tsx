@@ -1,5 +1,8 @@
+import type { JSX } from "react"
+import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { BookOpen } from "lucide-react"
+import { signInSchema } from "@workspace/schemas/auth/sign-in"
 import { Button } from "@workspace/ui/components/button"
 import {
   Card,
@@ -18,7 +21,36 @@ export const Route = createFileRoute("/_auth/signin")({
 const labelClass = "text-xs font-semibold tracking-wide"
 const inputClass = "h-11 bg-secondary"
 
-function SignIn() {
+type FieldErrors = Partial<Record<"email" | "password", string>>
+
+function SignIn(): JSX.Element {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [formMessage, setFormMessage] = useState<string | null>(null)
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+    setFormMessage(null)
+
+    const result = signInSchema.safeParse({ email, password })
+
+    if (!result.success) {
+      const nextErrors: FieldErrors = {}
+      for (const issue of result.error.issues) {
+        const field = issue.path[0]
+        if (field === "email" || field === "password") {
+          nextErrors[field] = issue.message
+        }
+      }
+      setFieldErrors(nextErrors)
+      return
+    }
+
+    setFieldErrors({})
+    setFormMessage("Sign-in is not wired to the API yet — validation passed.")
+  }
+
   return (
     <div className="w-full max-w-md">
       <Card className="shadow-sm [--card-spacing:--spacing(6)]">
@@ -51,10 +83,7 @@ function SignIn() {
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => e.preventDefault()}
-          >
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email" className={labelClass}>
                 EMAIL ADDRESS
@@ -65,7 +94,24 @@ function SignIn() {
                 autoComplete="email"
                 placeholder="name@example.com"
                 className={inputClass}
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  if (fieldErrors.email) {
+                    setFieldErrors((current) => ({
+                      ...current,
+                      email: undefined,
+                    }))
+                  }
+                }}
+                aria-invalid={fieldErrors.email ? true : undefined}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
+              {fieldErrors.email ? (
+                <p id="email-error" className="text-xs text-destructive">
+                  {fieldErrors.email}
+                </p>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -86,8 +132,33 @@ function SignIn() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 className={inputClass}
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value)
+                  if (fieldErrors.password) {
+                    setFieldErrors((current) => ({
+                      ...current,
+                      password: undefined,
+                    }))
+                  }
+                }}
+                aria-invalid={fieldErrors.password ? true : undefined}
+                aria-describedby={
+                  fieldErrors.password ? "password-error" : undefined
+                }
               />
+              {fieldErrors.password ? (
+                <p id="password-error" className="text-xs text-destructive">
+                  {fieldErrors.password}
+                </p>
+              ) : null}
             </div>
+
+            {formMessage ? (
+              <p className="text-sm text-muted-foreground" role="status">
+                {formMessage}
+              </p>
+            ) : null}
 
             <Button type="submit" className="mt-2 h-11 w-full">
               Sign In / Sign Up
@@ -111,7 +182,7 @@ function SignIn() {
   )
 }
 
-function GoogleIcon() {
+function GoogleIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
       <path

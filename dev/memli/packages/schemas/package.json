@@ -1,0 +1,20 @@
+{
+  "name": "@workspace/schemas",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "~6"
+  },
+  "exports": {
+    "./auth/sign-in": "./src/auth/sign-in.ts",
+    "./env/web": "./src/env/web.ts"
+  }
+}

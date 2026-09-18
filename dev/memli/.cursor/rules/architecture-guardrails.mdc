@@ -1,0 +1,38 @@
+---
+description: Architecture guardrails — phased splits, shared packages, no premature platforms
+alwaysApply: true
+---
+
+# Architecture guardrails (always-on)
+
+Full detail: `docs/architecture.md`, `docs/roadmap.md`, `docs/mobile.md`, `docs/dx-tooling.md`.
+
+## Current vs future
+
+- **Today:** one `apps/web` with `_marketing`, `_auth`, `_app` route groups is correct.
+- **Do not** split Astro marketing + React app until the roadmap Phase 3 criteria are met (working learning loop + clear SEO/perf need).
+- **Do not** start React Native until the shared API and `packages/core` SRS path are stable (Phase 4).
+
+## Sharing rules
+
+- Put pure domain logic in `packages/core` (no React, DOM, or RN imports).
+- Put shared contracts in `packages/schemas`.
+- `packages/ui` / shadcn is **web-only** — never assume it runs on iOS/Android.
+- New clients (API, mobile) should reuse `core` + `schemas`, not fork business rules.
+
+## Deployables (when they exist)
+
+- Marketing + web app: same learner hostname, path routing.
+- API: `api.*` subdomain (or local proxy) is appropriate.
+- Mobile: `apps/mobile` talking to the same API.
+
+## Dev-only tooling
+
+- Inspectors like Reactotron must be DEV-gated and never ship in production bundles.
+- Prefer adding Reactotron when mobile work begins; optional on web, still DEV-only.
+- Do not leave TanStack Router Devtools enabled for production users when polishing deploys.
+
+## Brand
+
+- Product may rebrand to **FluentVine**; keep package churn out of unrelated PRs until a branding pass.
+- User-facing copy/logo updates belong in a coordinated branding change.

@@ -1,7 +1,8 @@
+import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
 
-export function BackToHome() {
+export function BackToHome(): JSX.Element {
   return (
     <div className="p-6">
       <Link

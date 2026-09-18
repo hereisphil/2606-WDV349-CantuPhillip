@@ -1,0 +1,15 @@
+---
+description: Never auto-commit or push — only when the user explicitly asks
+alwaysApply: true
+---
+
+# No auto-commit / auto-push
+
+- **Never** create a git commit unless the user explicitly asks to commit in that message (or a clear follow-up like "commit this").
+- **Never** `git push`, force-push, or open a PR unless the user explicitly asks.
+- Uncommitted work is the default after implementing changes — leave it for the user to review.
+- "Ship it", "looks good", or finishing a task is **not** permission to commit or push.
+
+If commit/push is requested, follow the repo git safety rules (no config changes, no `--no-verify`, no amend unless conditions are met).
+---
+
