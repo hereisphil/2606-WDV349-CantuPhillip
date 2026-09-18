@@ -2,6 +2,8 @@
 
 Vite + React web app (`apps/web`), shared UI (`packages/ui`), Turborepo + Bun.
 
+**Planned public brand:** FluentVine (see docs). Product and architecture decisions live in [`docs/`](./docs/README.md) — start with the [roadmap](./docs/roadmap.md).
+
 ## Setup
 
 ```bash
