@@ -14,9 +14,14 @@ alwaysApply: true
 
 ## Brand
 
-- Product name: **Memli**.
+- Product name today: **Memli** (planned public rebrand: **FluentVine** — coordinate renames in a branding pass).
 - Desktop logo: BookOpen icon in a primary-colored rounded square + "Memli" text.
 - Prefer semantic tokens (`bg-primary`, `text-muted-foreground`) over hard-coded blues.
+
+## Product & architecture docs
+
+- Long-lived decisions: `docs/` (start at `docs/roadmap.md`).
+- Always-on UX / i18n / architecture constraints: `product-ux.mdc`, `i18n-foundations.mdc`, `architecture-guardrails.mdc`.
 
 ## Prefer composition over new packages
 

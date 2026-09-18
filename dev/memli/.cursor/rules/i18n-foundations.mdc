@@ -1,0 +1,27 @@
+---
+description: i18n foundations — UI locale vs learning language, LATAM prep
+alwaysApply: true
+---
+
+# i18n foundations (always-on)
+
+Full detail: `docs/i18n.md`.
+
+## UI locale ≠ learning language
+
+- Never use a single unqualified `language` field for both app chrome locale and “what I’m studying.”
+- Prefer explicit names in schemas/settings: e.g. `uiLocale`, `learningLanguage`, `contentLocale`.
+- Target UI pair when localization ships: `en` + `es-419` (Latin American Spanish). `pt-BR` is a later candidate.
+
+## Code habits (even before an i18n library)
+
+- No user-visible English (or any UI) copy inside `packages/core`.
+- API errors: prefer stable **codes**; clients map codes to localized strings.
+- Avoid sentence concatenation (`"Hello, " + name`). Use single templates with placeholders when adding messages.
+- Persist timestamps in UTC/ISO; format for display with `Intl` and the active UI locale.
+- Learning content (decks, cards, mnemonics): plan/include a content language/locale in new models.
+
+## Do not
+
+- Block core feature work on full marketing translations.
+- Over-split `es-MX` / `es-AR` before `es-419` exists.
