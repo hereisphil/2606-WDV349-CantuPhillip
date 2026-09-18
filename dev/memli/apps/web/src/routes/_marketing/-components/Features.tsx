@@ -24,16 +24,28 @@ const features = [
 
 export function Features(): JSX.Element {
   return (
-    <section id="features" className="scroll-mt-16">
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid gap-10 text-center sm:grid-cols-3">
+    <section id="features" className="scroll-mt-24">
+      <div className="mx-auto max-w-6xl px-6 py-24 sm:py-28 lg:py-32">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-semibold text-balance sm:text-4xl">
+            Why Memli
+          </h2>
+          <p className="mt-4 text-lg text-pretty text-muted-foreground">
+            Three things that turn a word you just met into one you never lose.
+          </p>
+        </div>
+
+        <div className="mt-14 grid gap-6 sm:grid-cols-3 lg:mt-16">
           {features.map(({ icon: Icon, title, description }) => (
-            <div key={title} className="flex flex-col items-center">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-brand-tint text-primary">
+            <div
+              key={title}
+              className="rounded-xl border border-border bg-card p-6"
+            >
+              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="size-5" />
               </span>
-              <h3 className="mt-4 font-semibold">{title}</h3>
-              <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+              <h3 className="mt-5 font-semibold text-primary">{title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
                 {description}
               </p>
             </div>
