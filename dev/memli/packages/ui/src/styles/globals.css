@@ -11,6 +11,7 @@
 @theme inline {
   --font-sans: "Inter Variable", sans-serif;
   --font-heading: var(--font-sans);
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Brand color utilities */
   --color-brand-primary: oklch(0.488 0.243 264.376); /* #2563EB Primary Blue */
@@ -62,7 +63,7 @@
 }
 
 :root {
-  --background: oklch(1 0 0); /* #FFFFFF Pure White */
+  --background: oklch(0.985 0.004 261); /* #F8FAFC Off-White page surface */
   --foreground: oklch(0.236 0.025 261); /* #1E293B Charcoal */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.236 0.025 261);

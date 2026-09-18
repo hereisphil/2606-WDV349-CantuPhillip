@@ -10,8 +10,8 @@ const tones: Record<Tone, { link: string; copyright: string }> = {
     copyright: "text-muted-foreground",
   },
   onDark: {
-    link: "text-brand-slate hover:text-white",
-    copyright: "text-brand-slate",
+    link: "text-brand-surface/75 hover:text-white",
+    copyright: "text-brand-surface/60",
   },
 }
 
@@ -21,11 +21,11 @@ export function SiteFooterNav({
   tone?: Tone
 }): JSX.Element {
   const { link, copyright } = tones[tone]
-  const linkClass = cn("text-sm font-medium transition-colors", link)
+  const linkClass = cn("font-ui text-sm font-medium transition-colors", link)
 
   return (
     <>
-      <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+      <nav className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
         <Link to="/" className={linkClass}>
           Home
         </Link>
