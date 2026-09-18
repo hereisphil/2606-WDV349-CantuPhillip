@@ -1,0 +1,30 @@
+---
+description: Consumer UX rules — one site, homepage, post-login navigation
+alwaysApply: true
+---
+
+# Product UX (always-on)
+
+Full detail: `docs/product-ux.md` and `docs/roadmap.md`.
+
+## One consumer hostname
+
+- Marketing and the web app stay on the **same** site (`{brand}.com` / localhost). Path-based separation only.
+- Do **not** introduce `app.` (or similar) as the human-facing product home.
+- `api.{brand}.com` is fine for the backend — users do not navigate there.
+
+## Homepage and marketing access
+
+- `/` remains a valid marketing entry (or a soft “welcome back” with a clear **Open app** CTA).
+- Never hard-redirect authenticated users such that marketing requires **logout** to view.
+- Public marketing routes (`/pricing`, `/about`, `/blog`, etc.) stay reachable while logged in.
+
+## Auth navigation
+
+- After successful login, send users to the app home (`/dashboard` or `/learn` — stay consistent with existing routes).
+- Logged-in marketing nav: emphasize **Open app** / **Dashboard**, not “you are trapped in the product.”
+- Do not replace marketing layout chrome with the full app shell on `/`.
+
+## When unsure
+
+Prefer `docs/product-ux.md` over copying another product’s subdomain or “logged-in homepage hijack” pattern.

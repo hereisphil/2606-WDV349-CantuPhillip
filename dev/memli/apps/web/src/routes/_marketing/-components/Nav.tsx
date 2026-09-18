@@ -1,3 +1,4 @@
+import type { JSX } from "react"
 import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
 import { BookOpen } from "lucide-react"
@@ -5,10 +6,10 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
 const navItemClass =
-  "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+  "rounded-md px-3 py-1.5 font-ui text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 
 const mobileNavItemClass =
-  "rounded-md px-3 py-2.5 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+  "rounded-md px-3 py-2.5 font-ui text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 
 const navLinks = [
   { to: "/" as const, label: "Home", exact: true, scrollToTop: true },
@@ -19,7 +20,7 @@ const navLinks = [
   { to: "/blog" as const, label: "Blog", scrollToTop: true },
 ]
 
-const scrollToTop = () =>
+const scrollToTop = (): void =>
   window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
 
 const NavLinks = ({
@@ -28,7 +29,7 @@ const NavLinks = ({
 }: {
   className: string
   onNavigate?: () => void
-}) => {
+}): JSX.Element[] => {
   return navLinks.map(({ to, label, hash, scrollToTop: toTop }) => (
     <Link
       key={label}
@@ -45,14 +46,14 @@ const NavLinks = ({
   ))
 }
 
-export function Nav() {
+export function Nav(): JSX.Element {
   const [mobileOpen, setMobileOpen] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!mobileOpen) return
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "Escape") {
         setMobileOpen(false)
         return
@@ -105,7 +106,7 @@ export function Nav() {
       ref={headerRef}
       className={`sticky top-0 z-50 w-full ${mobileOpen ? "h-screen overflow-y-auto overscroll-none bg-background" : "bg-background/65 backdrop-blur-sm"}`}
     >
-      <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-4 md:grid">
+      <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 md:grid">
         <Link
           to="/"
           className="flex items-center gap-2 font-semibold"
@@ -128,7 +129,7 @@ export function Nav() {
         </div>
       </nav>
 
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:hidden">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:hidden">
         <Link
           to="/"
           className="text-xl font-semibold"
