@@ -1,0 +1,31 @@
+---
+description: Memli monorepo stack, packages, and UI conventions
+alwaysApply: true
+---
+
+# Memli Stack
+
+- App lives under `dev/memli/`. Web UI: `apps/web`. Shared UI: `packages/ui`.
+- Routing: **TanStack Router** (`Link`, `createFileRoute`, file routes under `apps/web/src/routes`).
+- Styling: **Tailwind CSS** + `cn()` from `@workspace/ui/lib/utils`.
+- Components: **shadcn/ui** (Base UI primitives). Import from `@workspace/ui/components/*`.
+- Icons: **lucide-react**.
+- Button composition: use `render={<Link ... />}` and `nativeButton={false}` — not `asChild` (this is Base UI, not Radix).
+
+## Brand
+
+- Product name today: **Memli** (planned public rebrand: **FluentVine** — coordinate renames in a branding pass).
+- Desktop logo: BookOpen icon in a primary-colored rounded square + "Memli" text.
+- Prefer semantic tokens (`bg-primary`, `text-muted-foreground`) over hard-coded blues.
+
+## Product & architecture docs
+
+- Long-lived decisions: `docs/` (start at `docs/roadmap.md`).
+- Always-on UX / i18n / architecture constraints: `product-ux.mdc`, `i18n-foundations.mdc`, `architecture-guardrails.mdc`.
+
+## Prefer composition over new packages
+
+- Check existing shadcn components before adding.
+- For simple open/close UI, `useState` + Tailwind is fine; do not add libraries for one toggle.
+
+---

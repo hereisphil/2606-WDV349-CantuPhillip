@@ -1,0 +1,29 @@
+# Git hooks are repository-scoped. Commands use root: under "dev/memli/" so they
+# only run for Memli monorepo changes and execute with that working directory.
+# Canonical DX docs: dev/memli/README.md
+
+pre-commit:
+  parallel: true
+  commands:
+    prettier:
+      root: "dev/memli/"
+      glob: "*.{ts,tsx,js,jsx,json,css}"
+      run: bunx prettier --write {staged_files}
+      stage_fixed: true
+    # Run ESLint from each package so flat eslint.config.js resolves correctly
+    eslint-web:
+      root: "dev/memli/apps/web/"
+      glob: "*.{ts,tsx,js,jsx}"
+      run: bunx --bun eslint --fix {staged_files}
+      stage_fixed: true
+    eslint-ui:
+      root: "dev/memli/packages/ui/"
+      glob: "*.{ts,tsx,js,jsx}"
+      run: bunx --bun eslint --fix {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    typecheck:
+      root: "dev/memli/"
+      run: bun run typecheck
