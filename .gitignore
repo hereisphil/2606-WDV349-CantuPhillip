@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Vite dep-optimizer cache when it cannot find node_modules
+.vite
+
 # env files (can opt-in for committing if needed)
 .env*
 
