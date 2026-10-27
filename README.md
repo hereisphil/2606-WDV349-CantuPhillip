@@ -1,16 +1,9 @@
-# Project & Portfolio IV
+# Memli
 
-## Phillip Cantu
+**Memli** is the language-learning app I am building. It brings back crowd-sourced, association-based study: learners write and share their own mnemonics (images, stories, and jokes) instead of drilling a fixed card deck. A spaced-repetition system (SRS) decides what comes back up and when.
 
-### Full Sail University<br />Web Development Program
+I started this as my Full Sail University Web Development capstone. Research and early prototypes live in [`docs/`](./docs/). The app itself is the monorepo in [`dev/memli/`](./dev/memli/).
 
----
-
-**Memli** is an open, community-driven language learning web application built to restore the crowd-sourced, association-based learning patterns popularized by early mnemonic platforms. While modern language apps rely heavily on automated, repetitive drill mechanics that lead to user burnout, Memli centers the learning process around user-generated mnemonics such as: visual images, stories, and humorous hooks, that's supercharged by a science-backed Spaced Repetition System (SRS).
-
-This repository is the capstone project for Full Sail University's Web Development degree program. The first three weeks focused on research and prototyping inside [`docs/`](./docs/). Development of the live application began as a monorepo inside [`dev/memli/`](./dev/memli/).
-
-**Note:**<br />Formerly named "Mnemno"; rebranded to "Memli".
 
 ---
 
@@ -21,7 +14,7 @@ This repository is the capstone project for Full Sail University's Web Developme
 | **Staging** | [memli-staging.thereisphil.workers.dev](https://memli-staging.thereisphil.workers.dev/) |
 | **Production** | [memli.thereisphil.workers.dev](https://memli.thereisphil.workers.dev/) |
 
-> **Note:** The **staging** environment is password-protected with HTTP Basic Auth so pre-release builds stay private. Production stays publicly accessible.
+> **Note:** Staging asks for a password before it serves the app. Those credentials are Cloudflare secrets, not files in this repo. Production is public.
 
 **Repository:** [github.com/hereisphil/2606-WDV349-CantuPhillip](https://github.com/hereisphil/2606-WDV349-CantuPhillip)
 
@@ -95,8 +88,10 @@ bun run preview      # Run the prod sever on: http://localhost:4173
 
 **GitHub Actions:**
 
+- Pull requests into `dev`, `stage`, and `main` run [verify.yml](./.github/workflows/verify.yml) (format, types, lint, tests, Knip, build, and a Wrangler dry-run). Staging and production deploys run that same check before they ship.
 - Pushes to the `stage` branch trigger automatic staging deployment via [staging.yml](./.github/workflows/staging.yml).
 - Pushes to the `main` branch trigger automatic production deployment via [production.yml](./.github/workflows/production.yml).
+- After a pull request merges, [delete-merged-branch.yml](./.github/workflows/delete-merged-branch.yml) deletes the feature branch. Long-lived branches (`main`, `dev`, `stage`, `research`, `changelog`, `portfolio`) are left in place.
 
 ---
 
@@ -112,8 +107,17 @@ Feature work branches off `dev` and merges back through pull requests following 
 
 ---
 
-## Current Status (WIP)
+## Follow along
 
-The monorepo scaffold is in place with marketing pages (landing, about, pricing, community, blog, contact), TanStack routing, and a marketing shell. Prototype (static) development is underway. Still mapping Figma protoype components.
+Work is tracked on the public [project board](https://github.com/users/hereisphil/projects/1/views/1) (titled Capstone on GitHub). The default view is the **Issue Board**: backlog of issues and features, what is ready to pick up, what is in progress, and what is in review. The **Roadmap** view on that same project is the estimated timeline.
 
-See the [Changelog](./docs/changelog.md) for the latest updates.
+The [Changelog](./docs/changelog.md) is the week-by-week record of what already shipped.
+
+---
+
+## Author
+
+Hi! 👋 I'm **Phillip Cantu**. Feel free to reach out to me on:
+
+- **[X @relentlessphil](https://x.com/relentlessphil)**
+- **[LinkedIn](https://linkedin.com/in/phillipcantu)**

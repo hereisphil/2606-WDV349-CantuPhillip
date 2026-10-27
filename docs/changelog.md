@@ -4,9 +4,104 @@
 
 ### Phillip Cantu
 
-![Degree Program](https://img.shields.io/badge/degree-web%20development-blue.svg)&nbsp;
+![Degree Program](https://img.shields.io/badge/degree-web%20development-blue.svg) 
 
-Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the Memli app.
+Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the app.
+
+## 27 October 2026
+
+### `DX` Verify before deploy
+
+Pull requests into `dev`, `stage`, and `main` now run a `validate` check (`.github/workflows/verify.yml`): Prettier, TypeScript (app packages and the Worker entry, which Turbo does not typecheck), ESLint, Vitest, Knip, a production build, and a Wrangler staging dry-run. Staging and production deploys run that same check before they ship.
+
+* The staging workflow records a GitHub deployment on the `staging` environment. It had been pointed at `stage`, so a required deployment on `main` could never succeed. Production records the `production` environment.
+* `stage` requires the `validate` check, signed commits, and a linear history. Squash merges keep that history and let GitHub sign the commit it creates.
+
+### `SECURITY` Ready for a public repo
+
+The root README now leads with Memli and no longer includes a student number. Staging basic-auth credentials stay in Cloudflare only: `dev/memli/.cf` is untracked and gitignored, and this changelog no longer points at it.
+
+***
+
+## 26 October 2026
+
+### `DX` Vite cache ignored
+
+Ignored `.vite`. Vite writes that directory beside the app only when it cannot find `node_modules`. The optimizer cache already lives under `node_modules`.
+
+* See merged **[PR #99](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/99)**
+
+***
+
+## 18 September 2026
+
+### `FEATURE` Homepage rhythm
+
+Brought the hero to eye level, enlarged the type, added a secondary call to action and Why Memli cards, and softened the page surface.
+
+* See merged **[PR #96](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/96)** — Closes [#95](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/95)
+
+### `DOCUMENTATION` Product decisions written down
+
+Added roadmap, architecture, product UX, i18n, and mobile notes under `dev/memli/docs/`, plus short Cursor rules so later work follows those decisions instead of re-deciding them in chat.
+
+### `DX` Merged branches delete themselves
+
+A workflow deletes a feature branch after its pull request merges, and leaves `main`, `dev`, `stage`, `research`, `changelog`, and `portfolio` alone.
+
+* See merged **[PR #97](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/97)** — Closes [#94](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/94)
+
+***
+
+## 29 August 2026
+
+### `DX` Shared Zod schemas
+
+Added `@workspace/schemas` with the sign-in schema and web environment validation, so those contracts are not copied into the UI package.
+
+* Closes [#83](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/83)
+
+### `DX` Spaced-repetition tests
+
+Added `@workspace/core` and Vitest. The first tests cover SM-2 card grading. Domain logic stays out of React so a later API or mobile client can reuse it.
+
+* Closes [#84](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/84)
+
+***
+
+## 25 August 2026
+
+### `DX` Knip
+
+Added Knip to flag unused files, exports, and dependencies, and removed unused UI packages (`zod`, `geist`, `lucide-react`, and a few tooling deps that did not belong in `@workspace/ui`). CI runs it now; it is still not a local git hook.
+
+* Closes [#82](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/82)
+
+***
+
+## 02 August 2026
+
+### `DX` One TypeScript config, format, and git hooks
+
+* `@workspace/typescript-config` is the strict base that `web`, `ui`, and the Worker extend. Closes [#79](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/79).
+* Prettier has an ignore file and `format:check`. ESLint stays compatible with it. Closes [#80](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/80).
+* Lefthook formats and lints staged Memli files before commit, and typechecks before push. Hooks live at the repo root because Git hooks are repo-scoped. Closes [#81](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/81).
+
+***
+
+## 01 August 2026
+
+### `FEATURE` Marketing layout on a phone
+
+Rebuilt the marketing nav with scroll-to-top and an accessible hamburger menu (animated open/close). Moved the Why Mnemonics heading and copy above the flashcard demo so the section reads on a narrow screen. The Vite dev server listens on the local network so a phone on the same Wi-Fi can open it.
+
+### `DX` Shared ESLint and editor rules
+
+Added `@workspace/eslint-config` and applied it to `web` and `ui`, including explicit return types. Added Cursor rules for this repo: branch names, commit messages, and no commit or push unless asked. Documented which GitHub account can access this repo.
+
+* Closes [#78](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/78)
+
+***
 
 ## 29 June 2026
 
@@ -134,7 +229,7 @@ I finalized and compiled the deep structural research files exploring product de
 
 * **Design Heuristics (R4-Notes.md):** Documented visual safety parameters targeting the mitigation of coercive dark design patterns, integration rules for accessible focus-trapped dialog modals, and the application of Laws of UX (Miller's and Fitts's Laws).
 * **Plans for Production (R5-Notes.md):** Synthesized structural REST API mapping patterns, task scaling metrics using GitHub Issues, and modular layout rules matching Atomic Web Design configurations.
-  * See merged **[PR #30](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/30)** (*Research*) — Successfully resolves and **Closes [#23](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/23) and [#25](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/25)**.
+  * See merged **[PR #30](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/30)** (*Research*) — Successfully resolves and **Closes [#23](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/23) and [#25**](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/25).
 
 ***
 
@@ -190,7 +285,7 @@ Updated our repository file tree map to preserve strict tracking with the newly 
 
 * **Trunk Line & Environment Routing:** Established stable branch tracks:
   * `main`: Production-ready layer; completely locked to ensure zero unstable deployments.
-  * `stage`: The pre-flight staging area used for end-to-end integration verification prior to instructor appraisal.
+  * `stage`: The pre-flight staging area used for end-to-end integration verification before production.
   * `dev`: The central staging sandbox where upcoming features are pull-requested, combined, and sanity-checked.
 * **Isolated Feature Tracks:** Configured rolling workspace tracks built off the `dev` branch:
   * `research`: Ongoing technical learning, syntax tracking, and code safety analysis (`docs/research/R1-Notes.md`).
