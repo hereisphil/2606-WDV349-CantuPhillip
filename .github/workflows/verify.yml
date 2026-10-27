@@ -1,0 +1,68 @@
+name: CI Verification
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - stage
+      - main
+  # Lets staging.yml / production.yml reuse this exact gate before deploying.
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    # This display name is the status-check context branch protection
+    # requires. Do not rename it without updating branch protection first.
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dev/memli
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Format Check
+        run: bun run format:check
+
+      - name: Type Check
+        run: bun run typecheck
+
+      # The Worker entry (dev/memli/src/index.ts) is not a Turbo workspace
+      # package, so `turbo typecheck` never sees it. Check it explicitly.
+      - name: Type Check (Worker)
+        run: bunx tsc --noEmit
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Test
+        run: bun run test
+
+      - name: Unused Code (Knip)
+        run: bun run knip
+
+      - name: Build
+        run: bun run build
+
+      # Bundles the Worker + wrangler config without deploying or needing
+      # Cloudflare credentials (the web dist/ from Build must exist first).
+      - name: Wrangler Dry Run (Staging)
+        run: bunx wrangler deploy --dry-run --env staging
