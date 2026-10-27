@@ -7,12 +7,29 @@ on:
     paths:
       - "dev/memli/**"
       - ".github/workflows/*.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two staging deploys overlap; queue instead of cancelling.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
 
 jobs:
+  # a deploy must never run unverified code.
+  validate:
+    uses: ./.github/workflows/verify.yml
+    permissions:
+      contents: read
+
   deploy-to-staging:
+    needs: validate
     if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+    environment: staging
     # Force the runner container to execute commands directly inside the monorepo subfolder
     defaults:
       run:
