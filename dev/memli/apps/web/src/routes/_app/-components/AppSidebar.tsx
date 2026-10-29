@@ -27,6 +27,16 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 import { useViewer, type ViewerPlan } from "@/components/session-provider"
 
+const railLinks = [
+  { to: "/dashboard" as const, label: "Decks", icon: Layers, exact: true },
+  {
+    to: "/community" as const,
+    label: "Community Gallery",
+    icon: ImageIcon,
+    exact: false,
+  },
+]
+
 function StreakDisplay({ days }: { days: number }): JSX.Element {
   const dayLabel = days === 1 ? "1 Day" : `${days} Days`
 
@@ -73,9 +83,13 @@ function RailLink({
 
 function RailNav(): JSX.Element {
   return (
-    <nav aria-label="Primary" className="flex flex-col gap-1 px-3 py-2">
-      <RailLink to="/dashboard" label="Decks" icon={Layers} exact />
-      <RailLink to="/community" label="Community Gallery" icon={ImageIcon} />
+    <nav
+      aria-label="Primary"
+      className="hidden flex-col gap-1 px-3 py-2 md:flex"
+    >
+      {railLinks.map(({ to, label, icon, exact }) => (
+        <RailLink key={label} to={to} label={label} icon={icon} exact={exact} />
+      ))}
     </nav>
   )
 }
@@ -146,8 +160,8 @@ export function AppSidebar(): JSX.Element {
           <span>Memli</span>
         </Link>
 
-        {/* Mobile account menu: avatar inline with logo, username + badge inside menu */}
-        <div className="md:hidden">
+        {/* Mobile controls: avatar dropdown + hamburger dropdown */}
+        <div className="flex items-center gap-1 md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={`Account menu, @${viewer.username}`}
@@ -173,6 +187,39 @@ export function AppSidebar(): JSX.Element {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <AccountMenuItems />
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label="Navigation menu"
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="group/menu cursor-pointer hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                />
+              }
+            >
+              <div className="relative flex h-5 w-5 flex-col items-center justify-center">
+                <span className="absolute h-0.5 w-5 -translate-y-1.5 bg-foreground transition-all duration-300 group-data-popup-open/menu:translate-y-0 group-data-popup-open/menu:rotate-45" />
+                <span className="h-0.5 w-5 bg-foreground transition-all duration-300 group-data-popup-open/menu:opacity-0" />
+                <span className="absolute h-0.5 w-5 translate-y-1.5 bg-foreground transition-all duration-300 group-data-popup-open/menu:translate-y-0 group-data-popup-open/menu:-rotate-45" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuGroup>
+                {railLinks.map(({ to, label, icon: Icon, exact }) => (
+                  <DropdownMenuItem
+                    key={label}
+                    className="cursor-pointer [&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
+                    render={<Link to={to} activeOptions={{ exact }} />}
+                  >
+                    <Icon aria-hidden="true" />
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
