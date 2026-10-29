@@ -1,11 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, type JSX, type ReactNode } from "react"
 
+export type ViewerPlan = "free" | "pro"
+
 // Viewer/useViewer are temporary until Better Auth and a real user is created
 export type Viewer = {
   id: string
-  displayName: string
+  username: string
   email: string
+  plan: ViewerPlan
   uiLocale: string
   streakDays: number
 }
@@ -13,8 +16,9 @@ export type Viewer = {
 // Prototype stand-in. Better Auth (#108) replaces this value inside the provider.
 const prototypeViewer = {
   id: "usr_prototype_01",
-  displayName: "Prototype Learner",
+  username: "prototype_learner",
   email: "learner@prototype.memli.test",
+  plan: "pro",
   uiLocale: "en",
   streakDays: 12,
 } as const satisfies Viewer

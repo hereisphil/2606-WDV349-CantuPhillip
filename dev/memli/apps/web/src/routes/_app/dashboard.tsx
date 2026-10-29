@@ -1,18 +1,20 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useViewer } from "@/components/session-provider"
+import { Heading } from "@workspace/ui/components/heading"
+import { Section } from "@workspace/ui/components/section"
+import { Text } from "@workspace/ui/components/text"
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
 })
 
 function Dashboard(): JSX.Element {
-  const viewer = useViewer()
-
   return (
-    <section className="flex flex-col items-center justify-center gap-2">
-      <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-      <p className="text-sm text-muted-foreground">{viewer.displayName}</p>
-    </section>
+    <Section width="full" padding="compact">
+      <Heading>Decks</Heading>
+      <Text variant="muted" className="mt-2">
+        Your vocabulary collections will show up here.
+      </Text>
+    </Section>
   )
 }

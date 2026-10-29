@@ -21,6 +21,8 @@
   --color-brand-slate: oklch(0.491 0.032 261); /* #64748B Slate Gray */
   --color-brand-border: oklch(0.916 0.009 261); /* #E2E8F0 Border Gray */
   --color-brand-tint: oklch(0.971 0.013 264); /* #EFF6FF Blue Tint */
+  --color-streak: var(--streak);
+  --color-streak-foreground: var(--streak-foreground);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -95,6 +97,8 @@
   --sidebar-accent-foreground: oklch(0.488 0.243 264.376);
   --sidebar-border: oklch(0.916 0.009 261);
   --sidebar-ring: oklch(0.488 0.243 264.376);
+  --streak: oklch(0.97 0.02 75); /* warm streak surface */
+  --streak-foreground: oklch(0.68 0.19 48); /* orange flame */
 }
 
 .dark {
@@ -129,6 +133,8 @@
   --sidebar-accent-foreground: oklch(0.697 0.158 264);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.697 0.158 264);
+  --streak: oklch(0.32 0.04 60);
+  --streak-foreground: oklch(0.84 0.1 75);
 }
 
 @layer base {

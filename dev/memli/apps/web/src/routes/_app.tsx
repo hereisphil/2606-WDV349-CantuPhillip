@@ -1,18 +1,18 @@
+import type { JSX } from "react"
 import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { AppSidebar } from "./_app/-components/AppSidebar"
 
 export const Route = createFileRoute("/_app")({
-  // beforeLoad: ({ context }) => {
-  //   if (!context.auth?.isAuthenticated) {
-  // TODO: import  redirect from "@tanstack/react-router" and redirect to sign in if not authenticated
-  //     throw redirect({ to: "/signin" })
-  //   }
-  // },
-  component: () => (
-    <div className="flex min-h-dvh w-full">
-      {/* <Sidebar /> */}
-      <main className="grow p-6">
+  component: AppLayout,
+})
+
+function AppLayout(): JSX.Element {
+  return (
+    <div className="flex min-h-dvh w-full flex-col bg-background md:flex-row">
+      <AppSidebar />
+      <main className="min-w-0 flex-1">
         <Outlet />
       </main>
     </div>
-  ),
-})
+  )
+}
