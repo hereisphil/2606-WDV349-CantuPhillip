@@ -1,5 +1,8 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { Heading } from "@workspace/ui/components/heading"
+import { Section } from "@workspace/ui/components/section"
+import { Text } from "@workspace/ui/components/text"
 
 export const Route = createFileRoute("/_marketing/pricing")({
   component: Pricing,
@@ -7,11 +10,11 @@ export const Route = createFileRoute("/_marketing/pricing")({
 
 function Pricing(): JSX.Element {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="text-3xl font-bold">Pricing</h1>
-      <p className="mt-4 text-muted-foreground">
+    <Section>
+      <Heading>Pricing</Heading>
+      <Text variant="muted" className="mt-4">
         Simple, transparent pricing is on the way. Check back soon.
-      </p>
-    </section>
+      </Text>
+    </Section>
   )
 }
