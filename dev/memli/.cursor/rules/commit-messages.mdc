@@ -12,7 +12,7 @@ Lead with a **bracketed area tag** so `git log --oneline` readers know the domai
 ```
 [area] Short summary of what changed and why.
 
-Optional body for context. Use "Closes #N" when the commit finishes an issue.
+Optional body for context. Link the issue with `Refs #N`. The project board closes it when the work merges to `stage`.
 ```
 
 ## Area tags (pick the best fit)
@@ -40,7 +40,8 @@ Use `[area:subarea]` when it helps (e.g. `[DX:web]`, `[web:marketing]`).
 
 - Prefer present/past tense consistency with nearby commits; keep the subject readable without opening the diff
 - Mention the *reason* when the diff is large for a mechanical reason (e.g. ESLint return-type annotations)
-- Add `Closes #N` in the body when the commit completes that issue
+- Add `Refs #N` in the commit or pull request body. Issues stay open through Review and close when they merge to `stage`
+- Keep `Closes #N` off pull requests into `dev`. GitHub only auto-closes on the default branch, `main`, which would skip the staging review
 
 ## Do not
 
