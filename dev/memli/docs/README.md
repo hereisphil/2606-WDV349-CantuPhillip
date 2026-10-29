@@ -18,6 +18,7 @@ GitHub milestones and issues track *when* and *what* to build next. These docs t
 | [product-ux.md](./product-ux.md) | Consumer UX rules: `/`, auth redirects, logged-in marketing access |
 | [i18n.md](./i18n.md) | Localization strategy (LATAM-first: `en` + `es-419`) |
 | [mobile.md](./mobile.md) | React Native / Expo plan and what to share from the monorepo |
+| [state-management.md](./state-management.md) | Who owns each kind of React state; `useReducer`-first, lint-enforced; when to add `use-effect-reducer` |
 | [dx-tooling.md](./dx-tooling.md) | Dev-only tools (e.g. Reactotron), when to introduce them |
 
 ## How to use these docs
@@ -25,6 +26,7 @@ GitHub milestones and issues track *when* and *what* to build next. These docs t
 - **Before a large change:** read the relevant deep-dive and the matching roadmap phase.
 - **When deciding “should we split / subdomain / add a package?”:** prefer [architecture.md](./architecture.md) and [product-ux.md](./product-ux.md) over chat history or another product’s monorepo layout.
 - **When touching strings, schemas, or user-facing copy:** read [i18n.md](./i18n.md).
+- **When a component needs state (a second `useState`, a loading flag, a multi-step flow):** read [state-management.md](./state-management.md) first.
 - **When the brand becomes FluentVine:** update branding in code, README, Cursor rules, and a short “Brand” note in [roadmap.md](./roadmap.md); keep doc *filenames* stable so links and issues do not rot.
 
 ## What does *not* live here

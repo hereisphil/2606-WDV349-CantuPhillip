@@ -67,8 +67,13 @@ Products that steal the homepage after login train users to fight their tools (�
 
 ### After successful login
 
-- Send the user to the **canonical app home**: `/dashboard` **or** `/learn` (pick one; document in [architecture.md](./architecture.md) open decisions when chosen).
-- Deep-link return URLs are fine (`?redirect=/decks/123`) when safe and same-origin.
+- Send the user to the **canonical app home**: `/dashboard` (active study sessions live at `/study/$courseId`).
+- Deep-link return URLs are fine (`?redirect=/study/korean-101`) when safe and same-origin.
+
+### Prototype Mode (`359 MS 1`–`359 MS 3`) vs. Production Auth (`359 MS 4`)
+
+- During prototype milestones (`359 MS 1`–`359 MS 3`, Issue #110), `/signin` temporarily disables its credential inputs and provides a **"Skip & Continue to Prototype →"** button that navigates to `/dashboard`.
+- `/dashboard` and `/study/$courseId` read the current learner from a typed `SessionContext` / `useViewer()` provider backed by a seeded test user (`usr_prototype_01`), allowing the full SRS + Mnemonic study engine to be built and verified before Better Auth (#108, #107) replaces the bypass in `359 MS 4`.
 
 ### After logout
 

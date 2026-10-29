@@ -159,6 +159,7 @@ Do not paint into a cookies-only corner that makes mobile miserable — or a tok
 ### Rules
 
 - **New domain logic** → prefer `packages/core` + tests.
+- **New state transitions** (study session, grading flow) → pure reducer in `packages/core` + tests; `apps/web` only wraps it in `useReducer`. See [state-management.md](./state-management.md).
 - **New HTTP/API shapes** → `packages/schemas`.
 - **New button/input** → `packages/ui` for web; never assume it ports to RN.
 - **Do not** put marketing page sections into `core`.
@@ -236,8 +237,8 @@ Record the outcome here when chosen:
 
 | Topic | Options | Status |
 | --- | --- | --- |
-| Post-login canonical path | `/dashboard` vs `/learn` | Open — pick in auth/dashboard milestone |
-| Auth mechanism | Cookie session vs JWT/bearer hybrid | Open — must support web + mobile |
+| Post-login canonical path | `/dashboard` vs `/learn` | **Chosen: `/dashboard`** (active study sessions use `/study/$courseId`) |
+| Auth mechanism | Cookie session vs JWT/bearer hybrid | Better Auth in `359 MS 4` (seeded `useViewer()` test user `usr_prototype_01` in `359 MS 1`–`359 MS 3`) |
 | Auth route ownership after Astro split | App only vs lightweight marketing links out | Open — default lean: app owns auth pages |
 | App path prefix | Root paths vs `/app/*` | Open — only if proxy/SEO needs it |
 | Hosting | Cloudflare-centric (already in repo tooling) vs other | Lean current stack unless requirements change |
@@ -249,3 +250,4 @@ Record the outcome here when chosen:
 - `.cursor/rules/architecture-guardrails.mdc` — do not introduce `app.` subdomain UX or premature Astro split
 - `.cursor/rules/product-ux.mdc` — homepage and nav behavior
 - `.cursor/rules/memli-stack.mdc` — current implementation stack
+- `.cursor/rules/react-state.mdc` — state ownership and reducer-first conventions ([state-management.md](./state-management.md))

@@ -17,6 +17,7 @@ Already in play or available without new products:
 | TanStack Router Devtools | Route matches / debug (currently mounted in web root) |
 | Vitest | `packages/core` domain tests |
 | TypeScript + ESLint + Prettier + Lefthook | Quality gates |
+| `memli/no-use-state-sprawl` (local ESLint rule) | Pushes component state into `useReducer` + discriminated unions — see [state-management.md](./state-management.md) |
 | Knip | Unused code/deps hygiene |
 
 These cover a large fraction of web debugging needs for Phase 1.
@@ -60,7 +61,7 @@ Rules:
 - Structured timeline logging beyond `console.log`
 - Network inspection workflows
 - React Native state/debugging when the mobile app exists
-- Redux/state plugins **if** such state lands (not required by current stack)
+- Reducer/state plugins **if** useful once session reducers exist (see [state-management.md](./state-management.md); no global store is planned)
 
 ### What it is not
 

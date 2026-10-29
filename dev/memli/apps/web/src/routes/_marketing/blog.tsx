@@ -1,5 +1,8 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { Heading } from "@workspace/ui/components/heading"
+import { Section } from "@workspace/ui/components/section"
+import { Text } from "@workspace/ui/components/text"
 
 export const Route = createFileRoute("/_marketing/blog")({
   component: Blog,
@@ -7,11 +10,11 @@ export const Route = createFileRoute("/_marketing/blog")({
 
 function Blog(): JSX.Element {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="text-3xl font-bold">Blog</h1>
-      <p className="mt-4 text-muted-foreground">
+    <Section>
+      <Heading>Blog</Heading>
+      <Text variant="muted" className="mt-4">
         Articles and updates are on the way. Check back soon.
-      </p>
-    </section>
+      </Text>
+    </Section>
   )
 }

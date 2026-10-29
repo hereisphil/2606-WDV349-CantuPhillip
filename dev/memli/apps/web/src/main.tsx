@@ -3,6 +3,7 @@ import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
 import "@workspace/ui/globals.css"
+import { SessionProvider } from "@/components/session-provider.tsx"
 import { ThemeProvider } from "@/components/theme-provider.tsx"
 import { routeTree } from "@/routeTree.gen"
 
@@ -24,7 +25,9 @@ declare module "@tanstack/react-router" {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider defaultTheme="light">
-      <RouterProvider router={router} />
+      <SessionProvider>
+        <RouterProvider router={router} />
+      </SessionProvider>
     </ThemeProvider>
   </StrictMode>
 )

@@ -2,7 +2,7 @@
 
 **Status:** living plan (not a sprint board).  
 **Brand today:** Memli · **Planned brand:** FluentVine (domain examples below use `{brand}.com` / `fluentvine.com` as the intended production shape).  
-**Last aligned with product discussion:** 2026-09.
+**Last aligned with product discussion:** 2026-10.
 
 This document is the **hub**. It sequences work and points at deeper docs. It does not replace GitHub milestones/issues for tracking execution.
 
@@ -12,7 +12,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 
 1. **Best UX for non-technical learners** — one consumer hostname; users never need to remember `app.*`.
 2. **Clear separation of concerns over time** — marketing site, authenticated web app, shared API, and eventually mobile — without fragmenting the user journey across subdomains.
-3. **Ship a real learning loop first** — auth, decks, SRS review — before speculative platform splits.
+3. **Ship a real learning loop first** — decks, visual/story mnemonics, and SM-2 SRS review — before real auth boilerplate or speculative platform splits.
 4. **LATAM-ready foundations** — plan and prepare i18n early; full translation can follow once UI chrome stabilizes.
 5. **Mobile when the API and domain model are stable** — React Native shares logic and schemas, not web DOM components.
 
@@ -24,9 +24,10 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 | --- | --- |
 | Monorepo | Turborepo + Bun under `dev/memli/` |
 | Web | Single Vite + React app: `apps/web` |
+| Shared packages | `packages/core` (pure TS SM-2 SRS + Vitest), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
 | Routing | TanStack Router route groups: `_marketing`, `_auth`, `_app` |
 | Marketing vs app | **Logical** split only (same deployable, same origin) |
-| API | Not yet a separate `apps/api` Hono service (planned) |
+| API | Not yet a separate `apps/api` Hono service (scheduled in `359 MS 3`) |
 | Mobile | Not started |
 | i18n | English UI; no i18n framework yet |
 | DX inspectors | TanStack Router Devtools in web; Reactotron deferred |
@@ -46,6 +47,7 @@ These are non-negotiable unless an ADR explicitly overturns them. Details live i
 | API may use a subdomain | `api.{brand}.com` is fine — humans do not type it | [architecture.md](./architecture.md) |
 | UI locale ≠ learning language | Spanish chrome while studying Japanese must be possible | [i18n.md](./i18n.md) |
 | Share domain, not DOM | `packages/core` + `packages/schemas` are the mobile/web bridge; shadcn stays web | [mobile.md](./mobile.md), [architecture.md](./architecture.md) |
+| State has an owner | Server → TanStack Query, URL → Router params, lifecycle → `useReducer` in `packages/core`; one `useState` per component, lint-enforced | [state-management.md](./state-management.md) |
 | Dev tools stay in DEV | Reactotron and similar must not ship to production bundles | [dx-tooling.md](./dx-tooling.md) |
 
 ---
@@ -90,12 +92,30 @@ Phases can **overlap lightly** (e.g. i18n schema habits during Phase 1), but **d
 
 ## Phase 1 — Core web product + shared Hono API
 
-**Goal:** A learner can sign in, manage decks, and complete SRS review sessions on the web. A shared backend serves the web app (and later mobile).
+**Goal:** A learner can study language decks with visual/narrative mnemonics and complete persistent SM-2 SRS review sessions on the web, backed by a shared Hono + Drizzle + D1 API and real authentication.
+
+### Prototype-First execution sequence (WDV359 Milestones `359 MS 1`–`359 MS 4`)
+
+To guarantee the core learning loop ships first without getting blocked on authentication or secondary marketing copy:
+
+1. **`359 MS 1` (Week 1 — Design Primitives + Prototype Bypass + App Shell):**
+   - Extract reusable web primitives (`Section`, `Heading`, `Text`) into `@workspace/ui` (#105) and freeze secondary marketing stub pages (tag refactor only, no new copy).
+   - Disable the `/signin` form inputs, add a **"Skip & Continue to Prototype →"** button to `/dashboard`, and provide a seeded test learner (`usr_prototype_01`) via a typed `SessionContext` / `useViewer()` hook (#110).
+   - Build the `/dashboard` authenticated application shell (#45).
+2. **`359 MS 2` (Week 2 — Dashboard Decks + Study Session & Card UI):**
+   - Build the `/dashboard` User Metrics Banner (#46) and Study Deck Grid (#47) linking to `/study/$courseId`.
+   - Build the `/study/$courseId` Session Layout (#48) and interactive Core Study Card Display (#49).
+3. **`359 MS 3` (Week 3 — Mnemonic Engine + Persistent SRS Loop):**
+   - Build the Mnemonic Caption & Image Overlay Frame (#50) and Session Grading Controls Dock (#51) wired to `@workspace/core` `gradeCard()`.
+   - Scaffold `apps/api` (Hono + Drizzle ORM + Cloudflare D1/SQLite) and shared deck/review schemas in `@workspace/schemas` (#106), persisting seeded mnemonic decks and SRS review intervals for `usr_prototype_01` (#112).
+4. **`359 MS 4` (Week 4 — MVP Polish, Auth Integration & Beta Showcase):**
+   - Replace the `/signin` prototype bypass with real Better Auth Email/Password (#108) and Google OAuth / Passkeys (#107) by swapping the inside of `useViewer()`.
+   - Gate `TanStackRouterDevtools` to `import.meta.env.DEV` (#113) and promote `dev → stage → main` (#114).
 
 ### Product / UX (still one React app)
 
 - Keep `_marketing`, `_auth`, `_app` in `apps/web`.
-- After successful login → `/dashboard` or `/learn` (pick one primary post-auth landing route and stick to it).
+- Canonical post-auth landing route is `/dashboard` (active study sessions run at `/study/$courseId`).
 - Logged-in marketing nav shows **Open app** / **Dashboard**, not a forced redirect away from `/`.
 - See [product-ux.md](./product-ux.md).
 

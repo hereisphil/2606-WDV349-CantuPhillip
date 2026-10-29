@@ -1,0 +1,419 @@
+name: Sync PR to project board
+
+# Capstone board (users/hereisphil/projects/1):
+#   PR opened against dev        → In progress
+#   PR merged into dev           → Review          (issue stays open)
+#   dev merged into stage        → Staging         (issue closes)
+#   stage merged into main       → Done
+#
+# Feature PRs link issues with "Refs #N" in the title, body, or commits.
+# Promotion PRs (dev → stage, stage → main) move every card in the previous column.
+#
+# PROJECT_TOKEN must be a classic PAT with the `project` and `repo` scopes.
+# Fine-grained tokens cannot edit a user-owned Project.
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+concurrency:
+  group: project-board-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  update-board:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Move linked issues on the Capstone board
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          PROJECT_OWNER: hereisphil
+          PROJECT_NUMBER: 1
+        run: |
+          set -euo pipefail
+
+          case "$BASE_BRANCH" in
+            dev|stage|main) ;;
+            *)
+              echo "Base branch $BASE_BRANCH is outside the dev → stage → main flow."
+              exit 0
+              ;;
+          esac
+
+          PROJECT_JSON=$(gh api graphql \
+            -f login="$PROJECT_OWNER" \
+            -F number="$PROJECT_NUMBER" \
+            -f query='
+              query($login: String!, $number: Int!) {
+                user(login: $login) {
+                  projectV2(number: $number) {
+                    id
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+            ')
+
+          PROJECT_ID=$(echo "$PROJECT_JSON" | jq -er '.data.user.projectV2.id')
+          FIELD_ID=$(echo "$PROJECT_JSON" | jq -er '.data.user.projectV2.field.id')
+
+          option_id() {
+            local name="$1"
+            local id
+            id=$(echo "$PROJECT_JSON" | jq -r --arg name "$name" '
+              .data.user.projectV2.field.options[]
+              | select(.name == $name)
+              | .id
+            ')
+            if [ -z "$id" ]; then
+              echo "Capstone Status is missing \"$name\". Options:" >&2
+              echo "$PROJECT_JSON" | jq -r '.data.user.projectV2.field.options[].name' >&2
+              exit 1
+            fi
+            printf '%s\n' "$id"
+          }
+
+          IN_PROGRESS_ID=$(option_id "In progress")
+          REVIEW_ID=$(option_id "Review")
+          STAGING_ID=$(option_id "Staging")
+          DONE_ID=$(option_id "Done")
+          TODO_ID=$(option_id "Todo")
+
+          set_status() {
+            local item_id="$1"
+            local option="$2"
+            gh api graphql \
+              -f project="$PROJECT_ID" \
+              -f item="$item_id" \
+              -f field="$FIELD_ID" \
+              -f option="$option" \
+              -f query='
+                mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $field
+                    value: { singleSelectOptionId: $option }
+                  }) {
+                    projectV2Item { id }
+                  }
+                }
+              ' >/dev/null
+          }
+
+          close_if_open() {
+            local number="$1"
+            local comment="$2"
+            local state
+            state=$(gh issue view "$number" --repo "$REPO" --json state --jq .state)
+            if [ "$state" = "OPEN" ]; then
+              gh issue close "$number" --repo "$REPO" --reason completed --comment "$comment"
+              echo "Closed #$number"
+            fi
+          }
+
+          # Prints "<item-id> <status-name>" or "missing <content-id>".
+          # $project is applied in jq. Declaring it on the query makes GitHub
+          # reject the request as an unused variable, and jq then prints
+          # "missing null" from the empty payload.
+          project_item() {
+            local number="$1"
+            gh api graphql \
+              -f owner="${REPO%/*}" \
+              -f repo="${REPO#*/}" \
+              -F number="$number" \
+              -f query='
+                query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $number) {
+                      id
+                      projectItems(first: 20) {
+                        nodes {
+                          id
+                          project { id }
+                          fieldValueByName(name: "Status") {
+                            ... on ProjectV2ItemFieldSingleSelectValue { name }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ' | jq -er --arg project "$PROJECT_ID" '
+                .data.repository.issue as $issue
+                | if ($issue.id // "") == "" then
+                    error("issue query returned no id")
+                  else
+                    ($issue.projectItems.nodes // [])
+                    | map(select(.project.id == $project))
+                    | if length == 0 then
+                        "missing \($issue.id)"
+                      else
+                        "\(.[0].id) \(.[0].fieldValueByName.name // "")"
+                      end
+                  end
+              '
+          }
+
+          ensure_item() {
+            local number="$1"
+            local placement
+            placement=$(project_item "$number")
+            if [ "${placement%% *}" = "missing" ]; then
+              local content_id="${placement#missing }"
+              if [ -z "$content_id" ] || [ "$content_id" = "null" ]; then
+                echo "Issue #$number has no node id to add to the project." >&2
+                exit 1
+              fi
+              gh api graphql \
+                -f project="$PROJECT_ID" \
+                -f content="$content_id" \
+                -f query='
+                  mutation($project: ID!, $content: ID!) {
+                    addProjectV2ItemById(input: { projectId: $project, contentId: $content }) {
+                      item { id }
+                    }
+                  }
+                ' | jq -er '.data.addProjectV2ItemById.item.id'
+              echo ""
+              return
+            fi
+            printf '%s\n' "$placement"
+          }
+
+          allows_move() {
+            local current="$1"
+            local mode="$2"
+            case "$mode" in
+              active)
+                case "$current" in
+                  ""|Backlog|Todo|"In progress") return 0 ;;
+                esac
+                ;;
+              review)
+                case "$current" in
+                  ""|Backlog|Todo|"In progress"|Review) return 0 ;;
+                esac
+                ;;
+              abandon)
+                [ "$current" = "In progress" ]
+                return
+                ;;
+              force)
+                return 0
+                ;;
+            esac
+            return 1
+          }
+
+          move_issue() {
+            local number="$1"
+            local status_name="$2"
+            local option="$3"
+            local mode="$4"
+            local close_comment="${5:-}"
+            local kind
+            kind=$(gh api "repos/$REPO/issues/$number" --jq 'if .message != null then "gone" elif .pull_request != null then "pr" else "issue" end' || echo "gone")
+            if [ "$kind" != "issue" ]; then
+              echo "Skip #$number ($kind)"
+              return
+            fi
+
+            local placement item_id current
+            placement=$(ensure_item "$number")
+            item_id=${placement%% *}
+            current=${placement#"$item_id"}
+            current=${current# }
+
+            if ! allows_move "$current" "$mode"; then
+              echo "Leave #$number in ${current:-unset}"
+              return
+            fi
+
+            set_status "$item_id" "$option"
+            echo "Moved #$number to $status_name"
+            if [ -n "$close_comment" ]; then
+              close_if_open "$number" "$close_comment"
+            fi
+          }
+
+          linked_issue_numbers() {
+            local payload text
+            payload=$(gh api graphql \
+              -f owner="${REPO%/*}" \
+              -f repo="${REPO#*/}" \
+              -F pr="$PR_NUMBER" \
+              -f query='
+                query($owner: String!, $repo: String!, $pr: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    pullRequest(number: $pr) {
+                      title
+                      body
+                      closingIssuesReferences(first: 20) { nodes { number } }
+                      commits(first: 100) { nodes { commit { message } } }
+                    }
+                  }
+                }
+              ')
+            text=$(echo "$payload" | jq -r '
+              .data.repository.pullRequest
+              | [.title, .body, (.commits.nodes[].commit.message)]
+              | join("\n")
+            ')
+            # Keyword links only, so a passing "#45" in a commit does not move that card.
+            {
+              echo "$payload" | jq -r '.data.repository.pullRequest.closingIssuesReferences.nodes[].number'
+              printf '%s\n' "$text" | grep -oE '(Refs?|Closes?|Closed|Fix(es|ed)?|Resolve[sd]?) #[0-9]+' | grep -oE '[0-9]+' || true
+            } | sort -un
+          }
+
+          sweep() {
+            local from_status="$1"
+            local to_option="$2"
+            local to_name="$3"
+            local close_comment="$4"
+            local cursor=""
+            local page
+            while :; do
+              if [ -n "$cursor" ]; then
+                page=$(gh api graphql \
+                  -f id="$PROJECT_ID" \
+                  -f cursor="$cursor" \
+                  -f query='
+                    query($id: ID!, $cursor: String!) {
+                      node(id: $id) {
+                        ... on ProjectV2 {
+                          items(first: 100, after: $cursor) {
+                            pageInfo { hasNextPage endCursor }
+                            nodes {
+                              id
+                              fieldValueByName(name: "Status") {
+                                ... on ProjectV2ItemFieldSingleSelectValue { name }
+                              }
+                              content {
+                                __typename
+                                ... on Issue {
+                                  number
+                                  repository { nameWithOwner }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ')
+              else
+                page=$(gh api graphql \
+                  -f id="$PROJECT_ID" \
+                  -f query='
+                    query($id: ID!) {
+                      node(id: $id) {
+                        ... on ProjectV2 {
+                          items(first: 100) {
+                            pageInfo { hasNextPage endCursor }
+                            nodes {
+                              id
+                              fieldValueByName(name: "Status") {
+                                ... on ProjectV2ItemFieldSingleSelectValue { name }
+                              }
+                              content {
+                                __typename
+                                ... on Issue {
+                                  number
+                                  repository { nameWithOwner }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ')
+              fi
+
+              local matches
+              matches=$(echo "$page" | jq -c --arg from "$from_status" --arg repo "$REPO" '
+                .data.node.items.nodes[]
+                | select(.content.__typename == "Issue")
+                | select(.content.repository.nameWithOwner == $repo)
+                | select(.fieldValueByName.name == $from)
+                | {id, number: .content.number}
+              ')
+              if [ -n "$matches" ]; then
+                while IFS= read -r row; do
+                  item_id=$(echo "$row" | jq -r .id)
+                  number=$(echo "$row" | jq -r .number)
+                  set_status "$item_id" "$to_option"
+                  echo "Moved #$number to $to_name"
+                  if [ -n "$close_comment" ]; then
+                    close_if_open "$number" "$close_comment"
+                  fi
+                done <<<"$matches"
+              fi
+
+              local has_next
+              has_next=$(echo "$page" | jq -r '.data.node.items.pageInfo.hasNextPage')
+              if [ "$has_next" != "true" ]; then
+                break
+              fi
+              cursor=$(echo "$page" | jq -r '.data.node.items.pageInfo.endCursor')
+            done
+          }
+
+          if [ "$BASE_BRANCH" = "dev" ]; then
+            mode="active"
+            status_name="In progress"
+            option="$IN_PROGRESS_ID"
+            close_comment=""
+            if [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
+              mode="review"
+              status_name="Review"
+              option="$REVIEW_ID"
+            elif [ "$ACTION" = "closed" ]; then
+              mode="abandon"
+              status_name="Todo"
+              option="$TODO_ID"
+            elif [ "$ACTION" != "opened" ] && [ "$ACTION" != "reopened" ]; then
+              exit 0
+            fi
+            while IFS= read -r number; do
+              [ -n "$number" ] || continue
+              move_issue "$number" "$status_name" "$option" "$mode" "$close_comment" || exit 1
+            done < <(linked_issue_numbers)
+          elif [ "$MERGED" != "true" ]; then
+            echo "Pull request into $BASE_BRANCH was not merged."
+            exit 0
+          elif [ "$BASE_BRANCH" = "stage" ] && [ "$HEAD_BRANCH" = "dev" ]; then
+            sweep "Review" "$STAGING_ID" "Staging" "Merged to stage."
+          elif [ "$BASE_BRANCH" = "stage" ]; then
+            while IFS= read -r number; do
+              [ -n "$number" ] || continue
+              move_issue "$number" "Staging" "$STAGING_ID" "force" "Merged to stage." || exit 1
+            done < <(linked_issue_numbers)
+          elif [ "$BASE_BRANCH" = "main" ] && { [ "$HEAD_BRANCH" = "stage" ] || [ "$HEAD_BRANCH" = "dev" ]; }; then
+            sweep "Staging" "$DONE_ID" "Done" "Merged to main."
+            if [ "$HEAD_BRANCH" = "dev" ]; then
+              sweep "Review" "$DONE_ID" "Done" "Merged to main."
+            fi
+          elif [ "$BASE_BRANCH" = "main" ]; then
+            while IFS= read -r number; do
+              [ -n "$number" ] || continue
+              move_issue "$number" "Done" "$DONE_ID" "force" "Merged to main." || exit 1
+            done < <(linked_issue_numbers)
+          fi

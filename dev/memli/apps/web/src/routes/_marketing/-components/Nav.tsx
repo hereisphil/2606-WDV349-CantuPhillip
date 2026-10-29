@@ -1,9 +1,21 @@
 import type { JSX } from "react"
 import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
-import { BookOpen } from "lucide-react"
+import { BookOpen, LayoutDashboard } from "lucide-react"
+import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
+import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu"
 import { cn } from "@workspace/ui/lib/utils"
+import { useViewer, type Viewer } from "@/components/session-provider"
 
 const navItemClass =
   "rounded-md px-3 py-1.5 font-ui text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -46,7 +58,60 @@ const NavLinks = ({
   ))
 }
 
+function ViewerMenu({
+  viewer,
+  onNavigate,
+}: {
+  viewer: Viewer
+  onNavigate?: () => void
+}): JSX.Element {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`Account menu, @${viewer.username}`}
+        render={
+          <Button
+            variant="ghost"
+            className="size-11 rounded-full p-0 data-popup-open:bg-muted"
+          />
+        }
+      >
+        <Avatar>
+          <AvatarFallback />
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
+            <span className="truncate text-sm font-medium text-foreground">
+              @{viewer.username}
+            </span>
+            {viewer.plan === "pro" ? (
+              <Badge
+                variant="outline"
+                className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-700 uppercase dark:text-amber-300"
+              >
+                Pro
+              </Badge>
+            ) : null}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            render={<Link to="/dashboard" onClick={() => onNavigate?.()} />}
+          >
+            <LayoutDashboard aria-hidden="true" />
+            Dashboard
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export function Nav(): JSX.Element {
+  const viewer = useViewer()
   const [mobileOpen, setMobileOpen] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
 
@@ -104,7 +169,12 @@ export function Nav(): JSX.Element {
   return (
     <header
       ref={headerRef}
-      className={`sticky top-0 z-50 w-full ${mobileOpen ? "h-screen overflow-y-auto overscroll-none bg-background" : "bg-background/65 backdrop-blur-sm"}`}
+      className={cn(
+        "sticky top-0 z-50 w-full",
+        mobileOpen
+          ? "h-screen overflow-y-auto overscroll-none bg-background"
+          : "bg-background/65 backdrop-blur-sm"
+      )}
     >
       <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 md:grid">
         <Link
@@ -123,9 +193,7 @@ export function Nav(): JSX.Element {
         </div>
 
         <div className="flex justify-end">
-          <Button render={<Link to="/signin" />} nativeButton={false}>
-            Get Started
-          </Button>
+          <ViewerMenu viewer={viewer} />
         </div>
       </nav>
 
@@ -141,10 +209,8 @@ export function Nav(): JSX.Element {
           Memli
         </Link>
 
-        <div className="flex items-center gap-2">
-          <Button render={<Link to="/signin" />} nativeButton={false} size="sm">
-            Get Started
-          </Button>
+        <div className="flex items-center gap-1">
+          <ViewerMenu viewer={viewer} onNavigate={() => setMobileOpen(false)} />
           <Button
             type="button"
             variant="ghost"

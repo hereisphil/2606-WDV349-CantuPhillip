@@ -19,9 +19,11 @@ Full detail: `docs/product-ux.md` and `docs/roadmap.md`.
 - Never hard-redirect authenticated users such that marketing requires **logout** to view.
 - Public marketing routes (`/pricing`, `/about`, `/blog`, etc.) stay reachable while logged in.
 
-## Auth navigation
+## Auth navigation & Prototype Mode
 
-- After successful login, send users to the app home (`/dashboard` or `/learn` — stay consistent with existing routes).
+- Canonical post-login app home is `/dashboard` (study sessions run at `/study/$courseId`).
+- **Prototype Mode (`359 MS 1`–`359 MS 3`):** `/signin` has its form disabled and offers a **"Skip & Continue to Prototype →"** button to `/dashboard`. Components in `_app` read learner identity via a typed `SessionContext` / `useViewer()` hook returning a seeded test user (`usr_prototype_01`) so `359 MS 4` Better Auth + OAuth is a drop-in swap.
+- Secondary marketing/legal stub pages (`/about`, `/contact`, `/community`, `/blog`, `/pricing`, `/privacy`, `/terms`) are frozen in content during Phase 1 prototype work (only refactoring raw tags to `@workspace/ui` `<Section>`, `<Heading>`, `<Text>`).
 - Logged-in marketing nav: emphasize **Open app** / **Dashboard**, not “you are trapped in the product.”
 - Do not replace marketing layout chrome with the full app shell on `/`.
 

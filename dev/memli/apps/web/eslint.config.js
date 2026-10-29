@@ -18,4 +18,14 @@ export default defineConfig([
       "react-refresh/only-export-components": "off",
     },
   },
+  // React state guardrail exemptions (docs/state-management.md).
+  {
+    files: [
+      "src/routes/_marketing/**/*.{ts,tsx}",
+      "src/routes/_auth/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "memli/no-use-state-sprawl": "off",
+    },
+  },
 ])
