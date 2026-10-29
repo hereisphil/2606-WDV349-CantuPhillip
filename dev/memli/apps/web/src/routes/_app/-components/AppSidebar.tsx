@@ -4,6 +4,7 @@ import {
   BookOpen,
   ChevronsUpDown,
   CreditCard,
+  Flame,
   LogOut,
   SlidersHorizontal,
   UserIcon,
@@ -11,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
+import { Text } from "@workspace/ui/components/text"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,24 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { useViewer, type ViewerPlan } from "@/components/session-provider"
+
+function StreakDisplay({ days }: { days: number }): JSX.Element {
+  const dayLabel = days === 1 ? "1 Day" : `${days} Days`
+
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl bg-streak px-3 py-2.5">
+      <Flame className="size-5 text-streak-foreground" aria-hidden="true" />
+      <div className="min-w-0">
+        <Text className="text-[10px] leading-4 font-medium tracking-wider text-streak-foreground uppercase">
+          Streak
+        </Text>
+        <Text className="text-sm leading-5 font-semibold text-foreground">
+          {dayLabel}
+        </Text>
+      </div>
+    </div>
+  )
+}
 
 function ProBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
   if (plan !== "pro") return null
@@ -80,7 +100,7 @@ export function AppSidebar(): JSX.Element {
       aria-label="Application sidebar"
       className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
     >
-      <div className="flex items-center justify-between px-4 py-3 md:py-6">
+      <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
         <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
           <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <BookOpen className="size-4" aria-hidden="true" />
@@ -118,6 +138,10 @@ export function AppSidebar(): JSX.Element {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+
+      <div className="px-3 pb-3 md:px-4 md:pb-0">
+        <StreakDisplay days={viewer.streakDays} />
       </div>
 
       {/* Desktop bottom capsule: full-area hover + pointer cursor */}
