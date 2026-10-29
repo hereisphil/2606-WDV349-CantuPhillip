@@ -127,16 +127,18 @@ jobs:
             fi
           }
 
-          # Prints "<item-id> <status-name>" or "missing".
+          # Prints "<item-id> <status-name>" or "missing <content-id>".
+          # $project is applied in jq. Declaring it on the query makes GitHub
+          # reject the request as an unused variable, and jq then prints
+          # "missing null" from the empty payload.
           project_item() {
             local number="$1"
             gh api graphql \
               -f owner="${REPO%/*}" \
               -f repo="${REPO#*/}" \
               -F number="$number" \
-              -f project="$PROJECT_ID" \
               -f query='
-                query($owner: String!, $repo: String!, $number: Int!, $project: ID!) {
+                query($owner: String!, $repo: String!, $number: Int!) {
                   repository(owner: $owner, name: $repo) {
                     issue(number: $number) {
                       id
@@ -154,12 +156,16 @@ jobs:
                 }
               ' | jq -er --arg project "$PROJECT_ID" '
                 .data.repository.issue as $issue
-                | ($issue.projectItems.nodes // [])
-                | map(select(.project.id == $project))
-                | if length == 0 then
-                    "missing \($issue.id)"
+                | if ($issue.id // "") == "" then
+                    error("issue query returned no id")
                   else
-                    "\(.[0].id) \(.[0].fieldValueByName.name // "")"
+                    ($issue.projectItems.nodes // [])
+                    | map(select(.project.id == $project))
+                    | if length == 0 then
+                        "missing \($issue.id)"
+                      else
+                        "\(.[0].id) \(.[0].fieldValueByName.name // "")"
+                      end
                   end
               '
           }
@@ -170,6 +176,10 @@ jobs:
             placement=$(project_item "$number")
             if [ "${placement%% *}" = "missing" ]; then
               local content_id="${placement#missing }"
+              if [ -z "$content_id" ] || [ "$content_id" = "null" ]; then
+                echo "Issue #$number has no node id to add to the project." >&2
+                exit 1
+              fi
               gh api graphql \
                 -f project="$PROJECT_ID" \
                 -f content="$content_id" \
@@ -384,7 +394,7 @@ jobs:
             fi
             while IFS= read -r number; do
               [ -n "$number" ] || continue
-              move_issue "$number" "$status_name" "$option" "$mode" "$close_comment"
+              move_issue "$number" "$status_name" "$option" "$mode" "$close_comment" || exit 1
             done < <(linked_issue_numbers)
           elif [ "$MERGED" != "true" ]; then
             echo "Pull request into $BASE_BRANCH was not merged."
@@ -394,7 +404,7 @@ jobs:
           elif [ "$BASE_BRANCH" = "stage" ]; then
             while IFS= read -r number; do
               [ -n "$number" ] || continue
-              move_issue "$number" "Staging" "$STAGING_ID" "force" "Merged to stage."
+              move_issue "$number" "Staging" "$STAGING_ID" "force" "Merged to stage." || exit 1
             done < <(linked_issue_numbers)
           elif [ "$BASE_BRANCH" = "main" ] && { [ "$HEAD_BRANCH" = "stage" ] || [ "$HEAD_BRANCH" = "dev" ]; }; then
             sweep "Staging" "$DONE_ID" "Done" "Merged to main."
@@ -404,6 +414,6 @@ jobs:
           elif [ "$BASE_BRANCH" = "main" ]; then
             while IFS= read -r number; do
               [ -n "$number" ] || continue
-              move_issue "$number" "Done" "$DONE_ID" "force" "Merged to main."
+              move_issue "$number" "Done" "$DONE_ID" "force" "Merged to main." || exit 1
             done < <(linked_issue_numbers)
           fi

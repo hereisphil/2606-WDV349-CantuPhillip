@@ -70,7 +70,24 @@ function SignIn(): JSX.Element {
         </CardHeader>
 
         <CardContent className="flex flex-col">
-          <Button variant="outline" className="h-11 w-full">
+          <div className="mb-6 flex flex-col gap-3">
+            <p
+              id="prototype-mode-notice"
+              role="status"
+              className="rounded-lg border border-border bg-secondary px-3 py-2 text-center text-sm font-medium"
+            >
+              Prototype Mode — Sign-in form disabled
+            </p>
+            <Button
+              className="h-11 w-full"
+              render={<Link to="/dashboard" />}
+              nativeButton={false}
+            >
+              Skip & Continue to Prototype →
+            </Button>
+          </div>
+
+          <Button variant="outline" className="h-11 w-full" disabled>
             <GoogleIcon />
             Continue with Google
           </Button>
@@ -83,7 +100,11 @@ function SignIn(): JSX.Element {
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+            aria-describedby="prototype-mode-notice"
+          >
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email" className={labelClass}>
                 EMAIL ADDRESS
@@ -94,6 +115,7 @@ function SignIn(): JSX.Element {
                 autoComplete="email"
                 placeholder="name@example.com"
                 className={inputClass}
+                disabled
                 value={email}
                 onChange={(event) => {
                   setEmail(event.target.value)
@@ -121,7 +143,8 @@ function SignIn(): JSX.Element {
                 </Label>
                 <button
                   type="button"
-                  className="text-xs font-medium text-primary hover:underline"
+                  className="text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
+                  disabled
                 >
                   Forgot?
                 </button>
@@ -132,6 +155,7 @@ function SignIn(): JSX.Element {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 className={inputClass}
+                disabled
                 value={password}
                 onChange={(event) => {
                   setPassword(event.target.value)
@@ -160,7 +184,7 @@ function SignIn(): JSX.Element {
               </p>
             ) : null}
 
-            <Button type="submit" className="mt-2 h-11 w-full">
+            <Button type="submit" className="mt-2 h-11 w-full" disabled>
               Sign In / Sign Up
             </Button>
           </form>

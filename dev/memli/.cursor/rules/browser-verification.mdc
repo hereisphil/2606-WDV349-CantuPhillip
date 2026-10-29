@@ -1,0 +1,29 @@
+---
+description: Verify web UI in a headless browser — never Screen Recording or Computer Use
+alwaysApply: true
+---
+
+# Browser verification
+
+Check web UI in a headless browser against the local dev server. Do not use macOS Screen Recording or Cursor Computer Use.
+
+## Do
+
+- Start `bun run dev` in `dev/memli` when it is not already running (Vite at `http://localhost:5173`).
+- Launch headless Brave with its own profile and a DevTools port, then drive the page over the Chrome DevTools Protocol: navigate, wait for rendered text, click, and read `location` plus `innerText`.
+
+```bash
+"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
+  --headless=new --disable-gpu \
+  --user-data-dir=/tmp/memli-brave-verify \
+  --remote-debugging-port=9222 \
+  about:blank
+```
+
+- Confirm the behavior the change is supposed to produce. Stop the headless browser when the check is done.
+
+## Do not
+
+- Call Computer Use (`computer_screenshot`, `computer_click`, `computer_start_control`, or any screen-scope action).
+- Ask the user to turn on Screen Recording or Accessibility for verification.
+- Treat `curl` or `--dump-dom` as proof. Vite's `#root` is empty until JavaScript runs.
