@@ -236,8 +236,8 @@ Record the outcome here when chosen:
 
 | Topic | Options | Status |
 | --- | --- | --- |
-| Post-login canonical path | `/dashboard` vs `/learn` | Open — pick in auth/dashboard milestone |
-| Auth mechanism | Cookie session vs JWT/bearer hybrid | Open — must support web + mobile |
+| Post-login canonical path | `/dashboard` vs `/learn` | **Chosen: `/dashboard`** (active study sessions use `/study/$courseId`) |
+| Auth mechanism | Cookie session vs JWT/bearer hybrid | Better Auth in `359 MS 4` (seeded `useViewer()` test user `usr_prototype_01` in `359 MS 1`–`359 MS 3`) |
 | Auth route ownership after Astro split | App only vs lightweight marketing links out | Open — default lean: app owns auth pages |
 | App path prefix | Root paths vs `/app/*` | Open — only if proxy/SEO needs it |
 | Hosting | Cloudflare-centric (already in repo tooling) vs other | Lean current stack unless requirements change |

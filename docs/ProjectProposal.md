@@ -83,3 +83,58 @@ Architecturally, instead of relying on traditional slow-booting stacks, Mnemno u
 
 * **Mnemno Core Edge API (First-Party)**: A high-performance REST/RPC API layer built using Hono, deployed as a Cloudflare Worker, exposing strict JSON endpoints for course metadata, user progress metrics, and authentication validations.
 * **Backblaze B2 Object Storage via Cloudflare Bandwidth Alliance (Third-Party)**: Used for storing, serving, and caching user-generated visual mnemonics globally. This compliance adheres fully to standard S3-compatible object access policies, providing free egress routing through Cloudflare’s CDN layers for exceptional global delivery speeds.
+
+---
+
+## Change Order
+
+> **Date:** October 28, 2026 · **Course:** Project & Portfolio V (WDV359) — Module 1 (`1.4 Requirements - Change Order`)
+
+### 1. Confirmation of Project Scope
+
+I confirm that this **Project Proposal** ([`docs/ProjectProposal.md`](./ProjectProposal.md)) and the companion **Tech Stack** specification ([`docs/TechStack.md`](./TechStack.md)) accurately summarize the core vision, target audience, and edge-native architecture of the application (originally drafted as **Mnemno**, rebranded in code to **Memli** under [`dev/memli/`](../dev/memli/), with a planned public release brand of **FluentVine**). To guarantee a complete, high-quality interactive **Prototype and MVP** over the next four weeks, I am proposing targeted adjustments to feature sequencing and scope as detailed in **Section 3** below.
+
+### 2. Estimate of Work Remaining
+
+Roughly **35% of the foundational work is complete** from Month 1 (WDV349) and pre-course engineering, leaving **~65% of the application work to be completed across the 4-week WDV359 schedule** (`359 MS 1` through `359 MS 4`):
+
+* **Already Completed (~35%):**
+  * **Design & UX Foundations:** Low-fidelity wireframes ([`docs/designs/wires/wireframe.md`](./designs/wires/wireframe.md)), visual Style Tile ([`docs/designs/style-tile/StyleTile.md`](./designs/style-tile/StyleTile.md)), and high-fidelity interactive Figma prototype ([`docs/designs/prototypes/prototype.md`](./designs/prototypes/prototype.md)).
+  * **Monorepo & Deployment Pipeline:** Turborepo + Bun workspace (`dev/memli`), automated GitHub Actions verification (`.github/workflows/verify.yml`), and live Cloudflare Workers deployments for Staging (`memli-staging.thereisphil.workers.dev` behind HTTP Basic Auth) and Production (`memli.thereisphil.workers.dev`).
+  * **Marketing Site, Static Auth UI & Core SRS Math:** Responsive marketing landing page (`/`), `/signin` form UI with shared Zod schemas (`@workspace/schemas`), and a pure TypeScript SuperMemo SM-2 spaced-repetition engine (`gradeCard()` in `@workspace/core`) verified with Vitest unit tests.
+* **Work Remaining (~65% — 4 Weekly Milestones):**
+  * **Week 1 — `359 MS 1 [Design Primitives + Prototype Bypass + App Shell]` (Due Nov 2):**
+    * Extract reusable `<Section>`, `<Heading>`, and `<Text>` primitives into `@workspace/ui` and refactor existing stub tags without adding new marketing copy ([#105](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/105)).
+    * Temporarily disable the `/signin` form inputs, add a **"Skip & Continue to Prototype →"** button that navigates to `/dashboard`, and provide a seeded test learner (`usr_prototype_01`) via a typed `SessionContext` / `useViewer()` provider ([#110](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/110)).
+    * Build the `/dashboard` authenticated application shell and sidebar navigation ([#45](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/45)) and finalize Module 1 Kickoff & Change Order documentation ([#104](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/104)).
+  * **Week 2 — `359 MS 2 [Dashboard Decks + Study Session & Card UI]` (Due Nov 9):**
+    * Build the `/dashboard` User Metrics & Progress Overview banner ([#46](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/46)) and Study Deck Card Item & Layout Grid ([#47](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/47)).
+    * Build the `/study/$courseId` Session Layout Scaffolding ([#48](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/48)) and interactive Core Study Card Display ([#49](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/49)), alongside Module 2 Business Case & Product Metrics research ([#109](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/109)).
+  * **Week 3 — `359 MS 3 [Mnemonic Engine + Persistent SRS Loop]` (Due Nov 16):**
+    * Build the Mnemonic Caption & Image Overlay Frame ([#50](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/50)) and Session Grading Controls Dock (`Forgot`, `Hard`, `Good`, `Easy`) wired to `@workspace/core` `gradeCard()` ([#51](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/51)).
+    * Scaffold the `apps/api` Hono backend + Drizzle ORM / Cloudflare D1 schema ([#106](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/106)), persist seeded mnemonic decks and SRS review intervals for the prototype test user ([#112](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/112)), and complete Module 3 Innovation Research & API Compliance Audit ([#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)).
+  * **Week 4 — `359 MS 4 [MVP Polish, Auth Integration & Beta Showcase]` (Due Nov 22):**
+    * Replace the `/signin` prototype bypass with real Better Auth Email/Password ([#108](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/108)) and Google OAuth / Passkey sign-in ([#107](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/107)).
+    * Gate `TanStackRouterDevtools` to development only and run the accessibility & Beta Release Audit ([#113](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/113)), verify on Staging and promote `dev → stage → main` ([#114](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/114)), and complete the Module 4 Showcase & Postmortem ([#115](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/115)).
+
+### 3. Proposed Changes to Original Project Scope
+
+1. **Prototype-First Priority (Core SRS + Mnemonic Study Loop Before Real Authentication):**
+   * **Change:** User authentication (sign-up, sign-in, sign-out, OAuth) is removed from the critical path of Weeks 1–3. Instead, `/signin` will have its form disabled with a **"Skip & Continue to Prototype →"** button that enters `/dashboard` as an automatically signed-in seeded test user (`usr_prototype_01`).
+   * **Rationale:** The core value of Memli is **studying a language with Spaced Repetition (SM-2) and visual/narrative Mnemonic Images**. Front-loading authentication risks burning early milestones on boilerplate credential flows before the flashcard engine exists. By reading user identity through a clean `SessionContext` / `useViewer()` hook and keying database progress to `usr_prototype_01`, the entire prototype works end-to-end first while remaining 100% ready for Week 4's Better Auth + OAuth drop-in replacement.
+2. **Freeze on Marketing & Secondary Content Pages:**
+   * **Change:** The marketing homepage (`/`) remains as-is, and placeholder marketing/legal routes (`/about`, `/contact`, `/community`, `/blog`, `/pricing`, `/privacy`, `/terms`) will **not** be expanded with new content during WDV359 (only receiving the mechanical tag swap to `<Section>`, `<Heading>`, and `<Text>` in [#105](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/105)).
+   * **Rationale:** Eliminates non-essential copywriting and layout work so all frontend engineering focuses on `/dashboard` and `/study/$courseId`.
+3. **Seeded Visual Mnemonics Before Live B2 Media Upload Pipeline (Use Case 2 Scoping):**
+   * **Change:** For the 4-week prototype/MVP, **Use Case 1** (*Studying an Existing Lesson via the SRS Loop with Visual & Story Mnemonics*) is the primary deliverable. Flashcards will ship with rich pre-seeded visual mnemonic images and association stories stored in D1/static assets ([#50](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/50), [#112](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/112)), while live client-side image compression and Backblaze B2 bucket uploads (**Use Case 2**) are deferred until after the core SRS persistence loop is complete.
+   * **Rationale:** Guarantees learners can experience mnemonic-powered spaced repetition immediately without blocking the prototype on third-party object storage upload pipelines.
+4. **Brand Evolution & Repository Streamlining:**
+   * **Change:** Documented the transition from **Mnemno** to **Memli** (`dev/memli`) with a planned future rebrand to **FluentVine** ([`dev/memli/docs/roadmap.md`](../dev/memli/docs/roadmap.md)), and removed unused WDV349 boilerplate directories (`dev/portfolio/` and `.github/ISSUE_TEMPLATE/`).
+
+### Supplemental Links & Research References
+
+* **Product & Architecture Decision Docs:** [`dev/memli/docs/roadmap.md`](../dev/memli/docs/roadmap.md) · [`dev/memli/docs/architecture.md`](../dev/memli/docs/architecture.md) · [`dev/memli/docs/product-ux.md`](../dev/memli/docs/product-ux.md) · [`dev/memli/docs/i18n.md`](../dev/memli/docs/i18n.md)
+* **Course Research Logs:** [R1 — Feature Branch Workflow](./research/R1-Notes.md) · [R2 — Application Structure & Wireframing](./research/R2-Notes.md) · [R3 — Style & Visual Identity](./research/R3-Notes.md) · [R4 — Design Theory & UX Engineering](./research/R4-Notes.md) · [R5 — Production Planning, APIs & Components](./research/R5-Notes.md) · [R6 — Preparing for Alpha](./research/R6-Notes.md)
+* **Algorithm & Domain Reference:** Wozniak, P. A. (1990). *Optimization of learning: SuperMemo SM-2 Algorithm* — implemented in [`dev/memli/packages/core/src/srs/grade-card.ts`](../dev/memli/packages/core/src/srs/grade-card.ts)
+* **Project Tracking:** [GitHub Milestones (`359 MS 1`–`359 MS 4`)](https://github.com/hereisphil/2606-WDV349-CantuPhillip/milestones) · [Capstone Project Board](https://github.com/users/hereisphil/projects/1/views/1) · [Changelog](./changelog.md)
+

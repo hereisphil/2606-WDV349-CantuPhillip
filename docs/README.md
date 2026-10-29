@@ -11,9 +11,6 @@ Use it for the following:
 
 ### Weekly
 
-- Maintain a weekly log file: **log.md**
-- Regularly Update a Design log also, as work develops: See designs/**README.md**
-- Research: A R#-Notes.md file is required each week. Update the file to reflect your ongoing research. This should include class assigned and independent study. For example:
-  - Week 1: **R1-Notes.md**
-  - Week 2: **R2-Notes.md**
-  - etc.
+- Maintain a weekly changelog file: **[changelog.md](./changelog.md)**
+- Regularly update design documentation as work develops: See **[designs/README.md](./designs/README.md)**
+- Research: A `R#-Notes.md` file is maintained in **[research/](./research/)** for weekly class-assigned and independent research.
