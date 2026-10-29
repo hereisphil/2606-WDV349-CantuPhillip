@@ -1,5 +1,8 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { Heading } from "@workspace/ui/components/heading"
+import { Section } from "@workspace/ui/components/section"
+import { Text } from "@workspace/ui/components/text"
 
 export const Route = createFileRoute("/_marketing/community")({
   component: Community,
@@ -7,12 +10,12 @@ export const Route = createFileRoute("/_marketing/community")({
 
 function Community(): JSX.Element {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="text-3xl font-bold">Community</h1>
-      <p className="mt-4 text-muted-foreground">
+    <Section>
+      <Heading>Community</Heading>
+      <Text variant="muted" className="mt-4">
         Connect with other learners and explore shared memory hooks. This page
         is coming soon.
-      </p>
-    </section>
+      </Text>
+    </Section>
   )
 }
