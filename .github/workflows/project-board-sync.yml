@@ -1,6 +1,6 @@
 name: Sync PR to project board
 
-# Capstone board (users/hereisphil/projects/7):
+# Capstone board (users/hereisphil/projects/1):
 #   PR opened against dev        → In progress
 #   PR merged into dev           → Review          (issue stays open)
 #   dev merged into stage        → Staging         (issue closes)
@@ -38,7 +38,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           PROJECT_OWNER: hereisphil
-          PROJECT_NUMBER: 7
+          PROJECT_NUMBER: 1
         run: |
           set -euo pipefail
 
