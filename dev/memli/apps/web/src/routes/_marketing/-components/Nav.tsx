@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
 import { BookOpen, LayoutDashboard } from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
+import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import {
   DropdownMenu,
@@ -67,7 +68,7 @@ function ViewerMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={`Account menu, ${viewer.displayName}`}
+        aria-label={`Account menu, @${viewer.username}`}
         render={
           <Button
             variant="ghost"
@@ -81,13 +82,18 @@ function ViewerMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex flex-col gap-0.5 py-1.5">
+          <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
             <span className="truncate text-sm font-medium text-foreground">
-              {viewer.displayName}
+              @{viewer.username}
             </span>
-            <span className="truncate font-normal text-muted-foreground">
-              {viewer.email}
-            </span>
+            {viewer.plan === "pro" ? (
+              <Badge
+                variant="outline"
+                className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-700 uppercase dark:text-amber-300"
+              >
+                Pro
+              </Badge>
+            ) : null}
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

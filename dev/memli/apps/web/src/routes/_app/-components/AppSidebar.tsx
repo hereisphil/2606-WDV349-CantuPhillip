@@ -1,10 +1,76 @@
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
-import { BookOpen, LogOut } from "lucide-react"
+import {
+  BookOpen,
+  ChevronsUpDown,
+  CreditCard,
+  LogOut,
+  SlidersHorizontal,
+  UserIcon,
+} from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
+import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
-import { Text } from "@workspace/ui/components/text"
-import { useViewer } from "@/components/session-provider"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu"
+import { useViewer, type ViewerPlan } from "@/components/session-provider"
+
+function ProBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
+  if (plan !== "pro") return null
+
+  return (
+    <Badge
+      variant="outline"
+      className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-700 uppercase dark:text-amber-300"
+    >
+      Pro
+    </Badge>
+  )
+}
+
+function AccountMenuItems(): JSX.Element {
+  return (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          render={<Link to="/dashboard" />}
+        >
+          <UserIcon aria-hidden="true" />
+          View Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          render={<Link to="/dashboard" />}
+        >
+          <SlidersHorizontal aria-hidden="true" />
+          Learning Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          render={<Link to="/pricing" />}
+        >
+          <CreditCard aria-hidden="true" />
+          Subscription / Plan
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuItem className="cursor-pointer" render={<Link to="/" />}>
+          <LogOut aria-hidden="true" />
+          Sign Out
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
+  )
+}
 
 export function AppSidebar(): JSX.Element {
   const viewer = useViewer()
@@ -14,38 +80,78 @@ export function AppSidebar(): JSX.Element {
       aria-label="Application sidebar"
       className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
     >
-      <div className="px-4 py-3 md:py-6">
+      <div className="flex items-center justify-between px-4 py-3 md:py-6">
         <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
           <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <BookOpen className="size-4" aria-hidden="true" />
           </span>
           <span>Memli</span>
         </Link>
+
+        {/* Mobile account menu: avatar inline with logo, username + badge inside menu */}
+        <div className="md:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label={`Account menu, @${viewer.username}`}
+              render={
+                <Button
+                  variant="ghost"
+                  className="size-11 cursor-pointer rounded-full p-0 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                />
+              }
+            >
+              <Avatar>
+                <AvatarFallback />
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
+                  <span className="truncate text-sm font-medium text-foreground">
+                    @{viewer.username}
+                  </span>
+                  <ProBadge plan={viewer.plan} />
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <AccountMenuItems />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-sidebar-border px-4 py-4 md:mt-auto">
-        <div className="flex min-w-0 items-center gap-3">
-          <Avatar>
-            <AvatarFallback />
-          </Avatar>
-          <div className="min-w-0">
-            <Text className="truncate text-sm leading-5 font-medium text-foreground">
-              {viewer.displayName}
-            </Text>
-            <Text variant="small" className="truncate">
-              {viewer.email}
-            </Text>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          className="w-full justify-start px-2"
-          render={<Link to="/" />}
-          nativeButton={false}
-        >
-          <LogOut aria-hidden="true" />
-          Sign out
-        </Button>
+      {/* Desktop bottom capsule: full-area hover + pointer cursor */}
+      <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label={`Account menu, @${viewer.username}`}
+            render={
+              <Button
+                variant="ghost"
+                className="h-auto w-full cursor-pointer justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
+              />
+            }
+          >
+            <span className="flex min-w-0 items-center gap-2.5">
+              <Avatar>
+                <AvatarFallback />
+              </Avatar>
+              <span className="flex min-w-0 flex-col items-start gap-0.5">
+                <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
+                  @{viewer.username}
+                </span>
+                <ProBadge plan={viewer.plan} />
+              </span>
+            </span>
+            <ChevronsUpDown
+              aria-hidden="true"
+              className="size-4 text-muted-foreground"
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="min-w-56">
+            <AccountMenuItems />
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   )
