@@ -5,7 +5,11 @@ alwaysApply: true
 
 # Memli Stack
 
-- App lives under `dev/memli/`. Web UI: `apps/web`. Shared UI: `packages/ui`.
+- App lives under `dev/memli/`.
+  - `apps/web`: Vite + React frontend (`TanStack Router`).
+  - `packages/core` (`@workspace/core`): Pure TypeScript domain logic (SuperMemo SM-2 `gradeCard()`, zero React/DOM imports).
+  - `packages/schemas` (`@workspace/schemas`): Shared Zod validation contracts and environment schemas.
+  - `packages/ui` (`@workspace/ui`): Web-only component library built on shadcn/ui + Base UI primitives, including reusable `<Section>`, `<Heading>`, and `<Text>` layout/typography primitives.
 - Routing: **TanStack Router** (`Link`, `createFileRoute`, file routes under `apps/web/src/routes`).
 - Styling: **Tailwind CSS** + `cn()` from `@workspace/ui/lib/utils`.
 - Components: **shadcn/ui** (Base UI primitives). Import from `@workspace/ui/components/*`.

@@ -51,39 +51,44 @@ Weekly research notes covering class assignments and independent study:
 
 ```
 2606-WDV349-CantuPhillip/
-├── docs/                  # Research, design, planning, and changelog
-│   ├── ProjectProposal.md
-│   ├── TechStack.md
-│   ├── changelog.md
-│   ├── designs/           # Wireframes, prototypes, style tile
-│   └── research/          # Weekly R#-Notes.md files
+├── docs/                      # Course documentation, research, designs, and changelog
+│   ├── ProjectProposal.md     # Product scope, persona, use cases & WDV359 Change Order
+│   ├── TechStack.md           # Edge-native stack specification & WDV359 Change Order
+│   ├── changelog.md           # Weekly progress log
+│   ├── designs/               # Wireframes, Figma prototypes, and style tile
+│   └── research/              # Weekly R#-Notes.md research files
 └── dev/
-    ├── memli/             # Memli monorepo (the web app)
-    │   ├── apps/web/      # Vite + React frontend (TanStack Router)
-    │   └── packages/ui/   # Shared shadcn/ui component library
-    └── portfolio/         # Miscellaneous portfolio work
+    └── memli/                 # Memli Turborepo + Bun monorepo
+        ├── apps/web/          # Vite + React frontend (TanStack Router)
+        ├── packages/core/     # Pure TypeScript domain logic (SM-2 SRS engine + Vitest)
+        ├── packages/schemas/  # Shared Zod validation contracts & env schemas
+        ├── packages/ui/       # Shared web component library (shadcn/ui + Base UI)
+        └── docs/              # Product & architecture decision records (roadmap, UX, i18n)
 ```
 
 ---
 
 ## Local Development
 
-The web app lives in [`dev/memli/`](./dev/memli/) — a Turborepo monorepo bootstrapped with the [shadcn/ui Vite template](https://ui.shadcn.com/docs/installation/vite).
+The web app lives in [`dev/memli/`](./dev/memli/) — a Turborepo monorepo managed with Bun.
 
 **Prerequisites:** [Bun](https://bun.com/) 1.3+ and Node.js 20+
 
 ```bash
 cd dev/memli
 bun install
+bun run typecheck  # Typecheck all workspaces
 bun run lint       # Lint all workspaces
+bun run test       # Run Vitest unit tests (@workspace/core SRS engine)
+bun run knip       # Check for unused files, exports, and dependencies
 bun run build      # Production build
 ```
 
-**commands:**
+**Dev & Preview Commands:**
 
 ```bash
 bun run dev          # Run the dev server on: http://localhost:5173
-bun run preview      # Run the prod sever on: http://localhost:4173
+bun run preview      # Run the prod server on: http://localhost:4173
 ```
 
 **GitHub Actions:**
@@ -91,7 +96,7 @@ bun run preview      # Run the prod sever on: http://localhost:4173
 - Pull requests into `dev`, `stage`, and `main` run [verify.yml](./.github/workflows/verify.yml) (format, types, lint, tests, Knip, build, and a Wrangler dry-run). Staging and production deploys run that same check before they ship.
 - Pushes to the `stage` branch trigger automatic staging deployment via [staging.yml](./.github/workflows/staging.yml).
 - Pushes to the `main` branch trigger automatic production deployment via [production.yml](./.github/workflows/production.yml).
-- After a pull request merges, [delete-merged-branch.yml](./.github/workflows/delete-merged-branch.yml) deletes the feature branch. Long-lived branches (`main`, `dev`, `stage`, `research`, `changelog`, `portfolio`) are left in place.
+- After a pull request merges, [delete-merged-branch.yml](./.github/workflows/delete-merged-branch.yml) deletes the feature branch. Long-lived branches (`main`, `dev`, `stage`, `research`, `changelog`) are left in place.
 
 ---
 

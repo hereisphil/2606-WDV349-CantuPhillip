@@ -1,6 +1,6 @@
 # Memli — community mnemonic language learning (monorepo)
 
-Vite + React web app (`apps/web`), shared UI (`packages/ui`), Turborepo + Bun.
+Vite + React web app (`apps/web`), pure TypeScript SRS domain logic (`packages/core`), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
 
 **Planned public brand:** FluentVine (see docs). Product and architecture decisions live in [`docs/`](./docs/README.md) — start with the [roadmap](./docs/roadmap.md).
 

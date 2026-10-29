@@ -28,7 +28,6 @@ jobs:
               'stage',
               'research',
               'changelog',
-              'portfolio',
             ]
 
             if (protectedBranches.includes(branch)) {

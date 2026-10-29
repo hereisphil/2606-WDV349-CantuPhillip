@@ -59,3 +59,48 @@ A popular solution for relational database work is to utilize Sequelize as an OR
 All data operations will feature strict input validation powered by Zod inference.
 
 > P.S. certain text have been hyper-linked to their official pages or documentation
+
+---
+
+## Change Order
+
+> **Date:** October 28, 2026 · **Course:** Project & Portfolio V (WDV359) — Module 1 (`1.4 Requirements - Change Order`)
+
+### 1. Confirmation of Tech Stack & Scope
+
+I confirm that this **Tech Stack** document ([`docs/TechStack.md`](./TechStack.md)) and the **Project Proposal** ([`docs/ProjectProposal.md`](./ProjectProposal.md)) accurately summarize the technical architecture and scope of **Memli** (`dev/memli/`). The core stack—**React + Vite**, **TanStack Router & TanStack Query**, **Tailwind CSS + shadcn/ui (Base UI)**, **Bun + Turborepo**, **Hono**, **Cloudflare Workers & D1**, **Drizzle ORM**, **Zod**, and **Better Auth**—remains the foundation, with the architectural refinements and Prototype-First execution order detailed below.
+
+### 2. Estimate of Technical Work Remaining
+
+Approximately **35% of the technical architecture is already built and deployed**, leaving **~65% of the full-stack implementation across the 4-week WDV359 schedule** (`359 MS 1`–`359 MS 4`):
+
+* **Already Implemented in [`dev/memli/`](../dev/memli/):**
+  * **Monorepo & CI/CD Tooling:** Bun + Turborepo workspace with shared `@workspace/typescript-config` and `@workspace/eslint-config`, Prettier, Lefthook Git hooks ([`lefthook.yml`](../lefthook.yml)), Knip unused-code checks, Vitest, and GitHub Actions workflows ([`verify.yml`](../.github/workflows/verify.yml), [`staging.yml`](../.github/workflows/staging.yml), [`production.yml`](../.github/workflows/production.yml)) deploying to Cloudflare Workers with an edge Basic Auth gate on Staging ([`dev/memli/src/index.ts`](../dev/memli/src/index.ts)).
+  * **Shared Domain & Schema Packages:**
+    * `@workspace/core` ([`dev/memli/packages/core/`](../dev/memli/packages/core/)): Pure TypeScript SuperMemo SM-2 algorithm (`gradeCard()`, `createInitialCardProgress()`) with Vitest test coverage.
+    * `@workspace/schemas` ([`dev/memli/packages/schemas/`](../dev/memli/packages/schemas/)): Shared Zod validation contracts (`signInSchema`, `webEnvSchema`).
+    * `@workspace/ui` ([`dev/memli/packages/ui/`](../dev/memli/packages/ui/)): Shared web component library built on shadcn/ui and Base UI primitives.
+  * **Web Client Foundation (`apps/web`):** File-based TanStack Router setup (`_marketing`, `_auth`, `_app`), completed marketing landing page (`/`), and `/signin` form validation.
+* **Remaining Technical Work (~4 Weeks):**
+  * **Week 1 (`359 MS 1` — Due Nov 2):** Build reusable CVA-based `<Section>`, `<Heading>`, and `<Text>` primitives in `@workspace/ui` ([#105](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/105)); implement the `/signin` Prototype Mode bypass button and `SessionContext` / `useViewer()` seeded test user (`usr_prototype_01`) ([#110](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/110)); build the `/dashboard` application shell ([#45](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/45)).
+  * **Week 2 (`359 MS 2` — Due Nov 9):** Build `/dashboard` User Metrics Banner ([#46](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/46)) and Study Deck Grid ([#47](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/47)); build `/study/$courseId` Session Layout ([#48](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/48)) and interactive Flashcard Display ([#49](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/49)).
+  * **Week 3 (`359 MS 3` — Due Nov 16):** Build the Mnemonic Caption Overlay Frame ([#50](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/50)) and Session Grading Controls Dock wired to `@workspace/core` `gradeCard()` ([#51](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/51)); scaffold `apps/api` (Hono + Drizzle ORM + local D1/SQLite) and deck/review Zod contracts in `@workspace/schemas` ([#106](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/106)); persist seeded mnemonic decks and SRS review state via TanStack Query ([#112](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/112)); complete Module 3 API validation & compliance audit ([#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)).
+  * **Week 4 (`359 MS 4` — Due Nov 22):** Wire Better Auth Email/Password ([#108](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/108)) and Google OAuth / Passkeys ([#107](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/107)) into `apps/api` and `useViewer()`; gate `TanStackRouterDevtools` to `import.meta.env.DEV` ([#113](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/113)); verify on Staging and promote `dev → stage → main` ([#114](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/114)).
+
+### 3. Proposed Technical Changes to Original Scope
+
+1. **Formalized Monorepo Package Split (`@workspace/core`, `@workspace/schemas`, `@workspace/ui`):**
+   * Added dedicated packages for pure domain logic (`packages/core`, zero React/DOM dependencies) and shared Zod schemas (`packages/schemas`), keeping `packages/ui` strictly for web components. This ensures the Hono API (`apps/api`), web client (`apps/web`), and future React Native client (`apps/mobile`) execute identical SRS math and schema validation ([`dev/memli/docs/architecture.md`](../dev/memli/docs/architecture.md)).
+2. **Prototype Session Boundary (`useViewer()`) Before Better Auth Integration:**
+   * Rather than blocking frontend and SRS development on authentication setup in Week 1, the app will introduce a typed `SessionContext` / `useViewer()` provider returning a seeded test user (`usr_prototype_01`) and a **"Skip & Continue to Prototype →"** bypass on `/signin` ([#110](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/110)). Drizzle ORM tables in Week 3 ([#106](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/106), [#112](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/112)) will key `user_progress` records to `usr_prototype_01`, allowing Better Auth (Email/Password, Google OAuth, and Passkeys) to drop in cleanly during Week 4 ([#108](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/108), [#107](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/107)) without refactoring UI components.
+3. **Seeded Mnemonic Media Before Direct Backblaze B2 Uploads:**
+   * Initial visual mnemonics in Week 3 ([#50](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/50), [#112](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/112)) will use seeded image URLs and stories stored in Cloudflare D1 so the end-to-end SRS study loop is prioritized over custom media upload pipelines; direct Backblaze B2 uploads are deferred to post-prototype iteration.
+4. **Internationalization-Ready Schema Conventions (`uiLocale` vs. `learningLanguage` vs. `contentLocale`):**
+   * All new Drizzle models and `@workspace/schemas` contracts will separate UI language (`uiLocale`), target study language (`learningLanguage`), and mnemonic language (`contentLocale`), preparing the data layer for Phase 2 Latin American Spanish (`es-419`) support ([`dev/memli/docs/i18n.md`](../dev/memli/docs/i18n.md)).
+
+### Supplemental Links & Research References
+
+* **Architecture & Tooling Docs:** [`dev/memli/docs/roadmap.md`](../dev/memli/docs/roadmap.md) · [`dev/memli/docs/architecture.md`](../dev/memli/docs/architecture.md) · [`dev/memli/docs/dx-tooling.md`](../dev/memli/docs/dx-tooling.md) · [`dev/memli/docs/i18n.md`](../dev/memli/docs/i18n.md) · [`dev/memli/docs/mobile.md`](../dev/memli/docs/mobile.md)
+* **Implemented Packages:** [`dev/memli/packages/core/`](../dev/memli/packages/core/) · [`dev/memli/packages/schemas/`](../dev/memli/packages/schemas/) · [`dev/memli/packages/ui/`](../dev/memli/packages/ui/)
+* **Research Notes:** [R1 — Feature Branch Workflow & Bun Release Age](./research/R1-Notes.md) · [R4 — Design Theory & Accessible Modals](./research/R4-Notes.md) · [R5 — REST API Design & Atomic Components](./research/R5-Notes.md) · [R6 — Turborepo, ESLint & Pre-commit Hooks](./research/R6-Notes.md)
+
