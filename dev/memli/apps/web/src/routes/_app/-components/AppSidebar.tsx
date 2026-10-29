@@ -5,6 +5,8 @@ import {
   ChevronsUpDown,
   CreditCard,
   Flame,
+  Image as ImageIcon,
+  Layers,
   LogOut,
   SlidersHorizontal,
   UserIcon,
@@ -13,6 +15,7 @@ import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Text } from "@workspace/ui/components/text"
+import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +45,41 @@ function StreakDisplay({ days }: { days: number }): JSX.Element {
   )
 }
 
+function RailLink({
+  to,
+  label,
+  icon: Icon,
+  exact = false,
+}: {
+  to: "/dashboard" | "/community"
+  label: string
+  icon: typeof Layers
+  exact?: boolean
+}): JSX.Element {
+  return (
+    <Link
+      to={to}
+      activeOptions={{ exact }}
+      className={cn(
+        "flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground [&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
+      )}
+    >
+      <Icon className="size-4" aria-hidden="true" />
+      {label}
+    </Link>
+  )
+}
+
+function RailNav(): JSX.Element {
+  return (
+    <nav aria-label="Primary" className="flex flex-col gap-1 px-3 py-2">
+      <RailLink to="/dashboard" label="Decks" icon={Layers} exact />
+      <RailLink to="/community" label="Community Gallery" icon={ImageIcon} />
+    </nav>
+  )
+}
+
 function ProBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
   if (plan !== "pro") return null
 
@@ -68,7 +106,7 @@ function AccountMenuItems(): JSX.Element {
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
-          render={<Link to="/dashboard" />}
+          render={<Link to="/settings" />}
         >
           <SlidersHorizontal aria-hidden="true" />
           Learning Settings
@@ -143,6 +181,8 @@ export function AppSidebar(): JSX.Element {
       <div className="px-3 pb-3 md:px-4 md:pb-0">
         <StreakDisplay days={viewer.streakDays} />
       </div>
+
+      <RailNav />
 
       {/* Desktop bottom capsule: full-area hover + pointer cursor */}
       <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
