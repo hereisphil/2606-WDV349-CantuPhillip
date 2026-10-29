@@ -18,7 +18,7 @@
     },
     "packages/eslint-config": {
       "entry": ["*.{js,mjs,cjs}"],
-      "project": ["*.{js,mjs,cjs}"]
+      "project": ["*.{js,mjs,cjs}", "rules/*.js"]
     },
     "packages/typescript-config": {
       "entry": [],

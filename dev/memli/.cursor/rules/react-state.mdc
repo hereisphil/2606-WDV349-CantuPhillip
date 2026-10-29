@@ -1,0 +1,81 @@
+---
+description: React state — route each kind of state to its owner; useReducer + discriminated unions by default, useState only for a single uncoupled primitive
+alwaysApply: true
+---
+
+# React state (always-on)
+
+Full detail and rationale: `docs/state-management.md`. Lint enforcement: `memli/no-use-state-sprawl` in `@workspace/eslint-config/react`.
+
+Goal: make impossible states unrepresentable and keep "what happened" (events) separate from "how state responds" (reducer). The agent should not be able to write boolean soup (`isRevealed`, `isGraded`, `isComplete`…) without a lint error.
+
+## 1. Pick the owner before writing a hook
+
+| Kind of state | Owner | Never |
+| --- | --- | --- |
+| Data from the API (decks, cards, review history) | **TanStack Query** (`useQuery` / `useMutation`) | hand-rolled `isLoading` / `isError` / `data` |
+| Shareable or bookmarkable (card index, filters, tab) | **TanStack Router** search params | mirrored into component state |
+| Anything with a lifecycle, or ≥2 values that change together | **`useReducer`** with a discriminated union (default) | multiple `useState` calls |
+| A transition that must fire a side effect (audio, timer, persist) | `useReducer` **+ `use-effect-reducer`** (`exec` inside the reducer) — see §4 | reducer sets a flag, `useEffect` watches the flag |
+| One primitive with no coupling (`isOpen`, one controlled input) | `useState` — the **only** `useState` case | — |
+
+If you are about to write a second `useState` in a component, stop and write a reducer.
+
+## 2. Reducer shape
+
+- State is a **discriminated union on `status`**: `{ status: "prompt"; card } | { status: "revealed"; card; answer } | { status: "complete"; results }`. No parallel booleans.
+- Events are `{ type: "UPPER_SNAKE"; ...payload }`. Components only `dispatch(event)`; they never compute the next state inline.
+- The reducer is exhaustive over `status × event.type`; unknown combinations return `state` unchanged (and are tested).
+- Derive, don't store: anything computable from state (`remaining = deck.length - index`) is not state.
+- Pure transitions live in **`packages/core`** (`src/<domain>/<name>-reducer.ts`) next to `gradeCard()`, with a `.test.ts` covering every event from every status. `apps/web` only adds the React wrapper.
+
+```ts
+// packages/core/src/study/session-reducer.ts (shape, not final API)
+export type SessionState =
+  | { status: "prompt"; index: number; cards: Card[] }
+  | { status: "revealed"; index: number; cards: Card[]; answer: string }
+  | { status: "complete"; cards: Card[] }
+
+export type SessionEvent =
+  | { type: "REVEAL"; answer: string }
+  | { type: "GRADE"; grade: ReviewGrade } // "pass" | "fail" from srs/grade-card.ts
+  | { type: "RESTART" }
+
+export function sessionReducer(state: SessionState, event: SessionEvent): SessionState {
+  /* switch (state.status) → switch (event.type); GRADE calls gradeCard() */
+}
+```
+
+```tsx
+// apps/web — thin wrapper
+const [session, dispatch] = useReducer(sessionReducer, initialSession)
+<Button onClick={() => dispatch({ type: "GRADE", grade: "pass" })} />
+```
+
+## 3. Current code (do not refactor for ideology)
+
+- `routes/_marketing/-components/Nav.tsx` — `mobileOpen` is a single toggle. **Correct as `useState`.** The `useEffect`s are DOM sync (focus trap, scroll lock), not state sync.
+- `components/theme-provider.tsx` — one `useState`, passes lint. Leave as is.
+- `routes/_auth/signin.tsx` — four coupled `useState` calls (`email`, `password`, `fieldErrors`, `formMessage`). **Exempt for now** (`_auth/**` is opted out in `apps/web/eslint.config.js`; the form is disabled in prototype mode, #110). **When Better Auth lands (#108):** remove the `_auth` exemption and move the form to a reducer with `status: "idle" | "submitting" | "error" | "success"` before adding `isSubmitting` / server error / redirect flags.
+
+## 4. `use-effect-reducer` — not installed yet, here is when
+
+Default is React's `useReducer`. Do **not** add the dependency speculatively.
+
+Install `use-effect-reducer@0.8.0` (pinned exact; 0.x, single maintainer) the **first time a state transition must trigger a side effect**, for example:
+
+- play the audio clip when the listening test enters `revealed`
+- auto-advance timer after `GRADE`
+- persist a grade via a TanStack Query mutation from inside the transition
+
+Use `exec({ type: "playAudio", src })` inside the reducer and implement effects in the `effects` map. Keep the pure transition in `packages/core`; the web wrapper adds `exec` calls. TanStack Query still owns the server cache — effects *call* mutations, they do not re-implement loading/error.
+
+Until then, if you find yourself writing `useEffect(() => { if (state.status === "revealed") playAudio() }, [state.status])`, that is the signal to install it.
+
+## Do not
+
+- Write more than one `useState` per component/hook in `apps/web` outside the exempt zones (lint error).
+- Dodge the lint with `useState({ a, b })` — multi-key object literals are also an error.
+- `useEffect` that calls a setter to sync one piece of state with another (`react-hooks/set-state-in-effect` is an error).
+- Re-implement loading/error/data for server state outside TanStack Query.
+- Put `exec`/React-specific code in `packages/core`.

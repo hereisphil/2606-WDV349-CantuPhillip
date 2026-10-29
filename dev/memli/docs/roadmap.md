@@ -47,6 +47,7 @@ These are non-negotiable unless an ADR explicitly overturns them. Details live i
 | API may use a subdomain | `api.{brand}.com` is fine — humans do not type it | [architecture.md](./architecture.md) |
 | UI locale ≠ learning language | Spanish chrome while studying Japanese must be possible | [i18n.md](./i18n.md) |
 | Share domain, not DOM | `packages/core` + `packages/schemas` are the mobile/web bridge; shadcn stays web | [mobile.md](./mobile.md), [architecture.md](./architecture.md) |
+| State has an owner | Server → TanStack Query, URL → Router params, lifecycle → `useReducer` in `packages/core`; one `useState` per component, lint-enforced | [state-management.md](./state-management.md) |
 | Dev tools stay in DEV | Reactotron and similar must not ship to production bundles | [dx-tooling.md](./dx-tooling.md) |
 
 ---
