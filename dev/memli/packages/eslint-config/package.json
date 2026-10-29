@@ -5,7 +5,8 @@
   "private": true,
   "exports": {
     "./base": "./base.js",
-    "./react": "./react.js"
+    "./react": "./react.js",
+    "./plugin": "./plugin.js"
   },
   "dependencies": {
     "@eslint/js": "^10",

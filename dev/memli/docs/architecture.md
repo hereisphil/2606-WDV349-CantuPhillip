@@ -159,6 +159,7 @@ Do not paint into a cookies-only corner that makes mobile miserable — or a tok
 ### Rules
 
 - **New domain logic** → prefer `packages/core` + tests.
+- **New state transitions** (study session, grading flow) → pure reducer in `packages/core` + tests; `apps/web` only wraps it in `useReducer`. See [state-management.md](./state-management.md).
 - **New HTTP/API shapes** → `packages/schemas`.
 - **New button/input** → `packages/ui` for web; never assume it ports to RN.
 - **Do not** put marketing page sections into `core`.
@@ -249,3 +250,4 @@ Record the outcome here when chosen:
 - `.cursor/rules/architecture-guardrails.mdc` — do not introduce `app.` subdomain UX or premature Astro split
 - `.cursor/rules/product-ux.mdc` — homepage and nav behavior
 - `.cursor/rules/memli-stack.mdc` — current implementation stack
+- `.cursor/rules/react-state.mdc` — state ownership and reducer-first conventions ([state-management.md](./state-management.md))

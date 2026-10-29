@@ -25,11 +25,16 @@ alwaysApply: true
 ## Product & architecture docs
 
 - Long-lived decisions: `docs/` (start at `docs/roadmap.md`).
-- Always-on UX / i18n / architecture constraints: `product-ux.mdc`, `i18n-foundations.mdc`, `architecture-guardrails.mdc`.
+- Always-on UX / i18n / architecture / state constraints: `product-ux.mdc`, `i18n-foundations.mdc`, `architecture-guardrails.mdc`, `react-state.mdc`.
+
+## State
+
+- Follow `react-state.mdc`: server data → TanStack Query, URL-worthy → Router search params, lifecycle/coupled → `useReducer` + discriminated union (pure transitions in `packages/core`), `useState` only for one uncoupled primitive.
+- Enforced by `memli/no-use-state-sprawl` (max one `useState` per component in `apps/web`, outside `_marketing` / `_auth`).
 
 ## Prefer composition over new packages
 
 - Check existing shadcn components before adding.
-- For simple open/close UI, `useState` + Tailwind is fine; do not add libraries for one toggle.
+- A single open/close toggle is the one `useState` case; do not add libraries for one toggle. Two or more related values are a reducer, not a library.
 
 ---
