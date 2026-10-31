@@ -1,10 +1,11 @@
-import type { JSX } from "react"
+import type { JSX, ReactNode } from "react"
 import { Bell } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Text } from "@workspace/ui/components/text"
 
 type DueReviewAlertProps = {
   dueCount: number
+  stats?: ReactNode
 }
 
 function dueReviewMessage(dueCount: number): string {
@@ -15,11 +16,14 @@ function dueReviewMessage(dueCount: number): string {
   return `You have ${dueCount} cards due for review today.`
 }
 
-export function DueReviewAlert({ dueCount }: DueReviewAlertProps): JSX.Element {
+export function DueReviewAlert({
+  dueCount,
+  stats,
+}: DueReviewAlertProps): JSX.Element {
   return (
     <div
       role="status"
-      className="flex flex-col gap-3 rounded-xl bg-accent px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-4 rounded-xl bg-accent px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex items-start gap-3">
         <Bell
@@ -30,10 +34,13 @@ export function DueReviewAlert({ dueCount }: DueReviewAlertProps): JSX.Element {
           {dueReviewMessage(dueCount)}
         </Text>
       </div>
-      {/* Study sessions open at /study/$courseId (#48). */}
-      <Button type="button" className="cursor-pointer sm:shrink-0">
-        Start reviewing
-      </Button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        {stats}
+        {/* Study sessions open at /study/$courseId (#48). */}
+        <Button type="button" className="cursor-pointer sm:shrink-0">
+          Start reviewing
+        </Button>
+      </div>
     </div>
   )
 }

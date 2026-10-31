@@ -4,8 +4,12 @@ import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
 import { Text } from "@workspace/ui/components/text"
 import { DueReviewAlert } from "./-components/DueReviewAlert"
+import { LearningQuickStats } from "./-components/LearningQuickStats"
 
 const prototypeDueCount = 24
+const prototypeTermsLearned = 100
+const prototypeDailyReviewsCompleted = 24
+const prototypeDailyReviewTarget = 50
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -14,7 +18,16 @@ export const Route = createFileRoute("/_app/dashboard")({
 function Dashboard(): JSX.Element {
   return (
     <Section width="full" padding="compact" className="flex flex-col gap-8">
-      <DueReviewAlert dueCount={prototypeDueCount} />
+      <DueReviewAlert
+        dueCount={prototypeDueCount}
+        stats={
+          <LearningQuickStats
+            termsLearned={prototypeTermsLearned}
+            dailyReviewsCompleted={prototypeDailyReviewsCompleted}
+            dailyReviewTarget={prototypeDailyReviewTarget}
+          />
+        }
+      />
       <div>
         <Heading>Decks</Heading>
         <Text variant="muted" className="mt-2">
