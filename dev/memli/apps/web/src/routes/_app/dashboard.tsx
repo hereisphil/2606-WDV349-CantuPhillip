@@ -19,6 +19,7 @@ function Dashboard(): JSX.Element {
     <Section width="full" padding="compact" className="flex flex-col gap-8">
       <DueReviewAlert
         {...metrics.dueReview}
+        termsLearned={metrics.quickStats.termsLearned}
         stats={<LearningQuickStats {...metrics.quickStats} />}
       />
       <div>
