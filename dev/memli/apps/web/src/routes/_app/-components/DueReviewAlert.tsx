@@ -3,8 +3,11 @@ import { Bell } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Text } from "@workspace/ui/components/text"
 
-type DueReviewAlertProps = {
+export type DueReviewData = {
   dueCount: number
+}
+
+type DueReviewAlertProps = DueReviewData & {
   stats?: ReactNode
 }
 
