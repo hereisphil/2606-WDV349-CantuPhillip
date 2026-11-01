@@ -5,11 +5,22 @@ import { Section } from "@workspace/ui/components/section"
 import { Text } from "@workspace/ui/components/text"
 import { DueReviewAlert } from "./-components/DueReviewAlert"
 import { LearningQuickStats } from "./-components/LearningQuickStats"
+import { ProgressTrends } from "./-components/ProgressTrends"
 
+// Temporary stats for seeded prototype user
 const prototypeDueCount = 24
 const prototypeTermsLearned = 100
 const prototypeDailyReviewsCompleted = 24
 const prototypeDailyReviewTarget = 50
+const prototypeProgressTrends = {
+  consistencyPercent: 98,
+  consistencyWeeklyChangePercent: 2,
+  retentionPercent: 84,
+  retentionGlobalAveragePercent: 75,
+  newCardsThisMonth: 142,
+  rankLabel: "Top 5%",
+  rankCohort: "Among Spanish learners",
+}
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -34,6 +45,7 @@ function Dashboard(): JSX.Element {
           Your vocabulary collections will show up here.
         </Text>
       </div>
+      <ProgressTrends {...prototypeProgressTrends} />
     </Section>
   )
 }
