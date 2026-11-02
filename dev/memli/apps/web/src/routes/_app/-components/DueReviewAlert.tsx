@@ -46,7 +46,7 @@ export function DueReviewAlert({
         </Heading>
         <Text variant="small">{masteredDetail(termsLearned)}</Text>
         {/* Study sessions open at /study/$courseId (#48). */}
-        <Button type="button" className="cursor-pointer">
+        <Button type="button" size="lg">
           Start reviewing
         </Button>
       </div>
