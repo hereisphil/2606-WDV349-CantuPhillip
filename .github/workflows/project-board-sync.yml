@@ -6,7 +6,8 @@ name: Sync PR to project board
 #   dev merged into stage        → Staging         (issue closes)
 #   stage merged into main       → Done
 #
-# Feature PRs link issues with "Refs #N" in the title, body, or commits.
+# Feature PRs link issues with "Refs #N" (any case, optional colon)
+# in the title, body, or commits.
 # Promotion PRs (dev → stage, stage → main) move every card in the previous column.
 #
 # PROJECT_TOKEN must be a classic PAT with the `project` and `repo` scopes.
@@ -275,10 +276,13 @@ jobs:
               | [.title, .body, (.commits.nodes[].commit.message)]
               | join("\n")
             ')
-            # Keyword links only, so a passing "#45" in a commit does not move that card.
+            # Keyword links only, so a bare "#45" does not move that card.
+            # Case-insensitive. Colon is optional: "refs #12" and "Refs: #12".
+            # Word boundary so "prefix #12" is not read as "fix #12".
+            # closingIssuesReferences is empty unless the PR targets main.
             {
               echo "$payload" | jq -r '.data.repository.pullRequest.closingIssuesReferences.nodes[].number'
-              printf '%s\n' "$text" | grep -oE '(Refs?|Closes?|Closed|Fix(es|ed)?|Resolve[sd]?) #[0-9]+' | grep -oE '[0-9]+' || true
+              printf '%s\n' "$text" | grep -oiE '\b(Refs?|Closes?|Closed|Fix(es|ed)?|Resolve[sd]?)(:[[:space:]]*|[[:space:]]+)#[0-9]+' | grep -oE '[0-9]+' || true
             } | sort -un
           }
 

@@ -42,6 +42,18 @@ Use `[area:subarea]` when it helps (e.g. `[DX:web]`, `[web:marketing]`).
 - Mention the *reason* when the diff is large for a mechanical reason (e.g. ESLint return-type annotations)
 - Add `Refs #N` in the commit or pull request body. Issues stay open through Review and close when they merge to `stage`
 - Keep `Closes #N` off pull requests into `dev`. GitHub only auto-closes on the default branch, `main`, which would skip the staging review
+- When a commit completes one or more tasks on a linked issue, check those boxes in the issue body in the same turn (`- [ ]` → `- [x]`). Check only the tasks that commit finishes. Leave the issue open and leave every other task unchecked
+- Apply issue, milestone, label, and project edits with the `gh` CLI in the same turn. Do not ask for review or approval first, and do not use a GitHub tool that waits on an approval card. These edits are reversible
+
+## GitHub edits
+
+When the task needs `gh` to change an issue, milestone, or similar GitHub metadata, run the edit directly. The user does not review those changes before they land.
+
+This private repo is `hereisphil/2606-WDV349-CantuPhillip`. A `GITHUB_TOKEN` or `GH_TOKEN` on this machine can force the `phil-hgraph` login, which cannot see the repo. Unset both, and use the `hereisphil` account:
+
+```bash
+env -u GITHUB_TOKEN -u GH_TOKEN gh issue view 46 --repo hereisphil/2606-WDV349-CantuPhillip
+```
 
 ## Do not
 

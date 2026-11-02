@@ -8,6 +8,22 @@
 
 Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the app.
 
+## 01 November 2026
+
+### `FEATURE` Dashboard metrics
+
+`/dashboard` shows how many cards are due, terms learned, the daily goal, and progress for consistency, retention, new cards, and rank. Those counts stay a typed prototype seed until the API lands (#112). This work now sits in `359 MS 1`.
+
+* See merged **[PR #128](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/128)** — Refs [#46](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/46)
+
+### `DOCUMENTATION` Week 1 milestone summary
+
+Replaced the `359 MS 1` plan with a short summary of what landed: `Section`, `Heading`, and `Text` (#105), the prototype sign-in bypass (#110), the dashboard shell and metrics overview (#45, #46), and the Change Order (#104).
+
+* Refs [#104](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/104)
+
+***
+
 ## 28 October 2026
 
 ### `DOCUMENTATION` WDV359 Change Order & Prototype-First Roadmap

@@ -71,7 +71,7 @@ function RailLink({
       to={to}
       activeOptions={{ exact }}
       className={cn(
-        "flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
         "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground [&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}
     >
@@ -111,31 +111,22 @@ function AccountMenuItems(): JSX.Element {
   return (
     <>
       <DropdownMenuGroup>
-        <DropdownMenuItem
-          className="cursor-pointer"
-          render={<Link to="/dashboard" />}
-        >
+        <DropdownMenuItem render={<Link to="/dashboard" />}>
           <UserIcon aria-hidden="true" />
           View Profile
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer"
-          render={<Link to="/settings" />}
-        >
+        <DropdownMenuItem render={<Link to="/settings" />}>
           <SlidersHorizontal aria-hidden="true" />
           Learning Settings
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer"
-          render={<Link to="/pricing" />}
-        >
+        <DropdownMenuItem render={<Link to="/pricing" />}>
           <CreditCard aria-hidden="true" />
           Subscription / Plan
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem className="cursor-pointer" render={<Link to="/" />}>
+        <DropdownMenuItem render={<Link to="/" />}>
           <LogOut aria-hidden="true" />
           Sign Out
         </DropdownMenuItem>
@@ -168,7 +159,7 @@ export function AppSidebar(): JSX.Element {
               render={
                 <Button
                   variant="ghost"
-                  className="size-11 cursor-pointer rounded-full p-0 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  className="size-11 rounded-full p-0 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
@@ -197,7 +188,7 @@ export function AppSidebar(): JSX.Element {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="group/menu cursor-pointer hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  className="group/menu hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
@@ -212,7 +203,7 @@ export function AppSidebar(): JSX.Element {
                 {railLinks.map(({ to, label, icon: Icon, exact }) => (
                   <DropdownMenuItem
                     key={label}
-                    className="cursor-pointer [&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
+                    className="[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
                     render={<Link to={to} activeOptions={{ exact }} />}
                   >
                     <Icon aria-hidden="true" />
@@ -239,7 +230,7 @@ export function AppSidebar(): JSX.Element {
             render={
               <Button
                 variant="ghost"
-                className="h-auto w-full cursor-pointer justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
+                className="h-auto w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
               />
             }
           >
