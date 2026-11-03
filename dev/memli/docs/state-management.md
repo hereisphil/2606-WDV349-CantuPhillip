@@ -13,7 +13,7 @@ This document records *why* Memli routes React state the way it does. The short,
 1. **Every piece of client state has a designated owner** (table below). Picking the owner comes before writing a hook.
 2. **`useReducer` with a discriminated union is the default** for anything with a lifecycle or for two or more values that change together.
 3. **`useState` is allowed for exactly one uncoupled primitive per component** — a toggle, a single controlled input. The second `useState` in a component is a lint error.
-4. **Pure transitions live in `packages/core`** with Vitest coverage, next to `gradeCard()`. `apps/web` adds only the React wrapper.
+4. **Pure transitions live in `packages/core`** with Vitest coverage, next to the FSRS grading wrapper (when that package is restored in MS 3 — see `packages/core/README.md` / #130). `apps/web` adds only the React wrapper.
 5. **`use-effect-reducer` is not installed yet.** It is adopted the first time a transition must trigger a side effect (see [When to install `use-effect-reducer`](#when-to-install-use-effect-reducer)).
 
 ### State-owner table
@@ -43,7 +43,7 @@ A reducer separates *what happened* (`{ type: "GRADE", grade: "pass" }`) from *h
 
 ### Why this fits Memli unusually well
 
-- **`gradeCard()` is already a reducer.** `packages/core/src/srs/grade-card.ts` is a pure `(CardProgress, ReviewGrade) => CardProgress` transition with Vitest coverage. A study-session reducer is the same idea one level up, and its `GRADE` branch calls `gradeCard()`.
+- **SRS grading is a pure transition.** When `@workspace/core` returns in MS 3, a thin `ts-fsrs` wrapper (Memli-shaped `gradeCard` / progress helpers) is a pure `(CardProgress, ReviewGrade) => CardProgress` transition with Vitest coverage. A study-session reducer is the same idea one level up, and its `GRADE` branch calls that wrapper — never raw `ts-fsrs` from UI.
 - **The study flow is a state machine.** The Figma prototype already enumerates the states: prompt → typing/listening test → answer reveal → graded → next card or session complete. Issues #48, #49, #51 build exactly this. Deciding the shape *before* those land is far cheaper than refactoring after.
 - **Shareable with mobile.** [architecture.md](./architecture.md) says *share domain, not DOM*. A pure session reducer in `packages/core` is reusable by the Phase 4 React Native app and by the API. `useState` scattered across web components is not.
 - **The other owners already exist.** TanStack Query and Router search params are in [TechStack.md](../../../docs/TechStack.md). This decision does not add a state library; it writes down which existing tool owns what.
@@ -60,7 +60,7 @@ Matt Pocock's framing ("pit of success" → "black hole of success"): a prose ru
 | --- | --- | --- |
 | Lint | `memli/no-use-state-sprawl`: max one `useState` per component/hook; `useState({ a, b })` with 2+ keys is also an error | `packages/eslint-config/rules/no-use-state-sprawl.js`, on by default in `react.js` |
 | Lint | `react-hooks/exhaustive-deps` → `error`; React Compiler rules (`set-state-in-effect`, `set-state-in-render`, `purity`, `refs`) already `error` via `recommended` | `packages/eslint-config/react.js` |
-| Tests | Reducers in `packages/core` ship with a `.test.ts` covering every event from every `status` | `packages/core` (only package with Vitest — intentional pull) |
+| Tests | Reducers in `packages/core` ship with a `.test.ts` covering every event from every `status` | `packages/core` (restored in MS 3; Vitest lives there for domain — intentional pull) |
 | Types | `status`-discriminated unions; exhaustive `switch` on `state.status` then `event.type` | reducer files |
 | Agent rule | `.cursor/rules/react-state.mdc` (always-on): owner table, reducer shape, do-not list | `.cursor/rules/` |
 | Reference | The first real reducer (study session, #48/#49) becomes the copy-from example; until then the sketch in the Cursor rule is the template | `packages/core/src/study/` (future) |
@@ -82,8 +82,8 @@ The shared `react` config turns the rule **on everywhere** so new route groups a
 ## Reducer conventions
 
 ```ts
-// packages/core/src/study/session-reducer.ts (shape — final API lands with #48/#49)
-import { gradeCard, type ReviewGrade } from "../srs/grade-card"
+// packages/core/src/study/session-reducer.ts (shape — lands with #48/#49 + FSRS wrapper)
+import { gradeCard, type ReviewGrade } from "../srs/grade-card" // thin ts-fsrs wrapper
 
 export type SessionState =
   | { status: "prompt"; index: number; cards: StudyCard[] }
@@ -92,7 +92,7 @@ export type SessionState =
 
 export type SessionEvent =
   | { type: "REVEAL"; answer: string }
-  | { type: "GRADE"; grade: ReviewGrade }
+  | { type: "GRADE"; grade: ReviewGrade } // default: "pass" | "fail" → FSRS Good/Again
   | { type: "RESTART" }
 
 export function sessionReducer(

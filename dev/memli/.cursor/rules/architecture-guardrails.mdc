@@ -11,11 +11,11 @@ Full detail: `docs/architecture.md`, `docs/roadmap.md`, `docs/mobile.md`, `docs/
 
 - **Today:** one `apps/web` with `_marketing`, `_auth`, `_app` route groups is correct.
 - **Do not** split Astro marketing + React app until the roadmap Phase 3 criteria are met (working learning loop + clear SEO/perf need).
-- **Do not** start React Native until the shared API and `packages/core` SRS path are stable (Phase 4).
+- **Do not** start React Native until the shared API and `packages/core` FSRS path are stable (Phase 4).
 
 ## Sharing rules
 
-- Put pure domain logic in `packages/core` (no React, DOM, or RN imports).
+- Put pure domain logic in `packages/core` (no React, DOM, or RN imports). Wrap **`ts-fsrs`** there when MS 3 restores the package — do not hand-roll SM-2 or import `ts-fsrs` from apps (`packages/core/README.md`, #130).
 - Put shared contracts in `packages/schemas`.
 - `packages/ui` / shadcn is **web-only** — never assume it runs on iOS/Android.
 - New clients (API, mobile) should reuse `core` + `schemas`, not fork business rules.

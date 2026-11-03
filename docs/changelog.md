@@ -24,13 +24,23 @@ Replaced the `359 MS 1` plan with a short summary of what landed: `Section`, `He
 
 ***
 
+## 2 November 2026
+
+### `DX` Reset `@workspace/core`; adopt FSRS (`ts-fsrs`)
+
+Cleared premature hand-rolled SM-2 scaffolding from `packages/core` (nothing in `apps/web` imported it yet). Left a plan-only README: wrap [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs) inside `@workspace/core` when MS 3 needs grading. Aligned `dev/memli/docs/`, root course docs, and Cursor rules.
+
+* Refs [#130](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/130)
+
+***
+
 ## 28 October 2026
 
 ### `DOCUMENTATION` WDV359 Change Order & Prototype-First Roadmap
 
 Added `## Change Order` sections to [`docs/ProjectProposal.md`](./ProjectProposal.md) and [`docs/TechStack.md`](./TechStack.md) for Project & Portfolio V (`1.4 Requirements - Change Order`), and aligned the 4 weekly milestones (`359 MS 1`–`359 MS 4`) around a **Prototype-First** sequence:
 
-* **Weeks 1–3 (`359 MS 1`–`359 MS 3`)** focus entirely on the core language-learning prototype: reusable `<Section>`, `<Heading>`, and `<Text>` primitives in `@workspace/ui` (#105), a temporary `/signin` Prototype Mode bypass with a seeded test user (`usr_prototype_01`) via `useViewer()` (#110), the `/dashboard` shell and deck grid (#45–#47), the `/study/$courseId` flashcard & mnemonic session UI (#48–#51), and persistent SM-2 review tracking via Hono + Drizzle + Cloudflare D1 (#106, #112).
+* **Weeks 1–3 (`359 MS 1`–`359 MS 3`)** focus entirely on the core language-learning prototype: reusable `<Section>`, `<Heading>`, and `<Text>` primitives in `@workspace/ui` (#105), a temporary `/signin` Prototype Mode bypass with a seeded test user (`usr_prototype_01`) via `useViewer()` (#110), the `/dashboard` shell and deck grid (#45–#47), the `/study/$courseId` flashcard & mnemonic session UI (#48–#51), and persistent FSRS review tracking via Hono + Drizzle + Cloudflare D1 (#106, #112) — SRS scheduler decision later recorded as `ts-fsrs` in `@workspace/core` (#130).
 * **Week 4 (`359 MS 4`)** replaces the prototype bypass with real Better Auth Email/Password (#108) and Google OAuth / Passkeys (#107), gates `TanStackRouterDevtools` to development only (#113), and promotes the verified Beta release (`dev → stage → main`, #114–#115).
 * Removed unused WDV349 boilerplate directories (`dev/portfolio/` and `.github/ISSUE_TEMPLATE/`) and updated repository and monorepo documentation (`README.md`, `dev/memli/docs/`, `.cursor/rules/`).
 

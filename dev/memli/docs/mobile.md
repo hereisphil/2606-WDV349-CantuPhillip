@@ -21,7 +21,7 @@ Mobile is **not** a substitute for a good web app: marketing, account management
 Start `apps/mobile` when:
 
 1. Hono API auth + deck/review endpoints are stable enough to version
-2. SRS behavior in `packages/core` is tested and used by the API/web
+2. FSRS behavior in `packages/core` (`ts-fsrs` wrapper) is tested and used by the API/web
 3. You can dedicate focus without abandoning web quality
 
 Do **not** start mobile in parallel with green-field API + first study UI unless staffing suddenly appears — for a solo/Full Sail pace, sequence wins.
