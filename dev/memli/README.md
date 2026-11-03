@@ -1,6 +1,6 @@
 # Memli — community mnemonic language learning (monorepo)
 
-Vite + React web app (`apps/web`), pure TypeScript SRS domain logic (`packages/core`), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
+Vite + React web app (`apps/web`), planned pure TypeScript domain package (`packages/core` — FSRS via `ts-fsrs` when MS 3 needs it), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
 
 **Planned public brand:** FluentVine (see docs). Product and architecture decisions live in [`docs/`](./docs/README.md) — start with the [roadmap](./docs/roadmap.md).
 
@@ -21,7 +21,7 @@ bun install
 | `bun run lint` | ESLint via Turbo |
 | `bun run format` / `format:check` | Prettier write / check |
 | `bun run typecheck` | TypeScript via Turbo |
-| `bun run test` | Vitest via Turbo (`@workspace/core` SRS logic) |
+| `bun run test` | Turbo tests (today: `@workspace/eslint-config`; Vitest returns with `@workspace/core` in MS 3) |
 | `bun run knip` | Unused deps, exports, and files |
 | `bun run build` | Production build |
 
@@ -61,14 +61,14 @@ bun run knip
 
 Config: [`knip.json`](./knip.json). Treat a clean Knip run as the bar before wiring it into pre-push/CI. `useTheme` is ignored as intentional ThemeProvider API until a UI control consumes it. Shared Zod schemas live in `@workspace/schemas` (#83), not in `@workspace/ui`.
 
-## Tests (Vitest)
+## Tests
 
 ```bash
 cd dev/memli
 bun run test
 ```
 
-Pure SRS/domain logic lives in [`packages/core`](./packages/core) and is tested with Vitest. We intentionally skip marketing UI and route components; see the package README for scope.
+[`packages/core`](./packages/core) is currently a **plan-only** stub (FSRS / `ts-fsrs` wrapper documented in its README; #130). When MS 3 restores the package, domain logic and session reducers will be covered with Vitest there. We intentionally skip marketing UI and route components.
 
 ## Adding shadcn/ui components
 

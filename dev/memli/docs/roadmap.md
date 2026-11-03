@@ -12,7 +12,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 
 1. **Best UX for non-technical learners** — one consumer hostname; users never need to remember `app.*`.
 2. **Clear separation of concerns over time** — marketing site, authenticated web app, shared API, and eventually mobile — without fragmenting the user journey across subdomains.
-3. **Ship a real learning loop first** — decks, visual/story mnemonics, and SM-2 SRS review — before real auth boilerplate or speculative platform splits.
+3. **Ship a real learning loop first** — decks, visual/story mnemonics, and FSRS (`ts-fsrs`) SRS review — before real auth boilerplate or speculative platform splits.
 4. **LATAM-ready foundations** — plan and prepare i18n early; full translation can follow once UI chrome stabilizes.
 5. **Mobile when the API and domain model are stable** — React Native shares logic and schemas, not web DOM components.
 
@@ -24,7 +24,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 | --- | --- |
 | Monorepo | Turborepo + Bun under `dev/memli/` |
 | Web | Single Vite + React app: `apps/web` |
-| Shared packages | `packages/core` (pure TS SM-2 SRS + Vitest), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
+| Shared packages | `packages/core` (plan-only README for now; FSRS via `ts-fsrs` when MS 3 needs it), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
 | Routing | TanStack Router route groups: `_marketing`, `_auth`, `_app` |
 | Marketing vs app | **Logical** split only (same deployable, same origin) |
 | API | Not yet a separate `apps/api` Hono service (scheduled in `359 MS 3`) |
@@ -92,7 +92,7 @@ Phases can **overlap lightly** (e.g. i18n schema habits during Phase 1), but **d
 
 ## Phase 1 — Core web product + shared Hono API
 
-**Goal:** A learner can study language decks with visual/narrative mnemonics and complete persistent SM-2 SRS review sessions on the web, backed by a shared Hono + Drizzle + D1 API and real authentication.
+**Goal:** A learner can study language decks with visual/narrative mnemonics and complete persistent FSRS SRS review sessions on the web, backed by a shared Hono + Drizzle + D1 API and real authentication.
 
 ### Prototype-First execution sequence (WDV359 Milestones `359 MS 1`–`359 MS 4`)
 
@@ -106,8 +106,8 @@ To guarantee the core learning loop ships first without getting blocked on authe
    - Build the `/dashboard` User Metrics Banner (#46) and Study Deck Grid (#47) linking to `/study/$courseId`.
    - Build the `/study/$courseId` Session Layout (#48) and interactive Core Study Card Display (#49).
 3. **`359 MS 3` (Week 3 — Mnemonic Engine + Persistent SRS Loop):**
-   - Build the Mnemonic Caption & Image Overlay Frame (#50) and Session Grading Controls Dock (#51) wired to `@workspace/core` `gradeCard()`.
-   - Scaffold `apps/api` (Hono + Drizzle ORM + Cloudflare D1/SQLite) and shared deck/review schemas in `@workspace/schemas` (#106), persisting seeded mnemonic decks and SRS review intervals for `usr_prototype_01` (#112).
+   - Restore `@workspace/core` as a real package wrapping `ts-fsrs` (see `packages/core/README.md` / #130); build the Mnemonic Caption & Image Overlay Frame (#50) and Session Grading Controls Dock (#51) against that API.
+   - Scaffold `apps/api` (Hono + Drizzle ORM + Cloudflare D1/SQLite) and shared deck/review schemas in `@workspace/schemas` (#106), persisting seeded mnemonic decks and FSRS card state for `usr_prototype_01` (#112).
 4. **`359 MS 4` (Week 4 — MVP Polish, Auth Integration & Beta Showcase):**
    - Replace the `/signin` prototype bypass with real Better Auth Email/Password (#108) and Google OAuth / Passkeys (#107) by swapping the inside of `useViewer()`.
    - Gate `TanStackRouterDevtools` to `import.meta.env.DEV` (#113) and promote `dev → stage → main` (#114).
@@ -124,7 +124,7 @@ To guarantee the core learning loop ships first without getting blocked on authe
 - Introduce `apps/api` (Hono) as the shared backend.
 - Production shape: `api.{brand}.com` (or equivalent). Same-origin `/api` proxy in local/dev is acceptable.
 - Auth session strategy chosen once (cookie domain, CORS, CSRF) with **web + future mobile** in mind — see [architecture.md](./architecture.md) and [mobile.md](./mobile.md).
-- Domain logic that can stay pure TypeScript continues to live in `packages/core` (SRS already started here).
+- Domain logic that can stay pure TypeScript continues to live in `packages/core` (FSRS wrapper + session reducers land with MS 3; do not reintroduce hand-rolled SM-2).
 - Request/response and env validation continue to expand in `packages/schemas`.
 
 ### i18n habits (prep only)
@@ -148,7 +148,7 @@ Even before an i18n library:
 
 - [ ] Auth works against Hono API
 - [ ] Dashboard + review session loop usable on web
-- [ ] `packages/core` SRS covered by tests for grading behavior you rely on
+- [ ] `packages/core` FSRS wrappers + session reducers covered by Vitest for grading behavior you rely on
 - [ ] UX rules for `/` and post-login navigation respected
 - [ ] Schemas/API avoid baking “one language field” that conflates UI locale and learning language
 
@@ -274,7 +274,7 @@ dev/memli/   # or future fluentvine root name
     api/           # Phase 1 — Hono
     mobile/        # Phase 4 — Expo / RN
   packages/
-    core/          # pure domain (SRS, etc.) — share everywhere
+    core/          # pure domain (FSRS via ts-fsrs + reducers) — share everywhere; plan-only until MS 3
     schemas/       # Zod / shared contracts — share everywhere
     ui/            # web shadcn — web only
     ui-native/     # optional Phase 4+

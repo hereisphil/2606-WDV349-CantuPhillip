@@ -7,7 +7,7 @@ alwaysApply: true
 
 - App lives under `dev/memli/`.
   - `apps/web`: Vite + React frontend (`TanStack Router`).
-  - `packages/core` (`@workspace/core`): Pure TypeScript domain logic (SuperMemo SM-2 `gradeCard()`, zero React/DOM imports).
+  - `packages/core` (`@workspace/core`): Planned pure TypeScript domain package (FSRS via `ts-fsrs` wrapper + session reducers; zero React/DOM imports). Plan-only README today — restore code when MS 3 needs it (`packages/core/README.md`, #130).
   - `packages/schemas` (`@workspace/schemas`): Shared Zod validation contracts and environment schemas.
   - `packages/ui` (`@workspace/ui`): Web-only component library built on shadcn/ui + Base UI primitives, including reusable `<Section>`, `<Heading>`, and `<Text>` layout/typography primitives.
 - Routing: **TanStack Router** (`Link`, `createFileRoute`, file routes under `apps/web/src/routes`).

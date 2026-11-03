@@ -60,7 +60,7 @@ Weekly research notes covering class assignments and independent study:
 └── dev/
     └── memli/                 # Memli Turborepo + Bun monorepo
         ├── apps/web/          # Vite + React frontend (TanStack Router)
-        ├── packages/core/     # Pure TypeScript domain logic (SM-2 SRS engine + Vitest)
+        ├── packages/core/     # Plan-only for now; FSRS (ts-fsrs) domain package in MS 3 (#130)
         ├── packages/schemas/  # Shared Zod validation contracts & env schemas
         ├── packages/ui/       # Shared web component library (shadcn/ui + Base UI)
         └── docs/              # Product & architecture decision records (roadmap, UX, i18n)

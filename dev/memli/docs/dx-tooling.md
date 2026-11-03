@@ -15,7 +15,7 @@ Already in play or available without new products:
 | Browser DevTools | Network, performance, DOM |
 | React DevTools | Component tree / props |
 | TanStack Router Devtools | Route matches / debug (currently mounted in web root) |
-| Vitest | `packages/core` domain tests |
+| Vitest | Domain tests in `packages/core` when that package is restored (MS 3 / FSRS); ESLint rule unit tests run today |
 | TypeScript + ESLint + Prettier + Lefthook | Quality gates |
 | `memli/no-use-state-sprawl` (local ESLint rule) | Pushes component state into `useReducer` + discriminated unions — see [state-management.md](./state-management.md) |
 | Knip | Unused code/deps hygiene |
