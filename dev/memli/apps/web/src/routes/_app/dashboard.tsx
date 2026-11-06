@@ -2,19 +2,20 @@ import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
-import { Text } from "@workspace/ui/components/text"
 import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
 import {
   deckAction,
   isSameAction,
   selectFocusDeck,
+  sortDecks,
   todayPrimaryAction,
   todayState,
   totalDue,
   totalMastered,
 } from "./-components/dashboard-model"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
+import { DeckList } from "./-components/DeckList"
 import { FocusDeckCard } from "./-components/FocusDeckCard"
 import { LearningQuickStats } from "./-components/LearningQuickStats"
 import { ProgressTrends } from "./-components/ProgressTrends"
@@ -53,14 +54,12 @@ function Dashboard(): JSX.Element {
               }
             />
           )}
-          <section aria-labelledby="decks-heading">
-            <Heading id="decks-heading" level={2} size="3">
-              Your decks
-            </Heading>
-            <Text variant="muted" className="mt-2">
-              Your vocabulary collections will show up here.
-            </Text>
-          </section>
+          <DeckList
+            decks={sortDecks(decks).filter(
+              (deck) => deck.courseId !== focusDeck?.courseId
+            )}
+            now={now}
+          />
         </div>
         <aside aria-labelledby="glance-heading" className="flex flex-col gap-4">
           <Heading id="glance-heading" level={2} size="3">

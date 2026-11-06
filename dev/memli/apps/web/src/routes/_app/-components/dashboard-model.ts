@@ -44,10 +44,24 @@ function compareByNeed(a: DashboardDeck, b: DashboardDeck): number {
   return compareRecency(a, b)
 }
 
+export function sortDecks(decks: readonly DashboardDeck[]): DashboardDeck[] {
+  return [...decks].sort(compareByNeed)
+}
+
 export function selectFocusDeck(
   decks: readonly DashboardDeck[]
 ): DashboardDeck | null {
-  return [...decks].sort(compareByNeed)[0] ?? null
+  return sortDecks(decks)[0] ?? null
+}
+
+export function deckTotal(deck: DashboardDeck): number {
+  return deck.masteredCount + deck.learningCount + deck.unseenCount
+}
+
+/** 0–1. A deck with no cards counts as 0% mastered. */
+export function masteredRatio(deck: DashboardDeck): number {
+  const total = deckTotal(deck)
+  return total > 0 ? deck.masteredCount / total : 0
 }
 
 export type TodayState =
@@ -74,7 +88,7 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
       status: "review",
       dueCount,
       minutes: estimateMinutes(dueCount),
-      dueDecks: decks.filter((deck) => deck.dueCount > 0).sort(compareByNeed),
+      dueDecks: sortDecks(decks).filter((deck) => deck.dueCount > 0),
       focusDeck,
     }
   }

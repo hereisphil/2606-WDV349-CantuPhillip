@@ -1,18 +1,22 @@
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
-import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Card } from "@workspace/ui/components/card"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { useFormatters } from "@/lib/formatters"
 import type { DashboardDeck } from "./dashboard-metrics"
-import { deckAction, type DeckAction } from "./dashboard-model"
+import {
+  deckAction,
+  deckTotal,
+  masteredRatio,
+  type DeckAction,
+} from "./dashboard-model"
+import { LanguageBadge } from "./LanguageBadge"
+import { LastStudied } from "./LastStudied"
 
 const messages = {
   heading: "Continue learning",
-  lastStudied: "Last studied {time}",
-  notStarted: "Not started yet",
   due: "Due",
   newToday: "New today",
   mastered: "{percent} mastered",
@@ -50,10 +54,6 @@ const segments = [
   { key: "unseen", className: "bg-chart-4" },
 ] as const
 
-function languageCode(tag: string): string {
-  return new Intl.Locale(tag).language.toUpperCase()
-}
-
 function MasteryBar({ deck }: { deck: DashboardDeck }): JSX.Element {
   const { percent, plural, format } = useFormatters()
   const counts = {
@@ -61,18 +61,15 @@ function MasteryBar({ deck }: { deck: DashboardDeck }): JSX.Element {
     learning: deck.learningCount,
     unseen: deck.unseenCount,
   }
-  const total = counts.mastered + counts.learning + counts.unseen
 
   return (
     <div className="flex flex-col gap-2">
       <p className="flex flex-wrap items-baseline gap-x-2">
         <span className="font-heading text-lg font-semibold tabular-nums">
-          {format(messages.mastered, {
-            percent: percent(total > 0 ? counts.mastered / total : 0),
-          })}
+          {format(messages.mastered, { percent: percent(masteredRatio(deck)) })}
         </span>
         <span className="text-sm text-muted-foreground tabular-nums">
-          {plural(total, messages.totalCards)}
+          {plural(deckTotal(deck), messages.totalCards)}
         </span>
       </p>
       <div
@@ -148,8 +145,7 @@ export function FocusDeckCard({
   /** False when the Today panel's primary action already leads to the same session. */
   showAction: boolean
 }): JSX.Element {
-  const { number, format, languageName, relativeTime } = useFormatters()
-  const language = languageName(deck.learningLanguage)
+  const { number } = useFormatters()
   const action = deckAction(deck)
 
   return (
@@ -159,27 +155,12 @@ export function FocusDeckCard({
       </Heading>
       <Card className="gap-6 p-6">
         <div className="flex items-start gap-4">
-          <Badge
-            variant="secondary"
-            title={language}
-            className="h-10 min-w-10 rounded-lg px-2 text-sm font-semibold"
-          >
-            <span aria-hidden="true">
-              {languageCode(deck.learningLanguage)}
-            </span>
-            <span className="sr-only">{language}</span>
-          </Badge>
+          <LanguageBadge tag={deck.learningLanguage} size="lg" />
           <div className="flex min-w-0 flex-col gap-1">
             <Heading level={3} size="3" className="text-pretty">
               {deck.title}
             </Heading>
-            <Text variant="small">
-              {deck.lastReviewedAt === null
-                ? messages.notStarted
-                : format(messages.lastStudied, {
-                    time: relativeTime(new Date(deck.lastReviewedAt), now),
-                  })}
-            </Text>
+            <LastStudied at={deck.lastReviewedAt} now={now} />
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-4 sm:max-w-xs">
