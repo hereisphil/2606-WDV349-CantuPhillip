@@ -1,7 +1,7 @@
 import type { JSX } from "react"
+import { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import {
-  BookOpen,
   ChevronsUpDown,
   CreditCard,
   Flame,
@@ -12,8 +12,10 @@ import {
   UserIcon,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
-import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
+import { BrandMark } from "@/components/brand-mark"
+import { MenuGlyph } from "@/components/menu-glyph"
+import { PlanBadge } from "@/components/plan-badge"
 import { Text } from "@workspace/ui/components/text"
 import { cn } from "@workspace/ui/lib/utils"
 import {
@@ -25,7 +27,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-import { useViewer, type ViewerPlan } from "@/components/session-provider"
+import { useViewer } from "@/components/session-provider"
+
+const railActiveClass =
+  "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
 
 const railLinks = [
   { to: "/dashboard" as const, label: "Decks", icon: Layers, exact: true },
@@ -72,7 +77,8 @@ function RailLink({
       activeOptions={{ exact }}
       className={cn(
         "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
-        "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground [&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
+        railActiveClass,
+        "[&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}
     >
       <Icon className="size-4" aria-hidden="true" />
@@ -91,19 +97,6 @@ function RailNav(): JSX.Element {
         <RailLink key={label} to={to} label={label} icon={icon} exact={exact} />
       ))}
     </nav>
-  )
-}
-
-function ProBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
-  if (plan !== "pro") return null
-
-  return (
-    <Badge
-      variant="outline"
-      className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-700 uppercase dark:text-amber-300"
-    >
-      Pro
-    </Badge>
   )
 }
 
@@ -137,6 +130,7 @@ function AccountMenuItems(): JSX.Element {
 
 export function AppSidebar(): JSX.Element {
   const viewer = useViewer()
+  const [navOpen, setNavOpen] = useState(false)
 
   return (
     <aside
@@ -144,14 +138,10 @@ export function AppSidebar(): JSX.Element {
       className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
     >
       <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
-        <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen className="size-4" aria-hidden="true" />
-          </span>
-          <span>Memli</span>
+        <Link to="/dashboard" className="flex">
+          <BrandMark />
         </Link>
 
-        {/* Mobile controls: avatar dropdown + hamburger dropdown */}
         <div className="flex items-center gap-1 md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -173,7 +163,7 @@ export function AppSidebar(): JSX.Element {
                   <span className="truncate text-sm font-medium text-foreground">
                     @{viewer.username}
                   </span>
-                  <ProBadge plan={viewer.plan} />
+                  <PlanBadge plan={viewer.plan} />
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -181,29 +171,25 @@ export function AppSidebar(): JSX.Element {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu>
+          <DropdownMenu open={navOpen} onOpenChange={setNavOpen}>
             <DropdownMenuTrigger
               aria-label="Navigation menu"
               render={
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="group/menu hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
-              <div className="relative flex h-5 w-5 flex-col items-center justify-center">
-                <span className="absolute h-0.5 w-5 -translate-y-1.5 bg-foreground transition-all duration-300 group-data-popup-open/menu:translate-y-0 group-data-popup-open/menu:rotate-45" />
-                <span className="h-0.5 w-5 bg-foreground transition-all duration-300 group-data-popup-open/menu:opacity-0" />
-                <span className="absolute h-0.5 w-5 translate-y-1.5 bg-foreground transition-all duration-300 group-data-popup-open/menu:translate-y-0 group-data-popup-open/menu:-rotate-45" />
-              </div>
+              <MenuGlyph open={navOpen} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuGroup>
                 {railLinks.map(({ to, label, icon: Icon, exact }) => (
                   <DropdownMenuItem
                     key={label}
-                    className="[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
+                    className={railActiveClass}
                     render={<Link to={to} activeOptions={{ exact }} />}
                   >
                     <Icon aria-hidden="true" />
@@ -222,7 +208,6 @@ export function AppSidebar(): JSX.Element {
 
       <RailNav />
 
-      {/* Desktop bottom capsule: full-area hover + pointer cursor */}
       <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -242,7 +227,7 @@ export function AppSidebar(): JSX.Element {
                 <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
                   @{viewer.username}
                 </span>
-                <ProBadge plan={viewer.plan} />
+                <PlanBadge plan={viewer.plan} />
               </span>
             </span>
             <ChevronsUpDown

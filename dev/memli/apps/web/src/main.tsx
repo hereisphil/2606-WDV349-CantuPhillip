@@ -7,7 +7,6 @@ import { SessionProvider } from "@/components/session-provider.tsx"
 import { ThemeProvider } from "@/components/theme-provider.tsx"
 import { routeTree } from "@/routeTree.gen"
 
-// Set up a Router instance
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
@@ -15,7 +14,6 @@ const router = createRouter({
   scrollRestoration: true,
 })
 
-// Type-safe router registration
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router

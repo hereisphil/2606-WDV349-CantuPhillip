@@ -16,13 +16,16 @@ function unauthorized(message: string): Response {
   })
 }
 
-// Length-safe, constant-time string comparison to avoid leaking
-// credential length/contents through response timing.
-function timingSafeEqual(a: string, b: string): boolean {
+// Hash both values, then compare the digests, so credential length and
+// contents do not leak through response timing.
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
   const enc = new TextEncoder()
-  const aBytes = enc.encode(a)
-  const bBytes = enc.encode(b)
-  if (aBytes.length !== bBytes.length) return false
+  const [aDigest, bDigest] = await Promise.all([
+    crypto.subtle.digest("SHA-256", enc.encode(a)),
+    crypto.subtle.digest("SHA-256", enc.encode(b)),
+  ])
+  const aBytes = new Uint8Array(aDigest)
+  const bBytes = new Uint8Array(bDigest)
   let mismatch = 0
   for (let i = 0; i < aBytes.length; i++) {
     mismatch |= aBytes[i] ^ bBytes[i]
@@ -64,8 +67,8 @@ export default {
     const username = separator === -1 ? decoded : decoded.slice(0, separator)
     const password = separator === -1 ? "" : decoded.slice(separator + 1)
 
-    const userOk = timingSafeEqual(username, env.BASIC_AUTH_USER)
-    const passOk = timingSafeEqual(password, env.BASIC_AUTH_PASS)
+    const userOk = await timingSafeEqual(username, env.BASIC_AUTH_USER)
+    const passOk = await timingSafeEqual(password, env.BASIC_AUTH_PASS)
 
     if (userOk && passOk) {
       return env.ASSETS.fetch(request)

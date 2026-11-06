@@ -1,8 +1,6 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { Heading } from "@workspace/ui/components/heading"
-import { Section } from "@workspace/ui/components/section"
-import { Text } from "@workspace/ui/components/text"
+import { ComingSoon } from "./-components/ComingSoon"
 
 export const Route = createFileRoute("/_marketing/blog")({
   component: Blog,
@@ -10,11 +8,8 @@ export const Route = createFileRoute("/_marketing/blog")({
 
 function Blog(): JSX.Element {
   return (
-    <Section>
-      <Heading>Blog</Heading>
-      <Text variant="muted" className="mt-4">
-        Articles and updates are on the way. Check back soon.
-      </Text>
-    </Section>
+    <ComingSoon title="Blog">
+      Articles and updates are on the way. Check back soon.
+    </ComingSoon>
   )
 }

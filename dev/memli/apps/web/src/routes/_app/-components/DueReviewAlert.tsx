@@ -4,10 +4,7 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
-
-export type DueReviewData = {
-  dueCount: number
-}
+import type { DueReviewData } from "./dashboard-metrics"
 
 type DueReviewAlertProps = DueReviewData & {
   termsLearned: number

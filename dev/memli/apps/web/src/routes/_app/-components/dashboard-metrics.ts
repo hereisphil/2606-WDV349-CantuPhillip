@@ -1,11 +1,27 @@
-import type { DueReviewData } from "./DueReviewAlert"
-import type { LearningQuickStatsData } from "./LearningQuickStats"
-import type { ProgressTrendsData } from "./ProgressTrends"
-
 /**
  * Dashboard metric contract. #112 replaces {@link prototypeDashboardMetrics}
  * with Hono/D1 aggregates of this same shape. Component markup stays put.
  */
+export type DueReviewData = {
+  dueCount: number
+}
+
+export type LearningQuickStatsData = {
+  termsLearned: number
+  dailyReviewsCompleted: number
+  dailyReviewTarget: number
+}
+
+export type ProgressTrendsData = {
+  consistencyPercent: number
+  consistencyWeeklyChangePercent: number
+  retentionPercent: number
+  retentionGlobalAveragePercent: number
+  newCardsThisMonth: number
+  rankLabel: string
+  rankCohort: string
+}
+
 export type DashboardMetrics = {
   dueReview: DueReviewData
   quickStats: LearningQuickStatsData

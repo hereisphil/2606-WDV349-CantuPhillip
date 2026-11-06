@@ -5,10 +5,7 @@ import { defineConfig } from "eslint/config"
 import base from "./base.js"
 import memli from "./plugin.js"
 
-/**
- * Shared React + Vite ESLint flat config (extends base).
- * React state guardrails (see docs/state-management.md):
- */
+/** State owner rules: `docs/state-management.md`. */
 export default defineConfig([
   ...base,
   {

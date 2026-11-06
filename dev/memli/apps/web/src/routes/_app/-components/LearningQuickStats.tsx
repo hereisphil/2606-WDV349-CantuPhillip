@@ -2,12 +2,7 @@ import type { JSX } from "react"
 import { Card } from "@workspace/ui/components/card"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
-
-export type LearningQuickStatsData = {
-  termsLearned: number
-  dailyReviewsCompleted: number
-  dailyReviewTarget: number
-}
+import type { LearningQuickStatsData } from "./dashboard-metrics"
 
 function QuickStatCard({
   value,

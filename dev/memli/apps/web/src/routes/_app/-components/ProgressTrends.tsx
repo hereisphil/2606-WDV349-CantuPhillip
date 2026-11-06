@@ -3,16 +3,7 @@ import { Medal, TrendingUp } from "lucide-react"
 import { Card } from "@workspace/ui/components/card"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
-
-export type ProgressTrendsData = {
-  consistencyPercent: number
-  consistencyWeeklyChangePercent: number
-  retentionPercent: number
-  retentionGlobalAveragePercent: number
-  newCardsThisMonth: number
-  rankLabel: string
-  rankCohort: string
-}
+import type { ProgressTrendsData } from "./dashboard-metrics"
 
 type TrendBlock = {
   label: string
