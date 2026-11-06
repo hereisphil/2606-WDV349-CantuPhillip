@@ -22,6 +22,7 @@ export default defineConfig([
         "warn",
         { allowConstantExport: true },
       ],
+      "memli/button-link": "error",
       "memli/no-use-state-sprawl": ["error", { max: 1 }],
     },
   },
