@@ -65,6 +65,9 @@
 }
 
 :root {
+  /* Sticky marketing header plus a peek of the next section.
+     Hero min-height and in-page anchor scroll-margin both clear this. */
+  --marketing-header-clearance: 6rem;
   --background: oklch(0.985 0.004 261); /* #F8FAFC Off-White page surface */
   --foreground: oklch(0.236 0.025 261); /* #1E293B Charcoal */
   --card: oklch(1 0 0);

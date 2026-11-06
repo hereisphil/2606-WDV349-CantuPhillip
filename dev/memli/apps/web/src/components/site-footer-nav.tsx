@@ -1,6 +1,6 @@
 import type { JSX } from "react"
-import { Link } from "@tanstack/react-router"
 import { cn } from "@workspace/ui/lib/utils"
+import { footerNav, MarketingLink } from "@/components/site-nav"
 
 type Tone = "onLight" | "onDark"
 
@@ -26,33 +26,9 @@ export function SiteFooterNav({
   return (
     <>
       <nav className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
-        <Link to="/" className={linkClass}>
-          Home
-        </Link>
-        <Link to="/" hash="features" className={linkClass}>
-          Features
-        </Link>
-        <Link to="/about" className={linkClass}>
-          About
-        </Link>
-        <Link to="/contact" className={linkClass}>
-          Contact
-        </Link>
-        <Link to="/blog" className={linkClass}>
-          Blog
-        </Link>
-        <Link to="/" hash="why-mnemonics" className={linkClass}>
-          Why Mnemonics?
-        </Link>
-        <Link to="/pricing" className={linkClass}>
-          Pricing
-        </Link>
-        <Link to="/terms" className={linkClass}>
-          Terms of Service
-        </Link>
-        <Link to="/privacy" className={linkClass}>
-          Privacy Policy
-        </Link>
+        {footerNav.map((id) => (
+          <MarketingLink key={id} id={id} className={linkClass} />
+        ))}
       </nav>
 
       <p className={cn("mt-8 text-center text-sm", copyright)}>
