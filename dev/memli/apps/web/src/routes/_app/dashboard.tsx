@@ -1,6 +1,5 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
 import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
@@ -17,8 +16,8 @@ import {
 import { DashboardGreeting } from "./-components/DashboardGreeting"
 import { DeckList } from "./-components/DeckList"
 import { FocusDeckCard } from "./-components/FocusDeckCard"
-import { LearningQuickStats } from "./-components/LearningQuickStats"
 import { ProgressTrends } from "./-components/ProgressTrends"
+import { ThisWeek } from "./-components/ThisWeek"
 import { TodayPanel } from "./-components/TodayPanel"
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -29,7 +28,6 @@ function Dashboard(): JSX.Element {
   const viewer = useViewer()
   const { decks, dailyGoal, progressTrends } = prototypeDashboardMetrics
   const dueCount = totalDue(decks)
-  const termsLearned = totalMastered(decks)
   const today = todayState(decks)
   const focusDeck = selectFocusDeck(decks)
   const now = new Date()
@@ -61,16 +59,13 @@ function Dashboard(): JSX.Element {
             now={now}
           />
         </div>
-        <aside aria-labelledby="glance-heading" className="flex flex-col gap-4">
-          <Heading id="glance-heading" level={2} size="3">
-            At a glance
-          </Heading>
-          <LearningQuickStats
-            termsLearned={termsLearned}
-            dailyReviewsCompleted={dailyGoal.reviewsCompleted}
-            dailyReviewTarget={dailyGoal.reviewTarget}
-          />
-        </aside>
+        <ThisWeek
+          days={dailyGoal.days}
+          reviewTarget={dailyGoal.reviewTarget}
+          now={now}
+          streakDays={viewer.streakDays}
+          wordsMastered={totalMastered(decks)}
+        />
       </div>
       <ProgressTrends {...progressTrends} />
     </Section>

@@ -1,3 +1,5 @@
+import { addDays, localDateKey } from "@/lib/dates"
+
 /**
  * Dashboard contract. #112 replaces {@link prototypeDashboardMetrics}
  * with Hono/D1 data of this same shape. Component markup stays put.
@@ -17,10 +19,10 @@ export type DashboardDeck = {
   lastReviewedAt: string | null
 }
 
-export type LearningQuickStatsData = {
-  termsLearned: number
-  dailyReviewsCompleted: number
-  dailyReviewTarget: number
+export type DailyReviews = {
+  /** Calendar date in the learner's time zone, "YYYY-MM-DD". */
+  date: string
+  reviewsCompleted: number
 }
 
 export type ProgressTrendsData = {
@@ -36,8 +38,9 @@ export type ProgressTrendsData = {
 export type DashboardMetrics = {
   decks: readonly DashboardDeck[]
   dailyGoal: {
-    reviewsCompleted: number
     reviewTarget: number
+    /** The last 7 days including today, oldest first. Missing days had no reviews. */
+    days: readonly DailyReviews[]
   }
   progressTrends: ProgressTrendsData
 }
@@ -47,6 +50,15 @@ const seededAt = Date.now()
 
 function hoursAgo(hours: number): string {
   return new Date(seededAt - hours * 60 * 60 * 1000).toISOString()
+}
+
+function recentDays(reviewsOldestFirst: readonly number[]): DailyReviews[] {
+  const today = new Date(seededAt)
+  const lastIndex = reviewsOldestFirst.length - 1
+  return reviewsOldestFirst.map((reviewsCompleted, index) => ({
+    date: localDateKey(addDays(today, index - lastIndex)),
+    reviewsCompleted,
+  }))
 }
 
 // Prototype stand-in for usr_prototype_01. #112 replaces this value.
@@ -98,8 +110,8 @@ export const prototypeDashboardMetrics = {
     },
   ],
   dailyGoal: {
-    reviewsCompleted: 24,
     reviewTarget: 50,
+    days: recentDays([12, 50, 64, 31, 50, 55, 24]),
   },
   progressTrends: {
     consistencyPercent: 98,

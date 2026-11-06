@@ -1,4 +1,4 @@
-import type { JSX } from "react"
+import type { JSX, ReactNode } from "react"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { useFormatters } from "@/lib/formatters"
@@ -13,9 +13,9 @@ const messages = {
     evening: "Good evening, {name}",
   },
   keepStreak: {
-    one: "About {count} minute of review keeps your {streak}-day streak going.",
+    one: "About {count} minute of review keeps your <b>{streak}-day streak</b> going.",
     other:
-      "About {count} minutes of review keeps your {streak}-day streak going.",
+      "About {count} minutes of review keeps your <b>{streak}-day streak</b> going.",
   },
   startStreak: {
     one: "About {count} minute of review starts a new streak today.",
@@ -23,6 +23,10 @@ const messages = {
   },
   caughtUp: "Nothing is due right now. Your memory is in good shape.",
 } as const
+
+const richTags = {
+  b: (chunk: string) => <strong className="font-semibold">{chunk}</strong>,
+}
 
 function timeOfDay(date: Date): TimeOfDay {
   const hour = date.getHours()
@@ -48,12 +52,15 @@ export function DashboardGreeting({
   streakDays,
   now,
 }: DashboardGreetingProps): JSX.Element {
-  const { format, plural } = useFormatters()
+  const { format, plural, rich } = useFormatters()
   const minutes = estimateMinutes(dueCount)
 
-  let status: string = messages.caughtUp
+  let status: ReactNode = messages.caughtUp
   if (dueCount > 0 && streakDays > 0) {
-    status = plural(minutes, messages.keepStreak, { streak: streakDays })
+    status = rich(messages.keepStreak, richTags, {
+      count: minutes,
+      streak: streakDays,
+    })
   } else if (dueCount > 0) {
     status = plural(minutes, messages.startStreak)
   }

@@ -1,4 +1,5 @@
-import type { DashboardDeck } from "./dashboard-metrics"
+import { addDays, localDateKey } from "@/lib/dates"
+import type { DailyReviews, DashboardDeck } from "./dashboard-metrics"
 
 // Rough review pace until #112 can measure it from review history.
 const SECONDS_PER_REVIEW = 8
@@ -137,4 +138,47 @@ export function isSameAction(
   return (
     a !== null && b !== null && a.courseId === b.courseId && a.mode === b.mode
   )
+}
+
+export function reviewsOn(days: readonly DailyReviews[], date: Date): number {
+  const key = localDateKey(date)
+  return days.find((day) => day.date === key)?.reviewsCompleted ?? 0
+}
+
+export type WeekDayStatus = "met" | "missed" | "in-progress" | "upcoming"
+
+export type WeekDay = {
+  date: Date
+  isToday: boolean
+  status: WeekDayStatus
+}
+
+/**
+ * The calendar week containing `now`, starting on `firstDayOfWeek`
+ * (1 = Monday … 7 = Sunday). Past days without a record count as missed.
+ */
+export function weekDays(
+  now: Date,
+  firstDayOfWeek: number,
+  days: readonly DailyReviews[],
+  reviewTarget: number
+): WeekDay[] {
+  const todayKey = localDateKey(now)
+  const offset = (now.getDay() - (firstDayOfWeek % 7) + 7) % 7
+  const start = addDays(now, -offset)
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = addDays(start, index)
+    const key = localDateKey(date)
+    const met = reviewsOn(days, date) >= reviewTarget
+    const isToday = key === todayKey
+    const status: WeekDayStatus = met
+      ? "met"
+      : isToday
+        ? "in-progress"
+        : key < todayKey
+          ? "missed"
+          : "upcoming"
+    return { date, isToday, status }
+  })
 }

@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router"
 import {
   ChevronsUpDown,
   CreditCard,
-  Flame,
   Image as ImageIcon,
   Layers,
   LogOut,
@@ -16,7 +15,6 @@ import { Button } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
-import { Text } from "@workspace/ui/components/text"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
@@ -41,24 +39,6 @@ const railLinks = [
     exact: false,
   },
 ]
-
-function StreakDisplay({ days }: { days: number }): JSX.Element {
-  const dayLabel = days === 1 ? "1 Day" : `${days} Days`
-
-  return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-streak px-3 py-2.5">
-      <Flame className="size-5 text-streak-foreground" aria-hidden="true" />
-      <div className="min-w-0">
-        <Text className="text-[10px] leading-4 font-medium tracking-wider text-streak-foreground uppercase">
-          Streak
-        </Text>
-        <Text className="text-sm leading-5 font-semibold text-foreground">
-          {dayLabel}
-        </Text>
-      </div>
-    </div>
-  )
-}
 
 function RailLink({
   to,
@@ -200,10 +180,6 @@ export function AppSidebar(): JSX.Element {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
-
-      <div className="px-3 pb-3 md:px-4 md:pb-0">
-        <StreakDisplay days={viewer.streakDays} />
       </div>
 
       <RailNav />

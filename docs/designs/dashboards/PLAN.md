@@ -74,6 +74,8 @@ type DashboardDeck = {
 }
 ```
 
+Alongside the decks, `dailyGoal` holds the review target and the last 7 days of review counts keyed by the learner's local date, so the week strip doesn't depend on the browser's time zone matching the server's.
+
 The types and the seeded snapshot live in `apps/web/src/routes/_app/-components/dashboard-metrics.ts`. Derived values are pure functions in `dashboard-model.ts` next to it, not stored state: `estimateMinutes`, `totalDue`, `totalMastered`, `todayState`, `selectFocusDeck`, `sortDecks`. They move into `@workspace/core` when that package is restored in MS 3.
 
 ## 5. Accessibility requirements
@@ -110,7 +112,7 @@ CI runs Knip, which fails on exports nothing imports. So each selector lands in 
 3. **Today panel.** Add `todayState`, with the focus rule it depends on, and replace `DueReviewAlert` with a `TodayPanel` driven by it. Due count, minutes, per-deck breakdown, primary and secondary actions. Add a `/study/$courseId` placeholder route with a `mode` search param so both actions have a destination until #48 lands.
 4. **Focus deck card.** Export `selectFocusDeck` and add a larger card for it, with a language-code badge, the stacked mastery bar and a text legend, "Last studied" time, and the one action that fits its state. Hide that action when the Today panel's primary action already opens the same session, which is always true until cross-deck review exists. Add `percent`, `languageName`, and `relativeTime` to `useFormatters()`.
 5. **Deck list rows.** Add `sortDecks` and compact rows sorted by it for every deck except the focus deck: language-code badge, title, last studied, status chip, mini progress bar, contextual action with a unique accessible name. Columns align through a CSS subgrid and switch on the list's own width (container query), not the viewport. Hidden when there is one deck. The badge and "Last studied" line become shared components.
-6. **This week aside.** Streak, daily goal ring, and locale-aware weekday dots. Fold in the "Learned" and "Daily goal" quick stats so the numbers appear once.
+6. **This week aside.** Streak, daily goal ring, and weekday dots whose first day and names come from the UI locale (`Intl.Locale` week info, falling back to Monday). Fold in the "Learned" and "Daily goal" quick stats so the numbers appear once, and remove `LearningQuickStats`. The sidebar streak is removed on every page (decided); the greeting keeps its streak line, with the streak in bold through a `<b>` rich-text tag, because on mobile the aside sits below the decks. The contract's `dailyGoal` gains `days`: the last 7 days as local `YYYY-MM-DD` dates with review counts.
 7. **Memory callout and trends.** Tricky-words callout from seeded data. Move `ProgressTrends` below the fold.
 8. **Edge states.** No decks, caught up, goal met, one deck, twelve decks, long titles, large numbers. Add a DEV-only `?preview=` search param that switches the seeded snapshot, so each state can be shown and checked.
 9. **Learning-language filter.** Shown only when decks span two or more learning languages. Stored in a `?studying=` search param, not component state.
@@ -119,7 +121,6 @@ CI runs Knip, which fails on exports nothing imports. So each selector lands in 
 ## 8. Open decisions
 
 - **Rank card.** "Top 5% among Spanish learners" invites comparison and needs cohort data we do not have. Keep, soften, or drop it.
-- **Sidebar streak.** The sidebar already shows the streak. Either the dashboard aside owns it and the sidebar copy hides on `/dashboard`, or both stay.
 - **Cross-deck review.** A single "review everything due" session needs a route beyond `/study/$courseId`. Decide before MS 3.
 - **Step 9 timing.** The language filter only matters for multi-language learners and can move to a later issue if MS 2 runs short.
 
