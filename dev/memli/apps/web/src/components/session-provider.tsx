@@ -7,6 +7,7 @@ export type ViewerPlan = "free" | "pro"
 export type Viewer = {
   id: string
   username: string
+  displayName: string
   email: string
   plan: ViewerPlan
   uiLocale: string
@@ -17,6 +18,7 @@ export type Viewer = {
 const prototypeViewer = {
   id: "usr_prototype_01",
   username: "prototype_learner",
+  displayName: "Phillip",
   email: "learner@prototype.memli.test",
   plan: "pro",
   uiLocale: "en",
