@@ -37,7 +37,7 @@ Priority from highest to lowest. DOM order matches visual order so keyboard and 
 6. **Memory callout**: "7 words keep slipping. Give them a new mnemonic."
 7. **Progress trends** (existing #46 component), moved below the fold.
 
-Layout is mobile-first, one column. At `xl` the page becomes two columns: main (regions 2–4) and a fixed 20rem aside (regions 5–6). Trends span the full width underneath. The split waits for `xl` because the 16rem app sidebar leaves the main column too narrow at `lg`.
+Layout is mobile-first, one column. At `xl` the page becomes two columns: main (regions 2–4) and a fixed 20rem aside (regions 5–6). Trends span the full width underneath. The split waits for `xl` because the 16rem app sidebar leaves the main column too narrow at `lg`. The page caps at `max-w-7xl` so cards don't stretch across large monitors.
 
 ### Focus deck rule
 
@@ -54,7 +54,7 @@ The panel is a discriminated union, not a set of booleans (`react-state.mdc`):
 | `caught-up` | due = 0, no new cards | none (calm "All caught up" message) | none |
 | `no-decks` | no decks yet | Browse community decks | none |
 
-Until a cross-deck session exists, **Start review** opens `/study/$courseId?mode=review` for the focus deck, and a "Starts in {deck}" line says so. **Learn new words** opens the same route with `?mode=learn`. Add "Add your first deck" and "Browse decks" once those pages exist; until then the panel offers no action it can't keep.
+Until a cross-deck session exists, **Start review** opens `/study/$courseId?mode=review` for the focus deck. When cards are due in two or more decks, the panel lists them and a "Starts in {deck}" line says where the session begins; with one deck both would repeat the headline. **Learn new words** opens the same route with `?mode=learn`. Add "Add your first deck" and "Browse decks" once those pages exist; until then the panel offers no action it can't keep.
 
 ## 4. Data contract
 
@@ -108,7 +108,7 @@ CI runs Knip, which fails on exports nothing imports. So each selector lands in 
 1. **Greeting and formatters.** Add a `displayName` to the prototype viewer, a `useFormatters()` hook built on `Intl`, and the per-component `messages` pattern. Render the greeting `h1` (morning, afternoon, or evening in the viewer's local time) with a status line from the due count and streak. Start `dashboard-model.ts` with `estimateMinutes`.
 2. **Data contract and page skeleton.** Add seeded decks to the dashboard contract and derive the due and mastered totals from them with `totalDue` and `totalMastered`, so the numbers can't disagree. Set the region order and the mobile-first grid with the `xl` two-column split. Move the banner, quick stats, and trends into their slots. Drop `role="status"` from the banner.
 3. **Today panel.** Add `todayState`, with the focus rule it depends on, and replace `DueReviewAlert` with a `TodayPanel` driven by it. Due count, minutes, per-deck breakdown, primary and secondary actions. Add a `/study/$courseId` placeholder route with a `mode` search param so both actions have a destination until #48 lands.
-4. **Focus deck card.** Export `selectFocusDeck` and add a larger card for it, with a language-code badge, the stacked mastery bar and a text legend, and the one action that fits its state.
+4. **Focus deck card.** Export `selectFocusDeck` and add a larger card for it, with a language-code badge, the stacked mastery bar and a text legend, "Last studied" time, and the one action that fits its state. Hide that action when the Today panel's primary action already opens the same session, which is always true until cross-deck review exists. Add `percent`, `languageName`, and `relativeTime` to `useFormatters()`.
 5. **Deck list rows.** Add `sortDecks` and compact rows sorted by it: language-code badge, title, status chip, mini progress bar, contextual action with a unique accessible name. Hidden when there is one deck.
 6. **This week aside.** Streak, daily goal ring, and locale-aware weekday dots. Fold in the "Learned" and "Daily goal" quick stats so the numbers appear once.
 7. **Memory callout and trends.** Tricky-words callout from seeded data. Move `ProgressTrends` below the fold.

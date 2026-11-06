@@ -6,11 +6,16 @@ import { Text } from "@workspace/ui/components/text"
 import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
 import {
+  deckAction,
+  isSameAction,
+  selectFocusDeck,
+  todayPrimaryAction,
   todayState,
   totalDue,
   totalMastered,
 } from "./-components/dashboard-model"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
+import { FocusDeckCard } from "./-components/FocusDeckCard"
 import { LearningQuickStats } from "./-components/LearningQuickStats"
 import { ProgressTrends } from "./-components/ProgressTrends"
 import { TodayPanel } from "./-components/TodayPanel"
@@ -24,18 +29,30 @@ function Dashboard(): JSX.Element {
   const { decks, dailyGoal, progressTrends } = prototypeDashboardMetrics
   const dueCount = totalDue(decks)
   const termsLearned = totalMastered(decks)
+  const today = todayState(decks)
+  const focusDeck = selectFocusDeck(decks)
+  const now = new Date()
 
   return (
-    <Section width="full" padding="compact" className="flex flex-col gap-8">
+    <Section width="wide" padding="compact" className="flex flex-col gap-8">
       <DashboardGreeting
         name={viewer.displayName}
         dueCount={dueCount}
         streakDays={viewer.streakDays}
-        now={new Date()}
+        now={now}
       />
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex min-w-0 flex-col gap-8">
-          <TodayPanel state={todayState(decks)} />
+          <TodayPanel state={today} />
+          {focusDeck === null ? null : (
+            <FocusDeckCard
+              deck={focusDeck}
+              now={now}
+              showAction={
+                !isSameAction(deckAction(focusDeck), todayPrimaryAction(today))
+              }
+            />
+          )}
           <section aria-labelledby="decks-heading">
             <Heading id="decks-heading" level={2} size="3">
               Your decks

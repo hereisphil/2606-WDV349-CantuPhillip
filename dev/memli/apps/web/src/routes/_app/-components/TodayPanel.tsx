@@ -77,6 +77,7 @@ function ReviewContent({
 }): JSX.Element {
   const { number, format, plural } = useFormatters()
   const { dueCount, minutes, dueDecks, focusDeck } = state
+  const spansDecks = dueDecks.length > 1
 
   return (
     <>
@@ -91,19 +92,21 @@ function ReviewContent({
         </p>
         <Text variant="muted">{plural(minutes, messages.minutes)}</Text>
       </div>
-      <ul className="flex flex-wrap gap-2">
-        {dueDecks.map((deck) => (
-          <li
-            key={deck.courseId}
-            className="rounded-lg bg-card px-3 py-1 text-sm text-muted-foreground tabular-nums"
-          >
-            {format(messages.fromDeck, {
-              count: deck.dueCount,
-              deck: deck.title,
-            })}
-          </li>
-        ))}
-      </ul>
+      {spansDecks ? (
+        <ul className="flex flex-wrap gap-2">
+          {dueDecks.map((deck) => (
+            <li
+              key={deck.courseId}
+              className="rounded-lg bg-card px-3 py-1 text-sm text-muted-foreground tabular-nums"
+            >
+              {format(messages.fromDeck, {
+                count: deck.dueCount,
+                deck: deck.title,
+              })}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <div className="flex flex-col gap-2">
         <Actions>
           <Button
@@ -123,9 +126,11 @@ function ReviewContent({
             <LearnLink deck={focusDeck} variant="outline" />
           ) : null}
         </Actions>
-        <Text variant="small">
-          {format(messages.startsIn, { deck: focusDeck.title })}
-        </Text>
+        {spansDecks ? (
+          <Text variant="small">
+            {format(messages.startsIn, { deck: focusDeck.title })}
+          </Text>
+        ) : null}
       </div>
     </>
   )

@@ -44,7 +44,7 @@ function compareByNeed(a: DashboardDeck, b: DashboardDeck): number {
   return compareRecency(a, b)
 }
 
-function selectFocusDeck(
+export function selectFocusDeck(
   decks: readonly DashboardDeck[]
 ): DashboardDeck | null {
   return [...decks].sort(compareByNeed)[0] ?? null
@@ -84,4 +84,43 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
   }
 
   return { status: "caught-up" }
+}
+
+export type DeckAction = {
+  courseId: string
+  mode: "review" | "learn"
+  count: number
+}
+
+/** Review when anything is due, otherwise learn new cards, otherwise nothing. */
+export function deckAction(deck: DashboardDeck): DeckAction | null {
+  if (deck.dueCount > 0) {
+    return { courseId: deck.courseId, mode: "review", count: deck.dueCount }
+  }
+  if (deck.newAvailable > 0) {
+    return { courseId: deck.courseId, mode: "learn", count: deck.newAvailable }
+  }
+  return null
+}
+
+/** Where the Today panel's primary action leads, so other regions don't repeat it. */
+export function todayPrimaryAction(state: TodayState): DeckAction | null {
+  switch (state.status) {
+    case "review":
+      return deckAction(state.focusDeck)
+    case "learn":
+      return deckAction(state.deck)
+    case "caught-up":
+    case "no-decks":
+      return null
+  }
+}
+
+export function isSameAction(
+  a: DeckAction | null,
+  b: DeckAction | null
+): boolean {
+  return (
+    a !== null && b !== null && a.courseId === b.courseId && a.mode === b.mode
+  )
 }
