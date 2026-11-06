@@ -18,7 +18,7 @@ function QuickStatCard({
       size="sm"
       role="group"
       aria-label={description}
-      className="min-w-28 flex-1 items-center gap-0.5 bg-card py-3 text-center shadow-none sm:flex-none"
+      className="items-center gap-0.5 bg-card py-3 text-center shadow-none"
     >
       <Heading
         level={3}
@@ -41,7 +41,7 @@ export function LearningQuickStats({
   dailyReviewTarget,
 }: LearningQuickStatsData): JSX.Element {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+    <div className="grid grid-cols-2 gap-2">
       <QuickStatCard
         value={String(termsLearned)}
         label="Learned"

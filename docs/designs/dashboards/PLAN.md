@@ -37,7 +37,7 @@ Priority from highest to lowest. DOM order matches visual order so keyboard and 
 6. **Memory callout**: "7 words keep slipping. Give them a new mnemonic."
 7. **Progress trends** (existing #46 component), moved below the fold.
 
-Layout is mobile-first, one column. At `lg` the page becomes two columns: main (regions 2–4) and a fixed-width aside (regions 5–6). Trends span the full width underneath.
+Layout is mobile-first, one column. At `xl` the page becomes two columns: main (regions 2–4) and a fixed 20rem aside (regions 5–6). Trends span the full width underneath. The split waits for `xl` because the 16rem app sidebar leaves the main column too narrow at `lg`.
 
 ### Focus deck rule
 
@@ -74,7 +74,7 @@ type DashboardDeck = {
 }
 ```
 
-Derived values are pure functions in `apps/web/src/routes/_app/-components/dashboard-model.ts`, not stored state: `selectFocusDeck`, `sortDecks`, `todayState`, `estimateMinutes`. They move into `@workspace/core` when that package is restored in MS 3.
+The types and the seeded snapshot live in `apps/web/src/routes/_app/-components/dashboard-metrics.ts`. Derived values are pure functions in `dashboard-model.ts` next to it, not stored state: `estimateMinutes`, `totalDue`, `totalMastered`, `todayState`, `selectFocusDeck`, `sortDecks`. They move into `@workspace/core` when that package is restored in MS 3.
 
 ## 5. Accessibility requirements
 
@@ -103,11 +103,13 @@ The library choice is still open in `dev/memli/docs/i18n.md`. Until then, write 
 
 Each step is one commit tagged `[web]` or `[ui]` with `Refs #47`. Check the matching task on the issue in the same turn the commit lands.
 
+CI runs Knip, which fails on exports nothing imports. So each selector lands in the same step as the component that first uses it, never ahead of it.
+
 1. **Greeting and formatters.** Add a `displayName` to the prototype viewer, a `useFormatters()` hook built on `Intl`, and the per-component `messages` pattern. Render the greeting `h1` (morning, afternoon, or evening in the viewer's local time) with a status line from the due count and streak. Start `dashboard-model.ts` with `estimateMinutes`.
-2. **Data contract and page skeleton.** Finish `dashboard-model.ts` (types, seeded snapshot, `selectFocusDeck`, `sortDecks`, `todayState`). Set the region order and the mobile-first grid with the `lg` two-column split. Move the existing banner, quick stats, and trends into their slots. Drop `role="status"` from the banner.
-3. **Today panel.** Replace `DueReviewAlert` with a `TodayPanel` driven by `todayState`. Due count, minutes, per-deck breakdown, primary and secondary actions. Add a `/study/$courseId` placeholder route so **Start review** has a destination until #48 lands.
-4. **Focus deck card.** Larger card for `selectFocusDeck`, with a language-code badge, the stacked mastery bar and a text legend, the deck title in its `lang`, and the one action that fits its state.
-5. **Deck list rows.** Compact rows sorted by `sortDecks`: language-code badge, title, status chip, mini progress bar, contextual action with a unique accessible name. Hidden when there is one deck.
+2. **Data contract and page skeleton.** Add seeded decks to the dashboard contract and derive the due and mastered totals from them with `totalDue` and `totalMastered`, so the numbers can't disagree. Set the region order and the mobile-first grid with the `xl` two-column split. Move the banner, quick stats, and trends into their slots. Drop `role="status"` from the banner.
+3. **Today panel.** Add `todayState` and replace `DueReviewAlert` with a `TodayPanel` driven by it. Due count, minutes, per-deck breakdown, primary and secondary actions. Add a `/study/$courseId` placeholder route so **Start review** has a destination until #48 lands.
+4. **Focus deck card.** Add `selectFocusDeck` and a larger card for it, with a language-code badge, the stacked mastery bar and a text legend, the deck title in its `lang`, and the one action that fits its state.
+5. **Deck list rows.** Add `sortDecks` and compact rows sorted by it: language-code badge, title, status chip, mini progress bar, contextual action with a unique accessible name. Hidden when there is one deck.
 6. **This week aside.** Streak, daily goal ring, and locale-aware weekday dots. Fold in the "Learned" and "Daily goal" quick stats so the numbers appear once.
 7. **Memory callout and trends.** Tricky-words callout from seeded data. Move `ProgressTrends` below the fold.
 8. **Edge states.** No decks, caught up, goal met, one deck, twelve decks, long titles, large numbers. Add a DEV-only `?preview=` search param that switches the seeded snapshot, so each state can be shown and checked.
