@@ -5,11 +5,15 @@ import { Section } from "@workspace/ui/components/section"
 import { Text } from "@workspace/ui/components/text"
 import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
-import { totalDue, totalMastered } from "./-components/dashboard-model"
+import {
+  todayState,
+  totalDue,
+  totalMastered,
+} from "./-components/dashboard-model"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
-import { DueReviewAlert } from "./-components/DueReviewAlert"
 import { LearningQuickStats } from "./-components/LearningQuickStats"
 import { ProgressTrends } from "./-components/ProgressTrends"
+import { TodayPanel } from "./-components/TodayPanel"
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -31,7 +35,7 @@ function Dashboard(): JSX.Element {
       />
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex min-w-0 flex-col gap-8">
-          <DueReviewAlert dueCount={dueCount} termsLearned={termsLearned} />
+          <TodayPanel state={todayState(decks)} />
           <section aria-labelledby="decks-heading">
             <Heading id="decks-heading" level={2} size="3">
               Your decks

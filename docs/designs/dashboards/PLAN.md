@@ -51,10 +51,10 @@ The panel is a discriminated union, not a set of booleans (`react-state.mdc`):
 | --- | --- | --- | --- |
 | `review` | due > 0 | Start review (N cards) | Learn N new words |
 | `learn` | due = 0, new cards available | Learn N new words | none |
-| `caught-up` | due = 0, no new cards | none (calm "All caught up" message) | Browse decks |
-| `no-decks` | no decks yet | Add your first deck | Browse community |
+| `caught-up` | due = 0, no new cards | none (calm "All caught up" message) | none |
+| `no-decks` | no decks yet | Browse community decks | none |
 
-Until a cross-deck session exists, **Start review** opens `/study/$courseId` for the focus deck.
+Until a cross-deck session exists, **Start review** opens `/study/$courseId?mode=review` for the focus deck, and a "Starts in {deck}" line says so. **Learn new words** opens the same route with `?mode=learn`. Add "Add your first deck" and "Browse decks" once those pages exist; until then the panel offers no action it can't keep.
 
 ## 4. Data contract
 
@@ -83,7 +83,7 @@ The types and the seeded snapshot live in `apps/web/src/routes/_app/-components/
 - Progress bars expose text, for example `aria-valuetext="64% mastered"`. The stacked mastered/learning/new bar gets one text summary, not three unlabeled segments.
 - Color is never the only signal: status chips carry text, weekday dots carry a check icon and a hidden label ("Monday, goal met").
 - Repeated buttons have unique accessible names: "Review 12 cards in Spanish Core 1000", not twelve "Review" buttons.
-- Deck titles and sample words in the learning language carry `lang` (for example `lang="es"`) so screen readers pronounce them correctly.
+- Text written in the learning language, such as sample words and mnemonics, carries `lang` (for example `lang="es"`) so screen readers pronounce it correctly. Deck titles are usually written in the UI language ("Spanish Core 1000" is English), so they don't get the learning language's `lang`.
 - Text contrast at least 4.5:1 in light and dark themes. Targets at least 24 by 24 px, primary actions 44 px tall.
 - Works at 320 px wide and 200% zoom without horizontal scrolling.
 - The goal ring respects `prefers-reduced-motion`.
@@ -107,8 +107,8 @@ CI runs Knip, which fails on exports nothing imports. So each selector lands in 
 
 1. **Greeting and formatters.** Add a `displayName` to the prototype viewer, a `useFormatters()` hook built on `Intl`, and the per-component `messages` pattern. Render the greeting `h1` (morning, afternoon, or evening in the viewer's local time) with a status line from the due count and streak. Start `dashboard-model.ts` with `estimateMinutes`.
 2. **Data contract and page skeleton.** Add seeded decks to the dashboard contract and derive the due and mastered totals from them with `totalDue` and `totalMastered`, so the numbers can't disagree. Set the region order and the mobile-first grid with the `xl` two-column split. Move the banner, quick stats, and trends into their slots. Drop `role="status"` from the banner.
-3. **Today panel.** Add `todayState` and replace `DueReviewAlert` with a `TodayPanel` driven by it. Due count, minutes, per-deck breakdown, primary and secondary actions. Add a `/study/$courseId` placeholder route so **Start review** has a destination until #48 lands.
-4. **Focus deck card.** Add `selectFocusDeck` and a larger card for it, with a language-code badge, the stacked mastery bar and a text legend, the deck title in its `lang`, and the one action that fits its state.
+3. **Today panel.** Add `todayState`, with the focus rule it depends on, and replace `DueReviewAlert` with a `TodayPanel` driven by it. Due count, minutes, per-deck breakdown, primary and secondary actions. Add a `/study/$courseId` placeholder route with a `mode` search param so both actions have a destination until #48 lands.
+4. **Focus deck card.** Export `selectFocusDeck` and add a larger card for it, with a language-code badge, the stacked mastery bar and a text legend, and the one action that fits its state.
 5. **Deck list rows.** Add `sortDecks` and compact rows sorted by it: language-code badge, title, status chip, mini progress bar, contextual action with a unique accessible name. Hidden when there is one deck.
 6. **This week aside.** Streak, daily goal ring, and locale-aware weekday dots. Fold in the "Learned" and "Daily goal" quick stats so the numbers appear once.
 7. **Memory callout and trends.** Tricky-words callout from seeded data. Move `ProgressTrends` below the fold.
