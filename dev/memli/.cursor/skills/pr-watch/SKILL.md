@@ -21,5 +21,6 @@ Open (or reuse) a feature PR, watch CI, report results. Do not merge.
 ## Do not
 
 - Merge, even when green (`pr-merge`).
+- Pass `--squash` or `--rebase`. This repo allows merge commits only (`gh pr merge --merge`).
 - Retry flaky CI in a loop unless the user asks.
 - Open a promotion PR unless the user asked for a promotion.

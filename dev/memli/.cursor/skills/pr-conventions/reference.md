@@ -70,13 +70,13 @@ Only when:
 3. PR is mergeable (no blocking conflicts).
 4. Base is `dev` (refuse silent promotion merges).
 
-Prefer:
+This repo allows merge commits only. Squash and rebase are disabled in the GitHub settings.
 
 ```bash
-env -u GITHUB_TOKEN -u GH_TOKEN gh pr merge <number> --repo hereisphil/2606-WDV349-CantuPhillip --squash
+env -u GITHUB_TOKEN -u GH_TOKEN gh pr merge <number> --repo hereisphil/2606-WDV349-CantuPhillip --merge
 ```
 
-Use `--merge` / `--rebase` only if the user asks. Do not `--admin` or skip checks.
+Do not pass `--squash` or `--rebase`. Do not `--admin` or skip checks.
 
 ## Report back
 

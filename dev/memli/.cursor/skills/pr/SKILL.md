@@ -23,4 +23,5 @@ Open a feature PR. Do not watch CI and do not merge.
 
 - Watch or wait on checks (`pr-watch` / `pr-merge`).
 - Merge.
+- Pass `--squash` or `--rebase`. This repo allows merge commits only (`gh pr merge --merge`).
 - Open a promotion PR (`dev→stage` / `stage→main`) unless the user asked for a promotion.
