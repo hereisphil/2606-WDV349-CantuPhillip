@@ -13,8 +13,8 @@ type RichTags = Record<string, (chunk: string) => ReactNode>
 
 export type Formatters = {
   number: (value: number) => string
-  /** `ratio` is 0–1, so 0.05 formats as "5%". */
-  percent: (ratio: number) => string
+  /** `ratio` is 0–1, so 0.05 formats as "5%". `signed` adds "+" to gains. */
+  percent: (ratio: number, options?: { signed?: boolean }) => string
   /** Name of a BCP 47 language in the UI locale, e.g. "es" → "Spanish". */
   languageName: (tag: string) => string
   /** "2 hours ago", "yesterday". Past and future both work. */
@@ -82,7 +82,14 @@ function createFormatters(locale: string): Formatters {
 
   const number = (value: number): string => numberFormat.format(value)
 
-  const percent = (ratio: number): string => percentFormat.format(ratio)
+  const signedPercentFormat = new Intl.NumberFormat(locale, {
+    style: "percent",
+    maximumFractionDigits: 0,
+    signDisplay: "exceptZero",
+  })
+
+  const percent = (ratio: number, options?: { signed?: boolean }): string =>
+    (options?.signed ? signedPercentFormat : percentFormat).format(ratio)
 
   const languageName = (tag: string): string => languageNames.of(tag) ?? tag
 

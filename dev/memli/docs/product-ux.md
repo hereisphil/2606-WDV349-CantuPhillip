@@ -134,6 +134,16 @@ Avoid burying “continue studying” behind unrelated marketing modules.
 
 ---
 
+## Parked ideas
+
+Ideas cut on purpose, worth revisiting once the conditions are met.
+
+| Idea | Why it waits | Revisit when |
+| --- | --- | --- |
+| **Rank card** on the dashboard (“Top 5% among Spanish learners”), dropped from #47 | Needs real cohort data, and comparison can discourage newer learners. If it returns, compare against the learner's own past or a cohort at the same stage, and consider an opt-out. | There are enough active learners per learning language for a percentile to mean something |
+
+---
+
 ## Onboarding & empty states
 
 When UX copy is written:

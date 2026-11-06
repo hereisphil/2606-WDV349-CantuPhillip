@@ -155,7 +155,7 @@ export function ThisWeek({
   const week = weekDays(now, firstDayOfWeek, days, reviewTarget)
 
   return (
-    <aside aria-labelledby="week-heading" className="flex flex-col gap-4">
+    <section aria-labelledby="week-heading" className="flex flex-col gap-4">
       <Heading id="week-heading" level={2} size="3">
         {messages.heading}
       </Heading>
@@ -202,6 +202,6 @@ export function ThisWeek({
           </div>
         </dl>
       </Card>
-    </aside>
+    </section>
   )
 }

@@ -16,9 +16,14 @@ import {
 import { DashboardGreeting } from "./-components/DashboardGreeting"
 import { DeckList } from "./-components/DeckList"
 import { FocusDeckCard } from "./-components/FocusDeckCard"
+import { MemoryCallout } from "./-components/MemoryCallout"
 import { ProgressTrends } from "./-components/ProgressTrends"
 import { ThisWeek } from "./-components/ThisWeek"
 import { TodayPanel } from "./-components/TodayPanel"
+
+const messages = {
+  aside: "Your progress",
+} as const
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
@@ -26,7 +31,8 @@ export const Route = createFileRoute("/_app/dashboard")({
 
 function Dashboard(): JSX.Element {
   const viewer = useViewer()
-  const { decks, dailyGoal, progressTrends } = prototypeDashboardMetrics
+  const { decks, dailyGoal, trickyWords, progressTrends } =
+    prototypeDashboardMetrics
   const dueCount = totalDue(decks)
   const today = todayState(decks)
   const focusDeck = selectFocusDeck(decks)
@@ -59,13 +65,16 @@ function Dashboard(): JSX.Element {
             now={now}
           />
         </div>
-        <ThisWeek
-          days={dailyGoal.days}
-          reviewTarget={dailyGoal.reviewTarget}
-          now={now}
-          streakDays={viewer.streakDays}
-          wordsMastered={totalMastered(decks)}
-        />
+        <aside aria-label={messages.aside} className="flex flex-col gap-6">
+          <ThisWeek
+            days={dailyGoal.days}
+            reviewTarget={dailyGoal.reviewTarget}
+            now={now}
+            streakDays={viewer.streakDays}
+            wordsMastered={totalMastered(decks)}
+          />
+          <MemoryCallout total={trickyWords.total} words={trickyWords.words} />
+        </aside>
       </div>
       <ProgressTrends {...progressTrends} />
     </Section>

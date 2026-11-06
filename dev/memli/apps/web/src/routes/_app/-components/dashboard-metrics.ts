@@ -25,14 +25,22 @@ export type DailyReviews = {
   reviewsCompleted: number
 }
 
+/** A card the learner keeps forgetting (FSRS calls these leeches). */
+export type TrickyWord = {
+  cardId: string
+  courseId: string
+  term: string
+  /** BCP 47 tag of `term`, so screen readers pronounce it correctly. */
+  learningLanguage: string
+  lapses: number
+}
+
 export type ProgressTrendsData = {
   consistencyPercent: number
   consistencyWeeklyChangePercent: number
   retentionPercent: number
   retentionGlobalAveragePercent: number
   newCardsThisMonth: number
-  rankLabel: string
-  rankCohort: string
 }
 
 export type DashboardMetrics = {
@@ -41,6 +49,11 @@ export type DashboardMetrics = {
     reviewTarget: number
     /** The last 7 days including today, oldest first. Missing days had no reviews. */
     days: readonly DailyReviews[]
+  }
+  trickyWords: {
+    total: number
+    /** The most-forgotten few, most lapses first. */
+    words: readonly TrickyWord[]
   }
   progressTrends: ProgressTrendsData
 }
@@ -113,13 +126,51 @@ export const prototypeDashboardMetrics = {
     reviewTarget: 50,
     days: recentDays([12, 50, 64, 31, 50, 55, 24]),
   },
+  trickyWords: {
+    total: 7,
+    words: [
+      {
+        cardId: "es-aprovechar",
+        courseId: "spanish-core-1000",
+        term: "aprovechar",
+        learningLanguage: "es",
+        lapses: 6,
+      },
+      {
+        cardId: "ja-nu",
+        courseId: "japanese-kana",
+        term: "ぬ",
+        learningLanguage: "ja",
+        lapses: 5,
+      },
+      {
+        cardId: "es-embarazada",
+        courseId: "spanish-core-1000",
+        term: "embarazada",
+        learningLanguage: "es",
+        lapses: 5,
+      },
+      {
+        cardId: "ja-re",
+        courseId: "japanese-kana",
+        term: "れ",
+        learningLanguage: "ja",
+        lapses: 4,
+      },
+      {
+        cardId: "es-desarrollar",
+        courseId: "spanish-core-1000",
+        term: "desarrollar",
+        learningLanguage: "es",
+        lapses: 4,
+      },
+    ],
+  },
   progressTrends: {
     consistencyPercent: 98,
     consistencyWeeklyChangePercent: 2,
     retentionPercent: 84,
     retentionGlobalAveragePercent: 75,
     newCardsThisMonth: 142,
-    rankLabel: "Top 5%",
-    rankCohort: "Among Spanish learners",
   },
 } as const satisfies DashboardMetrics
