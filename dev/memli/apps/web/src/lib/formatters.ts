@@ -17,6 +17,8 @@ export type Formatters = {
   percent: (ratio: number, options?: { signed?: boolean }) => string
   /** Name of a BCP 47 language in the UI locale, e.g. "es" → "Spanish". */
   languageName: (tag: string) => string
+  /** "4 minutes", or whole hours from 60 minutes up ("3 hours"). */
+  duration: (minutes: number) => string
   /** "2 hours ago", "yesterday". Past and future both work. */
   relativeTime: (date: Date, now: Date) => string
   /** "M" (narrow) or "Monday" (long). */
@@ -93,6 +95,22 @@ function createFormatters(locale: string): Formatters {
 
   const languageName = (tag: string): string => languageNames.of(tag) ?? tag
 
+  const minuteFormat = new Intl.NumberFormat(locale, {
+    style: "unit",
+    unit: "minute",
+    unitDisplay: "long",
+  })
+  const hourFormat = new Intl.NumberFormat(locale, {
+    style: "unit",
+    unit: "hour",
+    unitDisplay: "long",
+  })
+
+  const duration = (minutes: number): string =>
+    minutes < 60
+      ? minuteFormat.format(minutes)
+      : hourFormat.format(Math.round(minutes / 60))
+
   const relativeTime = (date: Date, now: Date): string => {
     const seconds = (date.getTime() - now.getTime()) / 1000
     for (const [unit, size] of relativeUnits) {
@@ -167,6 +185,7 @@ function createFormatters(locale: string): Formatters {
     number,
     percent,
     languageName,
+    duration,
     relativeTime,
     weekday,
     firstDayOfWeek,

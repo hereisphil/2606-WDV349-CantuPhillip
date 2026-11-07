@@ -157,7 +157,7 @@ export function FocusDeckCard({
         <div className="flex items-start gap-4">
           <LanguageBadge tag={deck.learningLanguage} size="lg" />
           <div className="flex min-w-0 flex-col gap-1">
-            <Heading level={3} size="3" className="text-pretty">
+            <Heading level={3} size="3" className="text-pretty wrap-break-word">
               {deck.title}
             </Heading>
             <LastStudied at={deck.lastReviewedAt} now={now} />

@@ -117,7 +117,7 @@ function DeckRow({
             level={3}
             size="4"
             weight="semibold"
-            className="text-base text-pretty"
+            className="text-base text-pretty wrap-break-word"
           >
             {deck.title}
           </Heading>

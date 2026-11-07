@@ -15,14 +15,22 @@ export type DashboardDeck = {
   masteredCount: number
   learningCount: number
   unseenCount: number
+  /** Cards in this deck the learner keeps forgetting. */
+  trickyCount: number
   /** ISO 8601 UTC, or null when the deck has never been studied. */
   lastReviewedAt: string | null
 }
 
-export type DailyReviews = {
+export type DailyStudy = {
   /** Calendar date in the learner's time zone, "YYYY-MM-DD". */
   date: string
-  reviewsCompleted: number
+  /** Reviews plus first-time new cards. */
+  cardsStudied: number
+  /**
+   * Nothing was left due and the new-card limit was used up by the end of
+   * the day. Counts as meeting the goal. Today reads the live deck counts.
+   */
+  cleared: boolean
 }
 
 /** A card the learner keeps forgetting (FSRS calls these leeches). */
@@ -46,9 +54,10 @@ export type ProgressTrendsData = {
 export type DashboardMetrics = {
   decks: readonly DashboardDeck[]
   dailyGoal: {
-    reviewTarget: number
-    /** The last 7 days including today, oldest first. Missing days had no reviews. */
-    days: readonly DailyReviews[]
+    /** Cards studied per day, reviews and new cards together. */
+    target: number
+    /** The last 7 days including today, oldest first. Missing days had no study. */
+    days: readonly DailyStudy[]
   }
   trickyWords: {
     total: number
@@ -61,16 +70,20 @@ export type DashboardMetrics = {
 // Relative to page load so "2 hours ago" stays true whenever the prototype is opened.
 const seededAt = Date.now()
 
-function hoursAgo(hours: number): string {
+export function hoursAgo(hours: number): string {
   return new Date(seededAt - hours * 60 * 60 * 1000).toISOString()
 }
 
-function recentDays(reviewsOldestFirst: readonly number[]): DailyReviews[] {
+function recentDays(
+  cardsOldestFirst: readonly number[],
+  clearedDaysAgo: readonly number[] = []
+): DailyStudy[] {
   const today = new Date(seededAt)
-  const lastIndex = reviewsOldestFirst.length - 1
-  return reviewsOldestFirst.map((reviewsCompleted, index) => ({
+  const lastIndex = cardsOldestFirst.length - 1
+  return cardsOldestFirst.map((cardsStudied, index) => ({
     date: localDateKey(addDays(today, index - lastIndex)),
-    reviewsCompleted,
+    cardsStudied,
+    cleared: clearedDaysAgo.includes(lastIndex - index),
   }))
 }
 
@@ -86,6 +99,7 @@ export const prototypeDashboardMetrics = {
       masteredCount: 52,
       learningCount: 148,
       unseenCount: 800,
+      trickyCount: 4,
       lastReviewedAt: hoursAgo(2),
     },
     {
@@ -97,6 +111,7 @@ export const prototypeDashboardMetrics = {
       masteredCount: 18,
       learningCount: 40,
       unseenCount: 34,
+      trickyCount: 3,
       lastReviewedAt: hoursAgo(26),
     },
     {
@@ -108,6 +123,7 @@ export const prototypeDashboardMetrics = {
       masteredCount: 20,
       learningCount: 30,
       unseenCount: 200,
+      trickyCount: 0,
       lastReviewedAt: hoursAgo(72),
     },
     {
@@ -119,12 +135,13 @@ export const prototypeDashboardMetrics = {
       masteredCount: 10,
       learningCount: 30,
       unseenCount: 80,
+      trickyCount: 0,
       lastReviewedAt: hoursAgo(24 * 14),
     },
   ],
   dailyGoal: {
-    reviewTarget: 50,
-    days: recentDays([12, 50, 64, 31, 50, 55, 24]),
+    target: 50,
+    days: recentDays([12, 50, 64, 31, 50, 55, 24], [3]),
   },
   trickyWords: {
     total: 7,

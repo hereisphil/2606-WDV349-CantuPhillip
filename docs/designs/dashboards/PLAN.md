@@ -51,10 +51,23 @@ The panel is a discriminated union, not a set of booleans (`react-state.mdc`):
 | --- | --- | --- | --- |
 | `review` | due > 0 | Start review (N cards) | Learn N new words |
 | `learn` | due = 0, new cards available | Learn N new words | none |
-| `caught-up` | due = 0, no new cards | none (calm "All caught up" message) | none |
+| `caught-up` | due = 0, no new cards left today | none (calm "All caught up" message) | opt-in: Learn 10 more new words, Practice N tricky words |
 | `no-decks` | no decks yet | Browse community decks | none |
 
 Until a cross-deck session exists, **Start review** opens `/study/$courseId?mode=review` for the focus deck. When cards are due in two or more decks, the panel lists them and a "Starts in {deck}" line says where the session begins; with one deck both would repeat the headline. **Learn new words** opens the same route with `?mode=learn`. Add "Add your first deck" and "Browse decks" once those pages exist; until then the panel offers no action it can't keep.
+
+### Daily goal and keep-going study
+
+FSRS schedules fewer reviews the better a learner remembers, so a fixed card target alone would mark a diligent learner's best days as missed. Two rules (decided):
+
+- **Cards studied** count toward the goal: reviews plus first-time new cards.
+- **Clearing the queue meets the goal.** A day where nothing was left due and the new-card limit was used up counts as met, even below the target. The ring fills and reads "24 studied" instead of "24 of 50". The streak should follow the same rule when #112 computes it on the server.
+
+A caught-up learner can opt into more study, like Anki's Custom Study. The panel offers it for the first deck, by need, that still has unseen cards or tricky words:
+
+- **Learn N more new words** opens `?mode=learn&extra=N`, capped at 10, with a note that each new word adds future reviews.
+- **Practice N tricky words** opens `?mode=practice` for that deck's leeches. Whether practice changes their schedule is decided with the session (#48, #49).
+- **Review ahead** is left out on purpose: reviewing before a card is due does less for long-term memory.
 
 ## 4. Data contract
 
@@ -70,11 +83,12 @@ type DashboardDeck = {
   masteredCount: number
   learningCount: number
   unseenCount: number
+  trickyCount: number // cards the learner keeps forgetting
   lastReviewedAt: string | null // ISO 8601 UTC
 }
 ```
 
-Alongside the decks, `dailyGoal` holds the review target and the last 7 days of review counts keyed by the learner's local date, so the week strip doesn't depend on the browser's time zone matching the server's.
+Alongside the decks, `dailyGoal` holds the card target and the last 7 days keyed by the learner's local date, so the week strip doesn't depend on the browser's time zone matching the server's. Each day has `cardsStudied` and `cleared` (the queue was empty by the end of the day); today's cleared state comes from the live deck counts instead.
 
 The types and the seeded snapshot live in `apps/web/src/routes/_app/-components/dashboard-metrics.ts`. Derived values are pure functions in `dashboard-model.ts` next to it, not stored state: `estimateMinutes`, `totalDue`, `totalMastered`, `todayState`, `selectFocusDeck`, `sortDecks`. They move into `@workspace/core` when that package is restored in MS 3.
 
@@ -114,7 +128,12 @@ CI runs Knip, which fails on exports nothing imports. So each selector lands in 
 5. **Deck list rows.** Add `sortDecks` and compact rows sorted by it for every deck except the focus deck: language-code badge, title, last studied, status chip, mini progress bar, contextual action with a unique accessible name. Columns align through a CSS subgrid and switch on the list's own width (container query), not the viewport. Hidden when there is one deck. The badge and "Last studied" line become shared components.
 6. **This week aside.** Streak, daily goal ring, and weekday dots whose first day and names come from the UI locale (`Intl.Locale` week info, falling back to Monday). Fold in the "Learned" and "Daily goal" quick stats so the numbers appear once, and remove `LearningQuickStats`. The sidebar streak is removed on every page (decided); the greeting keeps its streak line, with the streak in bold through a `<b>` rich-text tag, because on mobile the aside sits below the decks. The contract's `dailyGoal` gains `days`: the last 7 days as local `YYYY-MM-DD` dates with review counts.
 7. **Memory callout and trends.** Add `trickyWords` (total plus the most-forgotten few) to the contract and a "N words keep slipping" callout under This week, with each word in its own `lang`. The callout has no button until a session for tricky words or a mnemonic editor exists. Both sit in one `aside` labeled "Your progress". `ProgressTrends` stays below the fold and moves to a `messages` object, `Intl` percentages, a `dl` with visible text instead of `aria-label` strings, and a sentence-case heading. The Rank card is dropped (decided) and parked in `dev/memli/docs/product-ux.md` until there is real cohort data.
-8. **Edge states.** No decks, caught up, goal met, one deck, twelve decks, long titles, large numbers. Add a DEV-only `?preview=` search param that switches the seeded snapshot, so each state can be shown and checked.
+8. **Edge states.** No decks, caught up, goal met, one deck, twelve decks, long titles, large numbers. Add a DEV-only `?preview=` search param that switches the seeded snapshot, so each state can be shown and checked. Open `/dashboard?preview=default` in `bun run dev` to get the switcher; the names are `default`, `no-decks`, `learn`, `caught-up`, `finished` (caught up with nothing left to learn or practice), `goal-met`, `one-deck`, `many-decks`, `long-titles`, and `large-numbers`. The snapshots are built in a `/* @__PURE__ */` call behind `import.meta.env.DEV`, so production bundles contain none of them. Fixes this step found:
+   - With no decks, the page shows only the greeting (with welcome copy) and the Today panel.
+   - Durations use `Intl` units, so 1,284 cards read "About 3 hours", not "172 minutes".
+   - The Today panel lists at most three decks, then "and N more decks".
+   - Long, unbroken titles wrap instead of overflowing.
+   - A caught-up learner couldn't reach the goal. Clearing the queue now meets it, new cards count toward it, and the Today panel offers opt-in extra study (see "Daily goal and keep-going study").
 9. **Learning-language filter.** Shown only when decks span two or more learning languages. Stored in a `?studying=` search param, not component state.
 10. **Accessibility and docs pass.** Keyboard walk, axe run in headless Brave, 320 px and 200% zoom, dark-mode contrast, reduced motion. Update `dev/memli/docs/roadmap.md` (it still says "Study Deck Grid") and `docs/changelog.md`.
 

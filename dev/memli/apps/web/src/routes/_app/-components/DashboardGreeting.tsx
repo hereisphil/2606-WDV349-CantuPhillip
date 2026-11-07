@@ -13,15 +13,12 @@ const messages = {
     evening: "Good evening, {name}",
   },
   keepStreak: {
-    one: "About {count} minute of review keeps your <b>{streak}-day streak</b> going.",
     other:
-      "About {count} minutes of review keeps your <b>{streak}-day streak</b> going.",
+      "About {duration} of review keeps your <b>{count}-day streak</b> going.",
   },
-  startStreak: {
-    one: "About {count} minute of review starts a new streak today.",
-    other: "About {count} minutes of review starts a new streak today.",
-  },
+  startStreak: "About {duration} of review starts a new streak today.",
   caughtUp: "Nothing is due right now. Your memory is in good shape.",
+  welcome: "Welcome to Memli. Let's find your first deck.",
 } as const
 
 const richTags = {
@@ -41,6 +38,7 @@ function timeOfDay(date: Date): TimeOfDay {
 
 type DashboardGreetingProps = {
   name: string
+  hasDecks: boolean
   dueCount: number
   streakDays: number
   now: Date
@@ -48,21 +46,24 @@ type DashboardGreetingProps = {
 
 export function DashboardGreeting({
   name,
+  hasDecks,
   dueCount,
   streakDays,
   now,
 }: DashboardGreetingProps): JSX.Element {
-  const { format, plural, rich } = useFormatters()
-  const minutes = estimateMinutes(dueCount)
+  const { format, rich, duration } = useFormatters()
+  const time = duration(estimateMinutes(dueCount))
 
   let status: ReactNode = messages.caughtUp
-  if (dueCount > 0 && streakDays > 0) {
+  if (!hasDecks) {
+    status = messages.welcome
+  } else if (dueCount > 0 && streakDays > 0) {
     status = rich(messages.keepStreak, richTags, {
-      count: minutes,
-      streak: streakDays,
+      count: streakDays,
+      duration: time,
     })
   } else if (dueCount > 0) {
-    status = plural(minutes, messages.startStreak)
+    status = format(messages.startStreak, { duration: time })
   }
 
   return (

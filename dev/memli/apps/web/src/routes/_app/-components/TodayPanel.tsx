@@ -5,7 +5,7 @@ import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { useFormatters } from "@/lib/formatters"
 import type { DashboardDeck } from "./dashboard-metrics"
-import type { TodayState } from "./dashboard-model"
+import type { KeepGoing, TodayState } from "./dashboard-model"
 
 const messages = {
   heading: "Today",
@@ -13,11 +13,12 @@ const messages = {
     one: "card ready to review",
     other: "cards ready to review",
   },
-  minutes: {
-    one: "About {count} minute",
-    other: "About {count} minutes",
-  },
+  duration: "About {duration}",
   fromDeck: "{count} from {deck}",
+  moreDecks: {
+    one: "and {count} more deck",
+    other: "and {count} more decks",
+  },
   startReview: "Start review",
   learnNew: {
     one: "Learn {count} new word",
@@ -32,12 +33,25 @@ const messages = {
   caughtUp: "You're all caught up",
   caughtUpDetail:
     "New reviews show up here as your memory needs them. Check back later today.",
+  keepGoing: "Want to keep going in {deck}?",
+  learnMore: {
+    one: "Learn {count} more new word",
+    other: "Learn {count} more new words",
+  },
+  learnMoreCost:
+    "Each new word adds a few short reviews over the coming weeks.",
+  practiceTricky: {
+    one: "Practice {count} tricky word",
+    other: "Practice {count} tricky words",
+  },
   noDecks: "You don't have any decks yet",
   noDecksDetail: "Find a deck to start building your vocabulary.",
   browseCommunity: "Browse community decks",
 } as const
 
 const primaryActionClass = "h-11 px-4 text-base"
+
+const MAX_LISTED_DECKS = 3
 
 function LearnLink({
   deck,
@@ -75,9 +89,11 @@ function ReviewContent({
 }: {
   state: Extract<TodayState, { status: "review" }>
 }): JSX.Element {
-  const { number, format, plural } = useFormatters()
+  const { number, format, plural, duration } = useFormatters()
   const { dueCount, minutes, dueDecks, focusDeck } = state
   const spansDecks = dueDecks.length > 1
+  const listedDecks = dueDecks.slice(0, MAX_LISTED_DECKS)
+  const unlistedDecks = dueDecks.length - listedDecks.length
 
   return (
     <>
@@ -85,19 +101,21 @@ function ReviewContent({
         <p className="flex flex-wrap items-baseline gap-x-3">
           <span className="font-heading text-5xl font-bold tracking-tight tabular-nums">
             {number(dueCount)}
-          </span>
+          </span>{" "}
           <span className="text-lg font-medium">
             {plural(dueCount, messages.dueLabel)}
           </span>
         </p>
-        <Text variant="muted">{plural(minutes, messages.minutes)}</Text>
+        <Text variant="muted">
+          {format(messages.duration, { duration: duration(minutes) })}
+        </Text>
       </div>
       {spansDecks ? (
-        <ul className="flex flex-wrap gap-2">
-          {dueDecks.map((deck) => (
+        <ul className="flex flex-wrap items-center gap-2">
+          {listedDecks.map((deck) => (
             <li
               key={deck.courseId}
-              className="rounded-lg bg-card px-3 py-1 text-sm text-muted-foreground tabular-nums"
+              className="max-w-full rounded-lg bg-card px-3 py-1 text-sm wrap-break-word text-muted-foreground tabular-nums"
             >
               {format(messages.fromDeck, {
                 count: deck.dueCount,
@@ -105,6 +123,11 @@ function ReviewContent({
               })}
             </li>
           ))}
+          {unlistedDecks > 0 ? (
+            <li className="text-sm text-muted-foreground">
+              {plural(unlistedDecks, messages.moreDecks)}
+            </li>
+          ) : null}
         </ul>
       ) : null}
       <div className="flex flex-col gap-2">
@@ -154,12 +177,73 @@ function LearnContent({ deck }: { deck: DashboardDeck }): JSX.Element {
   )
 }
 
-function CaughtUpContent(): JSX.Element {
+function KeepGoingActions({
+  keepGoing,
+}: {
+  keepGoing: KeepGoing
+}): JSX.Element {
+  const { format, plural } = useFormatters()
+  const { deck, extraNew, trickyCount } = keepGoing
+
   return (
-    <div className="flex flex-col gap-1">
-      <p className="font-heading text-2xl font-bold">{messages.caughtUp}</p>
-      <Text variant="muted">{messages.caughtUpDetail}</Text>
+    <div className="flex flex-col gap-3 border-t border-foreground/10 pt-5">
+      <p className="font-medium wrap-break-word">
+        {format(messages.keepGoing, { deck: deck.title })}
+      </p>
+      <Actions>
+        {extraNew > 0 ? (
+          <Button
+            variant="outline"
+            className={primaryActionClass}
+            render={
+              <Link
+                to="/study/$courseId"
+                params={{ courseId: deck.courseId }}
+                search={{ mode: "learn", extra: extraNew }}
+              />
+            }
+            nativeButton={false}
+          >
+            {plural(extraNew, messages.learnMore)}
+          </Button>
+        ) : null}
+        {trickyCount > 0 ? (
+          <Button
+            variant="outline"
+            className={primaryActionClass}
+            render={
+              <Link
+                to="/study/$courseId"
+                params={{ courseId: deck.courseId }}
+                search={{ mode: "practice" }}
+              />
+            }
+            nativeButton={false}
+          >
+            {plural(trickyCount, messages.practiceTricky)}
+          </Button>
+        ) : null}
+      </Actions>
+      {extraNew > 0 ? (
+        <Text variant="small">{messages.learnMoreCost}</Text>
+      ) : null}
     </div>
+  )
+}
+
+function CaughtUpContent({
+  keepGoing,
+}: {
+  keepGoing: KeepGoing | null
+}): JSX.Element {
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <p className="font-heading text-2xl font-bold">{messages.caughtUp}</p>
+        <Text variant="muted">{messages.caughtUpDetail}</Text>
+      </div>
+      {keepGoing === null ? null : <KeepGoingActions keepGoing={keepGoing} />}
+    </>
   )
 }
 
@@ -190,7 +274,7 @@ function PanelContent({ state }: { state: TodayState }): JSX.Element {
     case "learn":
       return <LearnContent deck={state.deck} />
     case "caught-up":
-      return <CaughtUpContent />
+      return <CaughtUpContent keepGoing={state.keepGoing} />
     case "no-decks":
       return <NoDecksContent />
   }

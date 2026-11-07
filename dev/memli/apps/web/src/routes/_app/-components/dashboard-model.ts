@@ -1,5 +1,5 @@
 import { addDays, localDateKey } from "@/lib/dates"
-import type { DailyReviews, DashboardDeck } from "./dashboard-metrics"
+import type { DailyStudy, DashboardDeck } from "./dashboard-metrics"
 
 // Rough review pace until #112 can measure it from review history.
 const SECONDS_PER_REVIEW = 8
@@ -74,8 +74,33 @@ export type TodayState =
       focusDeck: DashboardDeck
     }
   | { status: "learn"; deck: DashboardDeck }
-  | { status: "caught-up" }
+  | { status: "caught-up"; keepGoing: KeepGoing | null }
   | { status: "no-decks" }
+
+/** Opt-in study for a learner who has finished everything scheduled today. */
+export type KeepGoing = {
+  deck: DashboardDeck
+  /** New cards past today's limit, 0 when the deck has none left. */
+  extraNew: number
+  trickyCount: number
+}
+
+// Past this, the extra reviews new cards create start to pile up.
+const EXTRA_NEW_CARDS = 10
+
+function keepGoing(decks: readonly DashboardDeck[]): KeepGoing | null {
+  const deck = sortDecks(decks).find(
+    (candidate) => candidate.unseenCount > 0 || candidate.trickyCount > 0
+  )
+  if (deck === undefined) {
+    return null
+  }
+  return {
+    deck,
+    extraNew: Math.min(EXTRA_NEW_CARDS, deck.unseenCount),
+    trickyCount: deck.trickyCount,
+  }
+}
 
 export function todayState(decks: readonly DashboardDeck[]): TodayState {
   const focusDeck = selectFocusDeck(decks)
@@ -98,7 +123,7 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
     return { status: "learn", deck: focusDeck }
   }
 
-  return { status: "caught-up" }
+  return { status: "caught-up", keepGoing: keepGoing(decks) }
 }
 
 export type DeckAction = {
@@ -140,9 +165,16 @@ export function isSameAction(
   )
 }
 
-export function reviewsOn(days: readonly DailyReviews[], date: Date): number {
+function dayOn(
+  days: readonly DailyStudy[],
+  date: Date
+): DailyStudy | undefined {
   const key = localDateKey(date)
-  return days.find((day) => day.date === key)?.reviewsCompleted ?? 0
+  return days.find((day) => day.date === key)
+}
+
+export function studiedOn(days: readonly DailyStudy[], date: Date): number {
+  return dayOn(days, date)?.cardsStudied ?? 0
 }
 
 export type WeekDayStatus = "met" | "missed" | "in-progress" | "upcoming"
@@ -155,13 +187,15 @@ export type WeekDay = {
 
 /**
  * The calendar week containing `now`, starting on `firstDayOfWeek`
- * (1 = Monday … 7 = Sunday). Past days without a record count as missed.
+ * (1 = Monday … 7 = Sunday). A day meets the goal by reaching the target
+ * or by clearing everything scheduled. Past days without a record count as missed.
  */
 export function weekDays(
   now: Date,
   firstDayOfWeek: number,
-  days: readonly DailyReviews[],
-  reviewTarget: number
+  days: readonly DailyStudy[],
+  target: number,
+  clearedToday: boolean
 ): WeekDay[] {
   const todayKey = localDateKey(now)
   const offset = (now.getDay() - (firstDayOfWeek % 7) + 7) % 7
@@ -170,8 +204,10 @@ export function weekDays(
   return Array.from({ length: 7 }, (_, index) => {
     const date = addDays(start, index)
     const key = localDateKey(date)
-    const met = reviewsOn(days, date) >= reviewTarget
     const isToday = key === todayKey
+    const day = dayOn(days, date)
+    const cleared = isToday ? clearedToday : (day?.cleared ?? false)
+    const met = cleared || (day?.cardsStudied ?? 0) >= target
     const status: WeekDayStatus = met
       ? "met"
       : isToday

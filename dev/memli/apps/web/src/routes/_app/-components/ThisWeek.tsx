@@ -5,9 +5,9 @@ import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
-import type { DailyReviews } from "./dashboard-metrics"
+import type { DailyStudy } from "./dashboard-metrics"
 import {
-  reviewsOn,
+  studiedOn,
   weekDays,
   type WeekDay,
   type WeekDayStatus,
@@ -17,11 +17,14 @@ const messages = {
   heading: "This week",
   goalTitle: "Daily goal",
   goalOf: "of {target}",
+  goalStudied: "studied",
   goalRemaining: {
-    one: "{count} more review to reach today's goal.",
-    other: "{count} more reviews to reach today's goal.",
+    one: "{count} more card to reach today's goal.",
+    other: "{count} more cards to reach today's goal.",
   },
-  goalMet: "Today's goal is done. Extra reviews still count.",
+  goalMet: "Today's goal is done. Extra study still counts.",
+  goalCleared:
+    "You finished everything scheduled today, so the goal counts as done.",
   weekLabel: "Daily goal this week",
   day: {
     met: "{day}, goal met",
@@ -44,12 +47,19 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 function GoalRing({
   completed,
   target,
+  cleared,
 }: {
   completed: number
   target: number
+  /** Fills the ring below the target, because clearing the queue meets the goal. */
+  cleared: boolean
 }): JSX.Element {
   const { number, format } = useFormatters()
-  const progress = target > 0 ? Math.min(1, completed / target) : 0
+  const progress = cleared
+    ? 1
+    : target > 0
+      ? Math.min(1, completed / target)
+      : 0
 
   return (
     <div className="relative size-24 shrink-0">
@@ -79,7 +89,7 @@ function GoalRing({
           {number(completed)}
         </span>{" "}
         <span className="text-xs text-muted-foreground tabular-nums">
-          {format(messages.goalOf, { target })}
+          {cleared ? messages.goalStudied : format(messages.goalOf, { target })}
         </span>
       </p>
     </div>
@@ -138,21 +148,25 @@ function WeekDots({ week }: { week: readonly WeekDay[] }): JSX.Element {
 
 export function ThisWeek({
   days,
-  reviewTarget,
+  target,
   now,
+  clearedToday,
   streakDays,
   wordsMastered,
 }: {
-  days: readonly DailyReviews[]
-  reviewTarget: number
+  days: readonly DailyStudy[]
+  target: number
   now: Date
+  /** True when nothing is due and today's new cards are used up. */
+  clearedToday: boolean
   streakDays: number
   wordsMastered: number
 }): JSX.Element {
   const { number, plural, firstDayOfWeek } = useFormatters()
-  const reviewsToday = reviewsOn(days, now)
-  const remaining = Math.max(0, reviewTarget - reviewsToday)
-  const week = weekDays(now, firstDayOfWeek, days, reviewTarget)
+  const studiedToday = studiedOn(days, now)
+  const remaining = Math.max(0, target - studiedToday)
+  const clearedEarly = clearedToday && remaining > 0
+  const week = weekDays(now, firstDayOfWeek, days, target, clearedToday)
 
   return (
     <section aria-labelledby="week-heading" className="flex flex-col gap-4">
@@ -162,7 +176,11 @@ export function ThisWeek({
       <Card className="@container gap-6 p-5">
         <div className="grid gap-6 @lg:grid-cols-2 @lg:items-center @lg:gap-8">
           <div className="flex items-center gap-4">
-            <GoalRing completed={reviewsToday} target={reviewTarget} />
+            <GoalRing
+              completed={studiedToday}
+              target={target}
+              cleared={clearedEarly}
+            />
             <div className="flex min-w-0 flex-col gap-1">
               <Heading
                 level={3}
@@ -173,9 +191,11 @@ export function ThisWeek({
                 {messages.goalTitle}
               </Heading>
               <Text variant="small">
-                {remaining > 0
-                  ? plural(remaining, messages.goalRemaining)
-                  : messages.goalMet}
+                {remaining === 0
+                  ? messages.goalMet
+                  : clearedToday
+                    ? messages.goalCleared
+                    : plural(remaining, messages.goalRemaining)}
               </Text>
             </div>
           </div>
