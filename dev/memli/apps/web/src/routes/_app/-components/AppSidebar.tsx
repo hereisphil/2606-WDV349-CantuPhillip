@@ -56,7 +56,7 @@ function RailLink({
       to={to}
       activeOptions={{ exact }}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "flex min-h-6 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
         railActiveClass,
         "[&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}

@@ -172,6 +172,7 @@ After Phase 3, marketing first paint should work with minimal JS; app routes can
 - Keyboard path through grading controls when those ship
 - Do not rely on color alone for grade correctness states
 - Respect locale and `lang` attributes as i18n lands
+- Target WCAG 2.2 **Level AA** for pointer targets (SC 2.5.8: at least **24×24** CSS pixels). Prefer shared `Button` sizes (`xs` / `icon-xs` floor at 24px) or the `touch-target` utility on bare links/buttons so hit areas grow without changing the visual layout; do not aim for AAA 44×44 unless a control is touch-critical.
 
 ---
 

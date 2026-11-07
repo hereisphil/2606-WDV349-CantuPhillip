@@ -20,7 +20,7 @@ export function PreviewSwitcher({
           to="/dashboard"
           search={{ preview: name }}
           aria-current={name === current ? "page" : undefined}
-          className="rounded-md px-2 py-1 hover:bg-muted aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+          className="touch-target inline-flex min-h-6 items-center rounded-md px-2 py-1 hover:bg-muted aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
         >
           {name}
         </Link>
