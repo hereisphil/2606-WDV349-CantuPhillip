@@ -143,7 +143,7 @@ function SignIn(): JSX.Element {
                 </Label>
                 <button
                   type="button"
-                  className="text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
+                  className="touch-target inline-flex items-center text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
                   disabled
                 >
                   Forgot?

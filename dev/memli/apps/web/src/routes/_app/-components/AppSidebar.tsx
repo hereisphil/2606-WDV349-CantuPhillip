@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router"
 import {
   ChevronsUpDown,
   CreditCard,
-  Flame,
   Image as ImageIcon,
   Layers,
   LogOut,
@@ -16,7 +15,6 @@ import { Button } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
-import { Text } from "@workspace/ui/components/text"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
@@ -42,24 +40,6 @@ const railLinks = [
   },
 ]
 
-function StreakDisplay({ days }: { days: number }): JSX.Element {
-  const dayLabel = days === 1 ? "1 Day" : `${days} Days`
-
-  return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-streak px-3 py-2.5">
-      <Flame className="size-5 text-streak-foreground" aria-hidden="true" />
-      <div className="min-w-0">
-        <Text className="text-[10px] leading-4 font-medium tracking-wider text-streak-foreground uppercase">
-          Streak
-        </Text>
-        <Text className="text-sm leading-5 font-semibold text-foreground">
-          {dayLabel}
-        </Text>
-      </div>
-    </div>
-  )
-}
-
 function RailLink({
   to,
   label,
@@ -76,7 +56,7 @@ function RailLink({
       to={to}
       activeOptions={{ exact }}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "flex min-h-6 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
         railActiveClass,
         "[&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}
@@ -202,16 +182,11 @@ export function AppSidebar(): JSX.Element {
         </div>
       </div>
 
-      <div className="px-3 pb-3 md:px-4 md:pb-0">
-        <StreakDisplay days={viewer.streakDays} />
-      </div>
-
       <RailNav />
 
       <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
         <DropdownMenu>
           <DropdownMenuTrigger
-            aria-label={`Account menu, @${viewer.username}`}
             render={
               <Button
                 variant="ghost"
@@ -219,6 +194,8 @@ export function AppSidebar(): JSX.Element {
               />
             }
           >
+            {/* Named by its content so the accessible name includes the visible text. */}
+            <span className="sr-only">Account menu, </span>
             <span className="flex min-w-0 items-center gap-2.5">
               <Avatar>
                 <AvatarFallback />
@@ -226,7 +203,7 @@ export function AppSidebar(): JSX.Element {
               <span className="flex min-w-0 flex-col items-start gap-0.5">
                 <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
                   @{viewer.username}
-                </span>
+                </span>{" "}
                 <PlanBadge plan={viewer.plan} />
               </span>
             </span>

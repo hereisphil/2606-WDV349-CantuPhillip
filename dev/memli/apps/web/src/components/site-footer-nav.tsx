@@ -21,7 +21,10 @@ export function SiteFooterNav({
   tone?: Tone
 }): JSX.Element {
   const { link, copyright } = tones[tone]
-  const linkClass = cn("font-ui text-sm font-medium transition-colors", link)
+  const linkClass = cn(
+    "touch-target inline-flex items-center font-ui text-sm font-medium transition-colors",
+    link
+  )
 
   return (
     <>

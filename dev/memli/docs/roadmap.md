@@ -103,7 +103,7 @@ To guarantee the core learning loop ships first without getting blocked on authe
    - Disable the `/signin` form inputs, add a **"Skip & Continue to Prototype →"** button to `/dashboard`, and provide a seeded test learner (`usr_prototype_01`) via a typed `SessionContext` / `useViewer()` hook (#110).
    - Build the `/dashboard` authenticated application shell (#45).
 2. **`359 MS 2` (Week 2 — Dashboard Decks + Study Session & Card UI):**
-   - Build the `/dashboard` User Metrics Banner (#46) and Study Deck Grid (#47) linking to `/study/$courseId`.
+   - Build the `/dashboard` User Metrics Banner (#46) and the study dashboard (#47): a Today panel with the next action, a focus deck, compact rows for the other decks, a This week aside, and a learning-language filter, all linking to `/study/$courseId`. Plan: [`docs/designs/dashboards/PLAN.md`](../../../docs/designs/dashboards/PLAN.md).
    - Build the `/study/$courseId` Session Layout (#48) and interactive Core Study Card Display (#49).
 3. **`359 MS 3` (Week 3 — Mnemonic Engine + Persistent SRS Loop):**
    - Restore `@workspace/core` as a real package wrapping `ts-fsrs` (see `packages/core/README.md` / #130); build the Mnemonic Caption & Image Overlay Frame (#50) and Session Grading Controls Dock (#51) against that API.
