@@ -8,6 +8,20 @@
 
 Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the app.
 
+## 07 November 2026
+
+### `FEATURE` Study dashboard
+
+`/dashboard` now answers "what should I study right now, and how long will it take?" instead of showing an equal-weight deck grid. A Today panel leads with the cards due, the time they take, and one primary action. The deck that needs attention most gets a larger card, and the rest sit in compact rows sorted by need. A This week aside shows the daily goal, the streak, and words that keep slipping. Learners with decks in two or more languages can filter by the language they're studying.
+
+* The daily goal counts new cards as well as reviews, and finishing everything scheduled counts as meeting it, so a learner who remembers well isn't penalized when FSRS schedules fewer reviews. A caught-up learner can opt into 10 more new words or tricky-word practice.
+* Strings are whole-sentence templates formatted through `Intl` (numbers, plurals, durations, relative times, weekday names), ready for an i18n library.
+* Checked with axe in light and dark themes, a keyboard walk, 320 px and 200% zoom, and reduced motion. Dark muted text and the Pro badge now meet 4.5:1 contrast.
+* The plan and a DEV-only `?preview=` switcher for each edge state live in [`docs/designs/dashboards/PLAN.md`](./designs/dashboards/PLAN.md). The data stays a typed prototype seed until the API lands (#112).
+* Refs [#47](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/47)
+
+***
+
 ## 01 November 2026
 
 ### `FEATURE` Dashboard metrics

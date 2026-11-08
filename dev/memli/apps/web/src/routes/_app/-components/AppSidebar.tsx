@@ -187,7 +187,6 @@ export function AppSidebar(): JSX.Element {
       <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
         <DropdownMenu>
           <DropdownMenuTrigger
-            aria-label={`Account menu, @${viewer.username}`}
             render={
               <Button
                 variant="ghost"
@@ -195,6 +194,8 @@ export function AppSidebar(): JSX.Element {
               />
             }
           >
+            {/* Named by its content so the accessible name includes the visible text. */}
+            <span className="sr-only">Account menu, </span>
             <span className="flex min-w-0 items-center gap-2.5">
               <Avatar>
                 <AvatarFallback />
@@ -202,7 +203,7 @@ export function AppSidebar(): JSX.Element {
               <span className="flex min-w-0 flex-col items-start gap-0.5">
                 <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
                   @{viewer.username}
-                </span>
+                </span>{" "}
                 <PlanBadge plan={viewer.plan} />
               </span>
             </span>
