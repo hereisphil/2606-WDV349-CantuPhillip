@@ -68,6 +68,46 @@ function buildManyDecks(): DashboardDeck[] {
   ]
 }
 
+/** Several decks in one learning language, so the language filter stays hidden. */
+function buildSameLanguageDecks(): DashboardDeck[] {
+  return [
+    ...base.decks.slice(0, 1),
+    deck("spanish-verbs", "Spanish Verb Conjugations", "es", {
+      dueCount: 12,
+      trickyCount: 2,
+      lastReviewedAt: hoursAgo(20),
+    }),
+    deck("spanish-travel", "Spanish for Travelers", "es", {
+      dueCount: 4,
+      lastReviewedAt: hoursAgo(30),
+    }),
+    deck("spanish-food", "Spanish at the Table", "es", {
+      newAvailable: 8,
+      lastReviewedAt: hoursAgo(72),
+    }),
+    deck("spanish-idioms", "Everyday Spanish Idioms", "es", {
+      newAvailable: 0,
+      lastReviewedAt: hoursAgo(24 * 6),
+    }),
+    deck("spanish-subjunctive", "The Spanish Subjunctive", "es", {
+      lastReviewedAt: null,
+      masteredCount: 0,
+      learningCount: 0,
+    }),
+    deck("spanish-false-friends", "Spanish False Friends", "es", {
+      newAvailable: 0,
+      masteredCount: 90,
+      learningCount: 10,
+      unseenCount: 0,
+      lastReviewedAt: hoursAgo(24 * 21),
+    }),
+    deck("spanish-numbers", "Spanish Numbers & Time", "es", {
+      dueCount: 2,
+      lastReviewedAt: hoursAgo(24 * 3),
+    }),
+  ]
+}
+
 export const previewNames = [
   "default",
   "no-decks",
@@ -77,6 +117,7 @@ export const previewNames = [
   "goal-met",
   "one-deck",
   "many-decks",
+  "same-language",
   "long-titles",
   "large-numbers",
 ] as const
@@ -144,6 +185,18 @@ function buildPreviews(): Record<PreviewName, DashboardPreview> {
       streakDays: 1,
     },
     "many-decks": { metrics: { ...base, decks: buildManyDecks() } },
+    "same-language": {
+      metrics: {
+        ...base,
+        decks: buildSameLanguageDecks(),
+        trickyWords: {
+          total: 6,
+          words: base.trickyWords.words.filter(
+            (word) => word.learningLanguage === "es"
+          ),
+        },
+      },
+    },
     "long-titles": {
       metrics: {
         ...base,

@@ -49,6 +49,11 @@ export function sortDecks(decks: readonly DashboardDeck[]): DashboardDeck[] {
   return [...decks].sort(compareByNeed)
 }
 
+/** Each learning language once, in the order its first deck appears. */
+export function learningLanguages(decks: readonly DashboardDeck[]): string[] {
+  return [...new Set(decks.map((deck) => deck.learningLanguage))]
+}
+
 export function selectFocusDeck(
   decks: readonly DashboardDeck[]
 ): DashboardDeck | null {
