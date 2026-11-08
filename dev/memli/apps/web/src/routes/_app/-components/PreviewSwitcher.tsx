@@ -1,8 +1,9 @@
+/* eslint-disable memli/no-literal-ui-strings -- development-only tool, never shown to learners */
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 import { previewNames, type PreviewName } from "./dashboard-previews"
 
-/** Development-only links between seeded dashboard states. Not translated on purpose. */
+/** Links between seeded dashboard states. */
 export function PreviewSwitcher({
   current,
 }: {

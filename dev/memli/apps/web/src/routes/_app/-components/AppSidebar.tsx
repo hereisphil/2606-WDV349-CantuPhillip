@@ -26,15 +26,35 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { useViewer } from "@/components/session-provider"
+import { useFormatters } from "@/lib/formatters"
+
+const messages = {
+  sidebar: "Application sidebar",
+  primaryNav: "Primary",
+  navigationMenu: "Navigation menu",
+  accountMenu: "Account menu, @{username}",
+  accountMenuPrefix: "Account menu, ",
+  decks: "Decks",
+  community: "Community Gallery",
+  profile: "View Profile",
+  settings: "Learning Settings",
+  plan: "Subscription / Plan",
+  signOut: "Sign Out",
+} as const
 
 const railActiveClass =
   "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
 
 const railLinks = [
-  { to: "/dashboard" as const, label: "Decks", icon: Layers, exact: true },
+  {
+    to: "/dashboard" as const,
+    label: messages.decks,
+    icon: Layers,
+    exact: true,
+  },
   {
     to: "/community" as const,
-    label: "Community Gallery",
+    label: messages.community,
     icon: ImageIcon,
     exact: false,
   },
@@ -70,7 +90,7 @@ function RailLink({
 function RailNav(): JSX.Element {
   return (
     <nav
-      aria-label="Primary"
+      aria-label={messages.primaryNav}
       className="hidden flex-col gap-1 px-3 py-2 md:flex"
     >
       {railLinks.map(({ to, label, icon, exact }) => (
@@ -86,22 +106,22 @@ function AccountMenuItems(): JSX.Element {
       <DropdownMenuGroup>
         <DropdownMenuItem render={<Link to="/dashboard" />}>
           <UserIcon aria-hidden="true" />
-          View Profile
+          {messages.profile}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/settings" />}>
           <SlidersHorizontal aria-hidden="true" />
-          Learning Settings
+          {messages.settings}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/pricing" />}>
           <CreditCard aria-hidden="true" />
-          Subscription / Plan
+          {messages.plan}
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem render={<Link to="/" />}>
           <LogOut aria-hidden="true" />
-          Sign Out
+          {messages.signOut}
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </>
@@ -110,11 +130,12 @@ function AccountMenuItems(): JSX.Element {
 
 export function AppSidebar(): JSX.Element {
   const viewer = useViewer()
+  const { format } = useFormatters()
   const [navOpen, setNavOpen] = useState(false)
 
   return (
     <aside
-      aria-label="Application sidebar"
+      aria-label={messages.sidebar}
       className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
     >
       <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
@@ -125,7 +146,9 @@ export function AppSidebar(): JSX.Element {
         <div className="flex items-center gap-1 md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger
-              aria-label={`Account menu, @${viewer.username}`}
+              aria-label={format(messages.accountMenu, {
+                username: viewer.username,
+              })}
               render={
                 <Button
                   variant="ghost"
@@ -153,7 +176,7 @@ export function AppSidebar(): JSX.Element {
 
           <DropdownMenu open={navOpen} onOpenChange={setNavOpen}>
             <DropdownMenuTrigger
-              aria-label="Navigation menu"
+              aria-label={messages.navigationMenu}
               render={
                 <Button
                   variant="ghost"
@@ -195,7 +218,7 @@ export function AppSidebar(): JSX.Element {
             }
           >
             {/* Named by its content so the accessible name includes the visible text. */}
-            <span className="sr-only">Account menu, </span>
+            <span className="sr-only">{messages.accountMenuPrefix}</span>
             <span className="flex min-w-0 items-center gap-2.5">
               <Avatar>
                 <AvatarFallback />

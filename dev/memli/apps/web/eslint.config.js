@@ -18,6 +18,13 @@ export default defineConfig([
       "react-refresh/only-export-components": "off",
     },
   },
+  // Signed-in app copy goes through `messages` objects (docs/i18n.md). Marketing and auth copy come later.
+  {
+    files: ["src/routes/_app/**/*.tsx"],
+    rules: {
+      "memli/no-literal-ui-strings": "error",
+    },
+  },
   // React state guardrail exemptions (docs/state-management.md).
   {
     files: [
