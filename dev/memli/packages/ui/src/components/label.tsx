@@ -7,6 +7,7 @@ function Label({
   ...props
 }: React.ComponentProps<"label">): React.JSX.Element {
   return (
+    // eslint-disable-next-line jsx-a11y-x/label-has-associated-control -- `htmlFor` arrives in `props`; call sites are checked as `label`
     <label
       data-slot="label"
       className={cn(

@@ -2,15 +2,18 @@ import { lazy, Suspense, type ComponentType } from "react"
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 
+// Hidden in production and during the axe audit (VITE_A11Y_AUDIT), so CI only
+// judges product UI — not the floating TanStack Router Devtools button.
 const TanStackRouterDevtools: ComponentType<{
   position?: "bottom-left" | "bottom-right" | "top-left" | "top-right"
-}> = import.meta.env.PROD
-  ? () => null
-  : lazy(() =>
-      import("@tanstack/react-router-devtools").then((mod) => ({
-        default: mod.TanStackRouterDevtools,
-      }))
-    )
+}> =
+  import.meta.env.PROD || import.meta.env.VITE_A11Y_AUDIT === "1"
+    ? () => null
+    : lazy(() =>
+        import("@tanstack/react-router-devtools").then((mod) => ({
+          default: mod.TanStackRouterDevtools,
+        }))
+      )
 
 export const Route = createRootRoute({
   component: () => (
