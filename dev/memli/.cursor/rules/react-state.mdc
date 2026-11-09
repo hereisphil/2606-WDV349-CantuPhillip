@@ -27,10 +27,10 @@ If you are about to write a second `useState` in a component, stop and write a r
 - Events are `{ type: "UPPER_SNAKE"; ...payload }`. Components only `dispatch(event)`; they never compute the next state inline.
 - The reducer is exhaustive over `status × event.type`; unknown combinations return `state` unchanged (and are tested).
 - Derive, don't store: anything computable from state (`remaining = deck.length - index`) is not state.
-- Pure transitions live in **`packages/core`** (`src/<domain>/<name>-reducer.ts`) next to `gradeCard()`, with a `.test.ts` covering every event from every status. `apps/web` only adds the React wrapper.
+- Pure transitions live in **`packages/core`** (`src/<domain>/<name>-reducer.ts`) next to the FSRS grading wrapper, with a `.test.ts` covering every event from every status. `apps/web` only adds the React wrapper. (`packages/core` is plan-only until MS 3 — see its README / #130.)
 
 ```ts
-// packages/core/src/study/session-reducer.ts (shape, not final API)
+// packages/core/src/study/session-reducer.ts (shape — lands with #48/#49 + FSRS wrapper)
 export type SessionState =
   | { status: "prompt"; index: number; cards: Card[] }
   | { status: "revealed"; index: number; cards: Card[]; answer: string }
@@ -38,11 +38,11 @@ export type SessionState =
 
 export type SessionEvent =
   | { type: "REVEAL"; answer: string }
-  | { type: "GRADE"; grade: ReviewGrade } // "pass" | "fail" from srs/grade-card.ts
+  | { type: "GRADE"; grade: ReviewGrade } // default UI: "pass" | "fail" → FSRS Good/Again
   | { type: "RESTART" }
 
 export function sessionReducer(state: SessionState, event: SessionEvent): SessionState {
-  /* switch (state.status) → switch (event.type); GRADE calls gradeCard() */
+  /* switch (state.status) → switch (event.type); GRADE calls @workspace/core FSRS wrapper */
 }
 ```
 

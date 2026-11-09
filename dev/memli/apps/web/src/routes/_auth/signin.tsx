@@ -1,8 +1,8 @@
 import type { JSX } from "react"
 import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { BookOpen } from "lucide-react"
 import { signInSchema } from "@workspace/schemas/auth/sign-in"
+import { BrandMark } from "@/components/brand-mark"
 import { Button } from "@workspace/ui/components/button"
 import {
   Card,
@@ -28,6 +28,14 @@ function SignIn(): JSX.Element {
   const [password, setPassword] = useState("")
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formMessage, setFormMessage] = useState<string | null>(null)
+
+  const clearFieldError = (field: keyof FieldErrors): void => {
+    setFieldErrors((current) =>
+      current[field] === undefined
+        ? current
+        : { ...current, [field]: undefined }
+    )
+  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault()
@@ -55,11 +63,8 @@ function SignIn(): JSX.Element {
     <div className="w-full max-w-md">
       <Card className="shadow-sm [--card-spacing:--spacing(6)]">
         <CardHeader className="items-center text-center">
-          <div className="flex items-center justify-center gap-2 font-semibold text-primary">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <BookOpen className="size-4" aria-hidden="true" />
-            </span>
-            <span className="text-lg">Memli</span>
+          <div className="flex justify-center text-primary">
+            <BrandMark wordClassName="text-lg" />
           </div>
           <CardTitle className="mt-4 text-2xl font-bold tracking-tight">
             Welcome!
@@ -119,12 +124,7 @@ function SignIn(): JSX.Element {
                 value={email}
                 onChange={(event) => {
                   setEmail(event.target.value)
-                  if (fieldErrors.email) {
-                    setFieldErrors((current) => ({
-                      ...current,
-                      email: undefined,
-                    }))
-                  }
+                  clearFieldError("email")
                 }}
                 aria-invalid={fieldErrors.email ? true : undefined}
                 aria-describedby={fieldErrors.email ? "email-error" : undefined}
@@ -143,7 +143,7 @@ function SignIn(): JSX.Element {
                 </Label>
                 <button
                   type="button"
-                  className="text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
+                  className="touch-target inline-flex items-center text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
                   disabled
                 >
                   Forgot?
@@ -159,12 +159,7 @@ function SignIn(): JSX.Element {
                 value={password}
                 onChange={(event) => {
                   setPassword(event.target.value)
-                  if (fieldErrors.password) {
-                    setFieldErrors((current) => ({
-                      ...current,
-                      password: undefined,
-                    }))
-                  }
+                  clearFieldError("password")
                 }}
                 aria-invalid={fieldErrors.password ? true : undefined}
                 aria-describedby={

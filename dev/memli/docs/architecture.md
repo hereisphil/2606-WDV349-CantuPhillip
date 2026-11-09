@@ -121,7 +121,7 @@ Until then, keep route groups and invest in the product.
 - Source of truth for auth sessions / tokens (exact scheme TBD in implementation)
 - Decks, cards, mnemonics, review grading persistence
 - Shared by `apps/web` and later `apps/mobile`
-- May call into `packages/core` for pure domain operations (e.g. SRS grading) so mobile/web/API never diverge on formulas
+- May call into `packages/core` for pure domain operations (e.g. FSRS grading via the `ts-fsrs` wrapper) so mobile/web/API never diverge on formulas
 
 ### Hosting shape
 
@@ -150,7 +150,7 @@ Do not paint into a cookies-only corner that makes mobile miserable — or a tok
 
 | Package | Web | API | Mobile | Notes |
 | --- | --- | --- | --- | --- |
-| `packages/core` | ✓ | ✓ | ✓ | Pure TS domain; **no React, no DOM, no RN** |
+| `packages/core` | ✓ | ✓ | ✓ | Pure TS domain (FSRS / `ts-fsrs` wrapper + reducers); **no React, no DOM, no RN**. Plan-only README until MS 3 (#130) |
 | `packages/schemas` | ✓ | ✓ | ✓ | Zod contracts, env schemas (split per-app env exports as needed) |
 | `packages/ui` | ✓ | — | — | shadcn / Base UI — **web only** |
 | `packages/ui-native` | — | — | ✓ | Optional; RN primitives |
@@ -242,6 +242,7 @@ Record the outcome here when chosen:
 | Auth route ownership after Astro split | App only vs lightweight marketing links out | Open — default lean: app owns auth pages |
 | App path prefix | Root paths vs `/app/*` | Open — only if proxy/SEO needs it |
 | Hosting | Cloudflare-centric (already in repo tooling) vs other | Lean current stack unless requirements change |
+| SRS scheduler | Hand-rolled SM-2 vs FSRS (`ts-fsrs`) | **Chosen: FSRS via `ts-fsrs` wrapper in `@workspace/core`** (#130); package restored in MS 3 |
 
 ---
 

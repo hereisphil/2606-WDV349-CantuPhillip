@@ -10,6 +10,9 @@ name: Sync PR to project board
 # in the title, body, or commits.
 # Promotion PRs (dev → stage, stage → main) move every card in the previous column.
 #
+# Capstone project workflows "Item closed" and "Auto-close issue" must stay Off.
+# This Action owns close timing and column moves; those built-ins race Staging → Done.
+#
 # PROJECT_TOKEN must be a classic PAT with the `project` and `repo` scopes.
 # Fine-grained tokens cannot edit a user-owned Project.
 on:
@@ -246,11 +249,13 @@ jobs:
               return
             fi
 
-            set_status "$item_id" "$option"
-            echo "Moved #$number to $status_name"
+            # Close first when needed, then set Status last so a residual
+            # project "Item closed" rule cannot overwrite Staging/Done.
             if [ -n "$close_comment" ]; then
               close_if_open "$number" "$close_comment"
             fi
+            set_status "$item_id" "$option"
+            echo "Moved #$number to $status_name"
           }
 
           linked_issue_numbers() {
@@ -363,11 +368,13 @@ jobs:
                 while IFS= read -r row; do
                   item_id=$(echo "$row" | jq -r .id)
                   number=$(echo "$row" | jq -r .number)
-                  set_status "$item_id" "$to_option"
-                  echo "Moved #$number to $to_name"
+                  # Close first when needed, then set Status last so a residual
+                  # project "Item closed" rule cannot overwrite Staging/Done.
                   if [ -n "$close_comment" ]; then
                     close_if_open "$number" "$close_comment"
                   fi
+                  set_status "$item_id" "$to_option"
+                  echo "Moved #$number to $to_name"
                 done <<<"$matches"
               fi
 

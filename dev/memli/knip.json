@@ -5,16 +5,18 @@
       "project": ["src/**/*.ts"]
     },
     "apps/web": {
-      "project": ["src/**/*.{ts,tsx}", "!src/routeTree.gen.ts"]
+      "entry": ["e2e/**/*.{ts,tsx}"],
+      "project": [
+        "src/**/*.{ts,tsx}",
+        "e2e/**/*.{ts,tsx}",
+        "!src/routeTree.gen.ts"
+      ]
     },
     "packages/ui": {
       "project": ["src/**/*.{ts,tsx}"]
     },
     "packages/schemas": {
       "project": ["src/**/*.ts"]
-    },
-    "packages/core": {
-      "project": ["src/**/*.ts", "vitest.config.ts"]
     },
     "packages/eslint-config": {
       "entry": ["*.{js,mjs,cjs}", "rules/*.test.js"],

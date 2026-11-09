@@ -23,6 +23,7 @@ import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppStudyCourseIdRouteImport } from './routes/_app/study.$courseId'
 
 const MarketingRoute = MarketingRouteImport.update({
   id: '/_marketing',
@@ -91,6 +92,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStudyCourseIdRoute = AppStudyCourseIdRouteImport.update({
+  id: '/study/$courseId',
+  path: '/study/$courseId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof MarketingPricingRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
+  '/study/$courseId': typeof AppStudyCourseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof MarketingPricingRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
+  '/study/$courseId': typeof AppStudyCourseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/terms': typeof MarketingTermsRoute
   '/_marketing/': typeof MarketingIndexRoute
+  '/_app/study/$courseId': typeof AppStudyCourseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/study/$courseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/study/$courseId'
   id:
     | '__root__'
     | '/_app'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/_marketing/privacy'
     | '/_marketing/terms'
     | '/_marketing/'
+    | '/_app/study/$courseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -286,17 +298,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/study/$courseId': {
+      id: '/_app/study/$courseId'
+      path: '/study/$courseId'
+      fullPath: '/study/$courseId'
+      preLoaderRoute: typeof AppStudyCourseIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppStudyCourseIdRoute: typeof AppStudyCourseIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppStudyCourseIdRoute: AppStudyCourseIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

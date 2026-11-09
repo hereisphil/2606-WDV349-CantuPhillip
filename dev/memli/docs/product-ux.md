@@ -134,6 +134,16 @@ Avoid burying “continue studying” behind unrelated marketing modules.
 
 ---
 
+## Parked ideas
+
+Ideas cut on purpose, worth revisiting once the conditions are met.
+
+| Idea | Why it waits | Revisit when |
+| --- | --- | --- |
+| **Rank card** on the dashboard (“Top 5% among Spanish learners”), dropped from #47 | Needs real cohort data, and comparison can discourage newer learners. If it returns, compare against the learner's own past or a cohort at the same stage, and consider an opt-out. | There are enough active learners per learning language for a percentile to mean something |
+
+---
+
 ## Onboarding & empty states
 
 When UX copy is written:
@@ -162,6 +172,7 @@ After Phase 3, marketing first paint should work with minimal JS; app routes can
 - Keyboard path through grading controls when those ship
 - Do not rely on color alone for grade correctness states
 - Respect locale and `lang` attributes as i18n lands
+- Target WCAG 2.2 **Level AA** for pointer targets (SC 2.5.8: at least **24×24** CSS pixels). Prefer shared `Button` sizes (`xs` / `icon-xs` floor at 24px) or the `touch-target` utility on bare links/buttons so hit areas grow without changing the visual layout; do not aim for AAA 44×44 unless a control is touch-critical.
 
 ---
 

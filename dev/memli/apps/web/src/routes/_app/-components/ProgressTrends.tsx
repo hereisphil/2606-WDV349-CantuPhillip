@@ -1,67 +1,43 @@
 import type { JSX } from "react"
-import { Medal, TrendingUp } from "lucide-react"
-import { Card } from "@workspace/ui/components/card"
+import { TrendingUp } from "lucide-react"
 import { Heading } from "@workspace/ui/components/heading"
-import { Text } from "@workspace/ui/components/text"
+import { cn } from "@workspace/ui/lib/utils"
+import { useFormatters } from "@/lib/formatters"
+import type { ProgressTrendsData } from "./dashboard-metrics"
 
-export type ProgressTrendsData = {
-  consistencyPercent: number
-  consistencyWeeklyChangePercent: number
-  retentionPercent: number
-  retentionGlobalAveragePercent: number
-  newCardsThisMonth: number
-  rankLabel: string
-  rankCohort: string
-}
-
-type TrendBlock = {
-  label: string
-  value: string
-  detail: string
-  detailClassName?: string
-  medal?: boolean
-}
-
-function weeklyChangeDetail(changePercent: number): string {
-  const sign = changePercent > 0 ? "+" : ""
-  return `${sign}${changePercent}% from last week`
-}
+const messages = {
+  heading: "Your progress trends",
+  consistency: "Consistency",
+  consistencyChange: "{change} from last week",
+  retention: "Retention",
+  retentionAverage: "Global average: {percent}",
+  newCards: "New cards",
+  newCardsDetail: "Added this month",
+} as const
 
 function TrendCard({
   label,
   value,
   detail,
   detailClassName,
-  medal = false,
-}: TrendBlock): JSX.Element {
+}: {
+  label: string
+  value: string
+  detail: string
+  detailClassName?: string
+}): JSX.Element {
   return (
-    <Card
-      role="group"
-      aria-label={`${label}: ${value}. ${detail}`}
-      className="gap-1 bg-secondary px-4 py-4 shadow-none ring-0"
-    >
-      <Text
-        variant="small"
-        aria-hidden="true"
-        className="text-xs font-medium tracking-wide uppercase"
-      >
+    <div className="flex flex-col gap-1 rounded-xl bg-secondary p-4">
+      <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         {label}
-      </Text>
-      <Heading
-        level={3}
-        size="2"
-        aria-hidden="true"
-        className="flex items-center gap-1.5 tracking-tight tabular-nums"
-      >
+      </dt>
+      <dd className="font-heading text-2xl font-bold tracking-tight tabular-nums">
         {value}
-        {medal ? (
-          <Medal className="size-5 text-streak-foreground" aria-hidden="true" />
-        ) : null}
-      </Heading>
-      <Text variant="small" aria-hidden="true" className={detailClassName}>
+      </dd>
+      <dd className={cn("text-sm text-muted-foreground", detailClassName)}>
         {detail}
-      </Text>
-    </Card>
+      </dd>
+    </div>
   )
 }
 
@@ -71,9 +47,9 @@ export function ProgressTrends({
   retentionPercent,
   retentionGlobalAveragePercent,
   newCardsThisMonth,
-  rankLabel,
-  rankCohort,
 }: ProgressTrendsData): JSX.Element {
+  const { number, percent, format } = useFormatters()
+
   return (
     <section
       aria-labelledby="progress-trends-heading"
@@ -86,27 +62,32 @@ export function ProgressTrends({
         className="flex items-center gap-2"
       >
         <TrendingUp className="size-5 text-primary" aria-hidden="true" />
-        Your Progress Trends
+        {messages.heading}
       </Heading>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <TrendCard
-          label="Consistency"
-          value={`${consistencyPercent}%`}
-          detail={weeklyChangeDetail(consistencyWeeklyChangePercent)}
+          label={messages.consistency}
+          value={percent(consistencyPercent / 100)}
+          detail={format(messages.consistencyChange, {
+            change: percent(consistencyWeeklyChangePercent / 100, {
+              signed: true,
+            }),
+          })}
         />
         <TrendCard
-          label="Retention"
-          value={`${retentionPercent}%`}
-          detail={`Global average: ${retentionGlobalAveragePercent}%`}
+          label={messages.retention}
+          value={percent(retentionPercent / 100)}
+          detail={format(messages.retentionAverage, {
+            percent: percent(retentionGlobalAveragePercent / 100),
+          })}
         />
         <TrendCard
-          label="New Cards"
-          value={String(newCardsThisMonth)}
-          detail="Added this month"
+          label={messages.newCards}
+          value={number(newCardsThisMonth)}
+          detail={messages.newCardsDetail}
           detailClassName="text-primary"
         />
-        <TrendCard label="Rank" value={rankLabel} detail={rankCohort} medal />
-      </div>
+      </dl>
     </section>
   )
 }

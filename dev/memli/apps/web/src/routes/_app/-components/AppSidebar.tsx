@@ -1,10 +1,9 @@
 import type { JSX } from "react"
+import { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import {
-  BookOpen,
   ChevronsUpDown,
   CreditCard,
-  Flame,
   Image as ImageIcon,
   Layers,
   LogOut,
@@ -12,9 +11,10 @@ import {
   UserIcon,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
-import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
-import { Text } from "@workspace/ui/components/text"
+import { BrandMark } from "@/components/brand-mark"
+import { MenuGlyph } from "@/components/menu-glyph"
+import { PlanBadge } from "@/components/plan-badge"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
@@ -25,35 +25,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-import { useViewer, type ViewerPlan } from "@/components/session-provider"
+import { useViewer } from "@/components/session-provider"
+import { useFormatters } from "@/lib/formatters"
+
+const messages = {
+  sidebar: "Application sidebar",
+  primaryNav: "Primary",
+  navigationMenu: "Navigation menu",
+  accountMenu: "Account menu, @{username}",
+  accountMenuPrefix: "Account menu, ",
+  decks: "Decks",
+  community: "Community Gallery",
+  profile: "View Profile",
+  settings: "Learning Settings",
+  plan: "Subscription / Plan",
+  signOut: "Sign Out",
+} as const
+
+const railActiveClass =
+  "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
 
 const railLinks = [
-  { to: "/dashboard" as const, label: "Decks", icon: Layers, exact: true },
+  {
+    to: "/dashboard" as const,
+    label: messages.decks,
+    icon: Layers,
+    exact: true,
+  },
   {
     to: "/community" as const,
-    label: "Community Gallery",
+    label: messages.community,
     icon: ImageIcon,
     exact: false,
   },
 ]
-
-function StreakDisplay({ days }: { days: number }): JSX.Element {
-  const dayLabel = days === 1 ? "1 Day" : `${days} Days`
-
-  return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-streak px-3 py-2.5">
-      <Flame className="size-5 text-streak-foreground" aria-hidden="true" />
-      <div className="min-w-0">
-        <Text className="text-[10px] leading-4 font-medium tracking-wider text-streak-foreground uppercase">
-          Streak
-        </Text>
-        <Text className="text-sm leading-5 font-semibold text-foreground">
-          {dayLabel}
-        </Text>
-      </div>
-    </div>
-  )
-}
 
 function RailLink({
   to,
@@ -71,8 +76,9 @@ function RailLink({
       to={to}
       activeOptions={{ exact }}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
-        "[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground [&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
+        "flex min-h-6 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        railActiveClass,
+        "[&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}
     >
       <Icon className="size-4" aria-hidden="true" />
@@ -84,7 +90,7 @@ function RailLink({
 function RailNav(): JSX.Element {
   return (
     <nav
-      aria-label="Primary"
+      aria-label={messages.primaryNav}
       className="hidden flex-col gap-1 px-3 py-2 md:flex"
     >
       {railLinks.map(({ to, label, icon, exact }) => (
@@ -94,41 +100,28 @@ function RailNav(): JSX.Element {
   )
 }
 
-function ProBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
-  if (plan !== "pro") return null
-
-  return (
-    <Badge
-      variant="outline"
-      className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-700 uppercase dark:text-amber-300"
-    >
-      Pro
-    </Badge>
-  )
-}
-
 function AccountMenuItems(): JSX.Element {
   return (
     <>
       <DropdownMenuGroup>
         <DropdownMenuItem render={<Link to="/dashboard" />}>
           <UserIcon aria-hidden="true" />
-          View Profile
+          {messages.profile}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/settings" />}>
           <SlidersHorizontal aria-hidden="true" />
-          Learning Settings
+          {messages.settings}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/pricing" />}>
           <CreditCard aria-hidden="true" />
-          Subscription / Plan
+          {messages.plan}
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem render={<Link to="/" />}>
           <LogOut aria-hidden="true" />
-          Sign Out
+          {messages.signOut}
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </>
@@ -137,25 +130,25 @@ function AccountMenuItems(): JSX.Element {
 
 export function AppSidebar(): JSX.Element {
   const viewer = useViewer()
+  const { format } = useFormatters()
+  const [navOpen, setNavOpen] = useState(false)
 
   return (
     <aside
-      aria-label="Application sidebar"
+      aria-label={messages.sidebar}
       className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
     >
       <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
-        <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen className="size-4" aria-hidden="true" />
-          </span>
-          <span>Memli</span>
+        <Link to="/dashboard" className="flex">
+          <BrandMark />
         </Link>
 
-        {/* Mobile controls: avatar dropdown + hamburger dropdown */}
         <div className="flex items-center gap-1 md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger
-              aria-label={`Account menu, @${viewer.username}`}
+              aria-label={format(messages.accountMenu, {
+                username: viewer.username,
+              })}
               render={
                 <Button
                   variant="ghost"
@@ -173,7 +166,7 @@ export function AppSidebar(): JSX.Element {
                   <span className="truncate text-sm font-medium text-foreground">
                     @{viewer.username}
                   </span>
-                  <ProBadge plan={viewer.plan} />
+                  <PlanBadge plan={viewer.plan} />
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -181,29 +174,25 @@ export function AppSidebar(): JSX.Element {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu>
+          <DropdownMenu open={navOpen} onOpenChange={setNavOpen}>
             <DropdownMenuTrigger
-              aria-label="Navigation menu"
+              aria-label={messages.navigationMenu}
               render={
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="group/menu hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
-              <div className="relative flex h-5 w-5 flex-col items-center justify-center">
-                <span className="absolute h-0.5 w-5 -translate-y-1.5 bg-foreground transition-all duration-300 group-data-popup-open/menu:translate-y-0 group-data-popup-open/menu:rotate-45" />
-                <span className="h-0.5 w-5 bg-foreground transition-all duration-300 group-data-popup-open/menu:opacity-0" />
-                <span className="absolute h-0.5 w-5 translate-y-1.5 bg-foreground transition-all duration-300 group-data-popup-open/menu:translate-y-0 group-data-popup-open/menu:-rotate-45" />
-              </div>
+              <MenuGlyph open={navOpen} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuGroup>
                 {railLinks.map(({ to, label, icon: Icon, exact }) => (
                   <DropdownMenuItem
                     key={label}
-                    className="[&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground"
+                    className={railActiveClass}
                     render={<Link to={to} activeOptions={{ exact }} />}
                   >
                     <Icon aria-hidden="true" />
@@ -216,17 +205,11 @@ export function AppSidebar(): JSX.Element {
         </div>
       </div>
 
-      <div className="px-3 pb-3 md:px-4 md:pb-0">
-        <StreakDisplay days={viewer.streakDays} />
-      </div>
-
       <RailNav />
 
-      {/* Desktop bottom capsule: full-area hover + pointer cursor */}
       <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
         <DropdownMenu>
           <DropdownMenuTrigger
-            aria-label={`Account menu, @${viewer.username}`}
             render={
               <Button
                 variant="ghost"
@@ -234,6 +217,8 @@ export function AppSidebar(): JSX.Element {
               />
             }
           >
+            {/* Named by its content so the accessible name includes the visible text. */}
+            <span className="sr-only">{messages.accountMenuPrefix}</span>
             <span className="flex min-w-0 items-center gap-2.5">
               <Avatar>
                 <AvatarFallback />
@@ -241,8 +226,8 @@ export function AppSidebar(): JSX.Element {
               <span className="flex min-w-0 flex-col items-start gap-0.5">
                 <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
                   @{viewer.username}
-                </span>
-                <ProBadge plan={viewer.plan} />
+                </span>{" "}
+                <PlanBadge plan={viewer.plan} />
               </span>
             </span>
             <ChevronsUpDown

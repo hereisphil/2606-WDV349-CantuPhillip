@@ -1,8 +1,6 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { Heading } from "@workspace/ui/components/heading"
-import { Section } from "@workspace/ui/components/section"
-import { Text } from "@workspace/ui/components/text"
+import { ComingSoon } from "./-components/ComingSoon"
 
 export const Route = createFileRoute("/_marketing/privacy")({
   component: Privacy,
@@ -10,11 +8,8 @@ export const Route = createFileRoute("/_marketing/privacy")({
 
 function Privacy(): JSX.Element {
   return (
-    <Section>
-      <Heading>Privacy Policy</Heading>
-      <Text variant="muted" className="mt-4">
-        Our privacy policy is being finalized. Check back soon.
-      </Text>
-    </Section>
+    <ComingSoon title="Privacy Policy">
+      Our privacy policy is being finalized. Check back soon.
+    </ComingSoon>
   )
 }

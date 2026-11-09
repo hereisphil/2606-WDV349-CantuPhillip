@@ -45,12 +45,7 @@ const sizeByTag = {
 
 type HeadingProps = ComponentProps<"h1"> &
   VariantProps<typeof headingVariants> & {
-    /**
-     * Semantic level. Chooses the tag unless `as` is set.
-     * Visual size still follows the rendered tag until `size` overrides it.
-     */
     level?: HeadingLevel
-    /** Rendered tag. Use with `size` when the element and the scale should differ. */
     as?: HeadingTag
   }
 

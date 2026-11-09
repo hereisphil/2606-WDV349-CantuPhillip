@@ -21,7 +21,6 @@
   --color-brand-slate: oklch(0.491 0.032 261); /* #64748B Slate Gray */
   --color-brand-border: oklch(0.916 0.009 261); /* #E2E8F0 Border Gray */
   --color-brand-tint: oklch(0.971 0.013 264); /* #EFF6FF Blue Tint */
-  --color-streak: var(--streak);
   --color-streak-foreground: var(--streak-foreground);
 
   --color-sidebar-ring: var(--sidebar-ring);
@@ -65,6 +64,9 @@
 }
 
 :root {
+  /* Sticky marketing header plus a peek of the next section.
+     Hero min-height and in-page anchor scroll-margin both clear this. */
+  --marketing-header-clearance: 6rem;
   --background: oklch(0.985 0.004 261); /* #F8FAFC Off-White page surface */
   --foreground: oklch(0.236 0.025 261); /* #1E293B Charcoal */
   --card: oklch(1 0 0);
@@ -97,7 +99,6 @@
   --sidebar-accent-foreground: oklch(0.488 0.243 264.376);
   --sidebar-border: oklch(0.916 0.009 261);
   --sidebar-ring: oklch(0.488 0.243 264.376);
-  --streak: oklch(0.97 0.02 75); /* warm streak surface */
   --streak-foreground: oklch(0.68 0.19 48); /* orange flame */
 }
 
@@ -113,7 +114,9 @@
   --secondary: oklch(0.291 0.025 261);
   --secondary-foreground: oklch(0.962 0.007 261);
   --muted: oklch(0.291 0.025 261);
-  --muted-foreground: oklch(0.637 0.025 261);
+  --muted-foreground: oklch(
+    0.68 0.025 261
+  ); /* 4.5:1+ on --secondary/--accent */
   --accent: oklch(0.291 0.025 261);
   --accent-foreground: oklch(0.697 0.158 264);
   --destructive: oklch(0.704 0.191 22.216);
@@ -133,7 +136,6 @@
   --sidebar-accent-foreground: oklch(0.697 0.158 264);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.697 0.158 264);
-  --streak: oklch(0.32 0.04 60);
   --streak-foreground: oklch(0.84 0.1 75);
 }
 
@@ -157,5 +159,21 @@
   }
   p {
     line-height: 1.65;
+  }
+}
+
+/* WCAG 2.2 SC 2.5.8 Target Size (Minimum) — Level AA: 24×24 CSS pixels.
+   Expands the hit area without changing the control's visual box. */
+@utility touch-target {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: max(100%, 1.5rem);
+    height: max(100%, 1.5rem);
   }
 }

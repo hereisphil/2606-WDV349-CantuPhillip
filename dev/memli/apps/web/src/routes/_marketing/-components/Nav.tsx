@@ -1,10 +1,17 @@
 import type { JSX } from "react"
 import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
-import { BookOpen, LayoutDashboard } from "lucide-react"
+import { LayoutDashboard } from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
-import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
+import { BrandMark } from "@/components/brand-mark"
+import { MenuGlyph } from "@/components/menu-glyph"
+import { PlanBadge } from "@/components/plan-badge"
+import {
+  headerNav,
+  MarketingLink,
+  scrollWindowToTop,
+} from "@/components/site-nav"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,22 +25,10 @@ import { cn } from "@workspace/ui/lib/utils"
 import { useViewer, type Viewer } from "@/components/session-provider"
 
 const navItemClass =
-  "rounded-md px-3 py-1.5 font-ui text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+  "touch-target inline-flex min-h-6 items-center rounded-md px-3 py-1.5 font-ui text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 
 const mobileNavItemClass =
-  "rounded-md px-3 py-2.5 font-ui text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-
-const navLinks = [
-  { to: "/" as const, label: "Home", exact: true, scrollToTop: true },
-  { to: "/" as const, hash: "why-mnemonics", label: "Why Mnemonics?" },
-  { to: "/" as const, hash: "features", label: "Features" },
-  { to: "/about" as const, label: "About", scrollToTop: true },
-  { to: "/contact" as const, label: "Contact", scrollToTop: true },
-  { to: "/blog" as const, label: "Blog", scrollToTop: true },
-]
-
-const scrollToTop = (): void =>
-  window.scrollTo({ top: 0, left: 0, behavior: "smooth" })
+  "touch-target inline-flex min-h-6 items-center rounded-md px-3 py-2.5 font-ui text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 
 const NavLinks = ({
   className,
@@ -42,19 +37,13 @@ const NavLinks = ({
   className: string
   onNavigate?: () => void
 }): JSX.Element[] => {
-  return navLinks.map(({ to, label, hash, scrollToTop: toTop }) => (
-    <Link
-      key={label}
-      to={to}
-      hash={hash}
+  return headerNav.map((id) => (
+    <MarketingLink
+      key={id}
+      id={id}
       className={className}
-      onClick={() => {
-        if (toTop) scrollToTop()
-        onNavigate?.()
-      }}
-    >
-      {label}
-    </Link>
+      onClick={onNavigate}
+    />
   ))
 }
 
@@ -86,14 +75,7 @@ function ViewerMenu({
             <span className="truncate text-sm font-medium text-foreground">
               @{viewer.username}
             </span>
-            {viewer.plan === "pro" ? (
-              <Badge
-                variant="outline"
-                className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-700 uppercase dark:text-amber-300"
-              >
-                Pro
-              </Badge>
-            ) : null}
+            <PlanBadge plan={viewer.plan} />
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -177,15 +159,8 @@ export function Nav(): JSX.Element {
       )}
     >
       <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 md:grid">
-        <Link
-          to="/"
-          className="flex items-center gap-2 font-semibold"
-          onClick={scrollToTop}
-        >
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen className="size-4" />
-          </span>
-          <span>Memli</span>
+        <Link to="/" className="flex" onClick={scrollWindowToTop}>
+          <BrandMark />
         </Link>
 
         <div className="flex items-center gap-1">
@@ -202,7 +177,7 @@ export function Nav(): JSX.Element {
           to="/"
           className="text-xl font-semibold"
           onClick={() => {
-            scrollToTop()
+            scrollWindowToTop()
             setMobileOpen(false)
           }}
         >
@@ -219,26 +194,7 @@ export function Nav(): JSX.Element {
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((open) => !open)}
           >
-            <div className="relative flex h-5 w-5 flex-col items-center justify-center">
-              <span
-                className={cn(
-                  "absolute h-0.5 w-5 bg-foreground transition-all duration-300",
-                  mobileOpen ? "rotate-45" : "-translate-y-1.5"
-                )}
-              />
-              <span
-                className={cn(
-                  "h-0.5 w-5 bg-foreground transition-all duration-300",
-                  mobileOpen ? "opacity-0" : "opacity-100"
-                )}
-              />
-              <span
-                className={cn(
-                  "absolute h-0.5 w-5 bg-foreground transition-all duration-300",
-                  mobileOpen ? "-rotate-45" : "translate-y-1.5"
-                )}
-              />
-            </div>
+            <MenuGlyph open={mobileOpen} />
           </Button>
         </div>
       </div>

@@ -1,14 +1,4 @@
-/**
- *
- * Pushes component state toward `useReducer` + discriminated unions by making
- * "boolean soup" impossible to write without a lint error.
- *
- * `useReducer` is the default for anything with a lifecycle. `useState` is
- * reserved for a single, uncoupled primitive (`isOpen`, a controlled input).
- *
- * Rationale and the state-owner routing table: `docs/state-management.md`
- * and `.cursor/rules/react-state.mdc`.
- */
+/** Rationale: `docs/state-management.md` and `.cursor/rules/react-state.mdc`. */
 
 const FUNCTION_TYPES = new Set([
   "FunctionDeclaration",
@@ -74,7 +64,6 @@ const rule = {
 
   create(context) {
     const max = context.options[0]?.max ?? 1
-    // enclosing function node -> useState CallExpression nodes inside it
     const callsByFunction = new Map()
 
     return {

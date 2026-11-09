@@ -22,7 +22,8 @@ jobs:
     # requires. Do not rename it without updating branch protection first.
     name: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Playwright Chromium + axe across dashboard previews needs headroom beyond the lint/build steps.
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: dev/memli
@@ -61,6 +62,17 @@ jobs:
 
       - name: Build
         run: bun run build
+
+      # Chromium only — axe covers rendered dashboard a11y that ESLint cannot.
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+        working-directory: dev/memli/apps/web
+
+      - name: Accessibility (axe)
+        run: bun run test:a11y
+        working-directory: dev/memli/apps/web
+        env:
+          CI: true
 
       # Bundles the Worker + wrangler config without deploying or needing
       # Cloudflare credentials (the web dist/ from Build must exist first).
