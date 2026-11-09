@@ -34,6 +34,14 @@ Strict custom rules (unused vars + `_` prefix, no `any`, explicit return types, 
 
 `eslint-config-prettier` is applied last in `base.js` so ESLint never fights Prettier on formatting.
 
+## Accessibility (`jsx-a11y-x/*`)
+
+`react` applies the `recommended` config from [`eslint-plugin-jsx-a11y-x`](https://github.com/es-tooling/eslint-plugin-jsx-a11y-x), a community fork of `eslint-plugin-jsx-a11y` with the same rules. The original doesn't support ESLint 10 yet ([jsx-a11y#1075](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/issues/1075)); switch back if it ships support, renaming the `jsx-a11y-x/` prefix to `jsx-a11y/`.
+
+The rules only know HTML elements, so `settings["jsx-a11y-x"].components` maps our wrappers to the element they render: `Button` → `button`, `Input` → `input`, `Label` → `label`, `AvatarImage` → `img`. TanStack `Link` is deliberately not mapped: it takes `to` instead of `href`, and `render={<Link to="…" />}` gets its text from the `Button`, so every rule about anchors would report a false positive. The axe check covers rendered links instead.
+
+Lint can't judge contrast, focus order, or whether names are unique across a page; the axe run in CI covers what it can of those. An `eslint-disable-next-line` needs a `--` reason, as on the shared `Label` wrapper, whose `htmlFor` arrives through spread props.
+
 ## Local rules (`memli/*`)
 
 Rules that encode Memli decisions live in `rules/` and are exposed through `plugin.js`.
