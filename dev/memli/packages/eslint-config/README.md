@@ -40,7 +40,7 @@ Strict custom rules (unused vars + `_` prefix, no `any`, explicit return types, 
 
 The rules only know HTML elements, so `settings["jsx-a11y-x"].components` maps our wrappers to the element they render: `Button` → `button`, `Input` → `input`, `Label` → `label`, `AvatarImage` → `img`. TanStack `Link` is deliberately not mapped: it takes `to` instead of `href`, and `render={<Link to="…" />}` gets its text from the `Button`, so every rule about anchors would report a false positive. The axe check covers rendered links instead.
 
-Lint can't judge contrast, focus order, or whether names are unique across a page; the axe run in CI covers what it can of those. An `eslint-disable-next-line` needs a `--` reason, as on the shared `Label` wrapper, whose `htmlFor` arrives through spread props.
+Lint can't judge contrast, focus order, or whether names are unique across a page. Those are covered by the Playwright + axe suite in `apps/web` (`bun run test:a11y`), which the `validate` job runs against `/dashboard` and every `?preview=` state in light and dark. An `eslint-disable-next-line` needs a `--` reason, as on the shared `Label` wrapper, whose `htmlFor` arrives through spread props.
 
 ## Local rules (`memli/*`)
 

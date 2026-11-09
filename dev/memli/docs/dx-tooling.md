@@ -16,6 +16,7 @@ Already in play or available without new products:
 | React DevTools | Component tree / props |
 | TanStack Router Devtools | Route matches / debug (currently mounted in web root) |
 | Vitest | Domain tests in `packages/core` when that package is restored (MS 3 / FSRS); ESLint rule unit tests run today |
+| Playwright + axe-core | WCAG 2.2 AA on `/dashboard` and each `?preview=` in light and dark (`bun run test:a11y` in `apps/web`; part of `validate`) |
 | TypeScript + ESLint + Prettier + Lefthook | Quality gates |
 | `memli/no-use-state-sprawl` (local ESLint rule) | Pushes component state into `useReducer` + discriminated unions — see [state-management.md](./state-management.md) |
 | Knip | Unused code/deps hygiene |

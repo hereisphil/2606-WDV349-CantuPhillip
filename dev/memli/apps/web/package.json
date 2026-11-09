@@ -10,7 +10,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js}\"",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:a11y": "playwright test"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.170.16",
@@ -21,6 +22,8 @@
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/vite": "^4",
     "@tanstack/react-router-devtools": "^1.167.0",
     "@tanstack/router-plugin": "^1.168.18",
