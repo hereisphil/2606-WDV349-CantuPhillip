@@ -18,7 +18,13 @@ Each week, and/or each major change, I will update this file by summarizing acti
 * Strings are whole-sentence templates formatted through `Intl` (numbers, plurals, durations, relative times, weekday names), ready for an i18n library.
 * Checked with axe in light and dark themes, a keyboard walk, 320 px and 200% zoom, and reduced motion. Dark muted text and the Pro badge now meet 4.5:1 contrast.
 * The plan and a DEV-only `?preview=` switcher for each edge state live in [`docs/designs/dashboards/PLAN.md`](./designs/dashboards/PLAN.md). The data stays a typed prototype seed until the API lands (#112).
-* Refs [#47](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/47)
+* See merged **[PR #140](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/140)** — Refs [#47](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/47)
+
+### `DOCUMENTATION` Week 2 milestone progress
+
+Recorded what `359 MS 2` actually shipped versus what slipped. The week landed the prioritized learner dashboard (#47 via PR #140) and the earlier FSRS plan reset in `@workspace/core` (#130). Dashboard metrics (#46) already closed under `359 MS 1`. Session layout (#48) and core study card display (#49) moved to `359 MS 3`; `/study/$courseId` stays a mode-aware placeholder (`review` / `learn` / `practice`) until those land. Module 2 business-case and product-metrics notes remain under [#109](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/109).
+
+* Refs [#109](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/109)
 
 ***
 
