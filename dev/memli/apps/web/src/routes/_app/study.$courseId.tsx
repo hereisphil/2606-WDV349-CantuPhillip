@@ -4,6 +4,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
 import { Text } from "@workspace/ui/components/text"
+import { useFormatters } from "@/lib/formatters"
 
 type StudyMode = "review" | "learn" | "practice"
 
@@ -13,11 +14,27 @@ type StudySearch = {
   extra?: number | undefined
 }
 
-const sessionNames = {
-  review: "review",
-  learn: "learn-new-words",
-  practice: "tricky-words practice",
-} as const satisfies Record<StudyMode, string>
+const messages = {
+  heading: "Study session",
+  placeholder: {
+    review: "The review session for <b>{course}</b> arrives with #48.",
+    learn: "The learn-new-words session for <b>{course}</b> arrives with #48.",
+    practice:
+      "The tricky-words practice session for <b>{course}</b> arrives with #48.",
+  },
+  learnExtra: {
+    one: "The learn-new-words session with {count} extra new card for <b>{course}</b> arrives with #48.",
+    other:
+      "The learn-new-words session with {count} extra new cards for <b>{course}</b> arrives with #48.",
+  },
+  back: "Back to dashboard",
+} as const
+
+const richTags = {
+  b: (chunk: string) => (
+    <span className="font-medium text-foreground">{chunk}</span>
+  ),
+}
 
 function parseMode(value: unknown): StudyMode {
   return value === "learn" || value === "practice" ? value : "review"
@@ -45,6 +62,7 @@ export const Route = createFileRoute("/_app/study/$courseId")({
 function StudySessionPlaceholder(): JSX.Element {
   const { courseId } = Route.useParams()
   const { mode, extra } = Route.useSearch()
+  const { rich } = useFormatters()
 
   return (
     <Section
@@ -52,15 +70,17 @@ function StudySessionPlaceholder(): JSX.Element {
       padding="compact"
       className="flex flex-col items-start gap-4"
     >
-      <Heading>Study session</Heading>
+      <Heading>{messages.heading}</Heading>
       <Text variant="muted">
-        The {sessionNames[mode]} session
-        {extra === undefined ? null : ` (${extra} extra new cards)`} for{" "}
-        <span className="font-medium text-foreground">{courseId}</span> arrives
-        with #48.
+        {extra === undefined
+          ? rich(messages.placeholder[mode], richTags, { course: courseId })
+          : rich(messages.learnExtra, richTags, {
+              count: extra,
+              course: courseId,
+            })}
       </Text>
       <Button render={<Link to="/dashboard" />} nativeButton={false}>
-        Back to dashboard
+        {messages.back}
       </Button>
     </Section>
   )

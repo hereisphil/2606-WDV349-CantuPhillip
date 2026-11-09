@@ -40,3 +40,9 @@ dev/memli/.cf
 
 # TanStack Router
 .tanstack/
+
+# Playwright
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/playwright/.cache/
