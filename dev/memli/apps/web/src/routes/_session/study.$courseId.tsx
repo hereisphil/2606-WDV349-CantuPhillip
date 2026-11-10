@@ -9,11 +9,20 @@ import {
   type StudyMode,
 } from "./-components/session-model"
 import { SessionHeader } from "./-components/SessionHeader"
+import {
+  isStudyPreviewName,
+  studyPreviews,
+  type SessionView,
+  type StudyPreviewName,
+} from "./-components/study-previews"
+import { StudyPreviewSwitcher } from "./-components/StudyPreviewSwitcher"
 
 type StudySearch = {
   mode: StudyMode
   /** New cards to add past today's limit. Only meaningful with `mode: "learn"`. */
   extra?: number | undefined
+  /** Development-only seeded session state. */
+  preview?: StudyPreviewName | undefined
 }
 
 const messages = {
@@ -45,12 +54,17 @@ function parseExtra(value: unknown): number | undefined {
 }
 
 export const Route = createFileRoute("/_session/study/$courseId")({
-  // `extra` is always set, even to undefined, because the router merges raw params into this result.
+  // Every key is always set, even to undefined, because the router merges raw params into this result.
+  // `import.meta.env.DEV` guards keep the preview snapshots out of production bundles.
   validateSearch: (search: Record<string, unknown>): StudySearch => {
     const mode = parseMode(search.mode)
     return {
       mode,
       extra: mode === "learn" ? parseExtra(search.extra) : undefined,
+      preview:
+        import.meta.env.DEV && isStudyPreviewName(search.preview)
+          ? search.preview
+          : undefined,
     }
   },
   loader: ({ params }) => {
@@ -66,14 +80,29 @@ export const Route = createFileRoute("/_session/study/$courseId")({
 
 function StudySession(): JSX.Element {
   const course = Route.useLoaderData()
-  const { mode, extra } = Route.useSearch()
-  const total = sessionQueueSize(course, mode, extra)
+  const { mode, extra, preview } = Route.useSearch()
+  // `completed` stays 0 until #49's session reducer supplies it.
+  const seeded: SessionView = {
+    title: course.title,
+    total: sessionQueueSize(course, mode, extra),
+    completed: 0,
+  }
+  const { title, total, completed } =
+    import.meta.env.DEV && preview !== undefined
+      ? studyPreviews[preview](seeded)
+      : seeded
 
   return (
     <>
-      <SessionHeader title={course.title} total={total} completed={0} />
+      <SessionHeader title={title} total={total} completed={completed} />
       <main className="flex flex-1 justify-center px-4 py-10 sm:px-6 sm:py-16">
         <div className="flex w-full max-w-xl flex-col gap-6">
+          {import.meta.env.DEV && preview !== undefined ? (
+            <StudyPreviewSwitcher
+              courseId={course.courseId}
+              current={preview}
+            />
+          ) : null}
           {total > 0 ? (
             <section
               aria-labelledby="session-mode"
