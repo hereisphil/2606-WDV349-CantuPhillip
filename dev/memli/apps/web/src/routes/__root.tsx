@@ -15,12 +15,19 @@ const TanStackRouterDevtools: ComponentType<{
         }))
       )
 
+// Same gating as the devtools: a quick jump to the `?preview=` snapshots while developing.
+const DevPreviewsMenu: ComponentType =
+  import.meta.env.PROD || import.meta.env.VITE_A11Y_AUDIT === "1"
+    ? () => null
+    : lazy(() => import("@/components/dev-previews-menu"))
+
 export const Route = createRootRoute({
   component: () => (
     <>
       <Outlet />
       <Suspense>
         <TanStackRouterDevtools position="bottom-right" />
+        <DevPreviewsMenu />
       </Suspense>
     </>
   ),
