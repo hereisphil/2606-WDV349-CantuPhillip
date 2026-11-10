@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SessionRouteImport } from './routes/_session'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
@@ -23,8 +24,12 @@ import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
-import { Route as AppStudyCourseIdRouteImport } from './routes/_app/study.$courseId'
+import { Route as SessionStudyCourseIdRouteImport } from './routes/_session/study.$courseId'
 
+const SessionRoute = SessionRouteImport.update({
+  id: '/_session',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketingRoute = MarketingRouteImport.update({
   id: '/_marketing',
   getParentRoute: () => rootRouteImport,
@@ -92,10 +97,10 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStudyCourseIdRoute = AppStudyCourseIdRouteImport.update({
+const SessionStudyCourseIdRoute = SessionStudyCourseIdRouteImport.update({
   id: '/study/$courseId',
   path: '/study/$courseId',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => SessionRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -110,7 +115,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof MarketingPricingRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
-  '/study/$courseId': typeof AppStudyCourseIdRoute
+  '/study/$courseId': typeof SessionStudyCourseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
@@ -124,13 +129,14 @@ export interface FileRoutesByTo {
   '/pricing': typeof MarketingPricingRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
-  '/study/$courseId': typeof AppStudyCourseIdRoute
+  '/study/$courseId': typeof SessionStudyCourseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_marketing': typeof MarketingRouteWithChildren
+  '/_session': typeof SessionRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_auth/signin': typeof AuthSigninRoute
@@ -142,7 +148,7 @@ export interface FileRoutesById {
   '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/terms': typeof MarketingTermsRoute
   '/_marketing/': typeof MarketingIndexRoute
-  '/_app/study/$courseId': typeof AppStudyCourseIdRoute
+  '/_session/study/$courseId': typeof SessionStudyCourseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -178,6 +184,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_auth'
     | '/_marketing'
+    | '/_session'
     | '/_app/dashboard'
     | '/_app/settings'
     | '/_auth/signin'
@@ -189,17 +196,25 @@ export interface FileRouteTypes {
     | '/_marketing/privacy'
     | '/_marketing/terms'
     | '/_marketing/'
-    | '/_app/study/$courseId'
+    | '/_session/study/$courseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   MarketingRoute: typeof MarketingRouteWithChildren
+  SessionRoute: typeof SessionRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_session': {
+      id: '/_session'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_marketing': {
       id: '/_marketing'
       path: ''
@@ -298,12 +313,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/study/$courseId': {
-      id: '/_app/study/$courseId'
+    '/_session/study/$courseId': {
+      id: '/_session/study/$courseId'
       path: '/study/$courseId'
       fullPath: '/study/$courseId'
-      preLoaderRoute: typeof AppStudyCourseIdRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof SessionStudyCourseIdRouteImport
+      parentRoute: typeof SessionRoute
     }
   }
 }
@@ -311,13 +326,11 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppSettingsRoute: typeof AppSettingsRoute
-  AppStudyCourseIdRoute: typeof AppStudyCourseIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppSettingsRoute: AppSettingsRoute,
-  AppStudyCourseIdRoute: AppStudyCourseIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -358,10 +371,22 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
+interface SessionRouteChildren {
+  SessionStudyCourseIdRoute: typeof SessionStudyCourseIdRoute
+}
+
+const SessionRouteChildren: SessionRouteChildren = {
+  SessionStudyCourseIdRoute: SessionStudyCourseIdRoute,
+}
+
+const SessionRouteWithChildren =
+  SessionRoute._addFileChildren(SessionRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   MarketingRoute: MarketingRouteWithChildren,
+  SessionRoute: SessionRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
