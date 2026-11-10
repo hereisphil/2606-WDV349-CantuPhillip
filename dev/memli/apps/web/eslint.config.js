@@ -20,7 +20,7 @@ export default defineConfig([
   },
   // Signed-in app copy goes through `messages` objects (docs/i18n.md). Marketing and auth copy come later.
   {
-    files: ["src/routes/_app/**/*.tsx"],
+    files: ["src/routes/_app/**/*.tsx", "src/routes/_session/**/*.tsx"],
     rules: {
       "memli/no-literal-ui-strings": "error",
     },

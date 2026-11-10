@@ -40,6 +40,7 @@ export function LanguageFilter({
         {messages.label}
       </span>
       <Link
+        from="/dashboard"
         to="/dashboard"
         search={(prev) => ({ ...prev, studying: undefined })}
         activeOptions={activeOptions}
@@ -50,6 +51,7 @@ export function LanguageFilter({
       {options.map(({ tag, name }) => (
         <Link
           key={tag}
+          from="/dashboard"
           to="/dashboard"
           search={(prev) => ({ ...prev, studying: tag })}
           activeOptions={activeOptions}
