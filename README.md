@@ -72,7 +72,7 @@ Weekly research notes covering class assignments and independent study:
 
 The web app lives in [`dev/memli/`](./dev/memli/) — a Turborepo monorepo managed with Bun.
 
-**Prerequisites:** [Bun](https://bun.com/) 1.3+ and Node.js 20+
+**Prerequisites:** [Bun](https://bun.com/) 1.3+ and Node.js 26 LTS. CI reads the version from [`dev/memli/.nvmrc`](./dev/memli/.nvmrc); locally, Vite+ or nvm pick it up from that file or from `engines.node`.
 
 ```bash
 cd dev/memli
