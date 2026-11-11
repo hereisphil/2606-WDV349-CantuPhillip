@@ -17,6 +17,12 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx}"
       run: bunx --bun eslint --fix {staged_files}
       stage_fixed: true
+    eslint-core:
+      priority: 1
+      root: "dev/memli/packages/core/"
+      glob: "*.{ts,tsx,js,jsx}"
+      run: bunx --bun eslint --fix {staged_files}
+      stage_fixed: true
     # 2. Format staged files after ESLint fixes complete
     prettier:
       priority: 2
