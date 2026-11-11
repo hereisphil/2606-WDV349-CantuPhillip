@@ -22,6 +22,7 @@
     "./answer/evaluate": "./src/answer/evaluate.ts",
     "./srs/outcome": "./src/srs/outcome.ts",
     "./srs/progress": "./src/srs/progress.ts",
+    "./study/session-reducer": "./src/study/session-reducer.ts",
     "./study/timing": "./src/study/timing.ts"
   }
 }
