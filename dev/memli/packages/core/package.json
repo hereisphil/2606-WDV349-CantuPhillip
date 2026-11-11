@@ -8,11 +8,17 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "ts-fsrs": "^6.0.0"
+  },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^10",
     "typescript": "~6",
     "vitest": "^5.1.0"
+  },
+  "exports": {
+    "./srs/progress": "./src/srs/progress.ts"
   }
 }
