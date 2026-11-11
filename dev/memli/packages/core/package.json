@@ -19,6 +19,7 @@
     "vitest": "^5.1.0"
   },
   "exports": {
+    "./answer/evaluate": "./src/answer/evaluate.ts",
     "./srs/progress": "./src/srs/progress.ts"
   }
 }
