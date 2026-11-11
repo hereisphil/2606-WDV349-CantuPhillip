@@ -13,7 +13,7 @@ This document records *why* Memli routes React state the way it does. The short,
 1. **Every piece of client state has a designated owner** (table below). Picking the owner comes before writing a hook.
 2. **`useReducer` with a discriminated union is the default** for anything with a lifecycle or for two or more values that change together.
 3. **`useState` is allowed for exactly one uncoupled primitive per component** — a toggle, a single controlled input. The second `useState` in a component is a lint error.
-4. **Pure transitions live in `packages/core`** with Vitest coverage, next to the FSRS grading wrapper (when that package is restored in MS 3 — see `packages/core/README.md` / #130). `apps/web` adds only the React wrapper.
+4. **Pure transitions live in `packages/core`** with Vitest coverage, next to the FSRS wrapper (`packages/core/README.md`, #132). `apps/web` adds only the React wrapper.
 5. **`use-effect-reducer` is not installed yet.** It is adopted the first time a transition must trigger a side effect (see [When to install `use-effect-reducer`](#when-to-install-use-effect-reducer)).
 
 ### State-owner table
@@ -43,7 +43,7 @@ A reducer separates *what happened* (`{ type: "GRADE", grade: "pass" }`) from *h
 
 ### Why this fits Memli unusually well
 
-- **SRS grading is a pure transition.** When `@workspace/core` returns in MS 3, a thin `ts-fsrs` wrapper (Memli-shaped `gradeCard` / progress helpers) is a pure `(CardProgress, ReviewGrade) => CardProgress` transition with Vitest coverage. A study-session reducer is the same idea one level up, and its `GRADE` branch calls that wrapper — never raw `ts-fsrs` from UI.
+- **SRS grading is a pure transition.** `@workspace/core`'s `applyOutcome(progress, outcome, now)` wraps `ts-fsrs` as a pure `CardProgress → CardProgress` transition with Vitest coverage. The study-session reducer is the same idea one level up, and its `RESOLVE` branch calls it — never raw `ts-fsrs` from UI.
 - **The study flow is a state machine.** The Figma prototype already enumerates the states: prompt → typing/listening test → answer reveal → graded → next card or session complete. Issues #48, #49, #51 build exactly this. Deciding the shape *before* those land is far cheaper than refactoring after.
 - **Shareable with mobile.** [architecture.md](./architecture.md) says *share domain, not DOM*. A pure session reducer in `packages/core` is reusable by the Phase 4 React Native app and by the API. `useState` scattered across web components is not.
 - **The other owners already exist.** TanStack Query and Router search params are in [TechStack.md](../../../docs/TechStack.md). This decision does not add a state library; it writes down which existing tool owns what.
@@ -60,10 +60,10 @@ Matt Pocock's framing ("pit of success" → "black hole of success"): a prose ru
 | --- | --- | --- |
 | Lint | `memli/no-use-state-sprawl`: max one `useState` per component/hook; `useState({ a, b })` with 2+ keys is also an error | `packages/eslint-config/rules/no-use-state-sprawl.js`, on by default in `react.js` |
 | Lint | `react-hooks/exhaustive-deps` → `error`; React Compiler rules (`set-state-in-effect`, `set-state-in-render`, `purity`, `refs`) already `error` via `recommended` | `packages/eslint-config/react.js` |
-| Tests | Reducers in `packages/core` ship with a `.test.ts` covering every event from every `status` | `packages/core` (restored in MS 3; Vitest lives there for domain — intentional pull) |
+| Tests | Reducers in `packages/core` ship with a `.test.ts` covering every event from every `status` | `packages/core` (Vitest lives there for domain — intentional pull) |
 | Types | `status`-discriminated unions; exhaustive `switch` on `state.status` then `event.type` | reducer files |
 | Agent rule | `.cursor/rules/react-state.mdc` (always-on): owner table, reducer shape, do-not list | `.cursor/rules/` |
-| Reference | The first real reducer (study session, #48/#49) becomes the copy-from example; until then the sketch in the Cursor rule is the template | `packages/core/src/study/` (future) |
+| Reference | The study-session reducer (#132) is the copy-from example | `packages/core/src/study/session-reducer.ts` |
 
 ### Exempt zones (opt-out, not opt-in)
 
@@ -82,63 +82,53 @@ The shared `react` config turns the rule **on everywhere** so new route groups a
 ## Reducer conventions
 
 ```ts
-// packages/core/src/study/session-reducer.ts (shape — lands with #48/#49 + FSRS wrapper)
-import { gradeCard, type ReviewGrade } from "../srs/grade-card" // thin ts-fsrs wrapper
-
-export type SessionState =
-  | { status: "prompt"; index: number; cards: StudyCard[] }
-  | { status: "revealed"; index: number; cards: StudyCard[]; answer: string }
-  | { status: "complete"; cards: StudyCard[] }
-
-export type SessionEvent =
-  | { type: "REVEAL"; answer: string }
-  | { type: "GRADE"; grade: ReviewGrade } // default: "pass" | "fail" → FSRS Good/Again
-  | { type: "RESTART" }
-
-export function sessionReducer(
-  state: SessionState,
+// packages/core/src/study/session-reducer.ts (abridged — see the file for the full version)
+export function sessionReducer<T extends SessionCard>(
+  state: SessionState<T>,
   event: SessionEvent
-): SessionState {
+): SessionState<T> {
   switch (state.status) {
     case "prompt":
-      if (event.type === "REVEAL") {
-        return { ...state, status: "revealed", answer: event.answer }
+      switch (event.type) {
+        case "SUBMIT":
+          return {
+            status: "answered",
+            queue: state.queue,
+            finished: state.finished,
+            reviews: state.reviews,
+            answer: event.answer,
+            evaluation: evaluateAnswer(state.queue[0].answers, event.answer),
+            elapsedMs: cappedOrNull(event.elapsedMs),
+          }
+        case "REVEAL":
+          return { /* same, with answer and evaluation null */ }
+        default:
+          return state
       }
-      return state
-    case "revealed":
-      if (event.type === "GRADE") {
-        const cards = state.cards.map((card, i) =>
-          i === state.index
-            ? { ...card, progress: gradeCard(card.progress, event.grade) }
-            : card
-        )
-        const next = state.index + 1
-        return next >= cards.length
-          ? { status: "complete", cards }
-          : { status: "prompt", index: next, cards }
-      }
-      return state
+    case "answered":
+      // Applies the outcome via the Rating Mapper; a missed card goes to the back of the queue.
+      return event.type === "RESOLVE" ? resolve(state, event) : state
     case "complete":
-      return event.type === "RESTART"
-        ? { status: "prompt", index: 0, cards: state.cards }
-        : state
+      return event.type === "RESTART" ? startSession(state.finished) : state
   }
 }
 ```
 
 ```tsx
-// apps/web/src/routes/_app/study.$courseId.tsx — thin wrapper, no logic
-const [session, dispatch] = useReducer(sessionReducer, initialSession)
+// apps/web/src/routes/_session/study.$courseId.tsx — thin wrapper, no logic
+const [session, dispatch] = useReducer(sessionReducer, cards, startSession)
 
-<Button onClick={() => dispatch({ type: "GRADE", grade: "pass" })}>Got it</Button>
+<Button onClick={() => dispatch({ type: "RESOLVE", outcome: "got_it", now: new Date() })}>
+  {messages.gotIt}
+</Button>
 ```
 
 Rules of thumb:
 
-- **Discriminate on `status`.** Each variant carries only the data valid in that phase (`answer` exists only in `revealed`).
+- **Discriminate on `status`.** Each variant carries only the data valid in that phase (`evaluation` exists only in `answered`).
 - **Events are `{ type: "UPPER_SNAKE", ...payload }`.** Components dispatch; they never compute next state.
 - **Unknown `status × event` combinations return `state` unchanged** — and have a test asserting that.
-- **Derive, don't store.** `remaining = cards.length - index` is computed in render, not kept in state.
+- **Derive, don't store.** The current card is `queue[0]`, `total = finished.length + queue.length`, and the outcome choices come from `outcomeChoices(evaluation)` — all computed in render, not kept in state.
 - **No React in `packages/core`.** The reducer file imports nothing from `react`. The hook call lives in `apps/web`.
 - **Server cache stays in TanStack Query.** A session reducer holds the *in-flight session*; the persisted review history is a query. Persisting a grade is a mutation the component (or, later, a reducer effect) calls.
 

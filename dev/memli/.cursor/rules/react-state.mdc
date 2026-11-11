@@ -23,33 +23,30 @@ If you are about to write a second `useState` in a component, stop and write a r
 
 ## 2. Reducer shape
 
-- State is a **discriminated union on `status`**: `{ status: "prompt"; card } | { status: "revealed"; card; answer } | { status: "complete"; results }`. No parallel booleans.
+- State is a **discriminated union on `status`**: `{ status: "prompt"; queue } | { status: "answered"; queue; evaluation } | { status: "complete"; reviews }`. No parallel booleans.
 - Events are `{ type: "UPPER_SNAKE"; ...payload }`. Components only `dispatch(event)`; they never compute the next state inline.
 - The reducer is exhaustive over `status × event.type`; unknown combinations return `state` unchanged (and are tested).
-- Derive, don't store: anything computable from state (`remaining = deck.length - index`) is not state.
-- Pure transitions live in **`packages/core`** (`src/<domain>/<name>-reducer.ts`) next to the FSRS grading wrapper, with a `.test.ts` covering every event from every status. `apps/web` only adds the React wrapper. (`packages/core` is plan-only until MS 3 — see its README / #130.)
+- Derive, don't store: anything computable from state (`total = finished.length + queue.length`) is not state.
+- Pure transitions live in **`packages/core`** (`src/<domain>/<name>-reducer.ts`) next to the FSRS grading wrapper, with a `.test.ts` covering every event from every status. `apps/web` only adds the React wrapper. The study session (`packages/core/src/study/session-reducer.ts`, #132) is the copy-from example.
 
 ```ts
-// packages/core/src/study/session-reducer.ts (shape — lands with #48/#49 + FSRS wrapper)
-export type SessionState =
-  | { status: "prompt"; index: number; cards: Card[] }
-  | { status: "revealed"; index: number; cards: Card[]; answer: string }
-  | { status: "complete"; cards: Card[] }
+// packages/core/src/study/session-reducer.ts (abridged)
+export type SessionState<T extends SessionCard> =
+  | { status: "prompt"; queue: readonly [T, ...T[]]; finished: readonly T[]; reviews: readonly SessionReview[] }
+  | { status: "answered"; queue: …; finished: …; reviews: …; answer: string | null; evaluation: Evaluation | null; elapsedMs: number | null }
+  | { status: "complete"; finished: readonly T[]; reviews: readonly SessionReview[] }
 
 export type SessionEvent =
-  | { type: "REVEAL"; answer: string }
-  | { type: "GRADE"; grade: ReviewGrade } // default UI: "pass" | "fail" → FSRS Good/Again
+  | { type: "SUBMIT"; answer: string; elapsedMs: number | null }
+  | { type: "REVEAL"; elapsedMs: number | null }
+  | { type: "RESOLVE"; outcome: ReviewOutcome; now: Date } // missed | tough | got_it | easy — never Anki grade names
   | { type: "RESTART" }
-
-export function sessionReducer(state: SessionState, event: SessionEvent): SessionState {
-  /* switch (state.status) → switch (event.type); GRADE calls @workspace/core FSRS wrapper */
-}
 ```
 
 ```tsx
 // apps/web — thin wrapper
-const [session, dispatch] = useReducer(sessionReducer, initialSession)
-<Button onClick={() => dispatch({ type: "GRADE", grade: "pass" })} />
+const [session, dispatch] = useReducer(sessionReducer, cards, startSession)
+<Button onClick={() => dispatch({ type: "RESOLVE", outcome: "got_it", now: new Date() })} />
 ```
 
 ## 3. Current code (do not refactor for ideology)
