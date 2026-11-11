@@ -20,6 +20,7 @@
   },
   "exports": {
     "./answer/evaluate": "./src/answer/evaluate.ts",
+    "./srs/outcome": "./src/srs/outcome.ts",
     "./srs/progress": "./src/srs/progress.ts"
   }
 }
