@@ -150,7 +150,7 @@ Do not paint into a cookies-only corner that makes mobile miserable — or a tok
 
 | Package | Web | API | Mobile | Notes |
 | --- | --- | --- | --- | --- |
-| `packages/core` | ✓ | ✓ | ✓ | Pure TS domain (FSRS / `ts-fsrs` wrapper + reducers); **no React, no DOM, no RN**. Plan-only README until MS 3 (#130) |
+| `packages/core` | ✓ | ✓ | ✓ | Pure TS domain (Evaluator, Rating Mapper, FSRS-7 via `ts-fsrs`, session reducer); **no React, no DOM, no RN** (#132) |
 | `packages/schemas` | ✓ | ✓ | ✓ | Zod contracts, env schemas (split per-app env exports as needed) |
 | `packages/ui` | ✓ | — | — | shadcn / Base UI — **web only** |
 | `packages/ui-native` | — | — | ✓ | Optional; RN primitives |
@@ -242,7 +242,7 @@ Record the outcome here when chosen:
 | Auth route ownership after Astro split | App only vs lightweight marketing links out | Open — default lean: app owns auth pages |
 | App path prefix | Root paths vs `/app/*` | Open — only if proxy/SEO needs it |
 | Hosting | Cloudflare-centric (already in repo tooling) vs other | Lean current stack unless requirements change |
-| SRS scheduler | Hand-rolled SM-2 vs FSRS (`ts-fsrs`) | **Chosen: FSRS via `ts-fsrs` wrapper in `@workspace/core`** (#130); package restored in MS 3 |
+| SRS scheduler | Hand-rolled SM-2 vs FSRS (`ts-fsrs`) | **Chosen: FSRS-7 via `ts-fsrs` wrapper in `@workspace/core`** (#130, #132) |
 
 ---
 

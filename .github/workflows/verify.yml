@@ -32,6 +32,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Bun installs and runs scripts, but Vitest, tsc, ESLint, and Wrangler
+      # execute on Node. Without this the runner's preinstalled Node decides.
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: dev/memli/.nvmrc
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

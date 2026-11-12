@@ -24,7 +24,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 | --- | --- |
 | Monorepo | Turborepo + Bun under `dev/memli/` |
 | Web | Single Vite + React app: `apps/web` |
-| Shared packages | `packages/core` (plan-only README for now; FSRS via `ts-fsrs` when MS 3 needs it), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
+| Shared packages | `packages/core` (Evaluator, Rating Mapper, FSRS-7 via `ts-fsrs`, session reducer), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
 | Routing | TanStack Router route groups: `_marketing`, `_auth`, `_app` |
 | Marketing vs app | **Logical** split only (same deployable, same origin) |
 | API | Not yet a separate `apps/api` Hono service (scheduled in `359 MS 3`) |
@@ -274,7 +274,7 @@ dev/memli/   # or future fluentvine root name
     api/           # Phase 1 — Hono
     mobile/        # Phase 4 — Expo / RN
   packages/
-    core/          # pure domain (FSRS via ts-fsrs + reducers) — share everywhere; plan-only until MS 3
+    core/          # pure domain (FSRS via ts-fsrs + reducers) — share everywhere
     schemas/       # Zod / shared contracts — share everywhere
     ui/            # web shadcn — web only
     ui-native/     # optional Phase 4+

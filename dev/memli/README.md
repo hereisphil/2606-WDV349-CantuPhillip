@@ -1,6 +1,6 @@
 # Memli — community mnemonic language learning (monorepo)
 
-Vite + React web app (`apps/web`), planned pure TypeScript domain package (`packages/core` — FSRS via `ts-fsrs` when MS 3 needs it), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
+Vite + React web app (`apps/web`), pure TypeScript domain package (`packages/core` — answer checking, FSRS-7 scheduling via `ts-fsrs`, and the study-session reducer), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
 
 **Planned public brand:** FluentVine (see docs). Product and architecture decisions live in [`docs/`](./docs/README.md) — start with the [roadmap](./docs/roadmap.md).
 
@@ -68,7 +68,7 @@ cd dev/memli
 bun run test
 ```
 
-[`packages/core`](./packages/core) is currently a **plan-only** stub (FSRS / `ts-fsrs` wrapper documented in its README; #130). When MS 3 restores the package, domain logic and session reducers will be covered with Vitest there. We intentionally skip marketing UI and route components.
+[`packages/core`](./packages/core) covers its domain logic and session reducer with Vitest (#132). We intentionally skip marketing UI and route components.
 
 ## Adding shadcn/ui components
 

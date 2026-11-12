@@ -1,6 +1,6 @@
 [install]
-# Automatically saves exact versions in package.json 
-save = "exact"
+# Save exact versions (no ^ range) to package.json on `bun add`.
+exact = true
 
 # Filter out any package version published less than 3 days ago.
 # 259200 seconds = 3 days (60s * 60m * 24h * 3d)
