@@ -2,6 +2,7 @@ import { useState, type JSX } from "react"
 import { Volume2 } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Spinner } from "@workspace/ui/components/spinner"
+import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
 import { canPronounce, pronounce } from "./pronunciation"
 import type { StudyMode } from "./session-model"
@@ -65,7 +66,11 @@ export function CardPrompt({
   return (
     <section
       aria-labelledby="session-mode"
-      className="flex min-h-72 flex-col gap-6 rounded-xl border border-border bg-card p-6 sm:p-8"
+      className={cn(
+        "flex flex-col rounded-xl border border-border bg-card p-6 sm:min-h-72 sm:gap-6 sm:p-8",
+        // On phones the card tightens once revealed, so the answer sits right under the term.
+        revealed ? "gap-2" : "min-h-72 gap-6"
+      )}
     >
       <p
         id="session-mode"

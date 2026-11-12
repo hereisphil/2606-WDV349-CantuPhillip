@@ -37,9 +37,10 @@ export function AnswerBreakdown({
       ref={focusOnMount}
       tabIndex={-1}
       aria-label={messages.region}
-      className="grid gap-4 outline-none sm:grid-cols-2"
+      // One card with two parts on phones; two cards side by side from sm up.
+      className="grid animate-in overflow-hidden rounded-xl border border-border bg-card duration-300 outline-none fade-in slide-in-from-bottom-2 motion-reduce:animate-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent"
     >
-      <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-6">
+      <div className="flex flex-col gap-2 p-6 sm:rounded-xl sm:border sm:border-border sm:bg-card">
         <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
           {messages.meaning}
         </h2>
@@ -54,7 +55,7 @@ export function AnswerBreakdown({
           {card.phonetic}
         </p>
       </div>
-      <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/40 p-6">
+      <div className="flex flex-col gap-2 border-t border-border bg-muted/40 p-6 sm:rounded-xl sm:border">
         <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
           {messages.example}
         </h2>

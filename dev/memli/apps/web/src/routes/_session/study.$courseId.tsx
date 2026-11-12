@@ -1,6 +1,5 @@
 import { useReducer, type JSX } from "react"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
-import { Eye } from "lucide-react"
 import {
   sessionReducer,
   startSession,
@@ -11,6 +10,7 @@ import { Text } from "@workspace/ui/components/text"
 import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
+import { RevealButton } from "./-components/RevealButton"
 import {
   findCourse,
   sessionQueueSize,
@@ -49,7 +49,6 @@ const messages = {
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
-  reveal: "Reveal answer",
   complete: {
     heading: "Session complete",
     body: "You've been through every card in this session.",
@@ -190,18 +189,12 @@ function SessionWorkspace({
                   answerLanguage={deckCards.answerLanguage}
                 />
               ) : (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-11 gap-2 text-base"
+                <RevealButton
                   // Response time (`elapsedMs`) is measured with the typed-answer path in the next #49 task.
-                  onClick={() => {
+                  onReveal={() => {
                     dispatch({ type: "REVEAL", elapsedMs: null })
                   }}
-                >
-                  <Eye aria-hidden="true" className="size-5" />
-                  {messages.reveal}
-                </Button>
+                />
               )}
             </>
           )}
