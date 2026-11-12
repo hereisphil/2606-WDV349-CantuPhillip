@@ -1,4 +1,4 @@
-import { useReducer, type JSX } from "react"
+import { useCallback, useReducer, type JSX } from "react"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import {
   sessionReducer,
@@ -10,7 +10,8 @@ import { Text } from "@workspace/ui/components/text"
 import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
-import { RevealButton } from "./-components/RevealButton"
+import { AnswerVerdict } from "./-components/AnswerVerdict"
+import { PromptActions } from "./-components/PromptActions"
 import {
   findCourse,
   sessionQueueSize,
@@ -139,6 +140,11 @@ function SessionWorkspace({
     (init) => startSession(initialCards(init))
   )
 
+  // Stable, so the reveal shortcut's key listener isn't re-added on every render.
+  const onReveal = useCallback((elapsedMs: number | null) => {
+    dispatch({ type: "REVEAL", elapsedMs })
+  }, [])
+
   // Derive, don't store (docs/state-management.md).
   const queued = session.status === "complete" ? 0 : session.queue.length
   const seeded: SessionView = {
@@ -187,13 +193,24 @@ function SessionWorkspace({
                   card={session.queue[0]}
                   learningLanguage={course.learningLanguage}
                   answerLanguage={deckCards.answerLanguage}
+                  verdict={
+                    session.evaluation !== null && session.answer !== null ? (
+                      <AnswerVerdict
+                        evaluation={session.evaluation}
+                        answer={session.answer}
+                        answerLanguage={deckCards.answerLanguage}
+                      />
+                    ) : null
+                  }
                 />
               ) : (
-                <RevealButton
-                  // Response time (`elapsedMs`) is measured with the typed-answer path in the next #49 task.
-                  onReveal={() => {
-                    dispatch({ type: "REVEAL", elapsedMs: null })
+                <PromptActions
+                  key={session.queue[0].cardId}
+                  answerLanguage={deckCards.answerLanguage}
+                  onSubmit={(answer, elapsedMs) => {
+                    dispatch({ type: "SUBMIT", answer, elapsedMs })
                   }}
+                  onReveal={onReveal}
                 />
               )}
             </>

@@ -50,8 +50,8 @@ function useRevealOnSpace(onReveal: () => void): void {
 }
 
 /**
- * The main action while a card's answer is hidden. Mount it only then, so
- * the Space shortcut exists only when there is something to reveal.
+ * Shows the answer without typing. Mount it only while the answer is hidden,
+ * so the Space shortcut exists only when there is something to reveal.
  */
 export function RevealButton({
   onReveal,
@@ -62,8 +62,9 @@ export function RevealButton({
 
   return (
     <Button
-      // The one primary action on screen: solid, tall, and lifted off the page.
-      className="relative h-14 gap-2.5 rounded-xl text-base font-semibold shadow-lg shadow-primary/25 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      // Secondary to Submit (one primary action per screen), but still a large, lifted target.
+      variant="outline"
+      className="relative h-12 gap-2.5 rounded-xl bg-card text-base font-semibold shadow-sm hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:text-primary hover:shadow-md active:shadow-sm motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       aria-keyshortcuts="Space"
       onClick={onReveal}
     >
@@ -72,7 +73,7 @@ export function RevealButton({
       {/* Shortcut hint only on hover or keyboard focus. Absolutely placed so the label never shifts. */}
       <kbd
         aria-hidden="true"
-        className="pointer-events-none absolute right-4 rounded border border-primary-foreground/30 bg-primary-foreground/15 px-1.5 py-0.5 font-sans text-xs font-medium opacity-0 transition-opacity group-hover/button:opacity-100 group-focus-visible/button:opacity-100 motion-reduce:transition-none"
+        className="pointer-events-none absolute right-4 rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-xs font-medium text-muted-foreground opacity-0 transition-opacity group-hover/button:opacity-100 group-focus-visible/button:opacity-100 motion-reduce:transition-none"
       >
         {messages.revealKey}
       </kbd>
