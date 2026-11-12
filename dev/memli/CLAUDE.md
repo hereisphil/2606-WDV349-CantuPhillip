@@ -12,6 +12,7 @@ The rules for this project live in `.cursor/rules/` so Cursor and Claude Code sh
 @.cursor/rules/commit-messages.mdc
 @.cursor/rules/no-auto-commit.mdc
 @.cursor/rules/browser-verification.mdc
+@.cursor/rules/shadcn-components.mdc
 
 ## Skills
 

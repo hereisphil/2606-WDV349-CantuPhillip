@@ -1,0 +1,35 @@
+---
+description: Add shadcn/ui components by copying them in by hand — never the shadcn CLI, which installs an unrelated `cn` package
+alwaysApply: true
+---
+
+# Adding shadcn/ui components
+
+`packages/ui` uses shadcn/ui's **Base UI** components (`components.json` style `base-nova`). Add them by copying the code in by hand, then adapt it to this repo.
+
+## Why not the CLI
+
+The shadcn registry lists the npm package **`cn`** as a dependency of every component, in every style, and imports `cn` from it instead of our helper. `shadcn add` (and `bunx --bun shadcn@latest add`) therefore runs `bun add cn` and writes `cn` into `packages/ui/package.json` and `bun.lock`. That package is unrelated to our `cn()` and ships its own executable. Some registry files also import shadcn's own site code (the spinner imports `@/app/(create)/components/icon-placeholder`).
+
+Copying by hand never installs anything, and it means every line gets read before it lands.
+
+## Do
+
+1. Open the component's page under `https://ui.shadcn.com/docs/components/base/…` and choose **Installation → Manual**.
+2. Paste it into `packages/ui/src/components/<name>.tsx`.
+3. Replace `import { cn } from "cn"` with `import { cn } from "@workspace/ui/lib/utils"`. Drop or replace any import from shadcn's site (`@/app/…`).
+4. Match the other files in `packages/ui/src/components`: explicit return types (`React.JSX.Element`), `data-slot`, Base UI primitives (not Radix).
+5. Remove hard-coded English such as `aria-label="Loading"`. The calling app passes localized copy (`i18n-foundations.mdc`). `spinner.tsx` is the example.
+6. Check the **dependencies** the page lists. Most are already installed (`@base-ui/react`, `class-variance-authority`, `lucide-react`). Ask before adding a new one, and confirm it is the real package.
+7. Run `bun run lint`, `bun run typecheck`, and `bun run knip` from `dev/memli`.
+
+## Enforcement
+
+- ESLint (`packages/eslint-config/base.js`) errors on any import from `cn`, with a message naming the right helper.
+- `knip` runs in CI and fails on a `cn` left in `package.json` with nothing importing it.
+
+## Do not
+
+- Run `shadcn add`, `shadcn init`, or `shadcn@latest add`.
+- `bun add cn` to silence a "Cannot find module 'cn'" error. Fix the import instead.
+- Copy a component's built-in English labels into `packages/ui`.
