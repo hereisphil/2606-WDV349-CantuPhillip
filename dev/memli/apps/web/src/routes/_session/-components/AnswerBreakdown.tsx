@@ -17,6 +17,8 @@ type AnswerBreakdownProps = {
   answerLanguage: string
   /** How a typed answer compared, shown first. Absent when revealed without typing. */
   verdict?: ReactNode
+  /** Shown after the meaning and example, still inside the answer: the mnemonic (#50). */
+  children?: ReactNode
 }
 
 /**
@@ -34,6 +36,7 @@ export function AnswerBreakdown({
   learningLanguage,
   answerLanguage,
   verdict,
+  children,
 }: AnswerBreakdownProps): JSX.Element {
   return (
     <section
@@ -72,6 +75,7 @@ export function AnswerBreakdown({
           </p>
         </div>
       </div>
+      {children}
     </section>
   )
 }

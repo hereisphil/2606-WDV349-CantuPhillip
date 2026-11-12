@@ -8,13 +8,6 @@ import {
   type StudyPreviewName,
 } from "./study-previews"
 
-const groups = Object.entries(studyPreviewGroups).map(([group, label]) => ({
-  label,
-  names: studyPreviewNames.filter(
-    (name) => studyPreviews[name].group === group
-  ),
-}))
-
 /** Links between seeded study session states, keeping the open deck and mode. */
 export function StudyPreviewSwitcher({
   courseId,
@@ -23,6 +16,14 @@ export function StudyPreviewSwitcher({
   courseId: string
   current: StudyPreviewName
 }): JSX.Element {
+  // Built here, not at module level, so production builds can drop the preview data entirely.
+  const groups = Object.entries(studyPreviewGroups).map(([group, label]) => ({
+    label,
+    names: studyPreviewNames.filter(
+      (name) => studyPreviews[name].group === group
+    ),
+  }))
+
   return (
     <nav
       aria-label="Study session previews"

@@ -11,6 +11,8 @@ import { Text } from "@workspace/ui/components/text"
 import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
+import { MnemonicSlot } from "./-components/MnemonicSlot"
+import { OutcomeDockSlot } from "./-components/OutcomeDockSlot"
 import { AnswerVerdict } from "./-components/AnswerVerdict"
 import { PromptActions } from "./-components/PromptActions"
 import {
@@ -215,20 +217,36 @@ function SessionWorkspace({
                 revealed={session.status === "answered"}
               />
               {session.status === "answered" ? (
-                <AnswerBreakdown
-                  card={session.queue[0]}
-                  learningLanguage={learningLanguage}
-                  answerLanguage={answerLanguage}
-                  verdict={
-                    session.evaluation !== null && session.answer !== null ? (
-                      <AnswerVerdict
-                        evaluation={session.evaluation}
-                        answer={session.answer}
-                        answerLanguage={answerLanguage}
-                      />
-                    ) : null
-                  }
-                />
+                <>
+                  <AnswerBreakdown
+                    card={session.queue[0]}
+                    learningLanguage={learningLanguage}
+                    answerLanguage={answerLanguage}
+                    verdict={
+                      session.evaluation !== null && session.answer !== null ? (
+                        <AnswerVerdict
+                          evaluation={session.evaluation}
+                          answer={session.answer}
+                          answerLanguage={answerLanguage}
+                        />
+                      ) : null
+                    }
+                  >
+                    <MnemonicSlot
+                      card={session.queue[0]}
+                      learningLanguage={learningLanguage}
+                      answerLanguage={answerLanguage}
+                    />
+                  </AnswerBreakdown>
+                  <OutcomeDockSlot
+                    evaluation={session.evaluation}
+                    elapsedMs={session.elapsedMs}
+                    progress={session.queue[0].progress}
+                    onResolve={(outcome) => {
+                      dispatch({ type: "RESOLVE", outcome, now: new Date() })
+                    }}
+                  />
+                </>
               ) : (
                 <PromptActions
                   key={session.queue[0].cardId}
