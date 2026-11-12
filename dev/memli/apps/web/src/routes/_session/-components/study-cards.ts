@@ -1,3 +1,6 @@
+import { createProgress } from "@workspace/core/srs/progress"
+import type { SessionCard } from "@workspace/core/study/session-reducer"
+
 /**
  * Card content for a study session. #112 replaces {@link seededDeckCards}
  * with cards from the API in this same shape.
@@ -239,6 +242,23 @@ const seededDeckCards: Record<string, DeckCards> = {
       },
     ],
   },
+}
+
+/** A card with the FSRS progress `@workspace/core`'s session reducer schedules. */
+export type SessionStudyCard = StudyCard & SessionCard
+
+/**
+ * Seeds every card as brand new. #112 loads each card's saved progress
+ * for usr_prototype_01 instead.
+ */
+export function withNewProgress(
+  cards: readonly StudyCard[],
+  now: Date
+): SessionStudyCard[] {
+  return cards.map((card) => ({
+    ...card,
+    progress: createProgress(card.cardId, now),
+  }))
 }
 
 /** The cards behind a deck, or null when it has none seeded. */

@@ -37,18 +37,20 @@ type CardPromptProps = {
   learningLanguage: string
   /** BCP 47 tag the learner answers in. */
   answerLanguage: string
+  /** Once the answer shows, the instruction to recall it goes away. */
+  revealed: boolean
 }
 
 /**
- * The prompt side of a study card: the word or phrase to recall, its part of
- * speech, and a button to hear it. The reveal (#49) and the typed answer
- * (#49 → Evaluator) build on this.
+ * The top of a study card: the word or phrase to recall, its part of speech,
+ * and a button to hear it. It stays on screen above the answer once revealed.
  */
 export function CardPrompt({
   card,
   mode,
   learningLanguage,
   answerLanguage,
+  revealed,
 }: CardPromptProps): JSX.Element {
   const { format, languageName } = useFormatters()
   const partOfSpeech = messages.partOfSpeech[card.partOfSpeech]
@@ -72,11 +74,13 @@ export function CardPrompt({
         {messages.mode[mode]}
       </p>
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
-          {format(messages.instruction, {
-            language: languageName(answerLanguage),
-          })}
-        </p>
+        {revealed ? null : (
+          <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+            {format(messages.instruction, {
+              language: languageName(answerLanguage),
+            })}
+          </p>
+        )}
         {/* `lang` so screen readers and speech pick the right voice for the term. */}
         <p
           lang={learningLanguage}

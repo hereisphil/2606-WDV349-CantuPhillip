@@ -1,8 +1,15 @@
-import type { JSX } from "react"
+import { useReducer, type JSX } from "react"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
+import { Eye } from "lucide-react"
+import {
+  sessionReducer,
+  startSession,
+} from "@workspace/core/study/session-reducer"
 import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
+import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
+import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
 import {
   findCourse,
@@ -10,7 +17,12 @@ import {
   type StudyMode,
 } from "./-components/session-model"
 import { SessionHeader } from "./-components/SessionHeader"
-import { findDeckCards } from "./-components/study-cards"
+import {
+  findDeckCards,
+  withNewProgress,
+  type DeckCards,
+  type SessionStudyCard,
+} from "./-components/study-cards"
 import {
   isStudyPreviewName,
   studyPreviews,
@@ -37,6 +49,11 @@ const messages = {
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
+  reveal: "Reveal answer",
+  complete: {
+    heading: "Session complete",
+    body: "You've been through every card in this session.",
+  },
 } as const
 
 function parseMode(value: unknown): StudyMode {
@@ -78,11 +95,57 @@ export const Route = createFileRoute("/_session/study/$courseId")({
 function StudySession(): JSX.Element {
   const { course, deckCards } = Route.useLoaderData()
   const { mode, extra, preview } = Route.useSearch()
-  // `completed` stays 0, and the first card stays on screen, until #49's session reducer supplies them.
+
+  return (
+    // Keyed so switching deck or session kind starts a fresh session instead of keeping the old reducer state.
+    <SessionWorkspace
+      key={`${course.courseId}:${mode}:${String(extra)}`}
+      course={course}
+      deckCards={deckCards}
+      mode={mode}
+      queueSize={sessionQueueSize(course, mode, extra)}
+      preview={preview}
+    />
+  )
+}
+
+type SessionWorkspaceProps = {
+  course: DashboardDeck
+  deckCards: DeckCards
+  mode: StudyMode
+  /** Cards this kind of session should hold, from the deck's counts. */
+  queueSize: number
+  preview: StudyPreviewName | undefined
+}
+
+/** The seeded cards for this session, capped at what the deck has waiting. */
+function initialCards({
+  deckCards,
+  queueSize,
+}: Pick<SessionWorkspaceProps, "deckCards" | "queueSize">): SessionStudyCard[] {
+  return withNewProgress(deckCards.cards.slice(0, queueSize), new Date())
+}
+
+function SessionWorkspace({
+  course,
+  deckCards,
+  mode,
+  queueSize,
+  preview,
+}: SessionWorkspaceProps): JSX.Element {
+  // The study-session state machine from @workspace/core: prompt → answered → … → complete.
+  const [session, dispatch] = useReducer(
+    sessionReducer<SessionStudyCard>,
+    { deckCards, queueSize },
+    (init) => startSession(initialCards(init))
+  )
+
+  // Derive, don't store (docs/state-management.md).
+  const queued = session.status === "complete" ? 0 : session.queue.length
   const seeded: SessionView = {
     title: course.title,
-    total: sessionQueueSize(course, mode, extra),
-    completed: 0,
+    total: session.finished.length + queued,
+    completed: session.finished.length,
   }
   const { title, total, completed } =
     import.meta.env.DEV && preview !== undefined
@@ -100,18 +163,47 @@ function StudySession(): JSX.Element {
               current={preview}
             />
           ) : null}
-          {total > 0 ? (
-            <CardPrompt
-              card={deckCards.cards[0]}
-              mode={mode}
-              learningLanguage={course.learningLanguage}
-              answerLanguage={deckCards.answerLanguage}
-            />
-          ) : (
+          {total === 0 ? (
             <EmptyState
               heading={messages.empty.heading}
               body={messages.empty.body}
             />
+          ) : session.status === "complete" ? (
+            // Placeholder until the session summary (`07 - Study session final page.png`) is built.
+            <EmptyState
+              heading={messages.complete.heading}
+              body={messages.complete.body}
+            />
+          ) : (
+            <>
+              <CardPrompt
+                card={session.queue[0]}
+                mode={mode}
+                learningLanguage={course.learningLanguage}
+                answerLanguage={deckCards.answerLanguage}
+                revealed={session.status === "answered"}
+              />
+              {session.status === "answered" ? (
+                <AnswerBreakdown
+                  card={session.queue[0]}
+                  learningLanguage={course.learningLanguage}
+                  answerLanguage={deckCards.answerLanguage}
+                />
+              ) : (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-11 gap-2 text-base"
+                  // Response time (`elapsedMs`) is measured with the typed-answer path in the next #49 task.
+                  onClick={() => {
+                    dispatch({ type: "REVEAL", elapsedMs: null })
+                  }}
+                >
+                  <Eye aria-hidden="true" className="size-5" />
+                  {messages.reveal}
+                </Button>
+              )}
+            </>
           )}
         </div>
       </main>
