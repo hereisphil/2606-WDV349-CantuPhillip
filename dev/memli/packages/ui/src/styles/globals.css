@@ -84,7 +84,7 @@
   --accent: oklch(0.971 0.013 264); /* #EFF6FF Blue Tint */
   --accent-foreground: oklch(0.488 0.243 264.376);
   --destructive: oklch(0.577 0.245 27.325);
-  /* Answer feedback. Dark enough for 4.5:1 text on --card and on a /10 tint of themselves. */
+  /* Answer feedback. For text on a /10 tint of itself, mix toward --foreground to keep 4.5:1. */
   --success: oklch(0.508 0.118 165.612); /* #047857 Emerald 700 */
   --warning: oklch(0.555 0.163 48.998); /* #B45309 Amber 700 */
   --border: oklch(0.916 0.009 261); /* #E2E8F0 Border Gray */

@@ -13,20 +13,22 @@ const messages = {
   youAnswered: "You answered <answer>{answer}</answer>",
 } as const
 
+// Text mixes the tone toward --foreground: darker in light mode, lighter in dark, so it
+// clears 4.5:1 on its own /10 tint in both themes (checked by e2e/study.a11y.spec.ts).
 const tones = {
   success: {
     box: "border-success/30 bg-success/10",
-    text: "text-success",
+    text: "text-[color-mix(in_oklab,var(--success)_70%,var(--foreground))]",
     Icon: CircleCheck,
   },
   warning: {
     box: "border-warning/30 bg-warning/10",
-    text: "text-warning",
+    text: "text-[color-mix(in_oklab,var(--warning)_70%,var(--foreground))]",
     Icon: CircleAlert,
   },
   wrong: {
     box: "border-destructive/30 bg-destructive/10",
-    text: "text-destructive",
+    text: "text-[color-mix(in_oklab,var(--destructive)_70%,var(--foreground))]",
     Icon: CircleX,
   },
 } as const

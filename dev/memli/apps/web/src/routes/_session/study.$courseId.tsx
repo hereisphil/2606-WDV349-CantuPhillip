@@ -3,6 +3,7 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import {
   sessionReducer,
   startSession,
+  type SessionState,
 } from "@workspace/core/study/session-reducer"
 import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
@@ -28,6 +29,7 @@ import {
   isStudyPreviewName,
   studyPreviews,
   type SessionView,
+  type StudyPreview,
   type StudyPreviewName,
 } from "./-components/study-previews"
 import { StudyPreviewSwitcher } from "./-components/StudyPreviewSwitcher"
@@ -97,9 +99,9 @@ function StudySession(): JSX.Element {
   const { mode, extra, preview } = Route.useSearch()
 
   return (
-    // Keyed so switching deck or session kind starts a fresh session instead of keeping the old reducer state.
+    // Keyed so switching deck, session kind or preview starts a fresh session instead of keeping the old reducer state.
     <SessionWorkspace
-      key={`${course.courseId}:${mode}:${String(extra)}`}
+      key={`${course.courseId}:${mode}:${String(extra)}:${preview ?? ""}`}
       course={course}
       deckCards={deckCards}
       mode={mode}
@@ -118,12 +120,35 @@ type SessionWorkspaceProps = {
   preview: StudyPreviewName | undefined
 }
 
-/** The seeded cards for this session, capped at what the deck has waiting. */
-function initialCards({
+/** The development preview in use, if any. */
+function previewOf(
+  name: StudyPreviewName | undefined
+): StudyPreview | undefined {
+  return import.meta.env.DEV && name !== undefined
+    ? studyPreviews[name]
+    : undefined
+}
+
+/**
+ * The first session state: the seeded cards, capped at what the deck has
+ * waiting. A preview may swap the cards and replay events through the reducer.
+ */
+function initialSession({
   deckCards,
   queueSize,
-}: Pick<SessionWorkspaceProps, "deckCards" | "queueSize">): SessionStudyCard[] {
-  return withNewProgress(deckCards.cards.slice(0, queueSize), new Date())
+  preview,
+}: Pick<
+  SessionWorkspaceProps,
+  "deckCards" | "queueSize" | "preview"
+>): SessionState<SessionStudyCard> {
+  const seeded = previewOf(preview)
+  const cards =
+    seeded?.cards?.(deckCards.cards) ?? deckCards.cards.slice(0, queueSize)
+  const events = seeded?.events?.(cards) ?? []
+  return events.reduce(
+    sessionReducer<SessionStudyCard>,
+    startSession(withNewProgress(cards, new Date()))
+  )
 }
 
 function SessionWorkspace({
@@ -136,9 +161,13 @@ function SessionWorkspace({
   // The study-session state machine from @workspace/core: prompt → answered → … → complete.
   const [session, dispatch] = useReducer(
     sessionReducer<SessionStudyCard>,
-    { deckCards, queueSize },
-    (init) => startSession(initialCards(init))
+    { deckCards, queueSize, preview },
+    initialSession
   )
+  const seeded = previewOf(preview)
+  const learningLanguage =
+    seeded?.languages?.learning ?? course.learningLanguage
+  const answerLanguage = seeded?.languages?.answer ?? deckCards.answerLanguage
 
   // Stable, so the reveal shortcut's key listener isn't re-added on every render.
   const onReveal = useCallback((elapsedMs: number | null) => {
@@ -147,15 +176,12 @@ function SessionWorkspace({
 
   // Derive, don't store (docs/state-management.md).
   const queued = session.status === "complete" ? 0 : session.queue.length
-  const seeded: SessionView = {
+  const derived: SessionView = {
     title: course.title,
     total: session.finished.length + queued,
     completed: session.finished.length,
   }
-  const { title, total, completed } =
-    import.meta.env.DEV && preview !== undefined
-      ? studyPreviews[preview](seeded)
-      : seeded
+  const { title, total, completed } = seeded?.view?.(derived) ?? derived
 
   return (
     <>
@@ -184,21 +210,21 @@ function SessionWorkspace({
               <CardPrompt
                 card={session.queue[0]}
                 mode={mode}
-                learningLanguage={course.learningLanguage}
-                answerLanguage={deckCards.answerLanguage}
+                learningLanguage={learningLanguage}
+                answerLanguage={answerLanguage}
                 revealed={session.status === "answered"}
               />
               {session.status === "answered" ? (
                 <AnswerBreakdown
                   card={session.queue[0]}
-                  learningLanguage={course.learningLanguage}
-                  answerLanguage={deckCards.answerLanguage}
+                  learningLanguage={learningLanguage}
+                  answerLanguage={answerLanguage}
                   verdict={
                     session.evaluation !== null && session.answer !== null ? (
                       <AnswerVerdict
                         evaluation={session.evaluation}
                         answer={session.answer}
-                        answerLanguage={deckCards.answerLanguage}
+                        answerLanguage={answerLanguage}
                       />
                     ) : null
                   }
@@ -206,7 +232,7 @@ function SessionWorkspace({
               ) : (
                 <PromptActions
                   key={session.queue[0].cardId}
-                  answerLanguage={deckCards.answerLanguage}
+                  answerLanguage={answerLanguage}
                   onSubmit={(answer, elapsedMs) => {
                     dispatch({ type: "SUBMIT", answer, elapsedMs })
                   }}
