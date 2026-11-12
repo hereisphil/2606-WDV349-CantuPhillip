@@ -3,12 +3,14 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
+import { CardPrompt } from "./-components/CardPrompt"
 import {
   findCourse,
   sessionQueueSize,
   type StudyMode,
 } from "./-components/session-model"
 import { SessionHeader } from "./-components/SessionHeader"
+import { findDeckCards } from "./-components/study-cards"
 import {
   isStudyPreviewName,
   studyPreviews,
@@ -26,12 +28,6 @@ type StudySearch = {
 }
 
 const messages = {
-  mode: {
-    review: "Review",
-    learn: "Learn new words",
-    practice: "Practice tricky words",
-  },
-  cardPlaceholder: "Your cards appear here with #49.",
   empty: {
     heading: "Nothing to study here right now",
     body: "This deck has no cards waiting for this kind of session. Pick another from your dashboard.",
@@ -69,19 +65,20 @@ export const Route = createFileRoute("/_session/study/$courseId")({
   },
   loader: ({ params }) => {
     const course = findCourse(params.courseId)
-    if (course === null) {
+    const deckCards = findDeckCards(params.courseId)
+    if (course === null || deckCards === null) {
       throw notFound()
     }
-    return course
+    return { course, deckCards }
   },
   component: StudySession,
   notFoundComponent: CourseNotFound,
 })
 
 function StudySession(): JSX.Element {
-  const course = Route.useLoaderData()
+  const { course, deckCards } = Route.useLoaderData()
   const { mode, extra, preview } = Route.useSearch()
-  // `completed` stays 0 until #49's session reducer supplies it.
+  // `completed` stays 0, and the first card stays on screen, until #49's session reducer supplies them.
   const seeded: SessionView = {
     title: course.title,
     total: sessionQueueSize(course, mode, extra),
@@ -104,18 +101,12 @@ function StudySession(): JSX.Element {
             />
           ) : null}
           {total > 0 ? (
-            <section
-              aria-labelledby="session-mode"
-              className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8 text-center"
-            >
-              <p
-                id="session-mode"
-                className="text-xs font-medium tracking-widest text-muted-foreground uppercase"
-              >
-                {messages.mode[mode]}
-              </p>
-              <Text variant="muted">{messages.cardPlaceholder}</Text>
-            </section>
+            <CardPrompt
+              card={deckCards.cards[0]}
+              mode={mode}
+              learningLanguage={course.learningLanguage}
+              answerLanguage={deckCards.answerLanguage}
+            />
           ) : (
             <EmptyState
               heading={messages.empty.heading}
