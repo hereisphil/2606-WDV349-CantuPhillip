@@ -139,8 +139,8 @@ export function AppSidebar(): JSX.Element {
       aria-label={messages.sidebar}
       className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-56 md:border-r md:border-b-0 lg:w-64"
     >
-      <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
-        <Link to="/dashboard" className="flex">
+      <div className="flex items-center justify-between px-4 py-1.5 md:pt-6 md:pb-4">
+        <Link to="/dashboard" className="flex min-h-11 items-center">
           <BrandMark />
         </Link>
 
@@ -183,7 +183,7 @@ export function AppSidebar(): JSX.Element {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  className="size-11 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >

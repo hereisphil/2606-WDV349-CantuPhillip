@@ -76,7 +76,8 @@ const headingId = "study-hero-heading"
 
 // The hero sizes itself by its own width (a container query), so a landscape
 // phone and a desktop column get the same layout at the same width.
-const actionsClass = "flex flex-col gap-3 @min-[520px]:flex-row"
+const actionsClass =
+  "flex flex-col gap-2 @min-[520px]:flex-row @min-[520px]:gap-3"
 const mainButtonClass = cn(
   buttonVariants({ variant: "cta", size: "touch-xl" }),
   "w-full @min-[520px]:w-auto @min-[520px]:min-w-70"
@@ -96,7 +97,7 @@ const textBlockClass = "flex max-w-120 flex-col gap-1"
 function CourseHeading({ deck }: { deck: DashboardDeck }): JSX.Element {
   return (
     <div className="flex max-w-120 items-center gap-3">
-      <LanguageBadge tag={deck.learningLanguage} size="lg" tone="hero" />
+      <LanguageBadge tag={deck.learningLanguage} size="hero" tone="hero" />
       <h2
         id={headingId}
         className="min-w-0 font-heading text-lg font-semibold text-pretty wrap-break-word"
@@ -333,7 +334,9 @@ function HeroFrame({ children }: { children: ReactNode }): JSX.Element {
       // --ring is reset so focus outlines inside the navy panel use its own white ring.
       className="@container rounded-2xl border border-transparent bg-hero text-hero-foreground shadow-(--hero-shadow) [--ring:var(--hero-ring)] dark:border-hero-border"
     >
-      <div className="flex flex-col gap-6 p-5 @min-[520px]:p-8">{children}</div>
+      <div className="flex flex-col gap-5 p-4 @min-[520px]:gap-6 @min-[520px]:p-8">
+        {children}
+      </div>
     </section>
   )
 }

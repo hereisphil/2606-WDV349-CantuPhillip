@@ -12,6 +12,8 @@ const toneClasses = {
 const sizeClasses = {
   default: "h-8 min-w-8 rounded-md px-1.5 text-xs",
   lg: "h-10 min-w-10 rounded-lg px-2 text-sm",
+  // Inside the hero (a size container): small on a phone, large from 520 px.
+  hero: "h-8 min-w-8 rounded-md px-1.5 text-xs @min-[520px]:h-10 @min-[520px]:min-w-10 @min-[520px]:rounded-lg @min-[520px]:px-2 @min-[520px]:text-sm",
 } as const
 
 function languageCode(tag: string): string {

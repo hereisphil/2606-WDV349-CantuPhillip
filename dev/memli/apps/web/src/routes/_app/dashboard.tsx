@@ -109,7 +109,11 @@ function Dashboard(): JSX.Element {
     today.status === "caught-up" && today.keepGoing === null
 
   return (
-    <Section padding="compact" className="flex flex-col gap-8">
+    <Section
+      padding="compact"
+      // Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
+      className="flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
+    >
       {import.meta.env.DEV && preview !== undefined ? (
         <PreviewSwitcher current={preview} />
       ) : null}
@@ -130,7 +134,7 @@ function Dashboard(): JSX.Element {
             first row and the courses and the tip in the second. No CSS order.
           */}
           <div className="@container">
-            <div className="grid items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem]">
+            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem]">
               <StudyHero state={today} />
               <ThisWeek
                 days={dailyGoal.days}
@@ -154,14 +158,16 @@ function Dashboard(): JSX.Element {
                   <TipCard tip={tip} />
                 </div>
               )}
+              <div className="@[56rem]:col-span-2">
+                <ProgressDisclosure
+                  retentionPercent={progressTrends.retentionPercent}
+                  newCardsThisMonth={progressTrends.newCardsThisMonth}
+                  wordsLearned={totalMastered(allDecks)}
+                  courses={sortDecks(allDecks)}
+                />
+              </div>
             </div>
           </div>
-          <ProgressDisclosure
-            retentionPercent={progressTrends.retentionPercent}
-            newCardsThisMonth={progressTrends.newCardsThisMonth}
-            wordsLearned={totalMastered(allDecks)}
-            courses={sortDecks(allDecks)}
-          />
         </>
       )}
     </Section>
