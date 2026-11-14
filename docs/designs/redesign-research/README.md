@@ -28,6 +28,8 @@ Three independent designs built on the research. REDESIGN.md takes "Night first"
 
 ## Color scripts
 
+These produced the token set. They are kept as a record. **The live check is now `dev/memli/packages/ui/src/styles/tokens.test.ts`**, which reads the shipped values from `globals.css` and runs in CI with `bun run test`.
+
 | File | What it is |
 | --- | --- |
 | [tokens.mjs](./color/tokens.mjs) | The source of truth for the proposed colors and roles. |

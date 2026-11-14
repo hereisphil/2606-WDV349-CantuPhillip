@@ -978,7 +978,7 @@ The redesign is done when all of these are true.
 
 - [ ] Every text pair meets 4.5:1 and its APCA target.
 - [ ] Control borders and the focus ring meet 3:1.
-- [ ] The token script (`verify.mjs`) passes, including the pairs this design added.
+- [ ] The color check (`packages/ui/src/styles/tokens.test.ts`) passes, including the pairs this design added.
 - [ ] Status is never shown by color alone.
 
 **Theme**
@@ -1071,7 +1071,7 @@ Repo rules apply throughout: semantic tokens only, Base UI primitives, shadcn co
 | Focus style, everywhere | `globals.css` base layer, `button.tsx`, `input.tsx`, `badge.tsx` | A solid 2 px outline in `--ring` with a 2 px offset replaces the 50% transparent ring. The global rule matters because plain links, radios and `<summary>` inherit it. |
 | Links as links | 7 call sites on the dashboard, 8 more in other route groups | `<Link className={buttonVariants(...)}>`. Update the "Button composition" line in `.cursor/rules/memli-stack.mdc` and the message in the `button-link` lint rule in the same step. |
 | Tokens | `packages/ui/src/styles/globals.css` | The three-tier file in the appendix. `--radius`, `--marketing-header-clearance` and the `--color-brand-*` lines stay as they are. |
-| Color check script | `packages/ui/scripts/` (proposed) | The script that checks every pairing, moved from `docs/designs/redesign-research/color/`. It needs two dev dependencies, `culori` and `apca-w3`. Confirm before adding them, as the repo rules ask. |
+| Color check | `packages/ui/src/styles/tokens.test.ts` (done) | A Vitest test that reads the roles straight from `globals.css` and checks every pairing in both themes, so it runs in CI with the other tests. It uses `culori` and `apca-w3` as dev dependencies. The main button's edge against the hero is not gated: it is depth only and measures Lc 27 in light. |
 
 ### 13.3 Where each control goes
 
@@ -1555,4 +1555,4 @@ Notes for whoever applies this:
 - The alias block keeps every utility that is in use today working: `text-secondary-foreground`, `text-card-foreground`, `text-popover-foreground`, the `sidebar-*` utilities, `text-streak-foreground` and `bg-chart-1` to `bg-chart-5`. The chart aliases can go once the mastery bars are rewritten.
 - `--radius`, `--marketing-header-clearance` and the `--color-brand-*` lines in `@theme` are not shown here and stay as they are.
 - `--input` changes from a translucent white to a solid border color in dark mode. Drop the `bg-input/30` and `bg-input/50` fills from the outline Button and the Input in the same step.
-- The scripts that produced and checked these values are saved in [redesign-research/color/](./redesign-research/color/). Phase 1 moves the check next to the tokens, so any later change to a value is re-checked.
+- The values now live in `packages/ui/src/styles/globals.css`, and `tokens.test.ts` next to it checks every pairing in CI. The scripts that first produced them are kept in [redesign-research/color/](./redesign-research/color/) as a record.

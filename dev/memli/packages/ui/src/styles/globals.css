@@ -14,9 +14,9 @@
      components reach colors only through roles.
   2. Roles: what a color is for (--card, --hero, --cta). One set for light,
      one for .dark. Every text and control pairing passes WCAG 2.2 AA and its
-     APCA target in both themes (docs/designs/redesign-research/color/).
+     APCA target in both themes, checked by tokens.test.ts.
   3. Utilities: @theme inline below turns each role into bg-*, text-* and so on.
-  Change a value in tier 1 or 2, then rerun the color check.
+  Change a value in tier 1 or 2, then run `bun run test` in packages/ui.
 */
 
 @theme inline {
