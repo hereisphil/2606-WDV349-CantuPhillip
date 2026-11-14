@@ -1,5 +1,5 @@
 import { useId, useState, type JSX } from "react"
-import { ChevronLeft, ChevronRight, ThumbsUp } from "lucide-react"
+import { ArrowBigUp, ChevronLeft, ChevronRight, ThumbsUp } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
@@ -10,9 +10,9 @@ import type { MnemonicStoryPart, StudyCard } from "./study-cards"
 
 const messages = {
   heading: "Community mnemonic",
-  byline: "By {author}",
+  byline: "By <author>{author}</author>",
   // Only when the story isn't in the deck's answer language.
-  bylineWithLanguage: "By {author}, written in {language}",
+  bylineWithLanguage: "By <author>{author}</author>, written in {language}",
   upvotes: { one: "{count} upvote", other: "{count} upvotes" },
   position: "{current} of {total}",
   // Read first when the story changes, so a screen reader hears where it is.
@@ -44,7 +44,7 @@ export function MnemonicFrame({
   answerLanguage,
 }: MnemonicFrameProps): JSX.Element | null {
   const headingId = useId()
-  const { format, plural, languageName } = useFormatters()
+  const { format, plural, rich, languageName } = useFormatters()
   // Which mnemonic is showing. One uncoupled number, so `useState` (docs/state-management.md).
   const [index, setIndex] = useState(0)
   const mnemonics = card.mnemonics ?? []
@@ -64,12 +64,16 @@ export function MnemonicFrame({
   const sameLanguage =
     new Intl.Locale(contentLocale).language ===
     new Intl.Locale(answerLanguage).language
-  const byline = sameLanguage
-    ? format(messages.byline, { author: author.displayName })
-    : format(messages.bylineWithLanguage, {
-        author: author.displayName,
-        language: languageName(contentLocale),
-      })
+  // The author's name stands out from "By"; the upvotes beside it are a quieter stat.
+  const byline = rich(
+    sameLanguage ? messages.byline : messages.bylineWithLanguage,
+    {
+      author: (name) => (
+        <span className="font-medium text-foreground">{name}</span>
+      ),
+    },
+    { author: author.displayName, language: languageName(contentLocale) }
+  )
 
   return (
     <section
@@ -129,13 +133,14 @@ export function MnemonicFrame({
               ))}
             </Text>
           </blockquote>
-          <figcaption className="flex flex-wrap gap-x-3 gap-y-1">
+          <figcaption className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <Text variant="small" className="min-w-0 wrap-break-word">
               {byline}
             </Text>
-            <Text variant="small" className="tabular-nums">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+              <ArrowBigUp aria-hidden="true" className="size-3.5" />
               {plural(mnemonic.upvotes, messages.upvotes)}
-            </Text>
+            </span>
           </figcaption>
         </figure>
       </div>
