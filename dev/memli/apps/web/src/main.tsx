@@ -20,9 +20,16 @@ declare module "@tanstack/react-router" {
   }
 }
 
+// Development only: ?pseudo=long|rtl|cjk stretches or flips every string to test layouts.
+if (import.meta.env.DEV) {
+  void import("@/lib/pseudo-locale").then(({ startPseudoLocale }) => {
+    startPseudoLocale()
+  })
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="light">
+    <ThemeProvider>
       <SessionProvider>
         <RouterProvider router={router} />
       </SessionProvider>

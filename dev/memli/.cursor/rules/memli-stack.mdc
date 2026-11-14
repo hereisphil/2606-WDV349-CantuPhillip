@@ -14,7 +14,7 @@ alwaysApply: true
 - Styling: **Tailwind CSS** + `cn()` from `@workspace/ui/lib/utils`.
 - Components: **shadcn/ui** (Base UI primitives). Import from `@workspace/ui/components/*`.
 - Icons: **lucide-react**.
-- Button composition: use `render={<Link ... />}` and `nativeButton={false}` — not `asChild` (this is Base UI, not Radix).
+- Links as links: anything that navigates is a TanStack `<Link>` styled with `className={cn(buttonVariants({ variant, size }), …)}`, never a `Button` that renders a `Link`, which screen readers announce as a button. `render={<Link ... />}` stays only on Base UI parts that need it, such as `DropdownMenuItem`. A `Button` is for actions (submit, open a menu, play audio). Never `asChild` (this is Base UI, not Radix). Enforced by `memli/button-link`.
 
 ## Brand
 

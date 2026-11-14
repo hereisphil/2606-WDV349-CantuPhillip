@@ -28,6 +28,8 @@ Three independent designs built on the research. REDESIGN.md takes "Night first"
 
 ## Color scripts
 
+These produced the token set. They are kept as a record. **The live check is now `dev/memli/packages/ui/src/styles/tokens.test.ts`**, which reads the shipped values from `globals.css` and runs in CI with `bun run test`.
+
 | File | What it is |
 | --- | --- |
 | [tokens.mjs](./color/tokens.mjs) | The source of truth for the proposed colors and roles. |
@@ -41,6 +43,12 @@ To rerun the check, install the two packages listed in `color/package.json` (`cu
 ```bash
 node verify.mjs
 ```
+
+## Baseline
+
+[baseline/](./baseline/README.md) holds screenshots of the dashboard as it was before the redesign (phone and desktop, light and dark), the test kit for phase 0 of #151, and a sheet for the results.
+
+[definition-of-done/](./definition-of-done/README.md) holds the results of the REDESIGN.md 11.3 checklist after the build, with grayscale and blur screenshots.
 
 ## Read these with care
 

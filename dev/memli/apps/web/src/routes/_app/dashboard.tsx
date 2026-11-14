@@ -4,14 +4,11 @@ import { Section } from "@workspace/ui/components/section"
 import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
 import {
-  deckAction,
-  isSameAction,
   learningLanguages,
   selectFocusDeck,
   sortDecks,
-  todayPrimaryAction,
+  tipFor,
   todayState,
-  totalDue,
   totalMastered,
 } from "./-components/dashboard-model"
 import {
@@ -21,18 +18,20 @@ import {
   type PreviewName,
 } from "./-components/dashboard-previews"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
-import { DeckList } from "./-components/DeckList"
-import { FocusDeckCard } from "./-components/FocusDeckCard"
+import { CourseList } from "./-components/CourseList"
 import { LanguageFilter } from "./-components/LanguageFilter"
-import { MemoryCallout } from "./-components/MemoryCallout"
 import { PreviewSwitcher } from "./-components/PreviewSwitcher"
-import { ProgressTrends } from "./-components/ProgressTrends"
+import { ProgressDisclosure } from "./-components/ProgressDisclosure"
+import { StudyHero } from "./-components/StudyHero"
 import { ThisWeek } from "./-components/ThisWeek"
-import { TodayPanel } from "./-components/TodayPanel"
+import { TipCard } from "./-components/TipCard"
 
 const messages = {
-  aside: "Your progress",
+  title: "Dashboard · Memli",
 } as const
+
+/** Above this many other courses, the list offers the Studying menu. */
+const MAX_UNFILTERED_COURSES = 5
 
 type DashboardSearch = {
   preview?: PreviewName | undefined
@@ -56,6 +55,7 @@ export const Route = createFileRoute("/_app/dashboard")({
         ? search.studying
         : undefined,
   }),
+  head: () => ({ meta: [{ title: messages.title }] }),
   component: Dashboard,
 })
 
@@ -67,23 +67,28 @@ function Dashboard(): JSX.Element {
     import.meta.env.DEV && preview !== undefined
       ? dashboardPreviews[preview]
       : { metrics: prototypeDashboardMetrics }
-  const {
-    decks: allDecks,
-    dailyGoal,
-    trickyWords,
-    progressTrends,
-  } = seeded.metrics
+  const { decks: allDecks, dailyGoal, progressTrends } = seeded.metrics
   const streakDays = seeded.streakDays ?? viewer.streakDays
   const now = new Date()
 
-  // The filter narrows what to study. The streak and goal count every language.
-  const languages = learningLanguages(allDecks)
+  // The hero, the week and the tip cover every course. The Studying menu
+  // narrows only the list of other courses (REDESIGN.md 5.4).
+  const today = todayState(allDecks)
+  const focusDeck = selectFocusDeck(allDecks)
+  const otherCourses = sortDecks(allDecks).filter(
+    (deck) => deck.courseId !== focusDeck?.courseId
+  )
+  const languages = learningLanguages(otherCourses)
+  // With five or fewer other courses, every course is already one tap away.
+  const showFilter =
+    otherCourses.length > MAX_UNFILTERED_COURSES && languages.length >= 2
   const studying =
-    languages.length > 1 &&
+    showFilter &&
     search.studying !== undefined &&
     languages.includes(search.studying)
       ? search.studying
       : undefined
+  // A ?studying= value the menu cannot show is stale: drop it so the URL matches the page.
   const staleStudying = search.studying !== undefined && studying === undefined
   const navigate = Route.useNavigate()
   useEffect(() => {
@@ -94,76 +99,86 @@ function Dashboard(): JSX.Element {
       })
     }
   }, [staleStudying, navigate])
-  const decks =
+  const listedCourses =
     studying === undefined
-      ? allDecks
-      : allDecks.filter((deck) => deck.learningLanguage === studying)
-  const today = todayState(decks)
-  const focusDeck = selectFocusDeck(decks)
-  const tricky =
-    studying === undefined
-      ? trickyWords
-      : {
-          total: decks.reduce((sum, deck) => sum + deck.trickyCount, 0),
-          words: trickyWords.words.filter(
-            (word) => word.learningLanguage === studying
-          ),
-        }
+      ? otherCourses
+      : otherCourses.filter((deck) => deck.learningLanguage === studying)
+  const tip = tipFor(allDecks, today)
+  // The finished hero already links to "Find another course".
+  const heroFindsAnother =
+    today.status === "caught-up" && today.keepGoing === null
 
   return (
-    <Section width="wide" padding="compact" className="flex flex-col gap-8">
+    <Section
+      padding="compact"
+      // Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
+      className="flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
+    >
       {import.meta.env.DEV && preview !== undefined ? (
         <PreviewSwitcher current={preview} />
       ) : null}
       <DashboardGreeting
         name={viewer.displayName}
         hasDecks={allDecks.length > 0}
-        dueCount={totalDue(allDecks)}
-        streakDays={streakDays}
         now={now}
       />
       {focusDeck === null ? (
         <div className="max-w-2xl">
-          <TodayPanel state={today} />
+          <StudyHero state={today} />
         </div>
       ) : (
         <>
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
-            <div className="flex min-w-0 flex-col gap-8">
-              {languages.length > 1 ? (
-                <LanguageFilter languages={languages} />
-              ) : null}
-              <TodayPanel state={today} />
-              <FocusDeckCard
-                deck={focusDeck}
-                now={now}
-                showAction={
-                  !isSameAction(
-                    deckAction(focusDeck),
-                    todayPrimaryAction(today)
-                  )
+          {/*
+            DOM order is reading order: hero, This week, courses, tip, progress.
+            From an 896 px content width the page has two columns: the hero,
+            the courses and progress on the left, This week with the tip right
+            under it on the right. No CSS order.
+
+            The hero spans the first two rows, and the second row is flexible.
+            Only items crossing a flexible row can grow it, so the first row is
+            exactly as tall as This week and the tip starts right under it,
+            while the courses start right under the hero.
+          */}
+          <div className="@container">
+            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem] @[56rem]:grid-rows-[auto_1fr_auto_auto]">
+              <div className="@[56rem]:col-start-1 @[56rem]:row-span-2 @[56rem]:row-start-1">
+                <StudyHero state={today} />
+              </div>
+              <div className="@[56rem]:col-start-2 @[56rem]:row-start-1">
+                <ThisWeek
+                  days={dailyGoal.days}
+                  target={dailyGoal.target}
+                  now={now}
+                  clearedToday={today.status === "caught-up"}
+                  streakDays={streakDays}
+                />
+              </div>
+              <CourseList
+                courses={listedCourses}
+                filter={
+                  showFilter ? (
+                    <LanguageFilter languages={languages} current={studying} />
+                  ) : null
                 }
+                showFindAnother={!heroFindsAnother}
+                className="@[56rem]:col-start-1 @[56rem]:row-start-3"
               />
-              <DeckList
-                decks={sortDecks(decks).filter(
-                  (deck) => deck.courseId !== focusDeck.courseId
-                )}
-                now={now}
-              />
+              {tip === null ? null : (
+                // Spans the courses' row too, so a tall tip never pushes the courses down.
+                <div className="@[56rem]:col-start-2 @[56rem]:row-span-2 @[56rem]:row-start-2">
+                  <TipCard tip={tip} />
+                </div>
+              )}
+              <div className="@[56rem]:col-start-1 @[56rem]:row-start-4">
+                <ProgressDisclosure
+                  retentionPercent={progressTrends.retentionPercent}
+                  newCardsThisMonth={progressTrends.newCardsThisMonth}
+                  wordsLearned={totalMastered(allDecks)}
+                  courses={sortDecks(allDecks)}
+                />
+              </div>
             </div>
-            <aside aria-label={messages.aside} className="flex flex-col gap-6">
-              <ThisWeek
-                days={dailyGoal.days}
-                target={dailyGoal.target}
-                now={now}
-                clearedToday={todayState(allDecks).status === "caught-up"}
-                streakDays={streakDays}
-                wordsMastered={totalMastered(allDecks)}
-              />
-              <MemoryCallout total={tricky.total} words={tricky.words} />
-            </aside>
           </div>
-          <ProgressTrends {...progressTrends} />
         </>
       )}
     </Section>

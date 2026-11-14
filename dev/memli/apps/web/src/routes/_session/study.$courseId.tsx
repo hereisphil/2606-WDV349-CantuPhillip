@@ -5,7 +5,8 @@ import {
   startSession,
   type SessionState,
 } from "@workspace/core/study/session-reducer"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
@@ -47,16 +48,16 @@ type StudySearch = {
 const messages = {
   empty: {
     heading: "Nothing to study here right now",
-    body: "This deck has no cards waiting for this kind of session. Pick another from your dashboard.",
+    body: "This course has no words waiting for this kind of session. Pick another from your dashboard.",
   },
   notFound: {
-    heading: "We couldn't find that deck",
+    heading: "We couldn't find that course",
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
   complete: {
     heading: "Session complete",
-    body: "You've been through every card in this session.",
+    body: "You've been through every word in this session.",
   },
 } as const
 
@@ -278,9 +279,9 @@ function EmptyState({
         {heading}
       </Heading>
       <Text variant="muted">{body}</Text>
-      <Button render={<Link to="/dashboard" />} nativeButton={false}>
+      <Link to="/dashboard" className={cn(buttonVariants())}>
         {messages.back}
-      </Button>
+      </Link>
     </div>
   )
 }

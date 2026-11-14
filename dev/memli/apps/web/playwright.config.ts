@@ -19,6 +19,16 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      // A phone width: the layout, the hero and the top bar change below 768 px.
+      name: "phone-375",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 812 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
   ],
   webServer: {
     command: `bunx vite --host 127.0.0.1 --port ${port} --strictPort`,

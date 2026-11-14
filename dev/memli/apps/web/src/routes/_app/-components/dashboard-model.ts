@@ -4,15 +4,11 @@ import type { DailyStudy, DashboardDeck } from "./dashboard-metrics"
 // Rough review pace until #112 can measure it from review history.
 const SECONDS_PER_REVIEW = 8
 
-export function estimateMinutes(cardCount: number): number {
+function estimateMinutes(cardCount: number): number {
   if (cardCount <= 0) {
     return 0
   }
   return Math.max(1, Math.ceil((cardCount * SECONDS_PER_REVIEW) / 60))
-}
-
-export function totalDue(decks: readonly DashboardDeck[]): number {
-  return decks.reduce((sum, deck) => sum + deck.dueCount, 0)
 }
 
 export function totalMastered(decks: readonly DashboardDeck[]): number {
@@ -64,22 +60,26 @@ export function deckTotal(deck: DashboardDeck): number {
   return deck.masteredCount + deck.learningCount + deck.unseenCount
 }
 
-/** 0–1. A deck with no cards counts as 0% mastered. */
-export function masteredRatio(deck: DashboardDeck): number {
-  const total = deckTotal(deck)
-  return total > 0 ? deck.masteredCount / total : 0
+/** Words the learner has met: mastered plus still learning. */
+export function startedCount(deck: DashboardDeck): number {
+  return deck.masteredCount + deck.learningCount
 }
 
 export type TodayState =
   | {
       status: "review"
+      /** Due in the focus course only: the session its button opens. */
       dueCount: number
       minutes: number
-      dueDecks: DashboardDeck[]
       focusDeck: DashboardDeck
     }
   | { status: "learn"; deck: DashboardDeck }
-  | { status: "caught-up"; keepGoing: KeepGoing | null }
+  | {
+      status: "caught-up"
+      /** The hero's course: where "keep going" leads, or the focus course. */
+      deck: DashboardDeck
+      keepGoing: KeepGoing | null
+    }
   | { status: "no-decks" }
 
 /** Opt-in study for a learner who has finished everything scheduled today. */
@@ -113,13 +113,13 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
     return { status: "no-decks" }
   }
 
-  const dueCount = totalDue(decks)
-  if (dueCount > 0) {
+  // The focus course is the one with the most due, so if it has none, nothing is due.
+  // Only its count is shown, so the number matches the session the button opens.
+  if (focusDeck.dueCount > 0) {
     return {
       status: "review",
-      dueCount,
-      minutes: estimateMinutes(dueCount),
-      dueDecks: sortDecks(decks).filter((deck) => deck.dueCount > 0),
+      dueCount: focusDeck.dueCount,
+      minutes: estimateMinutes(focusDeck.dueCount),
       focusDeck,
     }
   }
@@ -128,7 +128,32 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
     return { status: "learn", deck: focusDeck }
   }
 
-  return { status: "caught-up", keepGoing: keepGoing(decks) }
+  const more = keepGoing(decks)
+  return { status: "caught-up", deck: more?.deck ?? focusDeck, keepGoing: more }
+}
+
+/** What the tip card shows. `null` hides it. */
+export type Tip = { kind: "tricky"; course: DashboardDeck } | { kind: "study" }
+
+/**
+ * The tricky words of one course: the one most in need, so the hero's course
+ * comes first. A study tip when no course has tricky words. Hidden when the
+ * all-done hero already offers to practice the same words.
+ */
+export function tipFor(
+  decks: readonly DashboardDeck[],
+  today: TodayState
+): Tip | null {
+  const course = sortDecks(decks).find((deck) => deck.trickyCount > 0)
+  if (course === undefined) {
+    return { kind: "study" }
+  }
+  const heroPractices =
+    today.status === "caught-up" &&
+    today.keepGoing !== null &&
+    today.keepGoing.trickyCount > 0 &&
+    today.keepGoing.deck.courseId === course.courseId
+  return heroPractices ? null : { kind: "tricky", course }
 }
 
 export type DeckAction = {
@@ -148,28 +173,6 @@ export function deckAction(deck: DashboardDeck): DeckAction | null {
   return null
 }
 
-/** Where the Today panel's primary action leads, so other regions don't repeat it. */
-export function todayPrimaryAction(state: TodayState): DeckAction | null {
-  switch (state.status) {
-    case "review":
-      return deckAction(state.focusDeck)
-    case "learn":
-      return deckAction(state.deck)
-    case "caught-up":
-    case "no-decks":
-      return null
-  }
-}
-
-export function isSameAction(
-  a: DeckAction | null,
-  b: DeckAction | null
-): boolean {
-  return (
-    a !== null && b !== null && a.courseId === b.courseId && a.mode === b.mode
-  )
-}
-
 function dayOn(
   days: readonly DailyStudy[],
   date: Date
@@ -182,18 +185,23 @@ export function studiedOn(days: readonly DailyStudy[], date: Date): number {
   return dayOn(days, date)?.cardsStudied ?? 0
 }
 
-export type WeekDayStatus = "met" | "missed" | "in-progress" | "upcoming"
+/** How much work a day saw. The rule and the marks are in REDESIGN.md section 5.7. */
+export type WeekDayStatus = "met" | "partial" | "none" | "upcoming"
 
 export type WeekDay = {
   date: Date
   isToday: boolean
   status: WeekDayStatus
+  /** Words studied or reviewed that day. */
+  studied: number
 }
 
 /**
  * The calendar week containing `now`, starting on `firstDayOfWeek`
  * (1 = Monday … 7 = Sunday). A day meets the goal by reaching the target
- * or by clearing everything scheduled. Past days without a record count as missed.
+ * or by clearing everything scheduled. Otherwise, past days and today are
+ * "partial" when some words were studied and "none" when none were.
+ * Days without a record had no study.
  */
 export function weekDays(
   now: Date,
@@ -211,15 +219,16 @@ export function weekDays(
     const key = localDateKey(date)
     const isToday = key === todayKey
     const day = dayOn(days, date)
+    const studied = day?.cardsStudied ?? 0
     const cleared = isToday ? clearedToday : (day?.cleared ?? false)
-    const met = cleared || (day?.cardsStudied ?? 0) >= target
-    const status: WeekDayStatus = met
-      ? "met"
-      : isToday
-        ? "in-progress"
-        : key < todayKey
-          ? "missed"
-          : "upcoming"
-    return { date, isToday, status }
+    const status: WeekDayStatus =
+      key > todayKey
+        ? "upcoming"
+        : cleared || studied >= target
+          ? "met"
+          : studied > 0
+            ? "partial"
+            : "none"
+    return { date, isToday, status, studied }
   })
 }

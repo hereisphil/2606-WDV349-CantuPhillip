@@ -1,5 +1,7 @@
 # Dashboard plan (#47)
 
+> **Superseded by [REDESIGN.md](../REDESIGN.md) (#151).** This plan describes the first study dashboard. The redesign keeps its data model and states but replaces the layout, colors, words and theme handling; [REDESIGN.md section 5.6](../REDESIGN.md) lists the decisions it reverses. Read this file for history, and REDESIGN.md for how the dashboard works now.
+
 Replaces the equal-weight deck grid from the [Week 1 prototype](../prototypes/images/03%20-%20User%20dashboard%20page.png) with a dashboard that answers one question first: **what should I study right now, and how long will it take?**
 
 Tracking issue: [#47](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/47). The work lands as a series of small commits on `47-web-study_deck_card_grid`, one per step below. Each step is shippable on its own: typecheck and lint pass, and the page works in a headless browser.

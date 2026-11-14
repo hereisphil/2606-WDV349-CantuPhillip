@@ -13,22 +13,23 @@ const messages = {
   youAnswered: "You answered <answer>{answer}</answer>",
 } as const
 
-// Text mixes the tone toward --foreground: darker in light mode, lighter in dark, so it
-// clears 4.5:1 on its own /10 tint in both themes (checked by e2e/study.a11y.spec.ts).
+// Each tone uses its container pair, a solid tint with a matching text color, instead of
+// an alpha tint whose contrast shifts with whatever sits behind it. Text is 9:1 or better
+// in both themes, and the border is 3:1 or better against the tint and the page.
 const tones = {
   success: {
-    box: "border-success/30 bg-success/10",
-    text: "text-[color-mix(in_oklab,var(--success)_70%,var(--foreground))]",
+    box: "border-success bg-success-container",
+    text: "text-success-container-foreground",
     Icon: CircleCheck,
   },
   warning: {
-    box: "border-warning/30 bg-warning/10",
-    text: "text-[color-mix(in_oklab,var(--warning)_70%,var(--foreground))]",
+    box: "border-warning bg-warning-container",
+    text: "text-warning-container-foreground",
     Icon: CircleAlert,
   },
   wrong: {
-    box: "border-destructive/30 bg-destructive/10",
-    text: "text-[color-mix(in_oklab,var(--destructive)_70%,var(--foreground))]",
+    box: "border-destructive bg-destructive-container",
+    text: "text-destructive-container-foreground",
     Icon: CircleX,
   },
 } as const
@@ -78,7 +79,7 @@ export function AnswerVerdict({
       <Icon aria-hidden="true" className={cn("mt-0.5 size-5 shrink-0", text)} />
       <div className="flex min-w-0 flex-col gap-1">
         <p className={cn("font-semibold", text)}>{title}</p>
-        <p className="text-sm text-muted-foreground">
+        <p className={cn("text-sm", text)}>
           {rich(
             messages.youAnswered,
             {

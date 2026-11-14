@@ -52,7 +52,7 @@ const [session, dispatch] = useReducer(sessionReducer, cards, startSession)
 ## 3. Current code (do not refactor for ideology)
 
 - `routes/_marketing/-components/Nav.tsx` — `mobileOpen` is a single toggle. **Correct as `useState`.** The `useEffect`s are DOM sync (focus trap, scroll lock), not state sync.
-- `components/theme-provider.tsx` — one `useState`, passes lint. Leave as is.
+- `components/theme-provider.tsx` — one `useState` for the learner's choice; the device setting comes from `useSyncExternalStore`, and the resolved theme is derived. Do not add a second `useState` for it.
 - `routes/_auth/signin.tsx` — four coupled `useState` calls (`email`, `password`, `fieldErrors`, `formMessage`). **Exempt for now** (`_auth/**` is opted out in `apps/web/eslint.config.js`; the form is disabled in prototype mode, #110). **When Better Auth lands (#108):** remove the `_auth` exemption and move the form to a reducer with `status: "idle" | "submitting" | "error" | "success"` before adding `isSubmitting` / server error / redirect flags.
 
 ## 4. `use-effect-reducer` — not installed yet, here is when

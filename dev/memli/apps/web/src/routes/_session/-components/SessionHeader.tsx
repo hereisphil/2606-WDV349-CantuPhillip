@@ -1,7 +1,8 @@
 import { useEffect, type JSX } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { X } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
 
 const messages = {
@@ -9,12 +10,12 @@ const messages = {
   exitKey: "Esc",
   progressLabel: "Session progress",
   progressValue: {
-    one: "{completed} of {count} card done",
-    other: "{completed} of {count} cards done",
+    one: "{completed} of {count} word done",
+    other: "{completed} of {count} words done",
   },
   remaining: {
-    one: "{count} card left",
-    other: "{count} cards left",
+    one: "{count} word left",
+    other: "{count} words left",
   },
 } as const
 
@@ -65,12 +66,13 @@ export function SessionHeader({
     <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
       {/* From md up, a centered column the width of the card (max-w-xl) holds the progress, so it stays short and lines up with the card. */}
       <div className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 md:grid md:grid-cols-[1fr_minmax(0,36rem)_1fr] md:gap-6">
-        <Button
-          variant="ghost"
-          className="h-11 shrink-0 gap-2 px-3 text-base md:justify-self-start"
+        <Link
+          to="/dashboard"
           aria-keyshortcuts="Escape"
-          render={<Link to="/dashboard" />}
-          nativeButton={false}
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "touch" }),
+            "shrink-0 px-3 md:justify-self-start"
+          )}
         >
           <X aria-hidden="true" className="size-5" />
           {/* Visually hidden on phones so the control is icon-only, but still names the link. */}
@@ -82,7 +84,7 @@ export function SessionHeader({
           >
             {messages.exitKey}
           </kbd>
-        </Button>
+        </Link>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
             <h1 className="truncate font-heading text-base font-semibold">

@@ -1,4 +1,9 @@
-/** Base UI Button is a `<button>`. A link needs `nativeButton={false}`. `asChild` is Radix. See `.cursor/rules/memli-stack.mdc`. */
+/**
+ * Navigation is a link, not a button. A Base UI Button that renders a Link
+ * gets `role="button"` (or emits a `<button>`), so screen readers announce a
+ * link as a button. Style the link instead: `<Link className={cn(buttonVariants(...))}>`.
+ * `asChild` is Radix, not Base UI. See `.cursor/rules/memli-stack.mdc`.
+ */
 
 function isButtonElement(node) {
   return node.name.type === "JSXIdentifier" && node.name.name === "Button"
@@ -14,14 +19,6 @@ function attributeName(attribute) {
   }
 
   return attribute.name.name
-}
-
-function isFalseLiteral(value) {
-  return (
-    value?.type === "JSXExpressionContainer" &&
-    value.expression.type === "Literal" &&
-    value.expression.value === false
-  )
 }
 
 function elementName(node) {
@@ -74,14 +71,14 @@ const rule = {
     type: "problem",
     docs: {
       description:
-        "Require nativeButton={false} when Button renders a link, and reject the Radix asChild prop.",
+        "Navigation must be a link styled with buttonVariants, not a Button that renders a link. Rejects the Radix asChild prop.",
     },
     schema: [],
     messages: {
       asChild:
-        "`asChild` is a Radix prop. Compose Base UI Button with `render={<Link />} nativeButton={false}`.",
-      nativeButton:
-        "Button is rendering a link without `nativeButton={false}`, so it still emits a `<button>`. Set `nativeButton={false}`.",
+        "`asChild` is a Radix prop. For navigation, use a link styled like a button: `<Link className={cn(buttonVariants({ variant, size }))}>`.",
+      linkButton:
+        "A Button that renders a link is announced as a button. Use the link itself, styled like a button: `<Link className={cn(buttonVariants({ variant, size }))}>`.",
     },
   },
 
@@ -93,7 +90,6 @@ const rule = {
         }
 
         let renderAttribute = null
-        let nativeButtonIsFalse = false
 
         for (const attribute of node.attributes) {
           const name = attributeName(attribute)
@@ -104,13 +100,9 @@ const rule = {
           if (name === "render") {
             renderAttribute = attribute
           }
-
-          if (name === "nativeButton" && isFalseLiteral(attribute.value)) {
-            nativeButtonIsFalse = true
-          }
         }
 
-        if (!renderAttribute || nativeButtonIsFalse) {
+        if (!renderAttribute) {
           return
         }
 
@@ -120,7 +112,7 @@ const rule = {
             : null
 
         if (renderIsLink(expression)) {
-          context.report({ node: renderAttribute, messageId: "nativeButton" })
+          context.report({ node: renderAttribute, messageId: "linkButton" })
         }
       },
     }

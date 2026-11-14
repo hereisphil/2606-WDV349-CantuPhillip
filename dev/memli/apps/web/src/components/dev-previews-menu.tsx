@@ -33,7 +33,8 @@ export default function DevPreviewsMenu(): JSX.Element {
     <div
       className={cn(
         "fixed bottom-3 left-3 z-50",
-        hasAppSidebar && "md:left-[calc(16rem+0.75rem)]"
+        hasAppSidebar &&
+          "md:left-[calc(14rem+0.75rem)] lg:left-[calc(16rem+0.75rem)]"
       )}
     >
       <DropdownMenu>
@@ -41,7 +42,7 @@ export default function DevPreviewsMenu(): JSX.Element {
           render={
             <Button
               size="sm"
-              className="bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-red-600/50"
+              className="bg-red-600 text-white shadow-md hover:bg-red-700"
             />
           }
         >

@@ -1,9 +1,10 @@
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { SiteFooterNav } from "@/components/site-footer-nav"
 
-const footerButtonClass = "h-11 w-full px-6 text-base sm:w-auto"
+const footerButtonClass = "w-full px-6 sm:w-auto"
 
 export function Footer(): JSX.Element {
   return (
@@ -18,21 +19,25 @@ export function Footer(): JSX.Element {
             with Memli.
           </p>
           <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center">
-            <Button
-              className={footerButtonClass}
-              render={<Link to="/signin" />}
-              nativeButton={false}
+            <Link
+              to="/signin"
+              className={cn(
+                buttonVariants({ size: "touch" }),
+                footerButtonClass
+              )}
             >
               Start Learning Free
-            </Button>
-            <Button
-              variant="outline"
-              render={<Link to="/community" />}
-              nativeButton={false}
-              className={`${footerButtonClass} border-brand-slate bg-transparent text-brand-surface hover:bg-white/10 hover:text-white`}
+            </Link>
+            <Link
+              to="/community"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "touch" }),
+                footerButtonClass,
+                "border-brand-slate bg-transparent text-brand-surface hover:bg-white/10 hover:text-white"
+              )}
             >
               Explore Community
-            </Button>
+            </Link>
           </div>
         </div>
 

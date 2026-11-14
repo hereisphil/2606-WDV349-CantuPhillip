@@ -3,7 +3,8 @@ import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { signInSchema } from "@workspace/schemas/auth/sign-in"
 import { BrandMark } from "@/components/brand-mark"
-import { Button } from "@workspace/ui/components/button"
+import { Button, buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import {
   Card,
   CardContent,
@@ -83,16 +84,15 @@ function SignIn(): JSX.Element {
             >
               Prototype Mode — Sign-in form disabled
             </p>
-            <Button
-              className="h-11 w-full"
-              render={<Link to="/dashboard" />}
-              nativeButton={false}
+            <Link
+              to="/dashboard"
+              className={cn(buttonVariants({ size: "touch" }), "w-full")}
             >
               Skip & Continue to Prototype →
-            </Button>
+            </Link>
           </div>
 
-          <Button variant="outline" className="h-11 w-full" disabled>
+          <Button variant="outline" size="touch" className="w-full" disabled>
             <GoogleIcon />
             Continue with Google
           </Button>
@@ -179,7 +179,7 @@ function SignIn(): JSX.Element {
               </p>
             ) : null}
 
-            <Button type="submit" className="mt-2 h-11 w-full" disabled>
+            <Button type="submit" size="touch" className="mt-2 w-full" disabled>
               Sign In / Sign Up
             </Button>
           </form>

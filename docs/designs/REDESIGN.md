@@ -256,7 +256,7 @@ Numbers on this page go up or get done. Nothing is labeled "missed".
 | Level | Element | Contents |
 | --- | --- | --- |
 | **First glance (one element)** | **Study hero** | Course name. One big number with its phrase ("16 words to review"). One line of cost ("About 3 minutes"). The amber "Start review" button. One quiet second button ("Learn 10 new words"). One line of progress ("200 of 1,000 words started") with a thin bar. |
-| Second glance | **This week** | Seven day marks, "12 days in a row", "24 of 50 words today". |
+| Second glance | **This week** | Seven day marks, "12 days of study", "24 of 50 words today". |
 | Second glance | **Your other courses** | Compact rows: language badge, title, one status line, one quiet button. |
 | Third | Greeting | The `h1`, smaller than the hero number. |
 | Third | Tip card | One warm card. Tricky words when there are some, a study tip when there are none. |
@@ -295,7 +295,7 @@ y≈503  │ ╚═════════════════════�
        │ │ This week                         │ │
        │ │ Sun  Mon  Tue  Wed  Thu  Fri  Sat │ │  short names from Intl
        │ │ (✓)  (✓)  (✓)  (✓)  (✓)  (◔)  ( ) │ │  goal reached, today, later
-       │ │ 🔥 12 days in a row               │ │
+       │ │ 🔥 12 days of study               │ │
        │ │ 24 of 50 words today              │ │
        │ └───────────────────────────────────┘ │
        │ Your other courses                    │
@@ -334,7 +334,7 @@ Phone rules:
 │  ◎ Community   │  ║ [ES] Spanish Core 1000                   ║  │ This week            │ │
 │                │  ║                                          ║  │ Sun Mon Tue Wed Thu…│ │
 │                │  ║ 16                                       ║  │ (✓) (✓) (✓) (✓) (✓)…│ │
-│                │  ║ words to review                          ║  │ 🔥 12 days in a row  │ │
+│                │  ║ words to review                          ║  │ 🔥 12 days of study  │ │
 │                │  ║ About 3 minutes                          ║  │ 24 of 50 words today │ │
 │                │  ║                                          ║  └──────────────────────┘ │
 │                │  ║ ┌────────────────────┐ ┌───────────────┐ ║                           │
@@ -360,7 +360,7 @@ Phone rules:
 - **Above the fold** on a 1280 x 720 window: the hero, This week and the top of the course list. Three boxes, where today there are six.
 - **The space under "This week" stays empty.** The hero is taller than the week card. That is fine. A page does not have to fill every corner (Refactoring UI).
 - **No picture slot is reserved.** The hero's text is at most 480 px wide. When mnemonic images exist (section 15), a picture takes the free space on the end side.
-- **Reading order and tab order follow the picture, row by row.** The DOM order is greeting, hero, This week, courses, tip, progress. The grid places the hero and This week in the first row, and the courses and the tip in the second. No CSS `order` is used (WCAG 1.3.2 and 2.4.3).
+- **Reading order and tab order follow the picture, row by row.** The DOM order is greeting, hero, This week, courses, tip, progress. The grid puts the hero, the courses and progress in the first column, and This week with the tip right under it in the second. No CSS `order` is used (WCAG 1.3.2 and 2.4.3).
 
 **Tablet (768 px).** The sidebar narrows to 224 px and the content is one column: hero, a wide This week strip, the course list, the tip.
 
@@ -381,7 +381,7 @@ The hero keeps the same slots in every state. Only the words change, and sometim
 | `same-language` | As default. | No Studying menu. |
 | `long-titles` | The course name wraps. It is never cut off. | Row titles wrap. Row buttons stay at the end. |
 | `large-numbers` | "1,284" fits at both number sizes. | Same. The tip card reads the course's own tricky-word count, not the account total. |
-| Streak is 0 (needs a twelfth preview) | Normal hero. | The "days in a row" line is hidden. No zero, no red. |
+| Streak is 0 (needs a twelfth preview) | Normal hero. | The "days of study" line is hidden. No zero, no red. |
 | The hero's course is finished, another has words | The hero changes to the next course by the focus rule. | The finished course moves into the list with "All done". |
 | A `?studying=` filter is active | Unchanged. The hero ignores the filter. | The list shows only that language. The Studying menu always shows while a filter is active, so it can be cleared. |
 
@@ -428,6 +428,31 @@ Nothing disappears silently.
 | The sidebar streak was removed and the greeting kept the streak line (decided). | The streak appears once, in This week. | Same reason as the row above. |
 | "Mastered" is the progress word. | "Learned" for the same count, "started" for mastered plus learning. | "5% mastered" is accurate and discouraging on the home screen. |
 | Hero photos, the heatmap and the study tip were left out. | A tip card ships now. A picture slot and a month calendar come later. | Crystal circled the tip and named the heatmap. The data for the other two does not exist yet. |
+| The streak should follow the "clearing the queue meets the goal" rule. | The streak counts days of any study and forgives one day off (section 5.7). The goal rule still decides the check marks. | "Never miss twice": one missed day is an accident, two is the start of a new habit. |
+
+### 5.7 Days of study (the streak rule)
+
+Decided on 14 November 2026. The prototype shows a fixed sample number. #112 computes the real count on the server and must follow these rules.
+
+**The count**
+
+1. **Any study counts.** A day counts as a study day when the learner reviewed or learned at least one word. Reaching the daily goal is not required. The goal is about today's effort. The count is about showing up.
+2. **Never miss twice.** One day with no study does not reset the count. A second day with no study in a row starts a new count. This follows the "never miss twice" rule from James Clear's *Atomic Habits*: missing once is an accident, missing twice is the start of a new habit.
+3. **Only study days are counted.** A forgiven day off is not added to the number.
+4. **Today is never a miss yet.** Today only becomes a day off once it ends with no study.
+
+**The words.** The line reads "{count} days of study" (one form: "{count} day of study"), not "days in a row", because a forgiven gap makes "in a row" untrue. It hides at zero. It is never red.
+
+**The day marks** (This week). Each mark shows how much work the day saw, so a partial day looks different from a day off.
+
+| Mark | Meaning | Screen reader |
+| --- | --- | --- |
+| Filled check | The goal was reached, or everything due was cleared. | `{day}, goal reached` |
+| Partly filled ring | Some words studied, goal not reached. The ring fills by words studied over the goal. Past days and today. | `{day}, {count} of {target} words` |
+| Empty circle (solid line) | No words studied or reviewed. Past days and today. | `{day}, no study` |
+| Empty circle (dashed line) | A day still to come. | `{day}` |
+
+Today adds ", today" to its label, and its day name is drawn in the strongest text color.
 
 ---
 
@@ -442,7 +467,7 @@ Nothing disappears silently.
 | Due | **to review** | Scheduling jargon. |
 | Mastered | **learned** | The same count, in a plain word: "100 words learned so far". |
 | (new) | **started** | Mastered plus still learning. Used for the hero's progress line: "200 of 1,000 words started". "5% mastered" is true and discouraging on a home screen. "Started" is also true, and it does not claim a word is learned after one look. See decision 4. |
-| Streak | **days in a row** | Plain. It carries a translator note: consecutive days. |
+| Streak | **days of study** | Plain. It does not claim the days were consecutive, because one day off is forgiven (section 5.7). |
 | Mnemonic | **memory trick** | Plain. Introduce "mnemonic" once where the product teaches the word. |
 | Caught up | **All done** | Not an idiom, so it translates. |
 | Words keep slipping | **Tricky words** | One name for one set. |
@@ -490,12 +515,12 @@ Code identifiers such as `DashboardDeck` can stay. They are not user-facing. New
 | | `empty.detail` | `Courses are word lists with memory tricks from other learners.` |
 | | `empty.find` | `Find a course` |
 | This week | `heading` | `This week` |
-| | `daysInARow` | one: `{count} day studied` / other: `{count} days in a row` (hidden at 0) |
+| | `daysOfStudy` | one: `{count} day of study` / other: `{count} days of study` (hidden at 0; the rule is in section 5.7) |
 | | `today` | `<n>{done}</n> of {target} words today` |
 | | `goalMet` | `You reached today's goal.` |
 | | `goalCleared` | `You finished everything for today.` |
 | | `todayCleared` | `<n>{done}</n> words today` (when everything was finished under the target, as PLAN.md decided) |
-| | day labels (screen reader) | `{day}, goal reached` / `{day}, today` / `{day}, goal not reached` / `{day}` (a day still to come) |
+| | day labels (screen reader) | `{day}, goal reached` / `{day}, {count} of {target} words` / `{day}, no study` / `{day}` (a day still to come); today adds `, today` |
 | Courses | `heading` | `Your other courses` |
 | | `toReview` | one: `{count} word to review` / other: `{count} words to review` |
 | | `newWords` | one: `{count} new word` / other: `{count} new words` |
@@ -512,9 +537,10 @@ Code identifiers such as `DashboardDeck` can stay. They are not user-facing. New
 | | `tip.heading` | `Study tip` |
 | | `tip.items` | `Short daily reviews work better than one long one.` (drafts; you approve each tip) |
 | Progress | `heading` | `Your progress` |
-| | `learned` | `{count} words learned so far` |
-| | `remembered` | `You remembered {percent} of your reviews.` |
-| | `newThisMonth` | `{count} new words this month` |
+| | `stats.learned` | `Words learned` (label; the number is shown beside it) |
+| | `stats.remembered` | `Reviews remembered` |
+| | `stats.newThisMonth` | `New words this month` |
+| | `tableCaption` | `Words in each course` |
 | | table headings | `Course`, `Learned`, `Still learning`, `Not started` |
 | Shell | `skip` | `Skip to main content` |
 | | `title` | `Dashboard · Memli` |
@@ -614,7 +640,9 @@ An honest note: **dark surfaces separate less than light ones, and this is the w
 
 **A brighter dark hero, if the first build shows it is needed.** Raising the dark hero to `oklch(0.42 0.135 266)` (#2a4696) gives 2.11:1 against the page. The cost is contrast inside it: white text drops from 11.09:1 to 8.33:1 and the amber button from 8.30:1 to 6.24:1 against the panel. Both still pass. These figures were computed with the same libraries but are outside the gated run, so the script must be rerun if this value is adopted.
 
-The tip card is only 1.03:1 against the light page. It gets a real 1 px border and a 4 px warm edge on its start side (5.01:1 against the page), so it does not rely on its fill.
+**Checked after the hero was built (November 2026): not needed.** On a real Android phone (Xiaomi Redmi), at full and at dimmed brightness, the dark hero read clearly as its own panel, and the default and all-done states were easy to read in both themes. A blurred screenshot at 375 and 1280 px showed the navy hero and the amber button as the first two shapes in both themes. The dark hero stays `oklch(0.35 0.12 266)`. The same check found the language chips above the hero push it below the fold on a phone when several languages are studied; moving the filter into the course list (phase 4) fixes that.
+
+The tip card is only 1.03:1 against the light page. It gets an even 1 px warm outline (`--warning-container-border`), and its warm hue against the cool page sets it apart. The outline is decorative: a card's edge is not a control, so WCAG 1.4.11 does not ask for 3:1. (The first build used a 4 px warm edge on the start side; it was dropped for a simpler, even outline.)
 
 ### 7.5 Text
 
@@ -872,7 +900,7 @@ Shadow and glow values need tuning by eye in the real app. They are decoration a
 | Start with a feature, not a layout | The page is a grid of regions with equal weight. | Design the hero first. Everything else is arranged around it. |
 | Size is not everything. Use weight and color. | 15 type styles do the ranking. | Three text tones, two weights, one huge number. |
 | Emphasize by de-emphasizing | The active chip and the week dots are as loud as the button. | Quiet the competitors. Do not shout louder. |
-| Labels are a last resort | "TODAY", "Due", "Streak", "Daily goal", "Words mastered". | Fold labels into values: "16 words to review", "12 days in a row". |
+| Labels are a last resort | "TODAY", "Due", "Streak", "Daily goal", "Words mastered". | Fold labels into values: "16 words to review", "12 days of study". |
 | Do not use gray text on colored backgrounds | Would happen on a navy hero. | A pale tint of the hero's own hue. |
 | One primary, then secondary, then tertiary | The secondary button is wider than the primary. | Amber fill, then a tinted hero button, then quiet outlined row buttons. |
 | You do not have to fill the whole screen | Content stretches to fill the main column. | A maximum content width. |
@@ -882,7 +910,7 @@ Shadow and glow values need tuning by eye in the real app. They are decoration a
 | Emulate a light source. Shadows show elevation. | No shadows anywhere. | Two-part shadows in light, lightness steps in dark, an edge on the button. |
 | Use fewer borders | About fourteen hairlines on the first screen. | Surface steps and spacing first, borders last. |
 | Do not overlook empty states | The caught-up state looks like a notice. | A check in a tinted circle, a kind sentence, opt-in actions. |
-| Add color with accent borders | Every card is the same white box. | A 4 px warm edge on the tip card. |
+| Add color with accent borders | Every card is the same white box. | A warm fill and outline on the tip card. (A 4 px start edge was tried and dropped as too heavy.) |
 
 ---
 
@@ -944,9 +972,9 @@ Phones get their own design pass. Stacking the desktop cards is not enough.
 ### 11.2 Beyond WCAG
 
 - **One main task.** W3C's guidance for cognitive accessibility asks that the most important thing stands out visually and is visible without scrolling. That is the hero.
-- **Every graphic has a sentence that says the same thing.** The bar has "200 of 1,000 words started". The week marks have "12 days in a row". If a sentence is ever cut to save words, its graphic goes with it. The hero bar's track is only 1.46:1 against the hero, which is acceptable only because the sentence carries the value.
+- **Every graphic has a sentence that says the same thing.** The bar has "200 of 1,000 words started". The week marks have "12 days of study". If a sentence is ever cut to save words, its graphic goes with it. The hero bar's track is only 1.46:1 against the hero, which is acceptable only because the sentence carries the value.
 - **Forced colors (Windows high contrast).** Cards and the hero use real borders (transparent where no visible edge is wanted), so the system can draw them. The button keeps its transparent border. Focus uses `outline`.
-- **Streak ethics.** No streak in the greeting or the hero. A past day under the goal reads "goal not reached", never "missed", and is never red. The line hides at zero. Clearing the queue still counts as reaching the goal, as PLAN.md decided.
+- **Streak ethics.** No streak in the greeting or the hero. A day is never called "missed" and is never red. The line hides at zero. Clearing the queue still counts as reaching the goal, as PLAN.md decided. The count forgives one day off (section 5.7).
 - **Light text on a dark hero.** Some people with astigmatism find light-on-dark text blurs. The hero holds about 22 words, the largest type on the page, at 9.7:1 or better. Paragraphs never sit on it.
 
 ### 11.3 Definition of done
@@ -978,7 +1006,7 @@ The redesign is done when all of these are true.
 
 - [ ] Every text pair meets 4.5:1 and its APCA target.
 - [ ] Control borders and the focus ring meet 3:1.
-- [ ] The token script (`verify.mjs`) passes, including the pairs this design added.
+- [ ] The color check (`packages/ui/src/styles/tokens.test.ts`) passes, including the pairs this design added.
 - [ ] Status is never shown by color alone.
 
 **Theme**
@@ -1043,7 +1071,7 @@ Repo rules apply throughout: semantic tokens only, Base UI primitives, shadcn co
 | `TodayPanel.tsx` | Merge, then delete | Becomes `StudyHero.tsx`. Its four states keep their `switch` on `state.status`. |
 | `FocusDeckCard.tsx` | Merge, then delete | The badge and title become the hero's heading row. The three-part bar becomes one fill. |
 | `DeckList.tsx` | Restyle, rename `CourseList.tsx` | Rows lose "Last studied", the mini bar and the percent. One status sentence. 44 px buttons that are real links. Adds "Show all" (its one `useState`) and hosts the Studying menu, which stays uncontrolled because its value lives in the URL. The header renders even when a filter leaves no rows. |
-| `ThisWeek.tsx` | Restyle | The goal ring and "Words mastered" go. Today's mark becomes the ring. Short day names. Colors move from `bg-primary` to the chart roles. `weekDays()` and its four statuses (goal reached, not reached, today, to come) are reused unchanged. |
+| `ThisWeek.tsx` | Restyle | The goal ring and "Words mastered" go. Today's mark becomes the ring. Short day names. Colors move from `bg-primary` to the chart roles. `weekDays()` gains the words studied per day and four statuses by work done: goal reached, some study, no study, to come (section 5.7). |
 | `MemoryCallout.tsx` | Restyle, rename `TipCard.tsx` | Props become a union: tricky words for one course, or a study tip. Word chips go. Gains a Practice link. |
 | `ProgressTrends.tsx` | Restyle, rename `ProgressDisclosure.tsx` | A native `<details>`, closed by default, with three sentences and a per-course table. |
 | `LanguageFilter.tsx` | Restyle | From chips to one menu of links. Still writes `?studying=`. Lives in the course list header. It shows when the unfiltered list of other courses has more than 5 rows in 2 or more languages, or when a filter is active. Its options come from the other courses, not the hero's. When the menu would be hidden, a `?studying=` value is treated as stale and removed with the existing replace-navigation. |
@@ -1062,16 +1090,16 @@ Repo rules apply throughout: semantic tokens only, Base UI primitives, shadcn co
 | Piece | Where | Notes |
 | --- | --- | --- |
 | `StudyHero` | `routes/_app/-components/` | A `section` labeled by the course name. Its layout depends on its own width. The count is rendered with `rich()`. A picture slot that stays empty for now. |
-| `ThemeControl` | `apps/web/src/components/theme-control.tsx` | Two presentations from one options array: a native radio `fieldset` for the sidebar and a menu for the phone top bar. It is the first caller of `useTheme()`, so the Knip ignore entry for the theme provider can go. |
+| `ThemeControl` | `apps/web/src/components/theme-control.tsx` | One "Theme" menu from one options array, in two placements: a two-line row at the foot of the desktop sidebar that shows the current choice, and a "Theme" button in the phone top bar. (A radio `fieldset` card was tried first and dropped as too heavy for a setting people rarely change.) It is the first caller of `useTheme()`, so the Knip ignore entry for the theme provider can go. |
 | Page title | `routes/__root.tsx` and the dashboard route | No route sets a title today. Add the router's head support. |
 | Skip link | `routes/_app.tsx` | Targets `<main id="main" tabIndex={-1}>`. |
 | Button `variant="cta"` | `packages/ui` | `bg-cta text-cta-foreground`, the bottom edge, a transparent border. |
 | Button `variant="hero-quiet"` | `packages/ui` | The tinted second button on the hero. |
-| Button sizes: 44, 48 and 56 px | `packages/ui` | All use `min-h`, `h-auto` and wrapping text. They replace three hand-written 44 px overrides. |
+| Button sizes: 44, 48 and 56 px | `packages/ui` | `touch`, `touch-lg` and `touch-xl`. All use `min-h`, `h-auto` and wrapping text. They replace the hand-written 44 and 48 px overrides. |
 | Focus style, everywhere | `globals.css` base layer, `button.tsx`, `input.tsx`, `badge.tsx` | A solid 2 px outline in `--ring` with a 2 px offset replaces the 50% transparent ring. The global rule matters because plain links, radios and `<summary>` inherit it. |
 | Links as links | 7 call sites on the dashboard, 8 more in other route groups | `<Link className={buttonVariants(...)}>`. Update the "Button composition" line in `.cursor/rules/memli-stack.mdc` and the message in the `button-link` lint rule in the same step. |
 | Tokens | `packages/ui/src/styles/globals.css` | The three-tier file in the appendix. `--radius`, `--marketing-header-clearance` and the `--color-brand-*` lines stay as they are. |
-| Color check script | `packages/ui/scripts/` (proposed) | The script that checks every pairing, moved from `docs/designs/redesign-research/color/`. It needs two dev dependencies, `culori` and `apca-w3`. Confirm before adding them, as the repo rules ask. |
+| Color check | `packages/ui/src/styles/tokens.test.ts` (done) | A Vitest test that reads the roles straight from `globals.css` and checks every pairing in both themes, so it runs in CI with the other tests. It uses `culori` and `apca-w3` as dev dependencies. The main button's edge against the hero is not gated: it is depth only and measures Lc 27 in light. |
 
 ### 13.3 Where each control goes
 
@@ -1157,7 +1185,7 @@ Say this first, word for word: "I'm testing a design, not you. There are no wron
 | "Now you would rather pick up some brand new words." | "Learn 10 new words" | 3 of 4, within 10 seconds |
 | "You want to work on your Japanese today, not Spanish." | The Japanese row's button | 3 of 4, within 10 seconds |
 | "The screen is too bright for you. Change it." | The theme control (on a phone, the Theme button) | 3 of 4, within 10 seconds |
-| "Without clicking: how many days in a row have you studied?" | They say 12 | 3 of 4, within 10 seconds |
+| "Without clicking: how many days have you studied?" | They say 12 | 3 of 4, within 10 seconds |
 
 Then point at "Spanish Core 1000" and ask "What would you call this?" Write down the noun. Then ask "Which fits best: deck, course, list, or set?" This settles Crystal's question with evidence. Ask it in phase 0, before anything is renamed.
 
@@ -1189,7 +1217,7 @@ Be clear about what version one delivers. People voted for color, depth and imag
 | **A real next-review time** in the all-done state: "Next review tomorrow." | Old Memrise's level page | A next-review date in the contract (#112). |
 | **Nearer milestones.** "200 of 1,000" moves slowly. Levels or chapters inside a course would give a closer goal. | Old Memrise's course page | Course structure in the data. |
 | **The daily goal in minutes**, with a few choices, as old Memrise offered (5, 15 or 45 minutes a day). | Old Memrise | A settings page and a way to measure time. |
-| **Small celebrations** at 7, 30 and 100 days in a row. | Other apps research | After the basics. Motion-safe only. |
+| **Small celebrations** at 7, 30 and 100 days of study. | Other apps research | After the basics. Motion-safe only. |
 | **A growth picture per course** (seed to flower, five stages). | Playful memory | Needs original art drawn well. Weak art would look like clip art. |
 | **A bottom bar on phones.** | All three proposals | Three real in-app destinations. Today there is one. |
 | **Cross-course review**, so the hero can show the total again. | PLAN.md open decision | A session route beyond `/study/$courseId`. |
@@ -1266,6 +1294,20 @@ Every size is arithmetic and every contrast number is computed. By this plan's o
 - **Study tips.** The draft tips are common study advice and are not sourced.
 
 ---
+
+### 17.3 What the build changed
+
+The build (14 November 2026, branch `151-web-dashboard_redesign`) followed this plan with these differences. Results of the section 11.3 checklist are in [`redesign-research/definition-of-done/`](./redesign-research/definition-of-done/README.md).
+
+- **The desktop theme control is a menu row, not a radio card.** The card was built and judged too heavy for a setting people rarely change. The sidebar now has one two-line "Theme / Match my device" row that opens the same menu as the phone, so desktop takes two clicks instead of one. The current choice still shows without opening it.
+- **The streak rule was decided** (section 5.7): any study counts, one day off is forgiven, and the line reads "days of study". The day marks show the work done: a check, a partial ring, or an empty circle for no study.
+- **The dark hero kept its color.** On a real Android phone at full and dim brightness, and in a blurred screenshot, it read as its own panel (section 7.4).
+- **Phones got tighter than sketched.** To fit both hero buttons at 320 x 450, the top bar is 56 px, the gutter 16 px, and the hero uses 16 px padding, a 32 px badge and an 8 px gap between stacked buttons below 520 px. The hero starts at y 121.
+- **Course row titles are plain bold text, not headings**, which keeps the page at five visible headings. Rows wrap when a long translated button and the title cannot share a line.
+- **"Your progress" sits in the grid's first column**, under the course list, so its cards share the hero's edges. Its table scrolls inside a labeled region below 352 px.
+- **"Your progress" shows three numbers with labels, not three sentences.** The plain sentences read as unstyled text. Each number is now a label and value pair ("Words learned", 100): a row on a phone and a tile on wider cards. The table sits in its own card, and every number shares its heading's end edge.
+- **The tip card sits right under This week**, not level with the course list, and has an even warm outline instead of a 4 px start edge. The hero spans the grid's first two rows and the second row is flexible, so the tip follows This week while the courses still start right under the hero.
+- **Known exceptions:** at 1280 x 720 the hero, This week and the tip fill the first screen and the course list's top edge shows too (four boxes, not three); a 375 px tall landscape phone cannot show the hero's button on its first screen; and the long-titles preview at 320 x 450 pushes both buttons below the fold, because its 98-character course name wraps to four lines.
 
 ## 18. Sources
 
@@ -1555,4 +1597,4 @@ Notes for whoever applies this:
 - The alias block keeps every utility that is in use today working: `text-secondary-foreground`, `text-card-foreground`, `text-popover-foreground`, the `sidebar-*` utilities, `text-streak-foreground` and `bg-chart-1` to `bg-chart-5`. The chart aliases can go once the mastery bars are rewritten.
 - `--radius`, `--marketing-header-clearance` and the `--color-brand-*` lines in `@theme` are not shown here and stay as they are.
 - `--input` changes from a translucent white to a solid border color in dark mode. Drop the `bg-input/30` and `bg-input/50` fills from the outline Button and the Input in the same step.
-- The scripts that produced and checked these values are saved in [redesign-research/color/](./redesign-research/color/). Phase 1 moves the check next to the tokens, so any later change to a value is re-checked.
+- The values now live in `packages/ui/src/styles/globals.css`, and `tokens.test.ts` next to it checks every pairing in CI. The scripts that first produced them are kept in [redesign-research/color/](./redesign-research/color/) as a record.
