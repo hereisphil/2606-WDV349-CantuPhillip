@@ -72,7 +72,7 @@ export function ThemeMenu({ placement }: ThemeMenuProps): JSX.Element {
           <>
             {/* Two lines, like the account row, so a long choice or translation is not cut off. */}
             <span className="flex min-w-0 flex-1 flex-col items-start">
-              <span className="text-xs leading-4 font-medium">
+              <span className="text-sm leading-5 font-medium">
                 {messages.legend}
               </span>{" "}
               <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">

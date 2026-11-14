@@ -8,7 +8,9 @@ export function PlanBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
   return (
     <Badge
       variant="outline"
-      className="h-4 border-amber-500/30 bg-amber-500/10 px-1.5 text-[10px] font-semibold tracking-wider text-amber-800 uppercase dark:text-amber-300"
+      // Neutral on purpose: amber belongs to the one main button on a screen.
+      // Labels are 14 px and sentence case (REDESIGN.md 7.7, 9.1).
+      className="h-auto border-border-strong px-1.5 py-0 text-sm leading-5 font-semibold text-foreground"
     >
       Pro
     </Badge>
