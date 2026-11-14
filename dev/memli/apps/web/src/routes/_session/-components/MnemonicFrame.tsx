@@ -210,7 +210,7 @@ function StoryPart({
   switch (part.kind) {
     case "term":
       return (
-        <strong lang={learningLanguage} className="font-semibold text-primary">
+        <strong lang={learningLanguage} className="font-semibold text-emphasis">
           {part.text}
         </strong>
       )
