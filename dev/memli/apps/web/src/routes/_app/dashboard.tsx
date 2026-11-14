@@ -141,12 +141,14 @@ function Dashboard(): JSX.Element {
                 now={now}
                 clearedToday={todayState(allDecks).status === "caught-up"}
                 streakDays={streakDays}
-                wordsMastered={totalMastered(allDecks)}
               />
               <MemoryCallout total={tricky.total} words={tricky.words} />
             </aside>
           </div>
-          <ProgressTrends {...progressTrends} />
+          <ProgressTrends
+            {...progressTrends}
+            wordsLearned={totalMastered(allDecks)}
+          />
         </>
       )}
     </Section>

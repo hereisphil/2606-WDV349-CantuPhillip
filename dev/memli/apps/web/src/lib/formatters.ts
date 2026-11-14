@@ -21,8 +21,8 @@ export type Formatters = {
   duration: (minutes: number) => string
   /** "2 hours ago", "yesterday". Past and future both work. */
   relativeTime: (date: Date, now: Date) => string
-  /** "M" (narrow) or "Monday" (long). */
-  weekday: (date: Date, width: "narrow" | "long") => string
+  /** "M" (narrow), "Mon" (short) or "Monday" (long). */
+  weekday: (date: Date, width: "narrow" | "short" | "long") => string
   /** 1 = Monday … 7 = Sunday, from the UI locale's region. */
   firstDayOfWeek: number
   format: (template: string, values?: MessageValues) => string
@@ -123,10 +123,11 @@ function createFormatters(locale: string): Formatters {
 
   const weekdayFormats = {
     narrow: new Intl.DateTimeFormat(locale, { weekday: "narrow" }),
+    short: new Intl.DateTimeFormat(locale, { weekday: "short" }),
     long: new Intl.DateTimeFormat(locale, { weekday: "long" }),
   }
 
-  const weekday = (date: Date, width: "narrow" | "long"): string =>
+  const weekday = (date: Date, width: "narrow" | "short" | "long"): string =>
     weekdayFormats[width].format(date)
 
   const firstDayOfWeek = localeFirstDay(locale)

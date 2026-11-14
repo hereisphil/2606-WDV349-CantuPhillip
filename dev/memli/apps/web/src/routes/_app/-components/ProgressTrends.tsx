@@ -13,6 +13,8 @@ const messages = {
   retentionAverage: "Global average: {percent}",
   newCards: "New words",
   newCardsDetail: "Added this month",
+  learned: "Words learned",
+  learnedDetail: "So far, in every course",
 } as const
 
 function TrendCard({
@@ -47,7 +49,11 @@ export function ProgressTrends({
   retentionPercent,
   retentionGlobalAveragePercent,
   newCardsThisMonth,
-}: ProgressTrendsData): JSX.Element {
+  wordsLearned,
+}: ProgressTrendsData & {
+  /** Moved here from This week, which now shows only the week. */
+  wordsLearned: number
+}): JSX.Element {
   const { number, percent, format } = useFormatters()
 
   return (
@@ -64,7 +70,7 @@ export function ProgressTrends({
         <TrendingUp className="size-5 text-primary" aria-hidden="true" />
         {messages.heading}
       </Heading>
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <TrendCard
           label={messages.consistency}
           value={percent(consistencyPercent / 100)}
@@ -86,6 +92,11 @@ export function ProgressTrends({
           value={number(newCardsThisMonth)}
           detail={messages.newCardsDetail}
           detailClassName="text-primary"
+        />
+        <TrendCard
+          label={messages.learned}
+          value={number(wordsLearned)}
+          detail={messages.learnedDetail}
         />
       </dl>
     </section>
