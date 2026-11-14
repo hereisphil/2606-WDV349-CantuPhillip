@@ -6,6 +6,7 @@ The rules for this project live in `.cursor/rules/` so Cursor and Claude Code sh
 @.cursor/rules/memli-stack.mdc
 @.cursor/rules/architecture-guardrails.mdc
 @.cursor/rules/product-ux.mdc
+@.cursor/rules/ui-design.mdc
 @.cursor/rules/react-state.mdc
 @.cursor/rules/i18n-foundations.mdc
 @.cursor/rules/git-workflow.mdc

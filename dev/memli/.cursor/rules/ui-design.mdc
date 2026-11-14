@@ -1,0 +1,70 @@
+---
+description: UI design floors for learner-facing screens — color tokens, type, targets, layout, copy — and where lint and CI enforce each
+alwaysApply: true
+---
+
+# UI design floors (always-on)
+
+Applies to learner-facing screens: `apps/web/src/routes/_app`, `_session` and `src/components`. Marketing and auth join when they get a design pass. Reasons and evidence: `docs/designs/REDESIGN.md` in the repository root (sections 6 to 11).
+
+These are floors, not a style guide. Each one exists because a real screen broke it.
+
+## Color
+
+- Role tokens only: `bg-card`, `text-muted-foreground`, `bg-warning-container`. No palette classes (`bg-blue-600`, `text-white`) and no arbitrary colors (`bg-[#0f172a]`).
+- A light/dark difference belongs in the token (`:root` and `.dark` in `packages/ui/src/styles/globals.css`). A `dark:` color class is the exception and needs a comment saying why the token cannot carry it.
+- A new token gets a pairing in `packages/ui/src/styles/tokens.test.ts` that says what it sits on. The test fails until it has one.
+- One amber (`variant: "cta"`) button per screen: the main action. Everything else is `outline`, `ghost` or `secondary`.
+- Status is never color alone. Add an icon, a shape or a word.
+
+## Type
+
+- Nothing under 14 px. No `text-xs`.
+- Every sentence is 16 px or larger. 14 px is for short labels only, in the default text tone at weight 600. Gray (`text-muted-foreground`) starts at 16 px.
+- Sentence case. No `uppercase` labels.
+
+## Targets
+
+- Every button, link row, menu item and input is at least 44 px tall, for mouse users too.
+- `Button` and `buttonVariants` always name a size: `touch` (44 px), `touch-lg` (48 px), `touch-xl` (56 px, the main action) or `icon-touch` (44 px square). The default is 32 px. Restyle a touch size with `className`; do not resize a small one with `size-11`.
+
+## Layout
+
+- Logical properties only, so the page flips in right-to-left languages: `ms-` `me-` `ps-` `pe-` `start-` `end-` `text-start` `text-end` `border-s` `rounded-s`. Never `ml-` `pr-` `left-` `text-left`. (`left-1/2` with `-translate-x-1/2` is fine: centering has no direction.)
+- DOM order is reading order. No `order-*`. Place things with grid rows and columns (`dashboard.tsx`), or write the parts in each layout's order (`MnemonicNav` in `MnemonicFrame.tsx`).
+- Components respond to their container (`@container`, `@[34rem]:`). Only page shells use viewport breakpoints.
+- Design the phone layout on its own. The main action is on the first screen at 375 px.
+- Translated text is up to three times longer. Let labels wrap: no `whitespace-nowrap`, and `truncate` only on learner content that is shown in full somewhere else.
+
+## Copy
+
+- One word per idea. Say **course** (not deck), **words** (not cards), **to review** (not due), **learned** (not mastered), **days of study** (not streak), **All done** (not caught up), **Dashboard** (not home or decks). Code identifiers such as `dueCount` can stay.
+- No em dashes. Use a period, a comma or a colon.
+- No sentence over 12 words. No idioms.
+- A count and the button next to it mean the same thing: the number in "16 words to review" is what "Start review" opens.
+- Copy lives in `messages` objects (`i18n-foundations.mdc`).
+
+## Every new screen or state
+
+- Add a `?preview=` state for each case worth looking at: empty, long text, large numbers. Add its name to `dashboard-previews.ts` or `study-previews.ts` and the axe, floors and pseudo-localization specs pick it up. A new route adds its path to those three specs in `apps/web/e2e/`.
+- A DEV-only tool is gated with `import.meta.env.DEV`, carries `data-dev-only` on its root, and is listed in the lint exemption in `apps/web/eslint.config.js`.
+
+## Enforcement
+
+| Floor | Checked by |
+| --- | --- |
+| Text size, logical properties, `order-*`, raw colors | `memli/no-restricted-classes` (`bun run lint`) |
+| Button sizes | `memli/touch-button-size` |
+| Em dashes in strings | `no-restricted-syntax` in `apps/web/eslint.config.js` |
+| Rendered text size, target height, capitals, retired words, em dashes | `apps/web/e2e/floors.spec.ts` |
+| Contrast of every token, in both themes | `packages/ui/src/styles/tokens.test.ts` |
+| Long, CJK and right-to-left text never scrolls sideways | `apps/web/e2e/pseudo.spec.ts` |
+| WCAG 2.2 AA on every preview state | `apps/web/e2e/*.a11y.spec.ts` |
+
+Not checked by a machine, so check by eye: one amber button per screen, sentences at 16 px, gray only at 16 px and up, sentence length.
+
+## Do not
+
+- Quiet a floor with `eslint-disable`, an `allow` option or a `notChecked` entry without a reason a reviewer would accept.
+- Lower a threshold in a spec to make a screen pass. Fix the screen, or raise it with the student first.
+- Restyle a screen that already meets the floors "for polish". The student owns design decisions (`teach-first.mdc`).

@@ -17,6 +17,9 @@ Already in play or available without new products:
 | TanStack Router Devtools | Route matches / debug (currently mounted in web root) |
 | Vitest | Domain tests in `packages/core` (Evaluator, FSRS helpers, session reducer); ESLint rule tests run with `node --test` |
 | Playwright + axe-core | WCAG 2.2 AA on `/dashboard`, each `?preview=`, a filtered course list and the open "Your progress", plus the study session, in light and dark, at desktop width and at 375 px (`bun run test:a11y` in `apps/web`; part of `validate`) |
+| Playwright design floors | `apps/web/e2e/floors.spec.ts`: no text under 14 px, no target under 44 px tall, no capitals, no retired words and no em dashes, on every dashboard and study `?preview=` state at desktop width and 375 px. `pseudo.spec.ts`: no sideways scroll with long, CJK and right-to-left text. Both run with `bun run test:a11y` |
+| Design-floor lint | `memli/no-restricted-classes` and `memli/touch-button-size` on learner-facing screens (`.cursor/rules/ui-design.mdc`, `packages/eslint-config/README.md`) |
+| Token registration | `packages/ui/src/styles/tokens.test.ts` fails for a `--color-*` utility with no contrast pairing |
 | TypeScript + ESLint + Prettier + Lefthook | Quality gates |
 | `memli/no-use-state-sprawl` (local ESLint rule) | Pushes component state into `useReducer` + discriminated unions — see [state-management.md](./state-management.md) |
 | Knip | Unused code/deps hygiene |

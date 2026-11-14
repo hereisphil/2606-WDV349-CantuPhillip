@@ -20,12 +20,12 @@ alwaysApply: true
 
 - Product name today: **Memli** (planned public rebrand: **FluentVine** — coordinate renames in a branding pass).
 - Desktop logo: BookOpen icon in a primary-colored rounded square + "Memli" text.
-- Prefer semantic tokens (`bg-primary`, `text-muted-foreground`) over hard-coded blues.
+- Role tokens only (`bg-card`, `text-muted-foreground`, `bg-cta`), never palette classes or hex values. Design floors for learner-facing screens (14 px text, 44 px targets, logical properties, copy): `ui-design.mdc`.
 
 ## Product & architecture docs
 
 - Long-lived decisions: `docs/` (start at `docs/roadmap.md`).
-- Always-on UX / i18n / architecture / state constraints: `product-ux.mdc`, `i18n-foundations.mdc`, `architecture-guardrails.mdc`, `react-state.mdc`.
+- Always-on UX / design / i18n / architecture / state constraints: `product-ux.mdc`, `ui-design.mdc`, `i18n-foundations.mdc`, `architecture-guardrails.mdc`, `react-state.mdc`.
 
 ## State
 
