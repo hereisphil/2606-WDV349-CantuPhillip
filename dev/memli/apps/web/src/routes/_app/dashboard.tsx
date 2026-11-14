@@ -21,13 +21,13 @@ import { DashboardGreeting } from "./-components/DashboardGreeting"
 import { CourseList } from "./-components/CourseList"
 import { LanguageFilter } from "./-components/LanguageFilter"
 import { PreviewSwitcher } from "./-components/PreviewSwitcher"
-import { ProgressTrends } from "./-components/ProgressTrends"
+import { ProgressDisclosure } from "./-components/ProgressDisclosure"
 import { StudyHero } from "./-components/StudyHero"
 import { ThisWeek } from "./-components/ThisWeek"
 import { TipCard } from "./-components/TipCard"
 
 const messages = {
-  aside: "Your progress",
+  aside: "Your week and tips",
 } as const
 
 /** Above this many other courses, the list offers the Studying menu. */
@@ -147,9 +147,11 @@ function Dashboard(): JSX.Element {
               {tip === null ? null : <TipCard tip={tip} />}
             </aside>
           </div>
-          <ProgressTrends
-            {...progressTrends}
+          <ProgressDisclosure
+            retentionPercent={progressTrends.retentionPercent}
+            newCardsThisMonth={progressTrends.newCardsThisMonth}
             wordsLearned={totalMastered(allDecks)}
+            courses={sortDecks(allDecks)}
           />
         </>
       )}
