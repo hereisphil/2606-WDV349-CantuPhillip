@@ -1294,6 +1294,18 @@ Every size is arithmetic and every contrast number is computed. By this plan's o
 
 ---
 
+### 17.3 What the build changed
+
+The build (14 November 2026, branch `151-web-dashboard_redesign`) followed this plan with these differences. Results of the section 11.3 checklist are in [`redesign-research/definition-of-done/`](./redesign-research/definition-of-done/README.md).
+
+- **The desktop theme control is a menu row, not a radio card.** The card was built and judged too heavy for a setting people rarely change. The sidebar now has one two-line "Theme / Match my device" row that opens the same menu as the phone, so desktop takes two clicks instead of one. The current choice still shows without opening it.
+- **The streak rule was decided** (section 5.7): any study counts, one day off is forgiven, and the line reads "days of study". The day marks show the work done: a check, a partial ring, or an empty circle for no study.
+- **The dark hero kept its color.** On a real Android phone at full and dim brightness, and in a blurred screenshot, it read as its own panel (section 7.4).
+- **Phones got tighter than sketched.** To fit both hero buttons at 320 x 450, the top bar is 56 px, the gutter 16 px, and the hero uses 16 px padding, a 32 px badge and an 8 px gap between stacked buttons below 520 px. The hero starts at y 121.
+- **Course row titles are plain bold text, not headings**, which keeps the page at five visible headings. Rows wrap when a long translated button and the title cannot share a line.
+- **"Your progress" sits in the grid** as a full-width last row, and its table scrolls inside a labeled region on narrow screens.
+- **Known exceptions:** at 1280 x 720 the tip card's top edge shows above the fold (four boxes, not three); a 375 px tall landscape phone cannot show the hero's button on its first screen; and the long-titles preview at 320 x 450 pushes both buttons below the fold, because its 98-character course name wraps to four lines.
+
 ## 18. Sources
 
 **Color**
