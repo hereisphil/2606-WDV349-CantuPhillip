@@ -9,7 +9,7 @@ const messages = {
 } as const
 
 const chipClass =
-  "inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-medium wrap-break-word transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:border-primary aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+  "inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-medium wrap-break-word transition-colors hover:bg-muted aria-[current=page]:border-primary aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
 
 // The router marks the chip whose search matches the URL exactly with aria-current="page".
 const activeOptions = { exact: true } as const

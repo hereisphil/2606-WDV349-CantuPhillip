@@ -41,7 +41,7 @@ export default function DevPreviewsMenu(): JSX.Element {
           render={
             <Button
               size="sm"
-              className="bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-red-600/50"
+              className="bg-red-600 text-white shadow-md hover:bg-red-700"
             />
           }
         >

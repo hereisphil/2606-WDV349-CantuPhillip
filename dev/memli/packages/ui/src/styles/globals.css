@@ -387,7 +387,15 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  /* One focus style for everything a keyboard can reach: a solid 2 px outline
+     with a 2 px gap, at 6:1 or better on every surface (WCAG 2.4.7, 1.4.11).
+     An outline, not a box-shadow ring, so Windows high-contrast mode draws it.
+     A surface with its own ground (the hero) sets --ring to its ring color. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   a {
     @apply cursor-pointer;
