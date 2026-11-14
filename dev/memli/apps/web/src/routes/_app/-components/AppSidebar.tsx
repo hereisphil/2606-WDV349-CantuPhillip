@@ -77,12 +77,12 @@ function RailLink({
       to={to}
       activeOptions={{ exact }}
       className={cn(
-        "flex min-h-6 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted hover:text-foreground-strong",
         railActiveClass,
         "[&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}
     >
-      <Icon className="size-4" aria-hidden="true" />
+      <Icon className="size-5" aria-hidden="true" />
       {label}
     </Link>
   )

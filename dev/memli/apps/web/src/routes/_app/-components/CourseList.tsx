@@ -78,14 +78,10 @@ function CourseRow({ course }: { course: DashboardDeck }): JSX.Element {
     <li className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
       <LanguageBadge tag={course.learningLanguage} />
       <div className="flex min-w-0 flex-1 basis-40 flex-col gap-0.5">
-        <Heading
-          level={3}
-          size="4"
-          weight="semibold"
-          className="text-base text-pretty wrap-break-word"
-        >
+        {/* Plain text, not a heading: the list already groups the rows, and the page keeps six headings or fewer. */}
+        <p className="text-base font-semibold text-pretty wrap-break-word text-foreground-strong">
           {course.title}
-        </Heading>
+        </p>
         <RowStatus action={action} />
       </div>
       {/* The count stays in the status line so every row reads the same way; the button's name repeats it. */}
