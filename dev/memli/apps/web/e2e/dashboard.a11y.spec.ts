@@ -25,29 +25,42 @@ async function openDashboard(
   await expect(page.locator("main")).toBeVisible()
 }
 
+async function expectNoViolations(page: Page): Promise<void> {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze()
+
+  expect(
+    results.violations,
+    results.violations
+      .map(
+        (violation) =>
+          `${violation.id} (${violation.impact}): ${violation.help}\n` +
+          violation.nodes
+            .map((node) => `  - ${node.target.join(" ")}`)
+            .join("\n")
+      )
+      .join("\n")
+  ).toEqual([])
+}
+
 test.describe("dashboard axe (WCAG 2.2 AA)", () => {
   for (const theme of themes) {
     for (const path of paths) {
       test(`${theme} ${path}`, async ({ page }) => {
         await openDashboard(page, path, theme)
-
-        const results = await new AxeBuilder({ page })
-          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-          .analyze()
-
-        expect(
-          results.violations,
-          results.violations
-            .map(
-              (violation) =>
-                `${violation.id} (${violation.impact}): ${violation.help}\n` +
-                violation.nodes
-                  .map((node) => `  - ${node.target.join(" ")}`)
-                  .join("\n")
-            )
-            .join("\n")
-        ).toEqual([])
+        await expectNoViolations(page)
       })
     }
+
+    // "Your progress" is closed by default, so its sentences and table need their own pass.
+    test(`${theme} /dashboard with Your progress open`, async ({ page }) => {
+      await openDashboard(page, "/dashboard", theme)
+      await page
+        .locator("section[aria-labelledby=progress-heading] summary")
+        .click()
+      await expect(page.getByRole("table")).toBeVisible()
+      await expectNoViolations(page)
+    })
   }
 })
