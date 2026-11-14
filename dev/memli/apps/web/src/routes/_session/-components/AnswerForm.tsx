@@ -43,7 +43,7 @@ export function AnswerForm({
     >
       <label
         htmlFor={inputId}
-        className="text-xs font-medium tracking-widest text-muted-foreground uppercase"
+        className="text-sm font-semibold text-foreground"
       >
         {messages.label}
       </label>
@@ -82,7 +82,7 @@ export function AnswerForm({
       {/* Only shown with a mouse or trackpad: touch keyboards have their own submit key. Still read to screen readers. */}
       <p
         id={hintId}
-        className="hidden text-xs text-muted-foreground pointer-fine:block"
+        className="hidden text-base text-muted-foreground pointer-fine:block"
       >
         {messages.hint}
       </p>

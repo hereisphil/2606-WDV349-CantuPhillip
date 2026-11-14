@@ -57,7 +57,7 @@ function SignIn(): JSX.Element {
     }
 
     setFieldErrors({})
-    setFormMessage("Sign-in is not wired to the API yet — validation passed.")
+    setFormMessage("Sign-in is not wired to the API yet. Validation passed.")
   }
 
   return (
@@ -82,7 +82,7 @@ function SignIn(): JSX.Element {
               role="status"
               className="rounded-lg border border-border bg-secondary px-3 py-2 text-center text-sm font-medium"
             >
-              Prototype Mode — Sign-in form disabled
+              Prototype Mode: sign-in form disabled
             </p>
             <Link
               to="/dashboard"

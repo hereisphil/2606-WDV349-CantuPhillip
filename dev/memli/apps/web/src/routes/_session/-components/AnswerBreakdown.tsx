@@ -49,7 +49,7 @@ export function AnswerBreakdown({
       {/* One card with two parts on phones; two cards side by side from sm up. */}
       <div className="grid overflow-hidden rounded-xl border border-border bg-card sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent">
         <div className="flex flex-col gap-2 p-6 sm:rounded-xl sm:border sm:border-border sm:bg-card">
-          <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+          <h2 className="text-sm font-semibold text-foreground">
             {messages.meaning}
           </h2>
           <p
@@ -64,7 +64,7 @@ export function AnswerBreakdown({
           </p>
         </div>
         <div className="flex flex-col gap-2 border-t border-border bg-muted/40 p-6 sm:rounded-xl sm:border">
-          <h2 className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+          <h2 className="text-sm font-semibold text-foreground">
             {messages.example}
           </h2>
           <p lang={learningLanguage} className="text-lg italic">

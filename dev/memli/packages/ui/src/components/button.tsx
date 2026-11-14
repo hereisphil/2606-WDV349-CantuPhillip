@@ -45,6 +45,8 @@ const buttonVariants = cva(
         // 44 px: row buttons and other controls.
         touch:
           "h-auto min-h-11 max-w-full shrink gap-2 px-4 py-2 text-center text-base leading-snug text-balance whitespace-normal",
+        // 44 px square: icon-only buttons.
+        "icon-touch": "size-11",
         // 48 px: the second button on the hero, and form submits.
         "touch-lg":
           "h-auto min-h-12 max-w-full shrink gap-2 px-5 py-2.5 text-center text-base leading-snug text-balance whitespace-normal",

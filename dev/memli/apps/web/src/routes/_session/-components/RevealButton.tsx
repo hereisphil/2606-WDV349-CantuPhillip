@@ -64,7 +64,8 @@ export function RevealButton({
     <Button
       // Secondary to Submit (one primary action per screen), but still a large, lifted target.
       variant="outline"
-      className="relative h-12 gap-2.5 rounded-xl bg-card text-base font-semibold shadow-sm hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:text-primary hover:shadow-md active:shadow-sm motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      size="touch-lg"
+      className="relative gap-2.5 rounded-xl bg-card text-base font-semibold shadow-sm hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:text-primary hover:shadow-md active:shadow-sm motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       aria-keyshortcuts="Space"
       onClick={onReveal}
     >
@@ -73,7 +74,7 @@ export function RevealButton({
       {/* Shortcut hint only on hover or keyboard focus. Absolutely placed so the label never shifts. */}
       <kbd
         aria-hidden="true"
-        className="pointer-events-none absolute right-4 rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-xs font-medium text-muted-foreground opacity-0 transition-opacity group-hover/button:opacity-100 group-focus-visible/button:opacity-100 motion-reduce:transition-none"
+        className="pointer-events-none absolute end-4 rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-sm font-medium text-muted-foreground opacity-0 transition-opacity group-hover/button:opacity-100 group-focus-visible/button:opacity-100 motion-reduce:transition-none"
       >
         {messages.revealKey}
       </kbd>

@@ -137,7 +137,7 @@ export function AppSidebar(): JSX.Element {
   return (
     <aside
       aria-label={messages.sidebar}
-      className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-56 md:border-r md:border-b-0 lg:w-64"
+      className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-56 md:border-e md:border-b-0 lg:w-64"
     >
       <div className="flex items-center justify-between px-4 py-1.5 md:pt-6 md:pb-4">
         <Link to="/dashboard" className="flex min-h-11 items-center">
@@ -154,7 +154,8 @@ export function AppSidebar(): JSX.Element {
               render={
                 <Button
                   variant="ghost"
-                  className="size-11 rounded-full p-0 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  size="icon-touch"
+                  className="rounded-full hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
@@ -182,8 +183,8 @@ export function AppSidebar(): JSX.Element {
               render={
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="size-11 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  size="icon-touch"
+                  className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
@@ -217,7 +218,8 @@ export function AppSidebar(): JSX.Element {
               render={
                 <Button
                   variant="ghost"
-                  className="h-auto w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
+                  size="touch"
+                  className="w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-start hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
                 />
               }
             >

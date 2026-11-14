@@ -56,13 +56,15 @@ export function ThemeMenu({ placement }: ThemeMenuProps): JSX.Element {
           inSidebar ? (
             <Button
               variant="ghost"
-              className="h-auto min-h-11 w-full justify-start gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+              size="touch"
+              className="w-full justify-start gap-2.5 rounded-lg px-3 py-1.5 text-start text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
             />
           ) : (
             <Button
               variant="ghost"
+              size="touch"
               // A long translated label wraps to two lines instead of pushing the account and menu buttons off a narrow screen.
-              className="h-auto min-h-11 max-w-28 gap-1.5 px-2 py-1 text-start text-sm leading-tight font-semibold whitespace-normal hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+              className="max-w-28 gap-1.5 px-2 py-1 text-start text-sm leading-tight font-semibold hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
             />
           )
         }
