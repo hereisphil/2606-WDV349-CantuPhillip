@@ -113,6 +113,13 @@ const pairings: readonly Pairing[] = [
   ["Control border on page", "border-strong", "background", "nonText"],
   ["Control border on sidebar", "border-strong", "sidebar", "nonText"],
   ["Control border on menu", "border-strong", "popover", "nonText"],
+  [
+    "Control border on tip card",
+    "border-strong",
+    "warning-container",
+    "nonText",
+  ],
+  ["Practice label on tip card", "foreground", "warning-container", "label"],
   ["Input border on card", "input", "card", "nonText"],
   ["Selected mark on card", "brand", "card", "nonText"],
   ["Selected mark on page", "brand", "background", "nonText"],

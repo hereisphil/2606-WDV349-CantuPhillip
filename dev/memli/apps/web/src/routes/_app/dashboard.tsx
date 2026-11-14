@@ -7,6 +7,7 @@ import {
   learningLanguages,
   selectFocusDeck,
   sortDecks,
+  tipFor,
   todayState,
   totalMastered,
 } from "./-components/dashboard-model"
@@ -19,11 +20,11 @@ import {
 import { DashboardGreeting } from "./-components/DashboardGreeting"
 import { CourseList } from "./-components/CourseList"
 import { LanguageFilter } from "./-components/LanguageFilter"
-import { MemoryCallout } from "./-components/MemoryCallout"
 import { PreviewSwitcher } from "./-components/PreviewSwitcher"
 import { ProgressTrends } from "./-components/ProgressTrends"
 import { StudyHero } from "./-components/StudyHero"
 import { ThisWeek } from "./-components/ThisWeek"
+import { TipCard } from "./-components/TipCard"
 
 const messages = {
   aside: "Your progress",
@@ -65,12 +66,7 @@ function Dashboard(): JSX.Element {
     import.meta.env.DEV && preview !== undefined
       ? dashboardPreviews[preview]
       : { metrics: prototypeDashboardMetrics }
-  const {
-    decks: allDecks,
-    dailyGoal,
-    trickyWords,
-    progressTrends,
-  } = seeded.metrics
+  const { decks: allDecks, dailyGoal, progressTrends } = seeded.metrics
   const streakDays = seeded.streakDays ?? viewer.streakDays
   const now = new Date()
 
@@ -106,6 +102,7 @@ function Dashboard(): JSX.Element {
     studying === undefined
       ? otherCourses
       : otherCourses.filter((deck) => deck.learningLanguage === studying)
+  const tip = tipFor(allDecks, today)
   // The finished hero already links to "Find another course".
   const heroFindsAnother =
     today.status === "caught-up" && today.keepGoing === null
@@ -147,10 +144,7 @@ function Dashboard(): JSX.Element {
                 clearedToday={today.status === "caught-up"}
                 streakDays={streakDays}
               />
-              <MemoryCallout
-                total={trickyWords.total}
-                words={trickyWords.words}
-              />
+              {tip === null ? null : <TipCard tip={tip} />}
             </aside>
           </div>
           <ProgressTrends

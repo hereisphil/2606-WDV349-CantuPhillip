@@ -34,7 +34,7 @@ export type DailyStudy = {
 }
 
 /** A card the learner keeps forgetting (FSRS calls these leeches). */
-export type TrickyWord = {
+type TrickyWord = {
   cardId: string
   courseId: string
   term: string

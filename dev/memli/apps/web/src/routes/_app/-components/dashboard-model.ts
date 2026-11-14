@@ -132,6 +132,30 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
   return { status: "caught-up", deck: more?.deck ?? focusDeck, keepGoing: more }
 }
 
+/** What the tip card shows. `null` hides it. */
+export type Tip = { kind: "tricky"; course: DashboardDeck } | { kind: "study" }
+
+/**
+ * The tricky words of one course: the one most in need, so the hero's course
+ * comes first. A study tip when no course has tricky words. Hidden when the
+ * all-done hero already offers to practice the same words.
+ */
+export function tipFor(
+  decks: readonly DashboardDeck[],
+  today: TodayState
+): Tip | null {
+  const course = sortDecks(decks).find((deck) => deck.trickyCount > 0)
+  if (course === undefined) {
+    return { kind: "study" }
+  }
+  const heroPractices =
+    today.status === "caught-up" &&
+    today.keepGoing !== null &&
+    today.keepGoing.trickyCount > 0 &&
+    today.keepGoing.deck.courseId === course.courseId
+  return heroPractices ? null : { kind: "tricky", course }
+}
+
 export type DeckAction = {
   courseId: string
   mode: "review" | "learn"
