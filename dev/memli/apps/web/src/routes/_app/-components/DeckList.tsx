@@ -11,20 +11,20 @@ import { LanguageBadge } from "./LanguageBadge"
 import { LastStudied } from "./LastStudied"
 
 const messages = {
-  heading: "Other decks",
-  due: { other: "{count} due" },
-  new: { other: "{count} new" },
-  caughtUp: "Caught up",
-  mastered: "{percent} mastered",
+  heading: "Your other courses",
+  due: { one: "{count} to review", other: "{count} to review" },
+  new: { one: "{count} new", other: "{count} new" },
+  caughtUp: "All done",
+  mastered: "{percent} learned",
   review: "Review",
   reviewLabel: {
-    one: "Review {count} card in {deck}",
-    other: "Review {count} cards in {deck}",
+    one: "Review {count} word in {course}",
+    other: "Review {count} words in {course}",
   },
   learn: "Learn",
   learnLabel: {
-    one: "Learn {count} new word in {deck}",
-    other: "Learn {count} new words in {deck}",
+    one: "Learn {count} new word in {course}",
+    other: "Learn {count} new words in {course}",
   },
 } as const
 
@@ -85,7 +85,7 @@ function RowAction({
       to="/study/$courseId"
       params={{ courseId: action.courseId }}
       search={{ mode: action.mode }}
-      aria-label={plural(action.count, label, { deck: deck.title })}
+      aria-label={plural(action.count, label, { course: deck.title })}
       className={cn(
         buttonVariants({ variant: "outline", size: "lg" }),
         "px-3 @2xl:justify-self-end"

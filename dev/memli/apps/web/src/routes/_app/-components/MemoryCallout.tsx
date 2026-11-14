@@ -7,11 +7,10 @@ import type { TrickyWord } from "./dashboard-metrics"
 
 const messages = {
   heading: {
-    one: "{count} word keeps slipping",
-    other: "{count} words keep slipping",
+    one: "{count} tricky word",
+    other: "{count} tricky words",
   },
-  detail:
-    "You've forgotten these a few times. A new mnemonic can help them stick.",
+  detail: "You've forgotten these a few times. A new memory trick can help.",
   more: { other: "and {count} more" },
 } as const
 

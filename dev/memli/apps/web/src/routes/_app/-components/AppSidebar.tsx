@@ -5,7 +5,7 @@ import {
   ChevronsUpDown,
   CreditCard,
   Image as ImageIcon,
-  Layers,
+  LayoutDashboard,
   LogOut,
   SlidersHorizontal,
   UserIcon,
@@ -35,8 +35,8 @@ const messages = {
   navigationMenu: "Navigation menu",
   accountMenu: "Account menu, @{username}",
   accountMenuPrefix: "Account menu, ",
-  decks: "Decks",
-  community: "Community Gallery",
+  dashboard: "Dashboard",
+  community: "Community",
   profile: "View Profile",
   settings: "Learning Settings",
   plan: "Subscription / Plan",
@@ -49,8 +49,8 @@ const railActiveClass =
 const railLinks = [
   {
     to: "/dashboard" as const,
-    label: messages.decks,
-    icon: Layers,
+    label: messages.dashboard,
+    icon: LayoutDashboard,
     exact: true,
   },
   {
@@ -69,7 +69,7 @@ function RailLink({
 }: {
   to: "/dashboard" | "/community"
   label: string
-  icon: typeof Layers
+  icon: typeof LayoutDashboard
   exact?: boolean
 }): JSX.Element {
   return (

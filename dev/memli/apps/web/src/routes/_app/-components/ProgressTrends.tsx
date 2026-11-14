@@ -11,7 +11,7 @@ const messages = {
   consistencyChange: "{change} from last week",
   retention: "Retention",
   retentionAverage: "Global average: {percent}",
-  newCards: "New cards",
+  newCards: "New words",
   newCardsDetail: "Added this month",
 } as const
 

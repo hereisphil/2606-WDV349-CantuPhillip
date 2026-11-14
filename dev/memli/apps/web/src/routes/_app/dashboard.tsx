@@ -113,8 +113,6 @@ function Dashboard(): JSX.Element {
       <DashboardGreeting
         name={viewer.displayName}
         hasDecks={allDecks.length > 0}
-        dueCount={today.status === "review" ? today.dueCount : 0}
-        streakDays={streakDays}
         now={now}
       />
       {focusDeck === null ? (

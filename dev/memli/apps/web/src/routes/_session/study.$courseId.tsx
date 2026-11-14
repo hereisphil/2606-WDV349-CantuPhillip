@@ -48,16 +48,16 @@ type StudySearch = {
 const messages = {
   empty: {
     heading: "Nothing to study here right now",
-    body: "This deck has no cards waiting for this kind of session. Pick another from your dashboard.",
+    body: "This course has no words waiting for this kind of session. Pick another from your dashboard.",
   },
   notFound: {
-    heading: "We couldn't find that deck",
+    heading: "We couldn't find that course",
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
   complete: {
     heading: "Session complete",
-    body: "You've been through every card in this session.",
+    body: "You've been through every word in this session.",
   },
 } as const
 

@@ -10,12 +10,12 @@ const messages = {
   exitKey: "Esc",
   progressLabel: "Session progress",
   progressValue: {
-    one: "{completed} of {count} card done",
-    other: "{completed} of {count} cards done",
+    one: "{completed} of {count} word done",
+    other: "{completed} of {count} words done",
   },
   remaining: {
-    one: "{count} card left",
-    other: "{count} cards left",
+    one: "{count} word left",
+    other: "{count} words left",
   },
 } as const
 

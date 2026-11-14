@@ -19,8 +19,8 @@ const messages = {
   goalOf: "of {target}",
   goalStudied: "studied",
   goalRemaining: {
-    one: "{count} more card to reach today's goal.",
-    other: "{count} more cards to reach today's goal.",
+    one: "{count} more word to reach today's goal.",
+    other: "{count} more words to reach today's goal.",
   },
   goalMet: "Today's goal is done. Extra study still counts.",
   goalCleared:
@@ -33,12 +33,12 @@ const messages = {
     upcoming: "{day}, upcoming",
   },
   todayMet: "{day}, today, goal met",
-  streak: "Streak",
+  streak: "Days in a row",
   streakDays: {
     one: "{count} day",
     other: "{count} days",
   },
-  mastered: "Words mastered",
+  mastered: "Words learned",
 } as const
 
 const RING_RADIUS = 42
