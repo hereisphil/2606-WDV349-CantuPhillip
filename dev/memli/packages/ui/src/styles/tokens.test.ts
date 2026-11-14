@@ -72,6 +72,13 @@ const pairings: readonly Pairing[] = [
     "hero-chip",
     "nonText",
   ],
+  [
+    "Hero text on hero chip on hover",
+    "hero-foreground",
+    "hero-chip-hover",
+    "bodyTint",
+  ],
+  ["Second hero button border on hover", "hero-foreground", "hero", "nonText"],
   ["Focus ring on hero", "hero-ring", "hero", "nonText"],
 
   // Actions

@@ -67,7 +67,8 @@ export function SessionHeader({
       <div className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 md:grid md:grid-cols-[1fr_minmax(0,36rem)_1fr] md:gap-6">
         <Button
           variant="ghost"
-          className="h-11 shrink-0 gap-2 px-3 text-base md:justify-self-start"
+          size="touch"
+          className="shrink-0 px-3 md:justify-self-start"
           aria-keyshortcuts="Escape"
           render={<Link to="/dashboard" />}
           nativeButton={false}

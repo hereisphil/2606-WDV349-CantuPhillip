@@ -72,7 +72,8 @@ export function AnswerForm({
         <Button
           type="submit"
           disabled={answer === ""}
-          className="h-12 shrink-0 gap-2 rounded-lg px-4 text-base font-semibold sm:px-5"
+          size="touch-lg"
+          className="shrink-0 px-4 font-semibold sm:px-5"
         >
           {messages.submit}
           <ArrowRight aria-hidden="true" className="size-4" />

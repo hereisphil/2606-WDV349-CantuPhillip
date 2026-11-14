@@ -4,7 +4,7 @@ import { Button } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { marketingSections } from "@/components/marketing-sections"
 
-const heroButtonClass = "h-12 w-full px-7 text-base sm:w-auto"
+const heroButtonClass = "w-full px-7 sm:w-auto"
 
 export function Hero(): JSX.Element {
   return (
@@ -23,7 +23,7 @@ export function Hero(): JSX.Element {
 
       <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center">
         <Button
-          size="lg"
+          size="touch-lg"
           className={heroButtonClass}
           render={<Link to="/signin" />}
           nativeButton={false}
@@ -31,7 +31,7 @@ export function Hero(): JSX.Element {
           Claim Your Username
         </Button>
         <Button
-          size="lg"
+          size="touch-lg"
           variant="outline"
           className={heroButtonClass}
           render={<Link to="/" hash={marketingSections.whyMnemonics} />}

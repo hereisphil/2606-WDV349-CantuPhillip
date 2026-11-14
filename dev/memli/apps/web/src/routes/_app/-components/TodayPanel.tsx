@@ -49,8 +49,6 @@ const messages = {
   browseCommunity: "Browse community decks",
 } as const
 
-const primaryActionClass = "h-11 px-4 text-base"
-
 const MAX_LISTED_DECKS = 3
 
 function LearnLink({
@@ -65,7 +63,7 @@ function LearnLink({
   return (
     <Button
       variant={variant}
-      className={primaryActionClass}
+      size="touch"
       render={
         <Link
           to="/study/$courseId"
@@ -133,7 +131,7 @@ function ReviewContent({
       <div className="flex flex-col gap-2">
         <Actions>
           <Button
-            className={primaryActionClass}
+            size="touch"
             render={
               <Link
                 to="/study/$courseId"
@@ -194,7 +192,7 @@ function KeepGoingActions({
         {extraNew > 0 ? (
           <Button
             variant="outline"
-            className={primaryActionClass}
+            size="touch"
             render={
               <Link
                 to="/study/$courseId"
@@ -210,7 +208,7 @@ function KeepGoingActions({
         {trickyCount > 0 ? (
           <Button
             variant="outline"
-            className={primaryActionClass}
+            size="touch"
             render={
               <Link
                 to="/study/$courseId"
@@ -256,7 +254,7 @@ function NoDecksContent(): JSX.Element {
       </div>
       <Actions>
         <Button
-          className={primaryActionClass}
+          size="touch"
           render={<Link to="/community" />}
           nativeButton={false}
         >

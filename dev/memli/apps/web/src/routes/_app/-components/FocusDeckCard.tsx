@@ -119,7 +119,8 @@ function ActionLink({
   return (
     <Button
       variant="outline"
-      className="h-11 self-start px-4 text-base"
+      size="touch"
+      className="self-start"
       aria-label={plural(action.count, label, { deck: deck.title })}
       render={
         <Link

@@ -1067,7 +1067,7 @@ Repo rules apply throughout: semantic tokens only, Base UI primitives, shadcn co
 | Skip link | `routes/_app.tsx` | Targets `<main id="main" tabIndex={-1}>`. |
 | Button `variant="cta"` | `packages/ui` | `bg-cta text-cta-foreground`, the bottom edge, a transparent border. |
 | Button `variant="hero-quiet"` | `packages/ui` | The tinted second button on the hero. |
-| Button sizes: 44, 48 and 56 px | `packages/ui` | All use `min-h`, `h-auto` and wrapping text. They replace three hand-written 44 px overrides. |
+| Button sizes: 44, 48 and 56 px | `packages/ui` | `touch`, `touch-lg` and `touch-xl`. All use `min-h`, `h-auto` and wrapping text. They replace the hand-written 44 and 48 px overrides. |
 | Focus style, everywhere | `globals.css` base layer, `button.tsx`, `input.tsx`, `badge.tsx` | A solid 2 px outline in `--ring` with a 2 px offset replaces the 50% transparent ring. The global rule matters because plain links, radios and `<summary>` inherit it. |
 | Links as links | 7 call sites on the dashboard, 8 more in other route groups | `<Link className={buttonVariants(...)}>`. Update the "Button composition" line in `.cursor/rules/memli-stack.mdc` and the message in the `button-link` lint rule in the same step. |
 | Tokens | `packages/ui/src/styles/globals.css` | The three-tier file in the appendix. `--radius`, `--marketing-header-clearance` and the `--color-brand-*` lines stay as they are. |

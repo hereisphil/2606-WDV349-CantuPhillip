@@ -58,6 +58,7 @@
   --color-hero-border: var(--hero-border);
   --color-hero-ring: var(--hero-ring);
   --color-hero-chip: var(--hero-chip);
+  --color-hero-chip-hover: var(--hero-chip-hover);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
@@ -232,6 +233,11 @@
   --hero-border: var(--blue-800);
   --hero-ring: var(--neutral-50);
   --hero-chip: color-mix(in oklab, var(--hero-foreground) 14%, var(--hero));
+  --hero-chip-hover: color-mix(
+    in oklab,
+    var(--hero-foreground) 20%,
+    var(--hero)
+  );
 
   /* Actions. --cta is the one main action per screen; --primary stays the brand blue. */
   --primary: var(--blue-700);
@@ -242,6 +248,13 @@
   --cta-hover: var(--amber-300);
   --cta-active: var(--amber-500);
   --cta-edge: var(--amber-700);
+  /* The main button's depth: a 3 px darker edge and a short shadow. Hover lifts
+     it 1 px (the edge grows to match) and press sinks it 2 px. */
+  --cta-shadow:
+    0 3px 0 0 var(--cta-edge), 0 4px 10px -2px oklch(0.2 0.06 265 / 0.35);
+  --cta-shadow-hover:
+    0 4px 0 0 var(--cta-edge), 0 7px 14px -3px oklch(0.2 0.06 265 / 0.4);
+  --cta-shadow-active: 0 1px 0 0 var(--cta-edge);
 
   /* Status. Text on a tint uses the matching *-container pair, never an alpha tint. */
   --success: var(--green-700);
@@ -315,6 +328,13 @@
   --hero-border: var(--blue-800);
   --hero-ring: var(--neutral-50);
   --hero-chip: color-mix(in oklab, var(--hero-foreground) 14%, var(--hero));
+  /* 16% is the most the lighter dark hero allows before its text drops under 7:1.
+     The hover also brightens the border, so the change still shows. */
+  --hero-chip-hover: color-mix(
+    in oklab,
+    var(--hero-foreground) 16%,
+    var(--hero)
+  );
 
   /* Accents get lighter and a little less colorful on a dark ground. */
   --primary: var(--blue-200);
@@ -325,6 +345,14 @@
   --cta-hover: var(--amber-200);
   --cta-active: var(--amber-400);
   --cta-edge: var(--amber-600);
+  /* Shadows do not show on navy, so dark mode uses a soft amber glow instead. */
+  --cta-shadow:
+    0 3px 0 0 var(--cta-edge),
+    0 0 22px -6px color-mix(in oklab, var(--cta) 55%, transparent);
+  --cta-shadow-hover:
+    0 4px 0 0 var(--cta-edge),
+    0 0 28px -6px color-mix(in oklab, var(--cta) 65%, transparent);
+  --cta-shadow-active: 0 1px 0 0 var(--cta-edge);
 
   --success: var(--green-300);
   --success-container: var(--green-950);
