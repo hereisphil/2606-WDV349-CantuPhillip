@@ -14,18 +14,12 @@ const messages = {
     one: "card ready to review",
     other: "cards ready to review",
   },
-  duration: "About {duration}",
-  fromDeck: "{count} from {deck}",
-  moreDecks: {
-    one: "and {count} more deck",
-    other: "and {count} more decks",
-  },
+  courseAndDuration: "In {deck}, about {duration}",
   startReview: "Start review",
   learnNew: {
     one: "Learn {count} new word",
     other: "Learn {count} new words",
   },
-  startsIn: "Starts in {deck}.",
   nothingDue: "Nothing to review right now",
   newReady: {
     one: "{count} new word is ready in {deck}.",
@@ -49,8 +43,6 @@ const messages = {
   noDecksDetail: "Find a deck to start building your vocabulary.",
   browseCommunity: "Browse community decks",
 } as const
-
-const MAX_LISTED_DECKS = 3
 
 function LearnLink({
   deck,
@@ -83,10 +75,7 @@ function ReviewContent({
   state: Extract<TodayState, { status: "review" }>
 }): JSX.Element {
   const { number, format, plural, duration } = useFormatters()
-  const { dueCount, minutes, dueDecks, focusDeck } = state
-  const spansDecks = dueDecks.length > 1
-  const listedDecks = dueDecks.slice(0, MAX_LISTED_DECKS)
-  const unlistedDecks = dueDecks.length - listedDecks.length
+  const { dueCount, minutes, focusDeck } = state
 
   return (
     <>
@@ -100,49 +89,25 @@ function ReviewContent({
           </span>
         </p>
         <Text variant="muted">
-          {format(messages.duration, { duration: duration(minutes) })}
+          {format(messages.courseAndDuration, {
+            deck: focusDeck.title,
+            duration: duration(minutes),
+          })}
         </Text>
       </div>
-      {spansDecks ? (
-        <ul className="flex flex-wrap items-center gap-2">
-          {listedDecks.map((deck) => (
-            <li
-              key={deck.courseId}
-              className="max-w-full rounded-lg bg-card px-3 py-1 text-sm wrap-break-word text-muted-foreground tabular-nums"
-            >
-              {format(messages.fromDeck, {
-                count: deck.dueCount,
-                deck: deck.title,
-              })}
-            </li>
-          ))}
-          {unlistedDecks > 0 ? (
-            <li className="text-sm text-muted-foreground">
-              {plural(unlistedDecks, messages.moreDecks)}
-            </li>
-          ) : null}
-        </ul>
-      ) : null}
-      <div className="flex flex-col gap-2">
-        <Actions>
-          <Link
-            to="/study/$courseId"
-            params={{ courseId: focusDeck.courseId }}
-            search={{ mode: "review" }}
-            className={cn(buttonVariants({ size: "touch" }))}
-          >
-            {messages.startReview}
-          </Link>
-          {focusDeck.newAvailable > 0 ? (
-            <LearnLink deck={focusDeck} variant="outline" />
-          ) : null}
-        </Actions>
-        {spansDecks ? (
-          <Text variant="small">
-            {format(messages.startsIn, { deck: focusDeck.title })}
-          </Text>
+      <Actions>
+        <Link
+          to="/study/$courseId"
+          params={{ courseId: focusDeck.courseId }}
+          search={{ mode: "review" }}
+          className={cn(buttonVariants({ size: "touch" }))}
+        >
+          {messages.startReview}
+        </Link>
+        {focusDeck.newAvailable > 0 ? (
+          <LearnLink deck={focusDeck} variant="outline" />
         ) : null}
-      </div>
+      </Actions>
     </>
   )
 }

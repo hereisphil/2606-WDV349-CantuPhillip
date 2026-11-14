@@ -1,18 +1,10 @@
 import type { JSX } from "react"
-import { Link } from "@tanstack/react-router"
-import { buttonVariants } from "@workspace/ui/components/button"
-import { cn } from "@workspace/ui/lib/utils"
 import { Card } from "@workspace/ui/components/card"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { useFormatters } from "@/lib/formatters"
 import type { DashboardDeck } from "./dashboard-metrics"
-import {
-  deckAction,
-  deckTotal,
-  masteredRatio,
-  type DeckAction,
-} from "./dashboard-model"
+import { deckAction, deckTotal, masteredRatio } from "./dashboard-model"
 import { LanguageBadge } from "./LanguageBadge"
 import { LastStudied } from "./LastStudied"
 
@@ -29,22 +21,6 @@ const messages = {
     mastered: "{count} mastered",
     learning: "{count} learning",
     unseen: "{count} not started",
-  },
-  review: {
-    one: "Review {count} card",
-    other: "Review {count} cards",
-  },
-  reviewLabel: {
-    one: "Review {count} card in {deck}",
-    other: "Review {count} cards in {deck}",
-  },
-  learn: {
-    one: "Learn {count} new word",
-    other: "Learn {count} new words",
-  },
-  learnLabel: {
-    one: "Learn {count} new word in {deck}",
-    other: "Learn {count} new words in {deck}",
   },
   caughtUp: "Nothing due in this deck. New reviews arrive as you need them.",
 } as const
@@ -102,49 +78,14 @@ function MasteryBar({ deck }: { deck: DashboardDeck }): JSX.Element {
   )
 }
 
-const actionMessages = {
-  review: { text: messages.review, label: messages.reviewLabel },
-  learn: { text: messages.learn, label: messages.learnLabel },
-} as const
-
-function ActionLink({
-  deck,
-  action,
-}: {
-  deck: DashboardDeck
-  action: DeckAction
-}): JSX.Element {
-  const { plural } = useFormatters()
-  const { text, label } = actionMessages[action.mode]
-
-  return (
-    <Link
-      to="/study/$courseId"
-      params={{ courseId: action.courseId }}
-      search={{ mode: action.mode }}
-      aria-label={plural(action.count, label, { deck: deck.title })}
-      className={cn(
-        buttonVariants({ variant: "outline", size: "touch" }),
-        "self-start"
-      )}
-    >
-      {plural(action.count, text)}
-    </Link>
-  )
-}
-
 export function FocusDeckCard({
   deck,
   now,
-  showAction,
 }: {
   deck: DashboardDeck
   now: Date
-  /** False when the Today panel's primary action already leads to the same session. */
-  showAction: boolean
 }): JSX.Element {
   const { number } = useFormatters()
-  const action = deckAction(deck)
 
   return (
     <section aria-labelledby="focus-heading" className="flex flex-col gap-4">
@@ -178,10 +119,9 @@ export function FocusDeckCard({
           </div>
         </dl>
         <MasteryBar deck={deck} />
-        {action === null ? (
+        {/* The Today panel above holds this course's study button. */}
+        {deckAction(deck) === null ? (
           <Text variant="muted">{messages.caughtUp}</Text>
-        ) : showAction ? (
-          <ActionLink deck={deck} action={action} />
         ) : null}
       </Card>
     </section>

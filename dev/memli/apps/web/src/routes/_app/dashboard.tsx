@@ -4,14 +4,10 @@ import { Section } from "@workspace/ui/components/section"
 import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
 import {
-  deckAction,
-  isSameAction,
   learningLanguages,
   selectFocusDeck,
   sortDecks,
-  todayPrimaryAction,
   todayState,
-  totalDue,
   totalMastered,
 } from "./-components/dashboard-model"
 import {
@@ -118,7 +114,7 @@ function Dashboard(): JSX.Element {
       <DashboardGreeting
         name={viewer.displayName}
         hasDecks={allDecks.length > 0}
-        dueCount={totalDue(allDecks)}
+        dueCount={today.status === "review" ? today.dueCount : 0}
         streakDays={streakDays}
         now={now}
       />
@@ -134,16 +130,7 @@ function Dashboard(): JSX.Element {
                 <LanguageFilter languages={languages} />
               ) : null}
               <TodayPanel state={today} />
-              <FocusDeckCard
-                deck={focusDeck}
-                now={now}
-                showAction={
-                  !isSameAction(
-                    deckAction(focusDeck),
-                    todayPrimaryAction(today)
-                  )
-                }
-              />
+              <FocusDeckCard deck={focusDeck} now={now} />
               <DeckList
                 decks={sortDecks(decks).filter(
                   (deck) => deck.courseId !== focusDeck.courseId

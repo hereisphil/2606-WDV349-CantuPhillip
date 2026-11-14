@@ -11,10 +11,6 @@ export function estimateMinutes(cardCount: number): number {
   return Math.max(1, Math.ceil((cardCount * SECONDS_PER_REVIEW) / 60))
 }
 
-export function totalDue(decks: readonly DashboardDeck[]): number {
-  return decks.reduce((sum, deck) => sum + deck.dueCount, 0)
-}
-
 export function totalMastered(decks: readonly DashboardDeck[]): number {
   return decks.reduce((sum, deck) => sum + deck.masteredCount, 0)
 }
@@ -73,9 +69,9 @@ export function masteredRatio(deck: DashboardDeck): number {
 export type TodayState =
   | {
       status: "review"
+      /** Due in the focus course only: the session its button opens. */
       dueCount: number
       minutes: number
-      dueDecks: DashboardDeck[]
       focusDeck: DashboardDeck
     }
   | { status: "learn"; deck: DashboardDeck }
@@ -113,13 +109,13 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
     return { status: "no-decks" }
   }
 
-  const dueCount = totalDue(decks)
-  if (dueCount > 0) {
+  // The focus course is the one with the most due, so if it has none, nothing is due.
+  // Only its count is shown, so the number matches the session the button opens.
+  if (focusDeck.dueCount > 0) {
     return {
       status: "review",
-      dueCount,
-      minutes: estimateMinutes(dueCount),
-      dueDecks: sortDecks(decks).filter((deck) => deck.dueCount > 0),
+      dueCount: focusDeck.dueCount,
+      minutes: estimateMinutes(focusDeck.dueCount),
       focusDeck,
     }
   }
@@ -146,28 +142,6 @@ export function deckAction(deck: DashboardDeck): DeckAction | null {
     return { courseId: deck.courseId, mode: "learn", count: deck.newAvailable }
   }
   return null
-}
-
-/** Where the Today panel's primary action leads, so other regions don't repeat it. */
-export function todayPrimaryAction(state: TodayState): DeckAction | null {
-  switch (state.status) {
-    case "review":
-      return deckAction(state.focusDeck)
-    case "learn":
-      return deckAction(state.deck)
-    case "caught-up":
-    case "no-decks":
-      return null
-  }
-}
-
-export function isSameAction(
-  a: DeckAction | null,
-  b: DeckAction | null
-): boolean {
-  return (
-    a !== null && b !== null && a.courseId === b.courseId && a.mode === b.mode
-  )
 }
 
 function dayOn(
