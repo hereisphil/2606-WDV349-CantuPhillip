@@ -45,8 +45,8 @@ export function MnemonicFrame({
         <ThumbsUp aria-hidden="true" className="size-3.5" />
         {messages.heading}
       </h2>
-      {/* Picture above the story on phones; beside it from sm up. */}
-      <div className="grid gap-4 sm:grid-cols-[12rem_1fr] sm:items-center sm:gap-6">
+      {/* Picture above the story on phones; picture and story share the width from sm up. */}
+      <div className="grid gap-4 sm:grid-cols-2 sm:items-center sm:gap-6">
         <MnemonicImage
           key={mnemonic.mnemonicId}
           image={mnemonic.image}
