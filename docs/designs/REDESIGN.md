@@ -360,7 +360,7 @@ Phone rules:
 - **Above the fold** on a 1280 x 720 window: the hero, This week and the top of the course list. Three boxes, where today there are six.
 - **The space under "This week" stays empty.** The hero is taller than the week card. That is fine. A page does not have to fill every corner (Refactoring UI).
 - **No picture slot is reserved.** The hero's text is at most 480 px wide. When mnemonic images exist (section 15), a picture takes the free space on the end side.
-- **Reading order and tab order follow the picture, row by row.** The DOM order is greeting, hero, This week, courses, tip, progress. The grid places the hero and This week in the first row, and the courses and the tip in the second. No CSS `order` is used (WCAG 1.3.2 and 2.4.3).
+- **Reading order and tab order follow the picture, row by row.** The DOM order is greeting, hero, This week, courses, tip, progress. The grid puts the hero, the courses and progress in the first column, and This week with the tip right under it in the second. No CSS `order` is used (WCAG 1.3.2 and 2.4.3).
 
 **Tablet (768 px).** The sidebar narrows to 224 px and the content is one column: hero, a wide This week strip, the course list, the tip.
 
@@ -537,9 +537,10 @@ Code identifiers such as `DashboardDeck` can stay. They are not user-facing. New
 | | `tip.heading` | `Study tip` |
 | | `tip.items` | `Short daily reviews work better than one long one.` (drafts; you approve each tip) |
 | Progress | `heading` | `Your progress` |
-| | `learned` | `{count} words learned so far` |
-| | `remembered` | `You remembered {percent} of your reviews.` |
-| | `newThisMonth` | `{count} new words this month` |
+| | `stats.learned` | `Words learned` (label; the number is shown beside it) |
+| | `stats.remembered` | `Reviews remembered` |
+| | `stats.newThisMonth` | `New words this month` |
+| | `tableCaption` | `Words in each course` |
 | | table headings | `Course`, `Learned`, `Still learning`, `Not started` |
 | Shell | `skip` | `Skip to main content` |
 | | `title` | `Dashboard · Memli` |
@@ -641,7 +642,7 @@ An honest note: **dark surfaces separate less than light ones, and this is the w
 
 **Checked after the hero was built (November 2026): not needed.** On a real Android phone (Xiaomi Redmi), at full and at dimmed brightness, the dark hero read clearly as its own panel, and the default and all-done states were easy to read in both themes. A blurred screenshot at 375 and 1280 px showed the navy hero and the amber button as the first two shapes in both themes. The dark hero stays `oklch(0.35 0.12 266)`. The same check found the language chips above the hero push it below the fold on a phone when several languages are studied; moving the filter into the course list (phase 4) fixes that.
 
-The tip card is only 1.03:1 against the light page. It gets a real 1 px border and a 4 px warm edge on its start side (5.01:1 against the page), so it does not rely on its fill.
+The tip card is only 1.03:1 against the light page. It gets an even 1 px warm outline (`--warning-container-border`), and its warm hue against the cool page sets it apart. The outline is decorative: a card's edge is not a control, so WCAG 1.4.11 does not ask for 3:1. (The first build used a 4 px warm edge on the start side; it was dropped for a simpler, even outline.)
 
 ### 7.5 Text
 
@@ -909,7 +910,7 @@ Shadow and glow values need tuning by eye in the real app. They are decoration a
 | Emulate a light source. Shadows show elevation. | No shadows anywhere. | Two-part shadows in light, lightness steps in dark, an edge on the button. |
 | Use fewer borders | About fourteen hairlines on the first screen. | Surface steps and spacing first, borders last. |
 | Do not overlook empty states | The caught-up state looks like a notice. | A check in a tinted circle, a kind sentence, opt-in actions. |
-| Add color with accent borders | Every card is the same white box. | A 4 px warm edge on the tip card. |
+| Add color with accent borders | Every card is the same white box. | A warm fill and outline on the tip card. (A 4 px start edge was tried and dropped as too heavy.) |
 
 ---
 
@@ -1303,8 +1304,10 @@ The build (14 November 2026, branch `151-web-dashboard_redesign`) followed this 
 - **The dark hero kept its color.** On a real Android phone at full and dim brightness, and in a blurred screenshot, it read as its own panel (section 7.4).
 - **Phones got tighter than sketched.** To fit both hero buttons at 320 x 450, the top bar is 56 px, the gutter 16 px, and the hero uses 16 px padding, a 32 px badge and an 8 px gap between stacked buttons below 520 px. The hero starts at y 121.
 - **Course row titles are plain bold text, not headings**, which keeps the page at five visible headings. Rows wrap when a long translated button and the title cannot share a line.
-- **"Your progress" sits in the grid** as a full-width last row, and its table scrolls inside a labeled region on narrow screens.
-- **Known exceptions:** at 1280 x 720 the tip card's top edge shows above the fold (four boxes, not three); a 375 px tall landscape phone cannot show the hero's button on its first screen; and the long-titles preview at 320 x 450 pushes both buttons below the fold, because its 98-character course name wraps to four lines.
+- **"Your progress" sits in the grid's first column**, under the course list, so its cards share the hero's edges. Its table scrolls inside a labeled region below 352 px.
+- **"Your progress" shows three numbers with labels, not three sentences.** The plain sentences read as unstyled text. Each number is now a label and value pair ("Words learned", 100): a row on a phone and a tile on wider cards. The table sits in its own card, and every number shares its heading's end edge.
+- **The tip card sits right under This week**, not level with the course list, and has an even warm outline instead of a 4 px start edge. The hero spans the grid's first two rows and the second row is flexible, so the tip follows This week while the courses still start right under the hero.
+- **Known exceptions:** at 1280 x 720 the hero, This week and the tip fill the first screen and the course list's top edge shows too (four boxes, not three); a 375 px tall landscape phone cannot show the hero's button on its first screen; and the long-titles preview at 320 x 450 pushes both buttons below the fold, because its 98-character course name wraps to four lines.
 
 ## 18. Sources
 

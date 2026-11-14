@@ -73,6 +73,7 @@
   --color-warning: var(--warning);
   --color-warning-container: var(--warning-container);
   --color-warning-container-foreground: var(--warning-container-foreground);
+  --color-warning-container-border: var(--warning-container-border);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-container: var(--destructive-container);
@@ -267,6 +268,8 @@
   --warning: var(--orange-700);
   --warning-container: var(--orange-100);
   --warning-container-foreground: var(--orange-900);
+  /* Outlines a warm card. Decorative: the fill's hue and this line set it apart, not contrast. */
+  --warning-container-border: var(--orange-200);
   --destructive: var(--red-700);
   --destructive-foreground: var(--neutral-0);
   --destructive-container: var(--red-100);
@@ -366,6 +369,7 @@
   --warning: var(--orange-300);
   --warning-container: var(--orange-950);
   --warning-container-foreground: var(--orange-200);
+  --warning-container-border: var(--orange-900);
   --destructive: var(--red-300);
   --destructive-foreground: var(--navy-950);
   --destructive-container: var(--red-950);

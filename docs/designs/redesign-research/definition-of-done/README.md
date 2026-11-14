@@ -25,7 +25,7 @@ Status: **pass**, **noted** (meets the intent with a known exception), or **open
 | 14 numbers or fewer | pass | 13 in `default`. `many-decks` shows 18, one per extra course row. |
 | No fact twice | noted | The tip card names its course ("4 tricky words in Spanish Core 1000"), so the hero's course name appears twice when the tip is about it. That follows the copy deck. |
 | No "deck", "due", "mastered", "retention" or "streak" | pass | None in visible text in any state. |
-| 3 boxes or fewer and 4 actions or fewer above the fold at 1280 x 720 | noted | Actions: 3. Boxes: 4, because the top edge of the tip card (beside the course list, as section 5.3 places it) starts at y 620. |
+| 3 boxes or fewer and 4 actions or fewer above the fold at 1280 x 720 | noted | Actions: 4 (the tip's Practice is now on the first screen). Boxes: 4, because the tip moved right under This week and the course list's top edge starts at y 620. |
 | No em dashes, no sentence over 12 words | pass | Longest sentence: "Courses are word lists with memory tricks from other learners." (10). |
 
 ## Type and targets
@@ -58,7 +58,7 @@ Status: **pass**, **noted** (meets the intent with a known exception), or **open
 | Check | Status | Evidence |
 | --- | --- | --- |
 | Skip link first; the main action is the first Tab stop in `main` | pass | Every state; in `?preview=` pages it follows the preview switcher. |
-| Tab order follows the picture, row by row | pass | DOM order is greeting, hero, This week, courses, tip, progress; the grid places them without CSS `order`. |
+| Tab order follows the picture | pass | DOM order is greeting, hero, This week, courses, tip, progress; the grid places them without CSS `order`. On desktop the tip sits under This week, so Tab goes from the courses up to the side column, then to progress. |
 | Links announced as links | pass | No `<a role="button">`; the `memli/button-link` lint rule blocks the old pattern. |
 | axe: 0 violations everywhere, both themes, desktop and 375 px, and with "Your progress" open | pass | 124 axe checks. |
 

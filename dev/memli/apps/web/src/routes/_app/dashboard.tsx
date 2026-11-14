@@ -129,20 +129,30 @@ function Dashboard(): JSX.Element {
       ) : (
         <>
           {/*
-            DOM order is reading order: hero, This week, courses, tip. From an
-            896 px content width the grid puts the hero and This week in the
-            first row and the courses and the tip in the second. No CSS order.
+            DOM order is reading order: hero, This week, courses, tip, progress.
+            From an 896 px content width the page has two columns: the hero,
+            the courses and progress on the left, This week with the tip right
+            under it on the right. No CSS order.
+
+            The hero spans the first two rows, and the second row is flexible.
+            Only items crossing a flexible row can grow it, so the first row is
+            exactly as tall as This week and the tip starts right under it,
+            while the courses start right under the hero.
           */}
           <div className="@container">
-            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem]">
-              <StudyHero state={today} />
-              <ThisWeek
-                days={dailyGoal.days}
-                target={dailyGoal.target}
-                now={now}
-                clearedToday={today.status === "caught-up"}
-                streakDays={streakDays}
-              />
+            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem] @[56rem]:grid-rows-[auto_1fr_auto_auto]">
+              <div className="@[56rem]:col-start-1 @[56rem]:row-span-2 @[56rem]:row-start-1">
+                <StudyHero state={today} />
+              </div>
+              <div className="@[56rem]:col-start-2 @[56rem]:row-start-1">
+                <ThisWeek
+                  days={dailyGoal.days}
+                  target={dailyGoal.target}
+                  now={now}
+                  clearedToday={today.status === "caught-up"}
+                  streakDays={streakDays}
+                />
+              </div>
               <CourseList
                 courses={listedCourses}
                 filter={
@@ -151,14 +161,15 @@ function Dashboard(): JSX.Element {
                   ) : null
                 }
                 showFindAnother={!heroFindsAnother}
+                className="@[56rem]:col-start-1 @[56rem]:row-start-3"
               />
               {tip === null ? null : (
-                // Stays in the side column even when there is no course list.
-                <div className="@[56rem]:col-start-2">
+                // Spans the courses' row too, so a tall tip never pushes the courses down.
+                <div className="@[56rem]:col-start-2 @[56rem]:row-span-2 @[56rem]:row-start-2">
                   <TipCard tip={tip} />
                 </div>
               )}
-              <div className="@[56rem]:col-span-2">
+              <div className="@[56rem]:col-start-1 @[56rem]:row-start-4">
                 <ProgressDisclosure
                   retentionPercent={progressTrends.retentionPercent}
                   newCardsThisMonth={progressTrends.newCardsThisMonth}

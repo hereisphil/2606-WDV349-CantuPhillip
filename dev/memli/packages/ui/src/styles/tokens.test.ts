@@ -157,7 +157,6 @@ const pairings: readonly Pairing[] = [
     "warning-container",
     "nonText",
   ],
-  ["Tip card edge on page", "warning", "background", "nonText"],
   ["Danger text on card", "destructive", "card", "colored"],
   ["Danger text on page", "destructive", "background", "colored"],
   [

@@ -33,8 +33,8 @@ const richTags = {
 
 /**
  * One warm aside: the tricky words in one course with a Practice link, or a
- * study tip when there are none. The 4 px warm edge, not the fill, separates
- * it from the page (the fill alone is only 1.03:1 in light mode).
+ * study tip when there are none. An even warm outline and fill set it apart
+ * from the page; no side is heavier than the others.
  */
 export function TipCard({ tip }: { tip: Tip }): JSX.Element {
   const { rich, plural } = useFormatters()
@@ -42,7 +42,7 @@ export function TipCard({ tip }: { tip: Tip }): JSX.Element {
   return (
     <section
       aria-labelledby="tip-heading"
-      className="flex flex-col gap-3 rounded-xl border border-s-4 border-border border-s-warning bg-warning-container p-5 text-warning-container-foreground"
+      className="flex flex-col gap-3 rounded-xl border border-warning-container-border bg-warning-container p-5 text-warning-container-foreground"
     >
       <div className="flex items-start gap-2">
         <Lightbulb

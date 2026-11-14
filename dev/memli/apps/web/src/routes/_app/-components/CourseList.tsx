@@ -113,11 +113,14 @@ export function CourseList({
   courses,
   filter,
   showFindAnother,
+  className,
 }: {
   courses: readonly DashboardDeck[]
   filter: ReactNode
   /** With no other courses, a dashed row offers to find one, unless the hero already does. */
   showFindAnother: boolean
+  /** Grid placement from the page. */
+  className?: string | undefined
 }): JSX.Element | null {
   const { plural } = useFormatters()
   const [expanded, setExpanded] = useState(false)
@@ -131,7 +134,10 @@ export function CourseList({
   const shown = expanded ? courses : courses.slice(0, VISIBLE_ROWS)
 
   return (
-    <section aria-labelledby="courses-heading" className="flex flex-col gap-4">
+    <section
+      aria-labelledby="courses-heading"
+      className={cn("flex flex-col gap-4", className)}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Heading id="courses-heading" level={2} size="3">
           {messages.heading}
