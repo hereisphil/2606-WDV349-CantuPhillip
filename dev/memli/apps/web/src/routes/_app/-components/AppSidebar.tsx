@@ -137,7 +137,7 @@ export function AppSidebar(): JSX.Element {
   return (
     <aside
       aria-label={messages.sidebar}
-      className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
+      className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-56 md:border-r md:border-b-0 lg:w-64"
     >
       <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
         <Link to="/dashboard" className="flex">

@@ -27,7 +27,7 @@ import { ThisWeek } from "./-components/ThisWeek"
 import { TipCard } from "./-components/TipCard"
 
 const messages = {
-  aside: "Your week and tips",
+  title: "Dashboard · Memli",
 } as const
 
 /** Above this many other courses, the list offers the Studying menu. */
@@ -55,6 +55,7 @@ export const Route = createFileRoute("/_app/dashboard")({
         ? search.studying
         : undefined,
   }),
+  head: () => ({ meta: [{ title: messages.title }] }),
   component: Dashboard,
 })
 
@@ -108,7 +109,7 @@ function Dashboard(): JSX.Element {
     today.status === "caught-up" && today.keepGoing === null
 
   return (
-    <Section width="wide" padding="compact" className="flex flex-col gap-8">
+    <Section padding="compact" className="flex flex-col gap-8">
       {import.meta.env.DEV && preview !== undefined ? (
         <PreviewSwitcher current={preview} />
       ) : null}
@@ -123,9 +124,21 @@ function Dashboard(): JSX.Element {
         </div>
       ) : (
         <>
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
-            <div className="flex min-w-0 flex-col gap-8">
+          {/*
+            DOM order is reading order: hero, This week, courses, tip. From an
+            896 px content width the grid puts the hero and This week in the
+            first row and the courses and the tip in the second. No CSS order.
+          */}
+          <div className="@container">
+            <div className="grid items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem]">
               <StudyHero state={today} />
+              <ThisWeek
+                days={dailyGoal.days}
+                target={dailyGoal.target}
+                now={now}
+                clearedToday={today.status === "caught-up"}
+                streakDays={streakDays}
+              />
               <CourseList
                 courses={listedCourses}
                 filter={
@@ -135,17 +148,13 @@ function Dashboard(): JSX.Element {
                 }
                 showFindAnother={!heroFindsAnother}
               />
+              {tip === null ? null : (
+                // Stays in the side column even when there is no course list.
+                <div className="@[56rem]:col-start-2">
+                  <TipCard tip={tip} />
+                </div>
+              )}
             </div>
-            <aside aria-label={messages.aside} className="flex flex-col gap-6">
-              <ThisWeek
-                days={dailyGoal.days}
-                target={dailyGoal.target}
-                now={now}
-                clearedToday={today.status === "caught-up"}
-                streakDays={streakDays}
-              />
-              {tip === null ? null : <TipCard tip={tip} />}
-            </aside>
           </div>
           <ProgressDisclosure
             retentionPercent={progressTrends.retentionPercent}

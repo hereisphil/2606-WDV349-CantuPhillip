@@ -1,5 +1,10 @@
 import { lazy, Suspense, type ComponentType } from "react"
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router"
+import {
+  createRootRoute,
+  HeadContent,
+  Link,
+  Outlet,
+} from "@tanstack/react-router"
 import { buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -25,6 +30,8 @@ const DevPreviewsMenu: ComponentType =
 export const Route = createRootRoute({
   component: () => (
     <>
+      {/* Renders each route's head(), such as the page title. */}
+      <HeadContent />
       <Outlet />
       <Suspense>
         <TanStackRouterDevtools position="bottom-right" />
