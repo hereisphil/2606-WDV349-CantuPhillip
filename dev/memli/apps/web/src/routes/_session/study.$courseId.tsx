@@ -1,8 +1,20 @@
-import type { JSX } from "react"
+import { useCallback, useReducer, type JSX } from "react"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
+import {
+  sessionReducer,
+  startSession,
+  type SessionState,
+} from "@workspace/core/study/session-reducer"
 import { Button } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
+import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
+import { AnswerBreakdown } from "./-components/AnswerBreakdown"
+import { CardPrompt } from "./-components/CardPrompt"
+import { MnemonicSlot } from "./-components/MnemonicSlot"
+import { OutcomeDockSlot } from "./-components/OutcomeDockSlot"
+import { AnswerVerdict } from "./-components/AnswerVerdict"
+import { PromptActions } from "./-components/PromptActions"
 import {
   findCourse,
   sessionQueueSize,
@@ -10,9 +22,16 @@ import {
 } from "./-components/session-model"
 import { SessionHeader } from "./-components/SessionHeader"
 import {
+  findDeckCards,
+  withNewProgress,
+  type DeckCards,
+  type SessionStudyCard,
+} from "./-components/study-cards"
+import {
   isStudyPreviewName,
   studyPreviews,
   type SessionView,
+  type StudyPreview,
   type StudyPreviewName,
 } from "./-components/study-previews"
 import { StudyPreviewSwitcher } from "./-components/StudyPreviewSwitcher"
@@ -26,12 +45,6 @@ type StudySearch = {
 }
 
 const messages = {
-  mode: {
-    review: "Review",
-    learn: "Learn new words",
-    practice: "Practice tricky words",
-  },
-  cardPlaceholder: "Your cards appear here with #49.",
   empty: {
     heading: "Nothing to study here right now",
     body: "This deck has no cards waiting for this kind of session. Pick another from your dashboard.",
@@ -41,6 +54,10 @@ const messages = {
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
+  complete: {
+    heading: "Session complete",
+    body: "You've been through every card in this session.",
+  },
 } as const
 
 function parseMode(value: unknown): StudyMode {
@@ -69,28 +86,104 @@ export const Route = createFileRoute("/_session/study/$courseId")({
   },
   loader: ({ params }) => {
     const course = findCourse(params.courseId)
-    if (course === null) {
+    const deckCards = findDeckCards(params.courseId)
+    if (course === null || deckCards === null) {
       throw notFound()
     }
-    return course
+    return { course, deckCards }
   },
   component: StudySession,
   notFoundComponent: CourseNotFound,
 })
 
 function StudySession(): JSX.Element {
-  const course = Route.useLoaderData()
+  const { course, deckCards } = Route.useLoaderData()
   const { mode, extra, preview } = Route.useSearch()
-  // `completed` stays 0 until #49's session reducer supplies it.
-  const seeded: SessionView = {
+
+  return (
+    // Keyed so switching deck, session kind or preview starts a fresh session instead of keeping the old reducer state.
+    <SessionWorkspace
+      key={`${course.courseId}:${mode}:${String(extra)}:${preview ?? ""}`}
+      course={course}
+      deckCards={deckCards}
+      mode={mode}
+      queueSize={sessionQueueSize(course, mode, extra)}
+      preview={preview}
+    />
+  )
+}
+
+type SessionWorkspaceProps = {
+  course: DashboardDeck
+  deckCards: DeckCards
+  mode: StudyMode
+  /** Cards this kind of session should hold, from the deck's counts. */
+  queueSize: number
+  preview: StudyPreviewName | undefined
+}
+
+/** The development preview in use, if any. */
+function previewOf(
+  name: StudyPreviewName | undefined
+): StudyPreview | undefined {
+  return import.meta.env.DEV && name !== undefined
+    ? studyPreviews[name]
+    : undefined
+}
+
+/**
+ * The first session state: the seeded cards, capped at what the deck has
+ * waiting. A preview may swap the cards and replay events through the reducer.
+ */
+function initialSession({
+  deckCards,
+  queueSize,
+  preview,
+}: Pick<
+  SessionWorkspaceProps,
+  "deckCards" | "queueSize" | "preview"
+>): SessionState<SessionStudyCard> {
+  const seeded = previewOf(preview)
+  const cards =
+    seeded?.cards?.(deckCards.cards) ?? deckCards.cards.slice(0, queueSize)
+  const events = seeded?.events?.(cards) ?? []
+  return events.reduce(
+    sessionReducer<SessionStudyCard>,
+    startSession(withNewProgress(cards, new Date()))
+  )
+}
+
+function SessionWorkspace({
+  course,
+  deckCards,
+  mode,
+  queueSize,
+  preview,
+}: SessionWorkspaceProps): JSX.Element {
+  // The study-session state machine from @workspace/core: prompt → answered → … → complete.
+  const [session, dispatch] = useReducer(
+    sessionReducer<SessionStudyCard>,
+    { deckCards, queueSize, preview },
+    initialSession
+  )
+  const seeded = previewOf(preview)
+  const learningLanguage =
+    seeded?.languages?.learning ?? course.learningLanguage
+  const answerLanguage = seeded?.languages?.answer ?? deckCards.answerLanguage
+
+  // Stable, so the reveal shortcut's key listener isn't re-added on every render.
+  const onReveal = useCallback((elapsedMs: number | null) => {
+    dispatch({ type: "REVEAL", elapsedMs })
+  }, [])
+
+  // Derive, don't store (docs/state-management.md).
+  const queued = session.status === "complete" ? 0 : session.queue.length
+  const derived: SessionView = {
     title: course.title,
-    total: sessionQueueSize(course, mode, extra),
-    completed: 0,
+    total: session.finished.length + queued,
+    completed: session.finished.length,
   }
-  const { title, total, completed } =
-    import.meta.env.DEV && preview !== undefined
-      ? studyPreviews[preview](seeded)
-      : seeded
+  const { title, total, completed } = seeded?.view?.(derived) ?? derived
 
   return (
     <>
@@ -103,24 +196,68 @@ function StudySession(): JSX.Element {
               current={preview}
             />
           ) : null}
-          {total > 0 ? (
-            <section
-              aria-labelledby="session-mode"
-              className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8 text-center"
-            >
-              <p
-                id="session-mode"
-                className="text-xs font-medium tracking-widest text-muted-foreground uppercase"
-              >
-                {messages.mode[mode]}
-              </p>
-              <Text variant="muted">{messages.cardPlaceholder}</Text>
-            </section>
-          ) : (
+          {total === 0 ? (
             <EmptyState
               heading={messages.empty.heading}
               body={messages.empty.body}
             />
+          ) : session.status === "complete" ? (
+            // Placeholder until the session summary (`07 - Study session final page.png`) is built.
+            <EmptyState
+              heading={messages.complete.heading}
+              body={messages.complete.body}
+            />
+          ) : (
+            <>
+              <CardPrompt
+                card={session.queue[0]}
+                mode={mode}
+                learningLanguage={learningLanguage}
+                answerLanguage={answerLanguage}
+                revealed={session.status === "answered"}
+              />
+              {session.status === "answered" ? (
+                <>
+                  <AnswerBreakdown
+                    card={session.queue[0]}
+                    learningLanguage={learningLanguage}
+                    answerLanguage={answerLanguage}
+                    verdict={
+                      session.evaluation !== null && session.answer !== null ? (
+                        <AnswerVerdict
+                          evaluation={session.evaluation}
+                          answer={session.answer}
+                          answerLanguage={answerLanguage}
+                        />
+                      ) : null
+                    }
+                  >
+                    <MnemonicSlot
+                      card={session.queue[0]}
+                      learningLanguage={learningLanguage}
+                      answerLanguage={answerLanguage}
+                    />
+                  </AnswerBreakdown>
+                  <OutcomeDockSlot
+                    evaluation={session.evaluation}
+                    elapsedMs={session.elapsedMs}
+                    progress={session.queue[0].progress}
+                    onResolve={(outcome) => {
+                      dispatch({ type: "RESOLVE", outcome, now: new Date() })
+                    }}
+                  />
+                </>
+              ) : (
+                <PromptActions
+                  key={session.queue[0].cardId}
+                  answerLanguage={answerLanguage}
+                  onSubmit={(answer, elapsedMs) => {
+                    dispatch({ type: "SUBMIT", answer, elapsedMs })
+                  }}
+                  onReveal={onReveal}
+                />
+              )}
+            </>
           )}
         </div>
       </main>

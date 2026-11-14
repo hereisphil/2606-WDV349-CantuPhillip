@@ -40,6 +40,8 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -82,6 +84,9 @@
   --accent: oklch(0.971 0.013 264); /* #EFF6FF Blue Tint */
   --accent-foreground: oklch(0.488 0.243 264.376);
   --destructive: oklch(0.577 0.245 27.325);
+  /* Answer feedback. For text on a /10 tint of itself, mix toward --foreground to keep 4.5:1. */
+  --success: oklch(0.508 0.118 165.612); /* #047857 Emerald 700 */
+  --warning: oklch(0.555 0.163 48.998); /* #B45309 Amber 700 */
   --border: oklch(0.916 0.009 261); /* #E2E8F0 Border Gray */
   --input: oklch(0.916 0.009 261);
   --ring: oklch(0.488 0.243 264.376);
@@ -120,6 +125,8 @@
   --accent: oklch(0.291 0.025 261);
   --accent-foreground: oklch(0.697 0.158 264);
   --destructive: oklch(0.704 0.191 22.216);
+  --success: oklch(0.765 0.177 163.223); /* #34D399 Emerald 400 */
+  --warning: oklch(0.828 0.189 84.429); /* #FBBF24 Amber 400 */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.697 0.158 264);

@@ -34,7 +34,7 @@ alwaysApply: true
 
 ## Prefer composition over new packages
 
-- Check existing shadcn components before adding.
+- Check existing shadcn components before adding. Add new ones by hand, never with the shadcn CLI (`shadcn-components.mdc`).
 - A single open/close toggle is the one `useState` case; do not add libraries for one toggle. Two or more related values are a reducer, not a library.
 
 ---

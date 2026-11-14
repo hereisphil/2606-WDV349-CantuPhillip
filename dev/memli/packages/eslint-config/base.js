@@ -38,6 +38,19 @@ export default defineConfig([
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-debugger": "error",
       eqeqeq: ["error", "always"],
+      // The shadcn registry imports `cn` from an unrelated npm package (.cursor/rules/shadcn-components.mdc).
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "cn",
+              message:
+                'The npm package `cn` is not our class-name helper; the shadcn registry adds it by mistake. Use `import { cn } from "@workspace/ui/lib/utils"`.',
+            },
+          ],
+        },
+      ],
     },
   },
   // Must be last so Prettier wins formatting conflicts
