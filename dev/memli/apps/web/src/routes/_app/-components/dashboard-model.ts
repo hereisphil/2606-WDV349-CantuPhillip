@@ -65,12 +65,6 @@ export function startedCount(deck: DashboardDeck): number {
   return deck.masteredCount + deck.learningCount
 }
 
-/** 0–1. A deck with no cards counts as 0% mastered. */
-export function masteredRatio(deck: DashboardDeck): number {
-  const total = deckTotal(deck)
-  return total > 0 ? deck.masteredCount / total : 0
-}
-
 export type TodayState =
   | {
       status: "review"

@@ -17,7 +17,7 @@ import {
   type PreviewName,
 } from "./-components/dashboard-previews"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
-import { DeckList } from "./-components/DeckList"
+import { CourseList } from "./-components/CourseList"
 import { LanguageFilter } from "./-components/LanguageFilter"
 import { MemoryCallout } from "./-components/MemoryCallout"
 import { PreviewSwitcher } from "./-components/PreviewSwitcher"
@@ -28,6 +28,9 @@ import { ThisWeek } from "./-components/ThisWeek"
 const messages = {
   aside: "Your progress",
 } as const
+
+/** Above this many other courses, the list offers the Studying menu. */
+const MAX_UNFILTERED_COURSES = 5
 
 type DashboardSearch = {
   preview?: PreviewName | undefined
@@ -71,14 +74,24 @@ function Dashboard(): JSX.Element {
   const streakDays = seeded.streakDays ?? viewer.streakDays
   const now = new Date()
 
-  // The filter narrows what to study. The streak and goal count every language.
-  const languages = learningLanguages(allDecks)
+  // The hero, the week and the tip cover every course. The Studying menu
+  // narrows only the list of other courses (REDESIGN.md 5.4).
+  const today = todayState(allDecks)
+  const focusDeck = selectFocusDeck(allDecks)
+  const otherCourses = sortDecks(allDecks).filter(
+    (deck) => deck.courseId !== focusDeck?.courseId
+  )
+  const languages = learningLanguages(otherCourses)
+  // With five or fewer other courses, every course is already one tap away.
+  const showFilter =
+    otherCourses.length > MAX_UNFILTERED_COURSES && languages.length >= 2
   const studying =
-    languages.length > 1 &&
+    showFilter &&
     search.studying !== undefined &&
     languages.includes(search.studying)
       ? search.studying
       : undefined
+  // A ?studying= value the menu cannot show is stale: drop it so the URL matches the page.
   const staleStudying = search.studying !== undefined && studying === undefined
   const navigate = Route.useNavigate()
   useEffect(() => {
@@ -89,21 +102,13 @@ function Dashboard(): JSX.Element {
       })
     }
   }, [staleStudying, navigate])
-  const decks =
+  const listedCourses =
     studying === undefined
-      ? allDecks
-      : allDecks.filter((deck) => deck.learningLanguage === studying)
-  const today = todayState(decks)
-  const focusDeck = selectFocusDeck(decks)
-  const tricky =
-    studying === undefined
-      ? trickyWords
-      : {
-          total: decks.reduce((sum, deck) => sum + deck.trickyCount, 0),
-          words: trickyWords.words.filter(
-            (word) => word.learningLanguage === studying
-          ),
-        }
+      ? otherCourses
+      : otherCourses.filter((deck) => deck.learningLanguage === studying)
+  // The finished hero already links to "Find another course".
+  const heroFindsAnother =
+    today.status === "caught-up" && today.keepGoing === null
 
   return (
     <Section width="wide" padding="compact" className="flex flex-col gap-8">
@@ -123,15 +128,15 @@ function Dashboard(): JSX.Element {
         <>
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
             <div className="flex min-w-0 flex-col gap-8">
-              {languages.length > 1 ? (
-                <LanguageFilter languages={languages} />
-              ) : null}
               <StudyHero state={today} />
-              <DeckList
-                decks={sortDecks(decks).filter(
-                  (deck) => deck.courseId !== focusDeck.courseId
-                )}
-                now={now}
+              <CourseList
+                courses={listedCourses}
+                filter={
+                  showFilter ? (
+                    <LanguageFilter languages={languages} current={studying} />
+                  ) : null
+                }
+                showFindAnother={!heroFindsAnother}
               />
             </div>
             <aside aria-label={messages.aside} className="flex flex-col gap-6">
@@ -139,10 +144,13 @@ function Dashboard(): JSX.Element {
                 days={dailyGoal.days}
                 target={dailyGoal.target}
                 now={now}
-                clearedToday={todayState(allDecks).status === "caught-up"}
+                clearedToday={today.status === "caught-up"}
                 streakDays={streakDays}
               />
-              <MemoryCallout total={tricky.total} words={tricky.words} />
+              <MemoryCallout
+                total={trickyWords.total}
+                words={trickyWords.words}
+              />
             </aside>
           </div>
           <ProgressTrends

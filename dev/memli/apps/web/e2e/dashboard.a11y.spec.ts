@@ -6,10 +6,11 @@ type Theme = "light" | "dark"
 
 const themes: Theme[] = ["light", "dark"]
 
-/** `/dashboard` plus every `?preview=` snapshot from #47. */
+/** `/dashboard`, every `?preview=` snapshot from #47, and a list narrowed by the Studying menu. */
 const paths = [
   "/dashboard",
   ...previewNames.map((name) => `/dashboard?preview=${name}`),
+  "/dashboard?preview=many-decks&studying=de",
 ]
 
 async function openDashboard(
