@@ -4,11 +4,13 @@ The checklist in [REDESIGN.md section 11.3](../../REDESIGN.md), run on 14 Novemb
 
 Status: **pass**, **noted** (meets the intent with a known exception), or **open** (needs people).
 
+`final-dashboard.png` shows the finished dashboard at 1280 px and 375 px in both themes.
+
 ## Focus
 
 | Check | Status | Evidence |
 | --- | --- | --- |
-| One amber shape on the first screen (none in the all-done states) | pass | 1 in every state with work to do; 0 in `caught-up` and `finished`. |
+| One amber shape on the first screen (none in the all-done states) | pass | 1 in every state with work to do; 0 in `caught-up` and `finished`. The sidebar's Pro badge was a second amber shape; it is neutral now. |
 | Both hero buttons fully visible at 375 x 550 (default, long titles, pseudo-long) | pass | Second button ends at y 438 (default) and y 518 (long titles). Pseudo-long passes the fold check at every portrait size in `e2e/pseudo.spec.ts`. |
 | The hero's count equals what its button opens | pass | Both read the focus course's `dueCount`. The prototype course has 5 sample cards, so the session shows 5 until #112 serves real cards. |
 | Grayscale: the hero is still seen first | pass | `grayscale-and-blur.png`, left column. |
