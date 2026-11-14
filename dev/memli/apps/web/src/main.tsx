@@ -22,7 +22,7 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="light">
+    <ThemeProvider>
       <SessionProvider>
         <RouterProvider router={router} />
       </SessionProvider>

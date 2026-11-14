@@ -164,7 +164,7 @@ The decision applies **going forward**. Existing components are not refactored f
 | File | Today | Decision |
 | --- | --- | --- |
 | `routes/_marketing/-components/Nav.tsx` | one `useState` (`mobileOpen`) + two `useEffect`s | **Keep.** Single toggle is the allowed `useState` case; the effects are DOM sync (focus trap, scroll lock), not state sync. |
-| `components/theme-provider.tsx` | one `useState` + three `useEffect`s; `localStorage.setItem` in two places | **Keep.** Passes lint. Would be a tidy `use-effect-reducer` demo (`SET_THEME`, `TOGGLE`, `STORAGE_SYNC` + one `persist` effect) but it works and is shadcn-derived. |
+| `components/theme-provider.tsx` | one `useState` (the learner's choice) + `useSyncExternalStore` (the device's light or dark setting) + two `useEffect`s (apply the class to `<html>`, follow other tabs) | **Keep.** The device setting lives outside React, so `useSyncExternalStore` reads it instead of a second `useState` kept in sync by an effect. The resolved theme is derived, not stored. (#151) |
 | `routes/_auth/signin.tsx` | four coupled `useState` calls: `email`, `password`, `fieldErrors`, `formMessage` | **Exempt now; migrate at #108.** See below. |
 
 ### `signin.tsx` — not now, but at Better Auth (#108)
