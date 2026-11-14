@@ -331,8 +331,8 @@
 
   --brand: var(--blue-300);
   --link: var(--blue-200);
-  /* blue-200 is too close to --foreground to stand out in a sentence; blue-400 is about 6.5:1 on --card. */
-  --emphasis: var(--blue-400);
+  /* blue-200 is too close to --foreground to stand out in a sentence; blue-400 misses the APCA target (Lc 52, needs 60). blue-300 is 9.2:1 on --card. */
+  --emphasis: var(--blue-300);
   --border: var(--navy-700);
   --border-strong: var(--neutral-600);
   --input: var(--neutral-600);

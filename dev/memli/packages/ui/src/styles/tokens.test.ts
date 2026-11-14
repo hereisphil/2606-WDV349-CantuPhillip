@@ -60,6 +60,7 @@ const pairings: readonly Pairing[] = [
   ["Selected label on accent", "accent-foreground", "accent", "label"],
   ["Link on page", "link", "background", "colored"],
   ["Link on card", "link", "card", "colored"],
+  ["Study word in a mnemonic", "emphasis", "card", "colored"],
 
   // The hero and its controls
   ["Hero text on hero", "hero-foreground", "hero", "body"],
@@ -99,6 +100,7 @@ const pairings: readonly Pairing[] = [
     "primary-hover",
     "label",
   ],
+  ["Quiet button label", "foreground", "secondary", "label"],
   ["Brand text on card", "primary", "card", "colored"],
   ["Brand text on page", "primary", "background", "colored"],
   [
@@ -183,6 +185,80 @@ const pairings: readonly Pairing[] = [
   ["Progress on card", "viz-progress", "card", "nonText"],
   ["Check mark on a filled day", "viz-on-progress", "viz-progress", "nonText"],
 ]
+
+/**
+ * Color utilities that are in no pairing, each with the reason. A new
+ * `--color-*` token fails the "registered" test below until it is in a
+ * pairing or listed here.
+ */
+const marketing = "Marketing pages only: a fixed value that is not themed."
+const unused = "Not used yet. Give it a pairing with its first use."
+const notChecked: Readonly<Record<string, string>> = {
+  border:
+    "Dividers and card outlines. Decoration: controls use border-strong, which is checked.",
+  "hero-border":
+    "The hero's outline in dark mode. Decoration: the fill already sets it apart.",
+  "warning-container-border":
+    "The tip card's outline. Decoration: the fill already sets it apart.",
+  "brand-primary": marketing,
+  "brand-sky": marketing,
+  "brand-charcoal": marketing,
+  "brand-surface": marketing,
+  "brand-slate": marketing,
+  "brand-border": marketing,
+  "brand-tint": marketing,
+  "hero-soft": unused,
+  "sidebar-primary-foreground": unused,
+}
+
+/** The `--color-*` utilities declared in the `@theme` block. */
+const utilities = [...css.matchAll(/^\s*--color-([a-z0-9-]+):/gm)].map(
+  ([, name]) => name ?? ""
+)
+const paired = new Set(pairings.flatMap(([, fg, bg]) => [fg, bg]))
+
+/** The role a token points at when it is `var(--role)` in both themes, such as `--card-foreground`. */
+function aliasOf(name: string): string | null {
+  const targets = themes.map(
+    (theme) => /^var\(--([a-z0-9-]+)\)$/.exec(tokens[theme][name] ?? "")?.[1]
+  )
+  const [first] = targets
+  return first !== undefined && targets.every((target) => target === first)
+    ? first
+    : null
+}
+
+function isRegistered(name: string): boolean {
+  if (paired.has(name) || name in notChecked) {
+    return true
+  }
+  const alias = aliasOf(name)
+  return alias !== null && isRegistered(alias)
+}
+
+describe("registration", () => {
+  test("there are color utilities to check", () => {
+    expect(utilities.length).toBeGreaterThan(60)
+  })
+
+  test.each(utilities)(
+    "--color-%s is in a pairing, is an alias of one, or is listed in notChecked",
+    (name) => {
+      expect(
+        isRegistered(name),
+        `Add a pairing for --${name} (what it sits on, and which rule), or list it in notChecked with the reason.`
+      ).toBe(true)
+    }
+  )
+
+  test.each(Object.keys(notChecked))(
+    "notChecked entry %s is still needed",
+    (name) => {
+      expect(utilities, "no such --color-* utility").toContain(name)
+      expect(paired.has(name), "it is in a pairing now").toBe(false)
+    }
+  )
+})
 
 describe.each(themes)("%s theme", (theme) => {
   test.each(pairings)("%s (--%s on --%s)", (_label, fg, bg, rule) => {
