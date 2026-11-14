@@ -1,5 +1,5 @@
 import type { SessionEvent } from "@workspace/core/study/session-reducer"
-import type { StudyCard } from "./study-cards"
+import { findDeckCards, type Mnemonic, type StudyCard } from "./study-cards"
 
 /** What the session header renders. `view` overrides replace the derived values. */
 export type SessionView = {
@@ -39,6 +39,7 @@ export const studyPreviewGroups = {
   progress: "Progress",
   card: "Card",
   answer: "Answer",
+  mnemonic: "Mnemonic",
 } as const
 
 type StudyPreviewGroup = keyof typeof studyPreviewGroups
@@ -98,6 +99,71 @@ const kana: StudyCard = {
     text: "てつだってくれて ありがとうございます。",
     translation: "Thank you very much for helping me.",
   },
+}
+
+// The seeded gato card, whose mnemonic has a picture, so the preview works on any deck.
+const gato: StudyCard = findDeckCards("spanish-core-1000")?.cards[0] ?? casa
+
+// The story every fixture mnemonic tells, so each preview only changes what it tests.
+const casaStory: Omit<Mnemonic, "mnemonicId"> = {
+  contentLocale: "en",
+  story: [
+    { kind: "plain", text: "You keep your " },
+    { kind: "keyword", text: "cash" },
+    { kind: "plain", text: " in your " },
+    { kind: "term", text: "casa" },
+    { kind: "plain", text: ", the safest place in the house." },
+  ],
+  author: { displayName: "dan.learns" },
+  upvotes: 860,
+}
+
+// A mnemonic whose picture never loads, so the fallback can be checked.
+const brokenImage: StudyCard = {
+  ...casa,
+  cardId: "preview-broken-image",
+  mnemonics: [
+    {
+      ...casaStory,
+      mnemonicId: "preview-broken-image-1",
+      image: {
+        src: "/missing-mnemonic.png",
+        alt: "A picture that fails to load.",
+      },
+    },
+  ],
+}
+
+// A mnemonic with no picture at all.
+const noImage: StudyCard = {
+  ...casa,
+  cardId: "preview-no-image",
+  mnemonics: [{ ...casaStory, mnemonicId: "preview-no-image-1" }],
+}
+
+// A story written in another language than the deck's answers, with a long author name.
+const otherLanguage: StudyCard = {
+  ...gato,
+  cardId: "preview-other-language",
+  mnemonics: [
+    {
+      mnemonicId: "preview-other-language-1",
+      contentLocale: "pt-BR",
+      story: [
+        { kind: "plain", text: "O " },
+        { kind: "term", text: "gato" },
+        { kind: "plain", text: " de sombreiro vai à " },
+        { kind: "keyword", text: "gala" },
+        { kind: "plain", text: " e todo mundo aplaude." },
+      ],
+      author: { displayName: "maria.eduarda.estuda.idiomas.todos.os.dias" },
+      upvotes: 1048576,
+      image: {
+        src: "/mnemonics/gato.svg",
+        alt: "Um gato laranja de gravata-borboleta, com um sombreiro enorme numa gala.",
+      },
+    },
+  ],
 }
 
 /** Answers the first `count` cards correctly, moving the session on that many. */
@@ -214,6 +280,37 @@ export const studyPreviews = {
     cards: () => [longContent],
     languages: spanish,
     events: () => submit("where is the nearest bathroom please"),
+  },
+
+  // Mnemonic: the frame under the revealed answer.
+  "mnemonic-image": {
+    group: "mnemonic",
+    description: "Three mnemonics to cycle through; the first has a picture",
+    cards: () => [gato],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
+  },
+  "mnemonic-no-image": {
+    group: "mnemonic",
+    description:
+      "One mnemonic, no picture: the term fills the frame, no arrows",
+    cards: () => [noImage],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
+  },
+  "mnemonic-broken-image": {
+    group: "mnemonic",
+    description: "A picture that fails to load falls back to the term",
+    cards: () => [brokenImage],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
+  },
+  "mnemonic-other-language": {
+    group: "mnemonic",
+    description: "A story in Brazilian Portuguese with a long author name",
+    cards: () => [otherLanguage],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
   },
 } as const satisfies Record<string, StudyPreview>
 

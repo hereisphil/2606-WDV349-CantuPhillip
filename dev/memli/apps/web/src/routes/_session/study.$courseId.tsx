@@ -12,7 +12,7 @@ import { Text } from "@workspace/ui/components/text"
 import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
-import { MnemonicSlot } from "./-components/MnemonicSlot"
+import { MnemonicFrame } from "./-components/MnemonicFrame"
 import { OutcomeDockSlot } from "./-components/OutcomeDockSlot"
 import { AnswerVerdict } from "./-components/AnswerVerdict"
 import { PromptActions } from "./-components/PromptActions"
@@ -233,7 +233,7 @@ function SessionWorkspace({
                       ) : null
                     }
                   >
-                    <MnemonicSlot
+                    <MnemonicFrame
                       card={session.queue[0]}
                       learningLanguage={learningLanguage}
                       answerLanguage={answerLanguage}

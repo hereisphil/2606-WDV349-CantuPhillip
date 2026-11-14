@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { X } from "lucide-react"
 import { buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
+import { ThemeMenu } from "@/components/theme-control"
 import { useFormatters } from "@/lib/formatters"
 
 const messages = {
@@ -64,8 +65,11 @@ export function SessionHeader({
 
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
-      {/* From md up, a centered column the width of the card (max-w-xl) holds the progress, so it stays short and lines up with the card. */}
-      <div className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 md:grid md:grid-cols-[1fr_minmax(0,36rem)_1fr] md:gap-6">
+      {/*
+        Below md, two rows: Exit and Theme, then the title and progress at full width, so the title isn't squeezed.
+        From md up, one row: a centered column the width of the card (max-w-xl) holds the progress, so it stays short and lines up with the card.
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 sm:gap-x-4 sm:px-6 md:grid md:grid-cols-[1fr_minmax(0,36rem)_1fr] md:gap-6">
         <Link
           to="/dashboard"
           aria-keyshortcuts="Escape"
@@ -85,7 +89,7 @@ export function SessionHeader({
             {messages.exitKey}
           </kbd>
         </Link>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="order-last flex w-full min-w-0 flex-col gap-2 md:order-none md:w-auto">
           <div className="flex items-baseline justify-between gap-3">
             <h1 className="truncate font-heading text-base font-semibold">
               {title}
@@ -112,6 +116,10 @@ export function SessionHeader({
               />
             </div>
           ) : null}
+        </div>
+        {/* Same "Theme" menu as the app's phone header, so it reads the same everywhere. */}
+        <div className="shrink-0 md:justify-self-end">
+          <ThemeMenu placement="topBar" />
         </div>
       </div>
     </header>

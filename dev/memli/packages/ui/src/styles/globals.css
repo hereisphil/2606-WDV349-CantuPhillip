@@ -51,6 +51,7 @@
   --color-hero-muted-foreground: var(--hero-muted-foreground);
   --color-brand: var(--brand);
   --color-link: var(--link);
+  --color-emphasis: var(--emphasis);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
@@ -227,6 +228,8 @@
   /* Lines and focus. --border is decorative; --border-strong meets 3:1 for controls. */
   --brand: var(--blue-700);
   --link: var(--blue-700);
+  /* Emphasized words inside body text, such as the study word in a mnemonic story. */
+  --emphasis: var(--blue-700);
   --border: var(--neutral-300);
   --border-strong: var(--neutral-600);
   --input: var(--neutral-600);
@@ -328,6 +331,8 @@
 
   --brand: var(--blue-300);
   --link: var(--blue-200);
+  /* blue-200 is too close to --foreground to stand out in a sentence; blue-400 is about 6.5:1 on --card. */
+  --emphasis: var(--blue-400);
   --border: var(--navy-700);
   --border-strong: var(--neutral-600);
   --input: var(--neutral-600);

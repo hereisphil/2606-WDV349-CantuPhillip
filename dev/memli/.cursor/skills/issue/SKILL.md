@@ -58,14 +58,26 @@ Also skip: closed issues, issues on **Going Beyond** unless the user named them,
    - **type** from title/labels: `docs`, `web`, `dx`, `ui`, `api`, `auth`, `core`, `deploy`, …
    - **slug**: short `snake_case` from the title (not the whole title)
 4. `git checkout -b <branch>`
-5. Read the issue body. Identify the **first unchecked** item under `## Tasks` (skip already `[x]` items; ignore `## Done when` for sequencing).
-6. Briefly state Goal, which task is first, and what remains after it — then **immediately begin implementing that first task only**. Stop when that task is done (or blocked); do not continue to the next task in the same turn unless the user asks.
+5. Move the issue to **In progress** on the [Capstone project board](https://github.com/users/hereisphil/projects/1). Do it every time, even when the issue was already started (it may sit in Todo or Review). Use the same token-free `gh` (the `hereisphil` login has the `project` scope):
+
+   ```bash
+   g() { env -u GITHUB_TOKEN -u GH_TOKEN gh "$@"; }
+   ITEM=$(g project item-list 1 --owner hereisphil --limit 500 --format json \
+     --jq '.items[] | select(.content.number==N and .content.repository=="hereisphil/2606-WDV349-CantuPhillip") | .id')
+   g project item-edit --project-id PVT_kwHOC_YUkc4BZjSD --id "$ITEM" \
+     --field-id PVTSSF_lAHOC_YUkc4BZjSDzhUhJqY --single-select-option-id 47fc9ee4
+   ```
+
+   Replace `N` with the issue number. The IDs are the board, its Status field, and the "In progress" option. If they stop working (the board or field was rebuilt), look them up again with `g project view 1 --owner hereisphil --format json --jq .id` and `g project field-list 1 --owner hereisphil --format json`. If `ITEM` is empty, the issue isn't on the board yet: add it with `g project item-add 1 --owner hereisphil --url <issue URL> --format json --jq .id` and use that ID. Moving a card is a reversible board edit, so run it without asking (`commit-messages.mdc`, GitHub edits).
+6. Read the issue body. Identify the **first unchecked** item under `## Tasks` (skip already `[x]` items; ignore `## Done when` for sequencing).
+7. Briefly state Goal, which task is first, and what remains after it — then **immediately begin implementing that first task only**. Stop when that task is done (or blocked); do not continue to the next task in the same turn unless the user asks.
 
 ## Report
 
 - Issue number, title, URL
 - Milestone
 - Branch name
+- Board status (moved to In progress)
 - First task started (and remaining unchecked tasks)
 - If auto-picked: one line on why, plus any open-but-complete issues skipped
 

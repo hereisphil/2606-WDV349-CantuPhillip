@@ -12,6 +12,37 @@ type PartOfSpeech = "noun" | "verb" | "adjective" | "adverb" | "phrase"
 
 type GrammaticalGender = "masculine" | "feminine" | "neuter"
 
+/**
+ * One run of a mnemonic story. Parts are data, not markup, so community
+ * text is never parsed.
+ * - `plain`: story text, in the mnemonic's `contentLocale`.
+ * - `term`: the word being learned, in the deck's `learningLanguage`.
+ * - `keyword`: the sound-alike hook that links the term to its meaning.
+ */
+export type MnemonicStoryPart = {
+  kind: "plain" | "term" | "keyword"
+  text: string
+}
+
+/** A memory hook for one card, written by the community (#50). */
+export type Mnemonic = {
+  mnemonicId: string
+  /** BCP 47 tag of the story and image description. May differ from the deck's `answerLanguage`. */
+  contentLocale: string
+  story: readonly [MnemonicStoryPart, ...MnemonicStoryPart[]]
+  author: { displayName: string }
+  /** Learners who found it useful. `StudyCard.mnemonics` is sorted by this, highest first. */
+  upvotes: number
+  /** Picture for the hook. Optional: a story works without one. */
+  image?:
+    | {
+        src: string
+        /** Describes the picture, in `contentLocale`. */
+        alt: string
+      }
+    | undefined
+}
+
 export type StudyCard = {
   cardId: string
   /** The word or phrase being learned, in the deck's `learningLanguage`. */
@@ -32,6 +63,11 @@ export type StudyCard = {
     text: string
     translation: string
   }
+  /**
+   * Shown on reveal, most upvoted first; the learner can cycle through the
+   * rest. Empty or missing when the card has none yet.
+   */
+  mnemonics?: readonly Mnemonic[] | undefined
 }
 
 export type DeckCards = {
@@ -57,6 +93,55 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "El gato está durmiendo en el sofá.",
           translation: "The cat is sleeping on the sofa.",
         },
+        mnemonics: [
+          {
+            mnemonicId: "mn-es-gato-1",
+            contentLocale: "en",
+            story: [
+              {
+                kind: "plain",
+                text: "A cat in a giant sombrero crashes a fancy ",
+              },
+              { kind: "keyword", text: "gala" },
+              // U+2011, a non-breaking hyphen, keeps "Gala‑cat" on one line.
+              { kind: "plain", text: ". Gala\u2011cat, " },
+              { kind: "term", text: "gato" },
+              { kind: "plain", text: "!" },
+            ],
+            author: { displayName: "lucia_m" },
+            upvotes: 1240,
+            image: {
+              src: "/mnemonics/gato.svg",
+              alt: "A ginger cat in a bow tie, wearing a giant sombrero at a gala.",
+            },
+          },
+          {
+            mnemonicId: "mn-es-gato-2",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "A cat knocks over your " },
+              { kind: "keyword", text: "gateau" },
+              { kind: "plain", text: " and licks the frosting. Bad " },
+              { kind: "term", text: "gato" },
+              { kind: "plain", text: "!" },
+            ],
+            author: { displayName: "kenji.k" },
+            upvotes: 312,
+          },
+          {
+            mnemonicId: "mn-es-gato-3",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "The cat is the " },
+              { kind: "keyword", text: "gatekeeper" },
+              { kind: "plain", text: ": no one gets past the " },
+              { kind: "term", text: "gato" },
+              { kind: "plain", text: "." },
+            ],
+            author: { displayName: "sam_studies" },
+            upvotes: 1,
+          },
+        ],
       },
       {
         cardId: "es-casa",
@@ -69,6 +154,38 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "Mi casa es tu casa.",
           translation: "My house is your house.",
         },
+        mnemonics: [
+          {
+            mnemonicId: "mn-es-casa-1",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "You keep your " },
+              { kind: "keyword", text: "cash" },
+              { kind: "plain", text: " in your " },
+              { kind: "term", text: "casa" },
+              { kind: "plain", text: ", the safest place in the house." },
+            ],
+            author: { displayName: "dan.learns" },
+            upvotes: 860,
+            image: {
+              src: "/mnemonics/casa.svg",
+              alt: "A house with a box of cash sitting on its roof.",
+            },
+          },
+          {
+            mnemonicId: "mn-es-casa-2",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "Your house is your " },
+              { kind: "keyword", text: "castle" },
+              { kind: "plain", text: ", and every " },
+              { kind: "term", text: "casa" },
+              { kind: "plain", text: " is a castle to someone." },
+            ],
+            author: { displayName: "lucia_m" },
+            upvotes: 94,
+          },
+        ],
       },
       {
         cardId: "es-comer",
@@ -80,6 +197,22 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "Vamos a comer a las dos.",
           translation: "We're going to eat at two.",
         },
+        // A mnemonic without a picture, so the fallback shows in a real deck.
+        mnemonics: [
+          {
+            mnemonicId: "mn-es-comer-1",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "Dinner's ready: " },
+              { kind: "keyword", text: "come here" },
+              { kind: "plain", text: " and eat! " },
+              { kind: "term", text: "Comer" },
+              { kind: "plain", text: " means to eat." },
+            ],
+            author: { displayName: "profe_ana" },
+            upvotes: 57,
+          },
+        ],
       },
       {
         cardId: "es-rapido",

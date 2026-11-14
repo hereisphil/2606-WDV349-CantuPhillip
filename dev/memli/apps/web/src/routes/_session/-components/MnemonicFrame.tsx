@@ -1,0 +1,232 @@
+import { useId, useState, type JSX } from "react"
+import { ArrowBigUp, ChevronLeft, ChevronRight, ThumbsUp } from "lucide-react"
+import { Button } from "@workspace/ui/components/button"
+import { Heading } from "@workspace/ui/components/heading"
+import { Text } from "@workspace/ui/components/text"
+import { cn } from "@workspace/ui/lib/utils"
+import { useFormatters } from "@/lib/formatters"
+import { MnemonicImage } from "./MnemonicImage"
+import type { MnemonicStoryPart, StudyCard } from "./study-cards"
+
+const messages = {
+  heading: "Community mnemonic",
+  byline: "By <author>{author}</author>",
+  // Only when the story isn't in the deck's answer language.
+  bylineWithLanguage: "By <author>{author}</author>, written in {language}",
+  upvotes: { one: "{count} upvote", other: "{count} upvotes" },
+  position: "{current} of {total}",
+  // Read first when the story changes, so a screen reader hears where it is.
+  positionAnnounced: "Mnemonic {current} of {total}.",
+  previous: "Previous mnemonic",
+  next: "Next mnemonic",
+} as const
+
+type MnemonicFrameProps = {
+  card: StudyCard
+  /** BCP 47 tag of the term the mnemonic anchors. */
+  learningLanguage: string
+  /** BCP 47 tag of the deck's meanings, to tell when a story is in another language. */
+  answerLanguage: string
+}
+
+/**
+ * The Mnemonic Caption Overlay Frame (#50): the card's memory hook, inside
+ * the revealed answer under the meaning and example
+ * (`05 - Study session answer page.png`). Opens on the most upvoted
+ * mnemonic; arrows cycle through the rest, wrapping at either end. Shows
+ * nothing when the card has no mnemonic yet.
+ *
+ * The answer remounts for every card, so the position starts over each time.
+ */
+export function MnemonicFrame({
+  card,
+  learningLanguage,
+  answerLanguage,
+}: MnemonicFrameProps): JSX.Element | null {
+  const headingId = useId()
+  const { format, plural, rich, languageName } = useFormatters()
+  // Which mnemonic is showing. One uncoupled number, so `useState` (docs/state-management.md).
+  const [index, setIndex] = useState(0)
+  const mnemonics = card.mnemonics ?? []
+  const total = mnemonics.length
+  const mnemonic = mnemonics[index]
+  if (mnemonic === undefined) {
+    return null
+  }
+
+  const step = (by: 1 | -1): void => {
+    setIndex((current) => (current + by + total) % total)
+  }
+  const position = { current: index + 1, total }
+
+  const { contentLocale, author } = mnemonic
+  // Compare languages, not tags: "en" and "en-US" read the same.
+  const sameLanguage =
+    new Intl.Locale(contentLocale).language ===
+    new Intl.Locale(answerLanguage).language
+  // The author's name stands out from "By"; the upvotes beside it are a quieter stat.
+  const byline = rich(
+    sameLanguage ? messages.byline : messages.bylineWithLanguage,
+    {
+      author: (name) => (
+        <span className="font-medium text-foreground">{name}</span>
+      ),
+    },
+    { author: author.displayName, language: languageName(contentLocale) }
+  )
+
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <Heading
+          level={2}
+          weight="medium"
+          id={headingId}
+          className="flex items-center gap-2 font-sans text-xs tracking-widest text-muted-foreground uppercase"
+        >
+          <ThumbsUp aria-hidden="true" className="size-3.5" />
+          {messages.heading}
+        </Heading>
+        {total > 1 ? (
+          // In the header from sm up, as in the design.
+          <MnemonicNav
+            position={position}
+            onStep={step}
+            className="hidden sm:flex"
+          />
+        ) : null}
+      </div>
+      {/* Picture above the story on phones; picture and story share the width from sm up. */}
+      <div className="grid gap-4 sm:grid-cols-2 sm:items-center sm:gap-6">
+        <MnemonicImage
+          // Keyed so a new picture starts loading from scratch.
+          key={mnemonic.mnemonicId}
+          image={mnemonic.image}
+          term={card.term}
+          learningLanguage={learningLanguage}
+          imageLanguage={contentLocale}
+          className="mx-auto max-w-xs sm:max-w-none"
+        />
+        {/* Announces the new story after an arrow press; nothing is read on first render. */}
+        <figure
+          aria-live="polite"
+          aria-atomic="true"
+          className="flex min-w-0 flex-col gap-3"
+        >
+          {total > 1 ? (
+            <span className="sr-only">
+              {format(messages.positionAnnounced, position)}
+            </span>
+          ) : null}
+          <blockquote lang={contentLocale}>
+            <Text className="text-lg leading-8 wrap-break-word">
+              {mnemonic.story.map((part, index) => (
+                // Parts never reorder, so their position is a stable key.
+                <StoryPart
+                  key={index}
+                  part={part}
+                  learningLanguage={learningLanguage}
+                />
+              ))}
+            </Text>
+          </blockquote>
+          <figcaption className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <Text variant="small" className="min-w-0 wrap-break-word">
+              {byline}
+            </Text>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+              <ArrowBigUp aria-hidden="true" className="size-3.5" />
+              {plural(mnemonic.upvotes, messages.upvotes)}
+            </span>
+          </figcaption>
+        </figure>
+      </div>
+      {total > 1 ? (
+        // Phones: below the story, within thumb reach. The header row has no room for 44 px buttons.
+        <MnemonicNav
+          position={position}
+          onStep={step}
+          className="flex justify-between border-t border-border pt-4 sm:hidden"
+        />
+      ) : null}
+    </section>
+  )
+}
+
+/**
+ * Previous / position / next. Rendered once per layout and hidden with CSS
+ * in the other, so only one is ever in the accessibility tree.
+ */
+function MnemonicNav({
+  position,
+  onStep,
+  className,
+}: {
+  position: { current: number; total: number }
+  onStep: (by: 1 | -1) => void
+  className: string
+}): JSX.Element {
+  const { format } = useFormatters()
+  return (
+    <div className={cn("items-center gap-1", className)}>
+      <Button
+        variant="outline"
+        size="icon"
+        className="size-11 sm:order-2 sm:size-8"
+        aria-label={messages.previous}
+        onClick={() => {
+          onStep(-1)
+        }}
+      >
+        <ChevronLeft aria-hidden="true" />
+      </Button>
+      {/* The figure's live region says the position for screen readers. */}
+      <span
+        aria-hidden="true"
+        className="text-sm text-muted-foreground tabular-nums sm:order-1 sm:mr-2"
+      >
+        {format(messages.position, position)}
+      </span>
+      <Button
+        variant="outline"
+        size="icon"
+        className="size-11 sm:order-3 sm:size-8"
+        aria-label={messages.next}
+        onClick={() => {
+          onStep(1)
+        }}
+      >
+        <ChevronRight aria-hidden="true" />
+      </Button>
+    </div>
+  )
+}
+
+function StoryPart({
+  part,
+  learningLanguage,
+}: {
+  part: MnemonicStoryPart
+  learningLanguage: string
+}): JSX.Element {
+  switch (part.kind) {
+    case "term":
+      return (
+        <strong lang={learningLanguage} className="font-semibold text-emphasis">
+          {part.text}
+        </strong>
+      )
+    case "keyword":
+      // A highlighter stroke: the sound-alike hook is the part to remember.
+      return (
+        <mark className="rounded-sm bg-cta/45 box-decoration-clone px-1 font-medium text-foreground dark:bg-cta/15 dark:text-cta">
+          {part.text}
+        </mark>
+      )
+    case "plain":
+      return <>{part.text}</>
+  }
+}
