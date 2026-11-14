@@ -1,18 +1,16 @@
 import { useId, type JSX } from "react"
 import { ChevronDown } from "lucide-react"
+import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
 import type { DashboardDeck, ProgressTrendsData } from "./dashboard-metrics"
 
 const messages = {
   heading: "Your progress",
-  learned: {
-    one: "{count} word learned so far",
-    other: "{count} words learned so far",
-  },
-  remembered: "You remembered {percent} of your reviews.",
-  newThisMonth: {
-    one: "{count} new word this month",
-    other: "{count} new words this month",
+  // Label and value pairs, not sentences: each number is read with its label.
+  stats: {
+    learned: "Words learned",
+    remembered: "Reviews remembered",
+    newThisMonth: "New words this month",
   },
   tableCaption: "Words in each course",
   course: "Course",
@@ -21,11 +19,35 @@ const messages = {
   notStarted: "Not started",
 } as const
 
-const cellClass = "px-2 py-2.5 text-end tabular-nums sm:px-3"
+// Same surface as the course list, so the page has one kind of card.
+const cardClass = "rounded-xl border bg-card shadow-xs dark:shadow-none"
+// 16 px at the card's edges, like the stats above. Each number column only
+// pads its start side: a phone keeps 10 px between columns so the table fits a
+// 360 px screen, and course names get the rest.
+const courseCellClass = "py-3 ps-4 pe-0"
+const numberCellPadding = "py-3 ps-2.5 pe-0 last:pe-4 @[34rem]:ps-4"
+// Numbers and their headings share the end edge, so every column lines up.
+const numberCellClass = cn(numberCellPadding, "text-end align-top tabular-nums")
+const numberHeadClass = cn(
+  numberCellPadding,
+  "text-end align-bottom @[34rem]:w-32"
+)
+
+/** One number with its label: a row on a phone, a tile from a 544 px card. */
+function Stat({ label, value }: { label: string; value: string }): JSX.Element {
+  return (
+    <div className="flex items-baseline justify-between gap-4 px-4 py-3 @[34rem]:flex-col-reverse @[34rem]:items-start @[34rem]:justify-end @[34rem]:gap-1 @[34rem]:px-5 @[34rem]:py-4">
+      <dt className="min-w-0 text-base text-pretty text-foreground">{label}</dt>
+      <dd className="shrink-0 font-heading text-2xl leading-none font-bold text-foreground-strong tabular-nums @[34rem]:text-3xl @[34rem]:leading-none">
+        {value}
+      </dd>
+    </div>
+  )
+}
 
 /**
- * Reference numbers, closed by default. Plain sentences and one table; no
- * comparisons with other learners.
+ * Reference numbers, closed by default: three numbers with their labels and
+ * one table per course. No comparisons with other learners.
  */
 export function ProgressDisclosure({
   retentionPercent,
@@ -36,7 +58,7 @@ export function ProgressDisclosure({
   wordsLearned: number
   courses: readonly DashboardDeck[]
 }): JSX.Element {
-  const { number, percent, plural, format } = useFormatters()
+  const { number, percent } = useFormatters()
   const captionId = useId()
 
   return (
@@ -53,16 +75,23 @@ export function ProgressDisclosure({
           />
           {messages.heading}
         </summary>
-        <div className="flex flex-col gap-6 pt-4">
-          <ul className="flex flex-col gap-1 text-base text-foreground">
-            <li>{plural(wordsLearned, messages.learned)}</li>
-            <li>
-              {format(messages.remembered, {
-                percent: percent(retentionPercent / 100),
-              })}
-            </li>
-            <li>{plural(newCardsThisMonth, messages.newThisMonth)}</li>
-          </ul>
+        <div className="@container flex flex-col gap-4 pt-3">
+          <dl
+            className={cn(
+              cardClass,
+              "grid divide-y @[34rem]:grid-cols-3 @[34rem]:divide-x @[34rem]:divide-y-0"
+            )}
+          >
+            <Stat label={messages.stats.learned} value={number(wordsLearned)} />
+            <Stat
+              label={messages.stats.remembered}
+              value={percent(retentionPercent / 100)}
+            />
+            <Stat
+              label={messages.stats.newThisMonth}
+              value={number(newCardsThisMonth)}
+            />
+          </dl>
           {/* Data tables may scroll sideways on a narrow screen (WCAG 1.4.10); the page itself never does.
               The box is focusable so keyboard users can scroll it. */}
           <div
@@ -70,27 +99,30 @@ export function ProgressDisclosure({
             aria-labelledby={captionId}
             // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex -- a scrollable region must take focus so keyboard users can scroll it (axe scrollable-region-focusable)
             tabIndex={0}
-            className="max-w-3xl overflow-x-auto rounded-xl"
+            className={cn(cardClass, "overflow-x-auto")}
           >
-            <table className="w-full border-collapse bg-card text-base">
+            <table className="w-full border-collapse text-base text-foreground">
               <caption
                 id={captionId}
-                className="pb-2 text-start font-semibold text-foreground-strong"
+                className="px-4 pt-4 pb-1 text-start font-heading font-semibold text-foreground-strong"
               >
                 {messages.tableCaption}
               </caption>
               <thead>
-                <tr className="border-b border-border-strong text-sm font-semibold text-foreground">
-                  <th scope="col" className="px-2 py-2.5 text-start sm:px-3">
+                <tr className="border-b border-border-strong text-sm font-semibold">
+                  <th
+                    scope="col"
+                    className={cn(courseCellClass, "text-start align-bottom")}
+                  >
                     {messages.course}
                   </th>
-                  <th scope="col" className={cellClass}>
+                  <th scope="col" className={numberHeadClass}>
                     {messages.learnedColumn}
                   </th>
-                  <th scope="col" className={cellClass}>
+                  <th scope="col" className={numberHeadClass}>
                     {messages.learning}
                   </th>
-                  <th scope="col" className={cellClass}>
+                  <th scope="col" className={numberHeadClass}>
                     {messages.notStarted}
                   </th>
                 </tr>
@@ -103,17 +135,22 @@ export function ProgressDisclosure({
                   >
                     <th
                       scope="row"
-                      className="min-w-28 px-2 py-2.5 text-start font-medium wrap-break-word text-foreground-strong sm:px-3"
+                      className={cn(
+                        courseCellClass,
+                        "min-w-28 text-start align-top font-semibold wrap-anywhere text-foreground-strong"
+                      )}
                     >
                       {course.title}
                     </th>
-                    <td className={cellClass}>
+                    <td className={numberCellClass}>
                       {number(course.masteredCount)}
                     </td>
-                    <td className={cellClass}>
+                    <td className={numberCellClass}>
                       {number(course.learningCount)}
                     </td>
-                    <td className={cellClass}>{number(course.unseenCount)}</td>
+                    <td className={numberCellClass}>
+                      {number(course.unseenCount)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
