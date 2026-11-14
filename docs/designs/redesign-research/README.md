@@ -48,6 +48,8 @@ node verify.mjs
 
 [baseline/](./baseline/README.md) holds screenshots of the dashboard as it was before the redesign (phone and desktop, light and dark), the test kit for phase 0 of #151, and a sheet for the results.
 
+[definition-of-done/](./definition-of-done/README.md) holds the results of the REDESIGN.md 11.3 checklist after the build, with grayscale and blur screenshots.
+
 ## Read these with care
 
 - **Known differences from the plan.** All three proposals include a phone bottom bar, a "Home" nav label and a "Language" filter label. REDESIGN.md dropped or changed each of these after review.
