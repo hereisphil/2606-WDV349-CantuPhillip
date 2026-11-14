@@ -42,6 +42,10 @@ To rerun the check, install the two packages listed in `color/package.json` (`cu
 node verify.mjs
 ```
 
+## Baseline
+
+[baseline/](./baseline/README.md) holds screenshots of the dashboard as it was before the redesign (phone and desktop, light and dark), the test kit for phase 0 of #151, and a sheet for the results.
+
 ## Read these with care
 
 - **Known differences from the plan.** All three proposals include a phone bottom bar, a "Home" nav label and a "Language" filter label. REDESIGN.md dropped or changed each of these after review.
