@@ -10,8 +10,8 @@ type MnemonicImageProps = {
   term: string
   /** BCP 47 tag of `term`. */
   learningLanguage: string
-  /** BCP 47 tag of the image's alt text. */
-  answerLanguage: string
+  /** BCP 47 tag of the image's alt text: the mnemonic's `contentLocale`. */
+  imageLanguage: string
   className?: string
 }
 
@@ -27,7 +27,7 @@ export function MnemonicImage({
   image,
   term,
   learningLanguage,
-  answerLanguage,
+  imageLanguage,
   className,
 }: MnemonicImageProps): JSX.Element {
   // One value with three states, not `isLoaded` + `hasError` (docs/state-management.md).
@@ -70,7 +70,7 @@ export function MnemonicImage({
             ref={settleIfComplete}
             src={image.src}
             alt={image.alt}
-            lang={answerLanguage}
+            lang={imageLanguage}
             decoding="async"
             onLoad={() => {
               setStatus("loaded")

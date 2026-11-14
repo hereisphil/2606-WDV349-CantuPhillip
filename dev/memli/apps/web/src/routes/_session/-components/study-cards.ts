@@ -13,16 +13,29 @@ type PartOfSpeech = "noun" | "verb" | "adjective" | "adverb" | "phrase"
 type GrammaticalGender = "masculine" | "feminine" | "neuter"
 
 /**
- * A memory hook for one card, written by the community (#50). The story,
- * keyword hooks and author come with the next #50 task.
+ * One run of a mnemonic story. Parts are data, not markup, so community
+ * text is never parsed.
+ * - `plain`: story text, in the mnemonic's `contentLocale`.
+ * - `term`: the word being learned, in the deck's `learningLanguage`.
+ * - `keyword`: the sound-alike hook that links the term to its meaning.
  */
+export type MnemonicStoryPart = {
+  kind: "plain" | "term" | "keyword"
+  text: string
+}
+
+/** A memory hook for one card, written by the community (#50). */
 export type Mnemonic = {
   mnemonicId: string
+  /** BCP 47 tag of the story and image description. May differ from the deck's `answerLanguage`. */
+  contentLocale: string
+  story: readonly [MnemonicStoryPart, ...MnemonicStoryPart[]]
+  author: { displayName: string }
   /** Picture for the hook. Optional: a story works without one. */
   image?:
     | {
         src: string
-        /** Describes the picture, in the deck's `answerLanguage`. */
+        /** Describes the picture, in `contentLocale`. */
         alt: string
       }
     | undefined
@@ -78,6 +91,19 @@ const seededDeckCards: Record<string, DeckCards> = {
         mnemonics: [
           {
             mnemonicId: "mn-es-gato-1",
+            contentLocale: "en",
+            story: [
+              {
+                kind: "plain",
+                text: "A cat in a giant sombrero crashes a fancy ",
+              },
+              { kind: "keyword", text: "gala" },
+              // U+2011, a non-breaking hyphen, keeps "Gala‑cat" on one line.
+              { kind: "plain", text: ". Gala\u2011cat, " },
+              { kind: "term", text: "gato" },
+              { kind: "plain", text: "!" },
+            ],
+            author: { displayName: "lucia_m" },
             image: {
               src: "/mnemonics/gato.svg",
               alt: "A ginger cat in a bow tie, wearing a giant sombrero at a gala.",
@@ -99,6 +125,15 @@ const seededDeckCards: Record<string, DeckCards> = {
         mnemonics: [
           {
             mnemonicId: "mn-es-casa-1",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "You keep your " },
+              { kind: "keyword", text: "cash" },
+              { kind: "plain", text: " in your " },
+              { kind: "term", text: "casa" },
+              { kind: "plain", text: ", the safest place in the house." },
+            ],
+            author: { displayName: "dan.learns" },
             image: {
               src: "/mnemonics/casa.svg",
               alt: "A house with a box of cash sitting on its roof.",
@@ -117,7 +152,20 @@ const seededDeckCards: Record<string, DeckCards> = {
           translation: "We're going to eat at two.",
         },
         // A mnemonic without a picture, so the fallback shows in a real deck.
-        mnemonics: [{ mnemonicId: "mn-es-comer-1" }],
+        mnemonics: [
+          {
+            mnemonicId: "mn-es-comer-1",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "Dinner's ready: " },
+              { kind: "keyword", text: "come here" },
+              { kind: "plain", text: " and eat! " },
+              { kind: "term", text: "Comer" },
+              { kind: "plain", text: " means to eat." },
+            ],
+            author: { displayName: "profe_ana" },
+          },
+        ],
       },
       {
         cardId: "es-rapido",
