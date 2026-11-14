@@ -31,6 +31,8 @@ export type Mnemonic = {
   contentLocale: string
   story: readonly [MnemonicStoryPart, ...MnemonicStoryPart[]]
   author: { displayName: string }
+  /** Learners who found it useful. `StudyCard.mnemonics` is sorted by this, highest first. */
+  upvotes: number
   /** Picture for the hook. Optional: a story works without one. */
   image?:
     | {
@@ -61,7 +63,10 @@ export type StudyCard = {
     text: string
     translation: string
   }
-  /** Shown on reveal, best first. Empty or missing when the card has none yet. */
+  /**
+   * Shown on reveal, most upvoted first; the learner can cycle through the
+   * rest. Empty or missing when the card has none yet.
+   */
   mnemonics?: readonly Mnemonic[] | undefined
 }
 
@@ -104,10 +109,37 @@ const seededDeckCards: Record<string, DeckCards> = {
               { kind: "plain", text: "!" },
             ],
             author: { displayName: "lucia_m" },
+            upvotes: 1240,
             image: {
               src: "/mnemonics/gato.svg",
               alt: "A ginger cat in a bow tie, wearing a giant sombrero at a gala.",
             },
+          },
+          {
+            mnemonicId: "mn-es-gato-2",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "A cat knocks over your " },
+              { kind: "keyword", text: "gateau" },
+              { kind: "plain", text: " and licks the frosting. Bad " },
+              { kind: "term", text: "gato" },
+              { kind: "plain", text: "!" },
+            ],
+            author: { displayName: "kenji.k" },
+            upvotes: 312,
+          },
+          {
+            mnemonicId: "mn-es-gato-3",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "The cat is the " },
+              { kind: "keyword", text: "gatekeeper" },
+              { kind: "plain", text: ": no one gets past the " },
+              { kind: "term", text: "gato" },
+              { kind: "plain", text: "." },
+            ],
+            author: { displayName: "sam_studies" },
+            upvotes: 1,
           },
         ],
       },
@@ -134,10 +166,24 @@ const seededDeckCards: Record<string, DeckCards> = {
               { kind: "plain", text: ", the safest place in the house." },
             ],
             author: { displayName: "dan.learns" },
+            upvotes: 860,
             image: {
               src: "/mnemonics/casa.svg",
               alt: "A house with a box of cash sitting on its roof.",
             },
+          },
+          {
+            mnemonicId: "mn-es-casa-2",
+            contentLocale: "en",
+            story: [
+              { kind: "plain", text: "Your house is your " },
+              { kind: "keyword", text: "castle" },
+              { kind: "plain", text: ", and every " },
+              { kind: "term", text: "casa" },
+              { kind: "plain", text: " is a castle to someone." },
+            ],
+            author: { displayName: "lucia_m" },
+            upvotes: 94,
           },
         ],
       },
@@ -164,6 +210,7 @@ const seededDeckCards: Record<string, DeckCards> = {
               { kind: "plain", text: " means to eat." },
             ],
             author: { displayName: "profe_ana" },
+            upvotes: 57,
           },
         ],
       },

@@ -115,6 +115,7 @@ const casaStory: Omit<Mnemonic, "mnemonicId"> = {
     { kind: "plain", text: ", the safest place in the house." },
   ],
   author: { displayName: "dan.learns" },
+  upvotes: 860,
 }
 
 // A mnemonic whose picture never loads, so the fallback can be checked.
@@ -156,6 +157,7 @@ const otherLanguage: StudyCard = {
         { kind: "plain", text: " e todo mundo aplaude." },
       ],
       author: { displayName: "maria.eduarda.estuda.idiomas.todos.os.dias" },
+      upvotes: 1048576,
       image: {
         src: "/mnemonics/gato.svg",
         alt: "Um gato laranja de gravata-borboleta, com um sombreiro enorme numa gala.",
@@ -283,14 +285,15 @@ export const studyPreviews = {
   // Mnemonic: the frame under the revealed answer.
   "mnemonic-image": {
     group: "mnemonic",
-    description: "A mnemonic with a picture",
+    description: "Three mnemonics to cycle through; the first has a picture",
     cards: () => [gato],
     languages: spanish,
     events: () => [{ type: "REVEAL", elapsedMs: null }],
   },
   "mnemonic-no-image": {
     group: "mnemonic",
-    description: "A mnemonic without a picture: the term fills the frame",
+    description:
+      "One mnemonic, no picture: the term fills the frame, no arrows",
     cards: () => [noImage],
     languages: spanish,
     events: () => [{ type: "REVEAL", elapsedMs: null }],
