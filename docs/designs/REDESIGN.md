@@ -1062,7 +1062,7 @@ Repo rules apply throughout: semantic tokens only, Base UI primitives, shadcn co
 | Piece | Where | Notes |
 | --- | --- | --- |
 | `StudyHero` | `routes/_app/-components/` | A `section` labeled by the course name. Its layout depends on its own width. The count is rendered with `rich()`. A picture slot that stays empty for now. |
-| `ThemeControl` | `apps/web/src/components/theme-control.tsx` | Two presentations from one options array: a native radio `fieldset` for the sidebar and a menu for the phone top bar. It is the first caller of `useTheme()`, so the Knip ignore entry for the theme provider can go. |
+| `ThemeControl` | `apps/web/src/components/theme-control.tsx` | One "Theme" menu from one options array, in two placements: a two-line row at the foot of the desktop sidebar that shows the current choice, and a "Theme" button in the phone top bar. (A radio `fieldset` card was tried first and dropped as too heavy for a setting people rarely change.) It is the first caller of `useTheme()`, so the Knip ignore entry for the theme provider can go. |
 | Page title | `routes/__root.tsx` and the dashboard route | No route sets a title today. Add the router's head support. |
 | Skip link | `routes/_app.tsx` | Targets `<main id="main" tabIndex={-1}>`. |
 | Button `variant="cta"` | `packages/ui` | `bg-cta text-cta-foreground`, the bottom edge, a transparent border. |

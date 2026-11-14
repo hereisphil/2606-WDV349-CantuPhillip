@@ -1,5 +1,5 @@
 import type { JSX } from "react"
-import { Monitor, Moon, Sun } from "lucide-react"
+import { ChevronsUpDown, Monitor, Moon, Sun } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ const messages = {
   dark: "Dark",
 } as const
 
-// One list for both presentations, so the labels and their order cannot drift (WCAG 3.2.4).
+// One list for both placements, so the labels and their order cannot drift (WCAG 3.2.4).
 const options: readonly { value: Theme; label: string; icon: typeof Sun }[] = [
   { value: "system", label: messages.system, icon: Monitor },
   { value: "light", label: messages.light, icon: Sun },
@@ -30,63 +30,65 @@ function asTheme(value: unknown): Theme | undefined {
   return options.find((option) => option.value === value)?.value
 }
 
-/**
- * Always-visible radio group for the desktop sidebar. Native radios give arrow
- * keys, "2 of 3, selected" and forced-colors support without extra code.
- */
-export function ThemeRadioGroup(): JSX.Element {
-  const { theme, setTheme } = useTheme()
-
-  // The border sits on a wrapper: a legend inside a bordered fieldset is drawn on the border line.
-  return (
-    <div className="rounded-xl border border-sidebar-border bg-card p-2">
-      <fieldset className="flex flex-col gap-1">
-        <legend className="px-2 pt-1 pb-1.5 text-sm font-semibold text-foreground">
-          {messages.legend}
-        </legend>
-        {options.map(({ value, label, icon: Icon }) => (
-          <label
-            key={value}
-            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 text-base text-foreground hover:bg-muted has-checked:bg-accent has-checked:font-semibold has-checked:text-accent-foreground"
-          >
-            <input
-              type="radio"
-              name="theme"
-              value={value}
-              checked={theme === value}
-              onChange={() => {
-                setTheme(value)
-              }}
-              className="size-4 shrink-0 cursor-pointer accent-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            />
-            <Icon aria-hidden="true" className="size-4 shrink-0" />
-            {label}
-          </label>
-        ))}
-      </fieldset>
-    </div>
-  )
+type ThemeMenuProps = {
+  /**
+   * "topBar": a short "Theme" button for the phone header.
+   * "sidebar": a full-width row at the foot of the desktop sidebar that also
+   * shows the current choice, so nobody has to open it to know the setting.
+   */
+  placement: "topBar" | "sidebar"
 }
 
-/** A labeled "Theme" button for the phone top bar that opens the same three choices. */
-export function ThemeMenu(): JSX.Element {
+/**
+ * The theme switch. Always labeled with the word "Theme", never an icon alone,
+ * so learners who do not know the sun and moon convention can still find it.
+ */
+export function ThemeMenu({ placement }: ThemeMenuProps): JSX.Element {
   const { theme, resolvedTheme, setTheme } = useTheme()
   const TriggerIcon = resolvedTheme === "dark" ? Moon : Sun
+  const current = options.find((option) => option.value === theme)
+  const inSidebar = placement === "sidebar"
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
-            variant="ghost"
-            className="min-h-11 gap-1.5 px-2.5 text-sm font-semibold hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
-          />
+          inSidebar ? (
+            <Button
+              variant="ghost"
+              className="h-auto min-h-11 w-full justify-start gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+            />
+          ) : (
+            <Button
+              variant="ghost"
+              className="min-h-11 gap-1.5 px-2.5 text-sm font-semibold hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+            />
+          )
         }
       >
         <TriggerIcon aria-hidden="true" />
-        {messages.legend}
+        {inSidebar && current ? (
+          <>
+            {/* Two lines, like the account row, so a long choice or translation is not cut off. */}
+            <span className="flex min-w-0 flex-1 flex-col items-start">
+              <span className="text-xs leading-4 font-medium">
+                {messages.legend}
+              </span>{" "}
+              <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
+                {current.label}
+              </span>
+            </span>
+            <ChevronsUpDown aria-hidden="true" className="size-4" />
+          </>
+        ) : (
+          messages.legend
+        )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
+      <DropdownMenuContent
+        side={inSidebar ? "top" : "bottom"}
+        align={inSidebar ? "start" : "end"}
+        className="w-60"
+      >
         <DropdownMenuGroup>
           <DropdownMenuLabel>{messages.legend}</DropdownMenuLabel>
           <DropdownMenuRadioGroup
@@ -102,7 +104,7 @@ export function ThemeMenu(): JSX.Element {
               <DropdownMenuRadioItem
                 key={value}
                 value={value}
-                className="min-h-11 text-base"
+                className="min-h-11 text-base data-checked:font-semibold"
               >
                 <Icon aria-hidden="true" />
                 {label}

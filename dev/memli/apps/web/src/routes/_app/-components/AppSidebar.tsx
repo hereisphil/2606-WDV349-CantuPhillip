@@ -15,7 +15,7 @@ import { Button } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
-import { ThemeMenu, ThemeRadioGroup } from "@/components/theme-control"
+import { ThemeMenu } from "@/components/theme-control"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
@@ -145,7 +145,7 @@ export function AppSidebar(): JSX.Element {
         </Link>
 
         <div className="flex items-center gap-1 md:hidden">
-          <ThemeMenu />
+          <ThemeMenu placement="topBar" />
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={format(messages.accountMenu, {
@@ -209,8 +209,8 @@ export function AppSidebar(): JSX.Element {
 
       <RailNav />
 
-      <div className="mt-auto hidden flex-col gap-3 p-3 md:flex">
-        <ThemeRadioGroup />
+      <div className="mt-auto hidden flex-col gap-2 p-3 md:flex">
+        <ThemeMenu placement="sidebar" />
         <div className="border-t border-sidebar-border pt-3">
           <DropdownMenu>
             <DropdownMenuTrigger
