@@ -1,6 +1,8 @@
 import buttonLink from "./rules/button-link.js"
 import noLiteralUiStrings from "./rules/no-literal-ui-strings.js"
+import noRestrictedClasses from "./rules/no-restricted-classes.js"
 import noUseStateSprawl from "./rules/no-use-state-sprawl.js"
+import touchButtonSize from "./rules/touch-button-size.js"
 
 const plugin = {
   meta: {
@@ -10,7 +12,9 @@ const plugin = {
   rules: {
     "button-link": buttonLink,
     "no-literal-ui-strings": noLiteralUiStrings,
+    "no-restricted-classes": noRestrictedClasses,
     "no-use-state-sprawl": noUseStateSprawl,
+    "touch-button-size": touchButtonSize,
   },
 }
 
