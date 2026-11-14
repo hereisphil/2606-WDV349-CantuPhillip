@@ -12,6 +12,8 @@ export function PreviewSwitcher({
   return (
     <nav
       aria-label="Dashboard previews"
+      // Design-floor checks (e2e/floors.spec.ts) skip DEV-only tools.
+      data-dev-only=""
       className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-2 text-xs"
     >
       <span className="font-medium text-muted-foreground">Preview</span>
