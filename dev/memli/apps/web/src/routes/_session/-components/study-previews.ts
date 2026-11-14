@@ -1,5 +1,5 @@
 import type { SessionEvent } from "@workspace/core/study/session-reducer"
-import type { StudyCard } from "./study-cards"
+import { findDeckCards, type StudyCard } from "./study-cards"
 
 /** What the session header renders. `view` overrides replace the derived values. */
 export type SessionView = {
@@ -39,6 +39,7 @@ export const studyPreviewGroups = {
   progress: "Progress",
   card: "Card",
   answer: "Answer",
+  mnemonic: "Mnemonic",
 } as const
 
 type StudyPreviewGroup = keyof typeof studyPreviewGroups
@@ -98,6 +99,31 @@ const kana: StudyCard = {
     text: "てつだってくれて ありがとうございます。",
     translation: "Thank you very much for helping me.",
   },
+}
+
+// The seeded gato card, whose mnemonic has a picture, so the preview works on any deck.
+const gato: StudyCard = findDeckCards("spanish-core-1000")?.cards[0] ?? casa
+
+// A mnemonic whose picture never loads, so the fallback can be checked.
+const brokenImage: StudyCard = {
+  ...casa,
+  cardId: "preview-broken-image",
+  mnemonics: [
+    {
+      mnemonicId: "preview-broken-image-1",
+      image: {
+        src: "/missing-mnemonic.png",
+        alt: "A picture that fails to load.",
+      },
+    },
+  ],
+}
+
+// A mnemonic with no picture at all.
+const noImage: StudyCard = {
+  ...casa,
+  cardId: "preview-no-image",
+  mnemonics: [{ mnemonicId: "preview-no-image-1" }],
 }
 
 /** Answers the first `count` cards correctly, moving the session on that many. */
@@ -214,6 +240,29 @@ export const studyPreviews = {
     cards: () => [longContent],
     languages: spanish,
     events: () => submit("where is the nearest bathroom please"),
+  },
+
+  // Mnemonic: the frame under the revealed answer.
+  "mnemonic-image": {
+    group: "mnemonic",
+    description: "A mnemonic with a picture",
+    cards: () => [gato],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
+  },
+  "mnemonic-no-image": {
+    group: "mnemonic",
+    description: "A mnemonic without a picture: the term fills the frame",
+    cards: () => [noImage],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
+  },
+  "mnemonic-broken-image": {
+    group: "mnemonic",
+    description: "A picture that fails to load falls back to the term",
+    cards: () => [brokenImage],
+    languages: spanish,
+    events: () => [{ type: "REVEAL", elapsedMs: null }],
   },
 } as const satisfies Record<string, StudyPreview>
 

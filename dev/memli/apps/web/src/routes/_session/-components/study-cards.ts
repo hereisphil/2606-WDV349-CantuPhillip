@@ -12,6 +12,22 @@ type PartOfSpeech = "noun" | "verb" | "adjective" | "adverb" | "phrase"
 
 type GrammaticalGender = "masculine" | "feminine" | "neuter"
 
+/**
+ * A memory hook for one card, written by the community (#50). The story,
+ * keyword hooks and author come with the next #50 task.
+ */
+export type Mnemonic = {
+  mnemonicId: string
+  /** Picture for the hook. Optional: a story works without one. */
+  image?:
+    | {
+        src: string
+        /** Describes the picture, in the deck's `answerLanguage`. */
+        alt: string
+      }
+    | undefined
+}
+
 export type StudyCard = {
   cardId: string
   /** The word or phrase being learned, in the deck's `learningLanguage`. */
@@ -32,6 +48,8 @@ export type StudyCard = {
     text: string
     translation: string
   }
+  /** Shown on reveal, best first. Empty or missing when the card has none yet. */
+  mnemonics?: readonly Mnemonic[] | undefined
 }
 
 export type DeckCards = {
@@ -57,6 +75,15 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "El gato está durmiendo en el sofá.",
           translation: "The cat is sleeping on the sofa.",
         },
+        mnemonics: [
+          {
+            mnemonicId: "mn-es-gato-1",
+            image: {
+              src: "/mnemonics/gato.svg",
+              alt: "A ginger cat in a bow tie, wearing a giant sombrero at a gala.",
+            },
+          },
+        ],
       },
       {
         cardId: "es-casa",
@@ -69,6 +96,15 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "Mi casa es tu casa.",
           translation: "My house is your house.",
         },
+        mnemonics: [
+          {
+            mnemonicId: "mn-es-casa-1",
+            image: {
+              src: "/mnemonics/casa.svg",
+              alt: "A house with a box of cash sitting on its roof.",
+            },
+          },
+        ],
       },
       {
         cardId: "es-comer",
@@ -80,6 +116,8 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "Vamos a comer a las dos.",
           translation: "We're going to eat at two.",
         },
+        // A mnemonic without a picture, so the fallback shows in a real deck.
+        mnemonics: [{ mnemonicId: "mn-es-comer-1" }],
       },
       {
         cardId: "es-rapido",
