@@ -238,6 +238,10 @@
     var(--hero-foreground) 20%,
     var(--hero)
   );
+  /* The hero is the one raised surface on the page: a larger two-part shadow. */
+  --hero-shadow:
+    0 1px 2px oklch(0.2 0.06 265 / 0.12),
+    0 16px 40px -12px oklch(0.2 0.06 265 / 0.45);
 
   /* Actions. --cta is the one main action per screen; --primary stays the brand blue. */
   --primary: var(--blue-700);
@@ -335,6 +339,8 @@
     var(--hero-foreground) 16%,
     var(--hero)
   );
+  /* Shadows vanish on navy, so the dark hero gets a soft blue glow and a visible border. */
+  --hero-shadow: 0 0 56px -20px color-mix(in oklab, var(--hero) 90%, white);
 
   /* Accents get lighter and a little less colorful on a dark ground. */
   --primary: var(--blue-200);

@@ -18,13 +18,12 @@ import {
 } from "./-components/dashboard-previews"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
 import { DeckList } from "./-components/DeckList"
-import { FocusDeckCard } from "./-components/FocusDeckCard"
 import { LanguageFilter } from "./-components/LanguageFilter"
 import { MemoryCallout } from "./-components/MemoryCallout"
 import { PreviewSwitcher } from "./-components/PreviewSwitcher"
 import { ProgressTrends } from "./-components/ProgressTrends"
+import { StudyHero } from "./-components/StudyHero"
 import { ThisWeek } from "./-components/ThisWeek"
-import { TodayPanel } from "./-components/TodayPanel"
 
 const messages = {
   aside: "Your progress",
@@ -120,7 +119,7 @@ function Dashboard(): JSX.Element {
       />
       {focusDeck === null ? (
         <div className="max-w-2xl">
-          <TodayPanel state={today} />
+          <StudyHero state={today} />
         </div>
       ) : (
         <>
@@ -129,8 +128,7 @@ function Dashboard(): JSX.Element {
               {languages.length > 1 ? (
                 <LanguageFilter languages={languages} />
               ) : null}
-              <TodayPanel state={today} />
-              <FocusDeckCard deck={focusDeck} now={now} />
+              <StudyHero state={today} />
               <DeckList
                 decks={sortDecks(decks).filter(
                   (deck) => deck.courseId !== focusDeck.courseId

@@ -60,6 +60,11 @@ export function deckTotal(deck: DashboardDeck): number {
   return deck.masteredCount + deck.learningCount + deck.unseenCount
 }
 
+/** Words the learner has met: mastered plus still learning. */
+export function startedCount(deck: DashboardDeck): number {
+  return deck.masteredCount + deck.learningCount
+}
+
 /** 0–1. A deck with no cards counts as 0% mastered. */
 export function masteredRatio(deck: DashboardDeck): number {
   const total = deckTotal(deck)
@@ -75,7 +80,12 @@ export type TodayState =
       focusDeck: DashboardDeck
     }
   | { status: "learn"; deck: DashboardDeck }
-  | { status: "caught-up"; keepGoing: KeepGoing | null }
+  | {
+      status: "caught-up"
+      /** The hero's course: where "keep going" leads, or the focus course. */
+      deck: DashboardDeck
+      keepGoing: KeepGoing | null
+    }
   | { status: "no-decks" }
 
 /** Opt-in study for a learner who has finished everything scheduled today. */
@@ -124,7 +134,8 @@ export function todayState(decks: readonly DashboardDeck[]): TodayState {
     return { status: "learn", deck: focusDeck }
   }
 
-  return { status: "caught-up", keepGoing: keepGoing(decks) }
+  const more = keepGoing(decks)
+  return { status: "caught-up", deck: more?.deck ?? focusDeck, keepGoing: more }
 }
 
 export type DeckAction = {
