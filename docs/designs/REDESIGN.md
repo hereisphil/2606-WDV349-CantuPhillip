@@ -614,6 +614,8 @@ An honest note: **dark surfaces separate less than light ones, and this is the w
 
 **A brighter dark hero, if the first build shows it is needed.** Raising the dark hero to `oklch(0.42 0.135 266)` (#2a4696) gives 2.11:1 against the page. The cost is contrast inside it: white text drops from 11.09:1 to 8.33:1 and the amber button from 8.30:1 to 6.24:1 against the panel. Both still pass. These figures were computed with the same libraries but are outside the gated run, so the script must be rerun if this value is adopted.
 
+**Checked after the hero was built (November 2026): not needed.** On a real Android phone (Xiaomi Redmi), at full and at dimmed brightness, the dark hero read clearly as its own panel, and the default and all-done states were easy to read in both themes. A blurred screenshot at 375 and 1280 px showed the navy hero and the amber button as the first two shapes in both themes. The dark hero stays `oklch(0.35 0.12 266)`. The same check found the language chips above the hero push it below the fold on a phone when several languages are studied; moving the filter into the course list (phase 4) fixes that.
+
 The tip card is only 1.03:1 against the light page. It gets a real 1 px border and a 4 px warm edge on its start side (5.01:1 against the page), so it does not rely on its fill.
 
 ### 7.5 Text
