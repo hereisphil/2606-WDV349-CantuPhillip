@@ -15,9 +15,11 @@ import {
 const messages = {
   heading: "This week",
   weekLabel: "Days you reached your goal this week",
-  daysInARow: {
-    one: "{count} day studied",
-    other: "{count} days in a row",
+  // Counts days with any study and forgives one day off ("never miss twice"),
+  // so it says "days of study", not "in a row". Rule: REDESIGN.md section 5.7.
+  daysOfStudy: {
+    one: "{count} day of study",
+    other: "{count} days of study",
   },
   today: {
     one: "<n>{count}</n> of {target} word today",
@@ -27,11 +29,14 @@ const messages = {
   goalCleared: "You finished everything for today.",
   day: {
     met: "{day}, goal reached",
-    missed: "{day}, goal not reached",
-    "in-progress": "{day}, today",
+    partial: {
+      one: "{day}, {count} of {target} word",
+      other: "{day}, {count} of {target} words",
+    },
+    none: "{day}, no study",
     upcoming: "{day}",
   },
-  todayMet: "{day}, today, goal reached",
+  todayLabel: "{label}, today",
 } as const
 
 const richTags = {
@@ -46,16 +51,16 @@ const RING_RADIUS = (MARK_SIZE - RING_STROKE) / 2
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 // Chart roles, not --primary, so the week stays quieter than the hero's button.
-// Missed and upcoming differ by line style as well as meaning, so color is never the only cue.
+// "No study" and "to come" differ by line style, so color is never the only cue.
 const markClasses = {
   met: "bg-viz-progress text-viz-on-progress",
-  missed: "border-2 border-border-strong",
-  "in-progress": "",
+  partial: "",
+  none: "border-2 border-border-strong",
   upcoming: "border-2 border-dashed border-border-strong",
 } as const satisfies Record<WeekDayStatus, string>
 
-/** Today's mark: a ring that fills toward the goal. */
-function TodayRing({ progress }: { progress: number }): JSX.Element {
+/** Some study, goal not reached: a ring filled by words studied over the goal. */
+function PartialRing({ progress }: { progress: number }): JSX.Element {
   return (
     <svg
       viewBox={`0 0 ${MARK_SIZE} ${MARK_SIZE}`}
@@ -68,7 +73,7 @@ function TodayRing({ progress }: { progress: number }): JSX.Element {
         r={RING_RADIUS}
         fill="none"
         strokeWidth={RING_STROKE}
-        className="stroke-viz-track"
+        className="stroke-border"
       />
       <circle
         cx={MARK_SIZE / 2}
@@ -87,24 +92,27 @@ function TodayRing({ progress }: { progress: number }): JSX.Element {
 
 function DayMarks({
   week,
-  todayProgress,
+  target,
 }: {
   week: readonly WeekDay[]
-  todayProgress: number
+  target: number
 }): JSX.Element {
-  const { weekday, format } = useFormatters()
+  const { weekday, format, plural } = useFormatters()
 
   return (
     <ol
       aria-label={messages.weekLabel}
       className="grid grid-cols-7 justify-items-center gap-1"
     >
-      {week.map(({ date, isToday, status }) => {
+      {week.map(({ date, isToday, status, studied }) => {
         const day = weekday(date, "long")
-        const label =
-          isToday && status === "met"
-            ? format(messages.todayMet, { day })
+        const dayLabel =
+          status === "partial"
+            ? plural(studied, messages.day.partial, { day, target })
             : format(messages.day[status], { day })
+        const label = isToday
+          ? format(messages.todayLabel, { label: dayLabel })
+          : dayLabel
 
         return (
           <li
@@ -124,8 +132,10 @@ function DayMarks({
                 {weekday(date, "short")}
               </span>
             </span>
-            {status === "in-progress" ? (
-              <TodayRing progress={todayProgress} />
+            {status === "partial" ? (
+              <PartialRing
+                progress={target > 0 ? Math.min(1, studied / target) : 0}
+              />
             ) : (
               <span
                 aria-hidden="true"
@@ -164,7 +174,6 @@ export function ThisWeek({
   const { plural, rich, firstDayOfWeek } = useFormatters()
   const studiedToday = studiedOn(days, now)
   const week = weekDays(now, firstDayOfWeek, days, target, clearedToday)
-  const todayProgress = target > 0 ? Math.min(1, studiedToday / target) : 0
 
   const todayLine =
     studiedToday >= target
@@ -179,13 +188,13 @@ export function ThisWeek({
         {messages.heading}
       </Heading>
       <Card className="@container gap-5 p-5">
-        <DayMarks week={week} todayProgress={todayProgress} />
+        <DayMarks week={week} target={target} />
         <div className="flex flex-col gap-1 text-base">
           {/* Hidden at zero: no "0 days", no red. */}
           {streakDays > 0 ? (
             <p className="flex items-center gap-2 font-semibold text-foreground-strong">
               <Flame aria-hidden="true" className="size-5 text-streak" />
-              {plural(streakDays, messages.daysInARow)}
+              {plural(streakDays, messages.daysOfStudy)}
             </p>
           ) : null}
           <p className="text-foreground">{todayLine}</p>

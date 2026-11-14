@@ -141,7 +141,7 @@ export const prototypeDashboardMetrics = {
   ],
   dailyGoal: {
     target: 50,
-    days: recentDays([12, 50, 64, 31, 50, 55, 24], [3]),
+    days: recentDays([12, 50, 64, 31, 0, 55, 24], [3]),
   },
   trickyWords: {
     total: 7,

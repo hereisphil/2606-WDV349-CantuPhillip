@@ -167,18 +167,23 @@ export function studiedOn(days: readonly DailyStudy[], date: Date): number {
   return dayOn(days, date)?.cardsStudied ?? 0
 }
 
-export type WeekDayStatus = "met" | "missed" | "in-progress" | "upcoming"
+/** How much work a day saw. The rule and the marks are in REDESIGN.md section 5.7. */
+export type WeekDayStatus = "met" | "partial" | "none" | "upcoming"
 
 export type WeekDay = {
   date: Date
   isToday: boolean
   status: WeekDayStatus
+  /** Words studied or reviewed that day. */
+  studied: number
 }
 
 /**
  * The calendar week containing `now`, starting on `firstDayOfWeek`
  * (1 = Monday … 7 = Sunday). A day meets the goal by reaching the target
- * or by clearing everything scheduled. Past days without a record count as missed.
+ * or by clearing everything scheduled. Otherwise, past days and today are
+ * "partial" when some words were studied and "none" when none were.
+ * Days without a record had no study.
  */
 export function weekDays(
   now: Date,
@@ -196,15 +201,16 @@ export function weekDays(
     const key = localDateKey(date)
     const isToday = key === todayKey
     const day = dayOn(days, date)
+    const studied = day?.cardsStudied ?? 0
     const cleared = isToday ? clearedToday : (day?.cleared ?? false)
-    const met = cleared || (day?.cardsStudied ?? 0) >= target
-    const status: WeekDayStatus = met
-      ? "met"
-      : isToday
-        ? "in-progress"
-        : key < todayKey
-          ? "missed"
-          : "upcoming"
-    return { date, isToday, status }
+    const status: WeekDayStatus =
+      key > todayKey
+        ? "upcoming"
+        : cleared || studied >= target
+          ? "met"
+          : studied > 0
+            ? "partial"
+            : "none"
+    return { date, isToday, status, studied }
   })
 }
