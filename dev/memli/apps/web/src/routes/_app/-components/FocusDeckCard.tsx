@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { Card } from "@workspace/ui/components/card"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
@@ -117,22 +118,18 @@ function ActionLink({
   const { text, label } = actionMessages[action.mode]
 
   return (
-    <Button
-      variant="outline"
-      size="touch"
-      className="self-start"
+    <Link
+      to="/study/$courseId"
+      params={{ courseId: action.courseId }}
+      search={{ mode: action.mode }}
       aria-label={plural(action.count, label, { deck: deck.title })}
-      render={
-        <Link
-          to="/study/$courseId"
-          params={{ courseId: action.courseId }}
-          search={{ mode: action.mode }}
-        />
-      }
-      nativeButton={false}
+      className={cn(
+        buttonVariants({ variant: "outline", size: "touch" }),
+        "self-start"
+      )}
     >
       {plural(action.count, text)}
-    </Button>
+    </Link>
   )
 }
 

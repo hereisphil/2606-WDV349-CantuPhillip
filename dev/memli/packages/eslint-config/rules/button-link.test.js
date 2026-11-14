@@ -37,37 +37,18 @@ tester.run("button-link", rule, {
       `,
     },
     {
-      name: "a button rendering a Link with nativeButton false",
+      name: "a link styled like a button",
       code: `
         function Home() {
-          return (
-            <Button render={<Link to="/" />} nativeButton={false}>
-              Home
-            </Button>
-          )
+          return <Link to="/" className={cn(buttonVariants({ size: "touch" }))}>Home</Link>
         }
       `,
     },
     {
-      name: "a button rendering an anchor with nativeButton false",
+      name: "a menu trigger rendering a Button",
       code: `
-        function Home() {
-          return <Button render={<a href="/" />} nativeButton={false}>Home</Button>
-        }
-      `,
-    },
-    {
-      name: "a render function that returns a Link, with nativeButton false",
-      code: `
-        function Home() {
-          return (
-            <Button
-              render={(props) => <Link {...props} to="/" />}
-              nativeButton={false}
-            >
-              Home
-            </Button>
-          )
+        function Menu() {
+          return <DropdownMenuTrigger render={<Button variant="ghost" />}>Open</DropdownMenuTrigger>
         }
       `,
     },
@@ -89,6 +70,47 @@ tester.run("button-link", rule, {
     },
   ],
   invalid: [
+    {
+      name: "a button rendering a Link with nativeButton false",
+      code: `
+        function Home() {
+          return (
+            <Button render={<Link to="/" />} nativeButton={false}>
+              Home
+            </Button>
+          )
+        }
+      `,
+
+      errors: [{ messageId: "linkButton" }],
+    },
+    {
+      name: "a button rendering an anchor with nativeButton false",
+      code: `
+        function Home() {
+          return <Button render={<a href="/" />} nativeButton={false}>Home</Button>
+        }
+      `,
+
+      errors: [{ messageId: "linkButton" }],
+    },
+    {
+      name: "a render function that returns a Link, with nativeButton false",
+      code: `
+        function Home() {
+          return (
+            <Button
+              render={(props) => <Link {...props} to="/" />}
+              nativeButton={false}
+            >
+              Home
+            </Button>
+          )
+        }
+      `,
+
+      errors: [{ messageId: "linkButton" }],
+    },
     {
       name: "asChild shorthand",
       code: `
@@ -114,7 +136,7 @@ tester.run("button-link", rule, {
           return <Button render={<Link to="/" />}>Home</Button>
         }
       `,
-      errors: [{ messageId: "nativeButton" }],
+      errors: [{ messageId: "linkButton" }],
     },
     {
       name: "anchor render without nativeButton",
@@ -123,7 +145,7 @@ tester.run("button-link", rule, {
           return <Button render={<a href="/" />}>Home</Button>
         }
       `,
-      errors: [{ messageId: "nativeButton" }],
+      errors: [{ messageId: "linkButton" }],
     },
     {
       name: "Link render with nativeButton true",
@@ -132,7 +154,7 @@ tester.run("button-link", rule, {
           return <Button render={<Link to="/" />} nativeButton={true}>Home</Button>
         }
       `,
-      errors: [{ messageId: "nativeButton" }],
+      errors: [{ messageId: "linkButton" }],
     },
     {
       name: "Link render with a non-literal nativeButton",
@@ -141,7 +163,7 @@ tester.run("button-link", rule, {
           return <Button render={<Link to="/" />} nativeButton={native}>Home</Button>
         }
       `,
-      errors: [{ messageId: "nativeButton" }],
+      errors: [{ messageId: "linkButton" }],
     },
     {
       name: "a render function that returns a Link, without nativeButton",
@@ -154,7 +176,7 @@ tester.run("button-link", rule, {
           )
         }
       `,
-      errors: [{ messageId: "nativeButton" }],
+      errors: [{ messageId: "linkButton" }],
     },
     {
       name: "asChild and a Link render report both",
@@ -163,7 +185,7 @@ tester.run("button-link", rule, {
           return <Button asChild render={<Link to="/" />}>Home</Button>
         }
       `,
-      errors: [{ messageId: "asChild" }, { messageId: "nativeButton" }],
+      errors: [{ messageId: "asChild" }, { messageId: "linkButton" }],
     },
   ],
 })

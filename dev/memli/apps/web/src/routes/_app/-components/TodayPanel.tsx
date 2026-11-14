@@ -1,6 +1,7 @@
 import type { JSX, ReactNode } from "react"
 import { Link } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { useFormatters } from "@/lib/formatters"
@@ -61,20 +62,14 @@ function LearnLink({
   const { plural } = useFormatters()
 
   return (
-    <Button
-      variant={variant}
-      size="touch"
-      render={
-        <Link
-          to="/study/$courseId"
-          params={{ courseId: deck.courseId }}
-          search={{ mode: "learn" }}
-        />
-      }
-      nativeButton={false}
+    <Link
+      to="/study/$courseId"
+      params={{ courseId: deck.courseId }}
+      search={{ mode: "learn" }}
+      className={cn(buttonVariants({ variant, size: "touch" }))}
     >
       {plural(deck.newAvailable, messages.learnNew)}
-    </Button>
+    </Link>
   )
 }
 
@@ -130,19 +125,14 @@ function ReviewContent({
       ) : null}
       <div className="flex flex-col gap-2">
         <Actions>
-          <Button
-            size="touch"
-            render={
-              <Link
-                to="/study/$courseId"
-                params={{ courseId: focusDeck.courseId }}
-                search={{ mode: "review" }}
-              />
-            }
-            nativeButton={false}
+          <Link
+            to="/study/$courseId"
+            params={{ courseId: focusDeck.courseId }}
+            search={{ mode: "review" }}
+            className={cn(buttonVariants({ size: "touch" }))}
           >
             {messages.startReview}
-          </Button>
+          </Link>
           {focusDeck.newAvailable > 0 ? (
             <LearnLink deck={focusDeck} variant="outline" />
           ) : null}
@@ -190,36 +180,28 @@ function KeepGoingActions({
       </p>
       <Actions>
         {extraNew > 0 ? (
-          <Button
-            variant="outline"
-            size="touch"
-            render={
-              <Link
-                to="/study/$courseId"
-                params={{ courseId: deck.courseId }}
-                search={{ mode: "learn", extra: extraNew }}
-              />
-            }
-            nativeButton={false}
+          <Link
+            to="/study/$courseId"
+            params={{ courseId: deck.courseId }}
+            search={{ mode: "learn", extra: extraNew }}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "touch" })
+            )}
           >
             {plural(extraNew, messages.learnMore)}
-          </Button>
+          </Link>
         ) : null}
         {trickyCount > 0 ? (
-          <Button
-            variant="outline"
-            size="touch"
-            render={
-              <Link
-                to="/study/$courseId"
-                params={{ courseId: deck.courseId }}
-                search={{ mode: "practice" }}
-              />
-            }
-            nativeButton={false}
+          <Link
+            to="/study/$courseId"
+            params={{ courseId: deck.courseId }}
+            search={{ mode: "practice" }}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "touch" })
+            )}
           >
             {plural(trickyCount, messages.practiceTricky)}
-          </Button>
+          </Link>
         ) : null}
       </Actions>
       {extraNew > 0 ? (
@@ -253,13 +235,9 @@ function NoDecksContent(): JSX.Element {
         <Text variant="muted">{messages.noDecksDetail}</Text>
       </div>
       <Actions>
-        <Button
-          size="touch"
-          render={<Link to="/community" />}
-          nativeButton={false}
-        >
+        <Link to="/community" className={cn(buttonVariants({ size: "touch" }))}>
           {messages.browseCommunity}
-        </Button>
+        </Link>
       </Actions>
     </>
   )

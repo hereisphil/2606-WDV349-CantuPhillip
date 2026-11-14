@@ -1,7 +1,8 @@
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 import { Badge } from "@workspace/ui/components/badge"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { useFormatters } from "@/lib/formatters"
 import type { DashboardDeck } from "./dashboard-metrics"
@@ -80,22 +81,18 @@ function RowAction({
   const { text, label } = actionMessages[action.mode]
 
   return (
-    <Button
-      variant="outline"
-      size="lg"
-      className="px-3 @2xl:justify-self-end"
+    <Link
+      to="/study/$courseId"
+      params={{ courseId: action.courseId }}
+      search={{ mode: action.mode }}
       aria-label={plural(action.count, label, { deck: deck.title })}
-      render={
-        <Link
-          to="/study/$courseId"
-          params={{ courseId: action.courseId }}
-          search={{ mode: action.mode }}
-        />
-      }
-      nativeButton={false}
+      className={cn(
+        buttonVariants({ variant: "outline", size: "lg" }),
+        "px-3 @2xl:justify-self-end"
+      )}
     >
       {text}
-    </Button>
+    </Link>
   )
 }
 

@@ -5,7 +5,8 @@ import {
   startSession,
   type SessionState,
 } from "@workspace/core/study/session-reducer"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
@@ -278,9 +279,9 @@ function EmptyState({
         {heading}
       </Heading>
       <Text variant="muted">{body}</Text>
-      <Button render={<Link to="/dashboard" />} nativeButton={false}>
+      <Link to="/dashboard" className={cn(buttonVariants())}>
         {messages.back}
-      </Button>
+      </Link>
     </div>
   )
 }

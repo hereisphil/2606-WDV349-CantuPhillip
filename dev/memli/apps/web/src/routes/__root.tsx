@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ComponentType } from "react"
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
+import { buttonVariants } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 
 // Hidden in production and during the axe audit (VITE_A11Y_AUDIT), so CI only
 // judges product UI — not the floating TanStack Router Devtools button.
@@ -34,9 +35,9 @@ export const Route = createRootRoute({
   notFoundComponent: () => (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4">
       <h1 className="text-2xl font-bold">404: Page not found.</h1>
-      <Button render={<Link to="/" />} nativeButton={false}>
+      <Link to="/" className={cn(buttonVariants())}>
         Go to home
-      </Button>
+      </Link>
     </div>
   ),
 })
