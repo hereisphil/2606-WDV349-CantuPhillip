@@ -61,7 +61,8 @@ export function ThemeMenu({ placement }: ThemeMenuProps): JSX.Element {
           ) : (
             <Button
               variant="ghost"
-              className="min-h-11 gap-1.5 px-2.5 text-sm font-semibold hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+              // A long translated label wraps to two lines instead of pushing the account and menu buttons off a narrow screen.
+              className="h-auto min-h-11 max-w-28 gap-1.5 px-2 py-1 text-start text-sm leading-tight font-semibold whitespace-normal hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
             />
           )
         }

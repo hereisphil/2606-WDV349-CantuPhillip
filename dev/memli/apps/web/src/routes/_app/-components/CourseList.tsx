@@ -74,9 +74,10 @@ function CourseRow({ course }: { course: DashboardDeck }): JSX.Element {
   const action = deckAction(course)
 
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    // Wraps when a long translated button and the title cannot share a line: the button moves under it.
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
       <LanguageBadge tag={course.learningLanguage} />
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 basis-40 flex-col gap-0.5">
         <Heading
           level={3}
           size="4"
@@ -98,7 +99,7 @@ function CourseRow({ course }: { course: DashboardDeck }): JSX.Element {
           })}
           className={cn(
             buttonVariants({ variant: "outline", size: "touch" }),
-            "shrink-0"
+            "ms-auto"
           )}
         >
           {actionMessages[action.mode].text}

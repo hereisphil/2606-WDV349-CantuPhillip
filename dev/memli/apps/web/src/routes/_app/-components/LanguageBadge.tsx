@@ -39,7 +39,9 @@ export function LanguageBadge({
       title={name}
       className={cn("font-semibold", sizeClasses[size], toneClasses[tone])}
     >
-      <span aria-hidden="true">{languageCode(tag)}</span>
+      <span aria-hidden="true" translate="no">
+        {languageCode(tag)}
+      </span>
       <span className="sr-only">{name}</span>
     </Badge>
   )
