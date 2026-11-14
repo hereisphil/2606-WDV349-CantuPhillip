@@ -15,6 +15,7 @@ import { Button } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
+import { ThemeMenu, ThemeRadioGroup } from "@/components/theme-control"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
@@ -144,6 +145,7 @@ export function AppSidebar(): JSX.Element {
         </Link>
 
         <div className="flex items-center gap-1 md:hidden">
+          <ThemeMenu />
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={format(messages.accountMenu, {
@@ -207,38 +209,41 @@ export function AppSidebar(): JSX.Element {
 
       <RailNav />
 
-      <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                className="h-auto w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
-              />
-            }
-          >
-            {/* Named by its content so the accessible name includes the visible text. */}
-            <span className="sr-only">{messages.accountMenuPrefix}</span>
-            <span className="flex min-w-0 items-center gap-2.5">
-              <Avatar>
-                <AvatarFallback />
-              </Avatar>
-              <span className="flex min-w-0 flex-col items-start gap-0.5">
-                <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
-                  @{viewer.username}
-                </span>{" "}
-                <PlanBadge plan={viewer.plan} />
+      <div className="mt-auto hidden flex-col gap-3 p-3 md:flex">
+        <ThemeRadioGroup />
+        <div className="border-t border-sidebar-border pt-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  className="h-auto w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
+                />
+              }
+            >
+              {/* Named by its content so the accessible name includes the visible text. */}
+              <span className="sr-only">{messages.accountMenuPrefix}</span>
+              <span className="flex min-w-0 items-center gap-2.5">
+                <Avatar>
+                  <AvatarFallback />
+                </Avatar>
+                <span className="flex min-w-0 flex-col items-start gap-0.5">
+                  <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
+                    @{viewer.username}
+                  </span>{" "}
+                  <PlanBadge plan={viewer.plan} />
+                </span>
               </span>
-            </span>
-            <ChevronsUpDown
-              aria-hidden="true"
-              className="size-4 text-muted-foreground"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="min-w-56">
-            <AccountMenuItems />
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <ChevronsUpDown
+                aria-hidden="true"
+                className="size-4 text-muted-foreground"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="min-w-56">
+              <AccountMenuItems />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </aside>
   )

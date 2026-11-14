@@ -29,8 +29,5 @@
       "entry": [],
       "project": []
     }
-  },
-  "ignoreIssues": {
-    "apps/web/src/components/theme-provider.tsx": ["exports"]
   }
 }
