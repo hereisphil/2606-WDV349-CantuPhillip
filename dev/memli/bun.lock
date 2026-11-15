@@ -20,6 +20,7 @@
       "name": "api",
       "version": "0.0.1",
       "dependencies": {
+        "@workspace/schemas": "workspace:*",
         "hono": "4.13.18",
       },
       "devDependencies": {

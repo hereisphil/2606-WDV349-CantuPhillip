@@ -14,6 +14,8 @@
     "typescript": "~6"
   },
   "exports": {
+    "./api/error": "./src/api/error.ts",
+    "./api/health": "./src/api/health.ts",
     "./auth/sign-in": "./src/auth/sign-in.ts",
     "./env/web": "./src/env/web.ts"
   }

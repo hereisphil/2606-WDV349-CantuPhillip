@@ -8,6 +8,8 @@ Use this package for validation at API boundaries, forms, and env parsing. **Do 
 
 | Import | Use for |
 |--------|---------|
+| `@workspace/schemas/api/error` | The API's error body and its stable error codes |
+| `@workspace/schemas/api/health` | `GET /api/health` response |
 | `@workspace/schemas/auth/sign-in` | Sign-in form input |
 | `@workspace/schemas/env/web` | Vite `import.meta.env` validation |
 
