@@ -1,7 +1,7 @@
 import type { CardProgress } from "@workspace/core/srs/progress"
 import { and, eq, inArray } from "drizzle-orm"
 
-import { idGroups, type Database } from "./client"
+import { idGroups, type Database, type Statement } from "./client"
 import { cards, userProgress } from "./schema"
 
 export type UserProgressRow = typeof userProgress.$inferSelect
@@ -109,19 +109,17 @@ export async function progressForCards(
 }
 
 /**
- * Saves each card's progress for one learner: a new row the first time, the
- * same row updated after that (an upsert on the `(user_id, card_id)` key).
- *
- * All of it goes in one D1 batch, which is a transaction: every card is
- * saved or none is, so a failure never leaves half a session stored.
+ * One statement per card that saves its progress for a learner: a new row
+ * the first time, the same row updated after that (an upsert on the
+ * `(user_id, card_id)` key). Built here, run by `runTogether`.
  */
-export async function saveProgress(
+export function progressUpserts(
   db: Database,
   userId: string,
   progress: readonly CardProgress[],
   now: Date
-): Promise<void> {
-  const [first, ...rest] = progress.map((cardProgress) => {
+): Statement[] {
+  return progress.map((cardProgress) => {
     const row = progressToRow(userId, cardProgress, now)
     const { userId: _userId, cardId: _cardId, ...changes } = row
     return db
@@ -132,7 +130,4 @@ export async function saveProgress(
         set: changes,
       })
   })
-  if (first !== undefined) {
-    await db.batch([first, ...rest])
-  }
 }

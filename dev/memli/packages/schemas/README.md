@@ -46,9 +46,11 @@ All four take the same value, a canonical BCP 47 tag (`es`, `pt-BR`, `es-419`), 
 
 ## Reviews: outcomes in, progress out
 
-A client never sends FSRS numbers. It sends what happened (`cardId`, `outcome`, `reviewedAt`, `durationMs`), and the API loads its own saved progress and schedules with `@workspace/core`'s `applyOutcome`. A tampered request can report a wrong outcome, but it cannot set its own stability or due date. Extra fields are dropped when parsed.
+A client never sends FSRS numbers. It sends what happened (`reviewId`, `cardId`, `outcome`, `reviewedAt`, `durationMs`), and the API loads its own saved progress and schedules with `@workspace/core`'s `applyOutcome`. A tampered request can report a wrong outcome, but it cannot set its own stability or due date. Extra fields are dropped when parsed.
 
 Outcomes are core's codes (`missed`, `tough`, `got_it`, `easy`), never raw ratings 1 to 4.
+
+`reviewId` is a UUID the app makes for each review with `crypto.randomUUID()`. It lets the API record a review once even when the request is sent twice. The session reducer in core stays pure and makes no ids; the app adds one when it sends the review.
 
 ## Keeping in step with `@workspace/core`
 

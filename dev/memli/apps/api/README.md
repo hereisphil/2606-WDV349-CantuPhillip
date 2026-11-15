@@ -2,7 +2,7 @@
 
 The Memli backend: a [Hono](https://hono.dev/) app that runs on Cloudflare Workers. The web app talks to it today, and the mobile app will later ([`docs/architecture.md`](../../docs/architecture.md)).
 
-So far: a health check, the error format, and a local D1 database with the tables for courses, cards, mnemonics and FSRS progress (#106). It is seeded with a learner and four starter courses, and three routes list courses, hand out a study session and save reviews (#112).
+So far: a health check, the error format, and a local D1 database with the tables for courses, cards, mnemonics, FSRS progress (#106) and the review log (#112). It is seeded with a learner and four starter courses, and three routes list courses, hand out a study session and save reviews (#112).
 
 ## Run it locally
 
@@ -120,17 +120,27 @@ It chooses first, from card ids and progress alone, then loads the full content 
 ```json
 {
   "reviews": [
-    { "cardId": "es-gato", "outcome": "got_it", "reviewedAt": "2026-11-15T03:25:51.000Z", "durationMs": 2100 }
+    {
+      "reviewId": "7d3c1e9a-2b4f-4c6d-8e1a-5f9b0c2d3e4f",
+      "cardId": "es-gato",
+      "outcome": "got_it",
+      "reviewedAt": "2026-11-15T03:25:51.000Z",
+      "durationMs": 2100
+    }
   ]
 }
 ```
 
-It answers each reviewed card's progress afterwards, once per card: `{ "progress": [ ... ] }`.
+It answers the progress of every card the request named, once per card: `{ "progress": [ ... ] }`.
+
+Each review saves two things together: the card's new state in `user_progress`, and one row in `reviews` (the review log, below).
 
 - **A client reports what happened, never the result.** The route loads its own saved progress and schedules with core's `applyOutcome`. Extra fields in the body (a made-up `stability`, say) are dropped by the schema.
 - **The server's clock decides when.** Devices' clocks disagree, and FSRS measures memory by the time since the last review. The last review in a request happened now, by the server's clock. Earlier ones in the same request keep their distance from it, because the gap between two reviews on one device is real even when its clock is wrong. One review per request, the usual case, is simply stamped now. See [`src/lib/review-batch.ts`](./src/lib/review-batch.ts).
 - **In order, oldest first.** A missed word comes back in the same session, so one card can appear twice.
 - **All or nothing.** One unknown card answers `NOT_FOUND` and saves nothing. The writes go in one D1 batch, which is a transaction.
+- **Safe to send twice.** `reviewId` is a UUID the client makes for each review (`crypto.randomUUID()`). If a request is sent again, after a dropped connection say, the server sees ids it already has, skips those reviews, and answers the same progress. Without it, a retry would count the review twice and push the card's next date out.
+- **The response time is capped again.** `durationMs` goes through core's `capElapsedMs` (30 seconds at most) on the server too. The app already caps it, but the server never takes a client's word for a number.
 - A body that is not JSON, or that the schema refuses, answers `INVALID_REQUEST`.
 
 ### Who is asking
@@ -208,14 +218,41 @@ src/db/schema.ts ──(bun run db:generate)──► drizzle/migrations/*.sql �
 | `cards` | word in a course | `position` orders new words; `answers` is a JSON array |
 | `mnemonics` | memory hook on a card | `story` is JSON parts, never markup; `content_locale`; `author_id` goes `null` if the author leaves |
 | `user_progress` | learner and card | Core's `CardProgress`, one column per field. No row means never seen |
+| `reviews` | review | The review log: outcome, rating, response time, and the card before the review. Never changed |
 
-Deleting a course removes its cards, their mnemonics, and everyone's progress on them. Deleting a learner removes their progress and keeps their mnemonics without an author.
+Deleting a course removes its cards, their mnemonics, and everyone's progress and reviews on them. Deleting a learner removes their progress and reviews, and keeps their mnemonics without an author.
 
 ### FSRS progress
 
 `user_progress` has a column for each of the eleven `CardProgress` fields: `state`, `due`, `last_review`, `stability`, `stability_fast`, `difficulty`, `reps`, `lapses`, `learning_step`, `scheduled_days`, plus the card. FSRS-7 needs all of them to schedule the next review, so none may be dropped. [`src/db/progress.ts`](./src/db/progress.ts) converts a row to and from `CardProgress`; a test proves the round trip loses nothing after real reviews.
 
 The index on `(user_id, due)` answers the question every session starts with: what is due for this learner now?
+
+### Review log
+
+`user_progress` says where a card stands now. `reviews` says how it got there: one row per review, written once and never changed.
+
+| Column | Holds |
+| --- | --- |
+| `id` | The client's `reviewId`, a UUID. The primary key, so one review is one row |
+| `user_id`, `card_id` | Who reviewed what |
+| `outcome` | What the learner chose: `missed`, `tough`, `got_it` or `easy` |
+| `rating` | The FSRS rating the outcome became, 1 to 4 |
+| `reviewed_at` | When, by the server's clock |
+| `duration_ms` | Response time, capped at 30 seconds. `NULL` when unknown |
+| `prior_*` | The card as it was *before* the review: state, due, last review, stability, fast stability, difficulty, learning step, scheduled days |
+
+It is core's review log (`applyOutcome(...).log`), one column per field; [`src/db/reviews.ts`](./src/db/reviews.ts) converts it.
+
+Why keep the card from before the review, when `user_progress` has the result? Because the result is already somewhere: it is the next review's `prior_` values, or `user_progress` for the latest. The state going in is what cannot be worked out afterwards, and it is what the future uses need:
+
+- **Undo** puts a card back as it was.
+- **FSRS parameter training** learns from "the card looked like this, and the learner then remembered or forgot it".
+- **Days of study, retention and new words per day** on the dashboard are counts over these rows. The index on `(user_id, reviewed_at)` reads one learner's history in time order.
+
+Nothing reads the log yet except the duplicate check. It is written now so that history exists when those features arrive.
+
+The log row and the progress update go in one D1 batch. Because the review id is the primary key, a second copy of the same review is refused by the database itself, and the batch takes its progress update down with it. That holds even when two copies of a request race each other past the route's own check.
 
 ### Timestamps
 
@@ -293,10 +330,11 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/lib/viewer.ts` | Who is asking. The prototype learner until #108. |
 | `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |
 | `src/env.ts` | What Cloudflare passes the Worker: the `DB` binding. |
-| `src/db/client.ts` | Drizzle around the D1 binding, and `idGroups`. |
+| `src/db/client.ts` | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`. |
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
 | `src/db/progress.ts` | Reads and saves `user_progress` as core's `CardProgress`. |
+| `src/db/reviews.ts` | Writes the review log together with progress; finds reviews already recorded. |
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
 | `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
 | `src/db/test-database.ts` | For tests: an in-memory SQLite database from the real migrations and seed. |
@@ -329,8 +367,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
 - **Deploying.** Nothing ships this Worker yet. Staging and production still deploy only the web assets from the root [`wrangler.jsonc`](../../wrangler.jsonc). The D1 `database_id` is a placeholder until a real database is created.
 - **Sign-in.** Every request is the prototype learner until Better Auth (#108). See "Who is asking".
-- **Review history.** `user_progress` holds where each card stands, not how it got there. Days of study, retention, and FSRS parameter training need a review log table (#112). `POST /api/reviews` checks `durationMs` but does not store it yet.
-- **The daily new-word limit resets.** `newAvailable` is the unseen words, capped at 10. It does not yet subtract the new words already started today, because that needs the review log.
-- **Retries.** Sending the same review twice records it twice. A review id from the client would let the server skip the repeat; that also needs the review log.
+- **Reading the review log.** Every review is recorded, but no route reads the history yet: days of study, retention, undo.
+- **The daily new-word limit resets.** `newAvailable` is the unseen words, capped at 10. It does not yet subtract the new words already started today. The log now has what that needs (reviews whose `prior_state` is `new`), but "today" is the learner's day, so the app has to send its time zone first.
 - **Enrollment.** `GET /api/courses` lists every course. There is no "my courses" yet.
 - **Local secrets.** When the API needs them, they go in `apps/api/.dev.vars`, which is gitignored.

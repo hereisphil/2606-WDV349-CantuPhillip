@@ -1,5 +1,6 @@
 import { applyOutcome } from "@workspace/core/srs/outcome"
 import { createProgress } from "@workspace/core/srs/progress"
+import { MAX_INFORMATIVE_MS } from "@workspace/core/study/timing"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
 import { describe, expect, it } from "vitest"
 
@@ -22,7 +23,13 @@ function review(
   outcome: ReviewSubmission["outcome"],
   minutes = 0
 ): ReviewSubmission {
-  return { cardId, outcome, reviewedAt: clientTime(minutes), durationMs: null }
+  return {
+    reviewId: crypto.randomUUID(),
+    cardId,
+    outcome,
+    reviewedAt: clientTime(minutes),
+    durationMs: null,
+  }
 }
 
 describe("reviewTimes", () => {
@@ -70,11 +77,11 @@ describe("reviewTimes", () => {
 
 describe("applyReviews", () => {
   it("starts a card the learner has never seen as new", () => {
-    const [progress] = applyReviews([], [review("es-gato", "got_it")], now)
+    const { progress } = applyReviews([], [review("es-gato", "got_it")], now)
 
-    expect(progress).toEqual(
-      applyOutcome(createProgress("es-gato", now), "got_it", now).progress
-    )
+    expect(progress).toEqual([
+      applyOutcome(createProgress("es-gato", now), "got_it", now).progress,
+    ])
   })
 
   it("builds on the saved progress, never on anything the client sends", () => {
@@ -89,9 +96,9 @@ describe("applyReviews", () => {
       due: "2099-01-01T00:00:00.000Z",
     }
 
-    const [progress] = applyReviews([saved], [tampered], now)
+    const { progress } = applyReviews([saved], [tampered], now)
 
-    expect(progress).toEqual(applyOutcome(saved, "got_it", now).progress)
+    expect(progress).toEqual([applyOutcome(saved, "got_it", now).progress])
   })
 
   it("applies a card's reviews in order and answers once per card", () => {
@@ -101,7 +108,7 @@ describe("applyReviews", () => {
       review("es-gato", "got_it", 0),
     ]
 
-    const progress = applyReviews([], reviews, now)
+    const { progress } = applyReviews([], reviews, now)
 
     const tenMinutesAgo = new Date(now.getTime() - 10 * minute)
     const missed = applyOutcome(
@@ -117,8 +124,68 @@ describe("applyReviews", () => {
   it("leaves cards that were not reviewed out of the answer", () => {
     const other = createProgress("es-casa", now)
 
-    const progress = applyReviews([other], [review("es-gato", "tough")], now)
+    const { progress } = applyReviews(
+      [other],
+      [review("es-gato", "tough")],
+      now
+    )
 
     expect(progress.map((card) => card.cardId)).toEqual(["es-gato"])
+  })
+
+  it("records each review with core's log: the outcome, its rating, and the card before", () => {
+    const first = review("es-gato", "missed", -10)
+    const second = review("es-gato", "got_it", 0)
+
+    const { recorded } = applyReviews([], [first, second], now)
+
+    const tenMinutesAgo = new Date(now.getTime() - 10 * minute)
+    const fresh = createProgress("es-gato", tenMinutesAgo)
+    const missed = applyOutcome(fresh, "missed", tenMinutesAgo)
+    expect(recorded).toEqual([
+      { ...missed.log, reviewId: first.reviewId, durationMs: null },
+      {
+        ...applyOutcome(missed.progress, "got_it", now).log,
+        reviewId: second.reviewId,
+        durationMs: null,
+      },
+    ])
+    expect(recorded.map((entry) => [entry.outcome, entry.rating])).toEqual([
+      ["missed", 1],
+      ["got_it", 3],
+    ])
+    // The log holds the card as it was going in, not coming out.
+    expect(recorded.map((entry) => entry.state)).toEqual(["new", "learning"])
+  })
+
+  it("dates the log by the server's clock", () => {
+    const { recorded } = applyReviews(
+      [],
+      [
+        {
+          ...review("es-gato", "got_it"),
+          reviewedAt: "2020-01-01T00:00:00.000Z",
+        },
+      ],
+      now
+    )
+
+    expect(recorded[0]?.reviewedAt).toBe(now.toISOString())
+  })
+
+  it.each([
+    [4_200, 4_200],
+    [0, 0],
+    [MAX_INFORMATIVE_MS + 1, MAX_INFORMATIVE_MS],
+    [9_000_000, MAX_INFORMATIVE_MS],
+    [null, null],
+  ])("keeps a response time of %s as %s", (sent, kept) => {
+    const { recorded } = applyReviews(
+      [],
+      [{ ...review("es-gato", "got_it"), durationMs: sent }],
+      now
+    )
+
+    expect(recorded[0]?.durationMs).toBe(kept)
   })
 })

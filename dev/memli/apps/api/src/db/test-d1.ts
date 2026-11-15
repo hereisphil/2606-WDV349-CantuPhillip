@@ -5,8 +5,8 @@ import { getPlatformProxy, unstable_splitSqlQuery } from "wrangler"
 
 import { app } from "../app"
 import type { Env } from "../env"
-import { database, type Database } from "./client"
-import { saveProgress } from "./progress"
+import { database, runTogether, type Database } from "./client"
+import { progressUpserts } from "./progress"
 import { cards, courses, mnemonics, users } from "./schema"
 import { apiRoot, migrationStatements, seedSql } from "./test-database"
 
@@ -98,8 +98,10 @@ export async function addCourse(
       exampleTranslation: "A word.",
     }
   })
-  const [first, ...rest] = rows.map((row) => db.insert(cards).values(row))
-  if (first !== undefined) await db.batch([first, ...rest])
+  await runTogether(
+    db,
+    rows.map((row) => db.insert(cards).values(row))
+  )
   return rows.map((row) => row.id)
 }
 
@@ -138,5 +140,5 @@ export async function addProgress(
   progress: readonly CardProgress[],
   userId: string = VIEWER_ID
 ): Promise<void> {
-  await saveProgress(db, userId, progress, new Date())
+  await runTogether(db, progressUpserts(db, userId, progress, new Date()))
 }

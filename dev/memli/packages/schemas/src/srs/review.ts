@@ -17,11 +17,20 @@ export type ReviewOutcomeData = z.infer<typeof reviewOutcomeSchema>
  * cannot hand the server a made-up stability or due date.
  */
 export const reviewSubmissionSchema = z.object({
+  /**
+   * A UUID the client makes for this one review (`crypto.randomUUID()`). If a
+   * request is sent again, after a dropped connection say, the server sees an
+   * id it already has and does not count the review twice.
+   */
+  reviewId: z.uuid(),
   cardId: z.string().min(1),
   outcome: reviewOutcomeSchema,
   /** When the learner settled the outcome, UTC ISO 8601. */
   reviewedAt: z.iso.datetime(),
-  /** Response time, already capped by core's `capElapsedMs`. `null` when unknown. */
+  /**
+   * Response time in milliseconds; `null` when unknown. The session reducer
+   * caps it with core's `capElapsedMs`, and the server caps it again.
+   */
   durationMs: z.int().nonnegative().nullable(),
 })
 
@@ -45,7 +54,11 @@ export const submitReviewsRequestSchema = z.object({
 
 export type SubmitReviewsRequest = z.infer<typeof submitReviewsRequestSchema>
 
-/** Each reviewed card's progress after the batch, once per card. */
+/**
+ * The progress of every card the request named, once per card, after its
+ * reviews. A review the server had already recorded changes nothing, and its
+ * card's progress still comes back.
+ */
 export const submitReviewsResponseSchema = z.object({
   progress: z.array(cardProgressSchema),
 })

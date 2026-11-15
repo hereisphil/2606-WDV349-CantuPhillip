@@ -1,11 +1,28 @@
 import { applyOutcome } from "@workspace/core/srs/outcome"
 import { createProgress, type CardProgress } from "@workspace/core/srs/progress"
+import type { SessionReview } from "@workspace/core/study/session-reducer"
+import { capElapsedMs } from "@workspace/core/study/timing"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
 
 /**
- * Turns the reviews a client reports into saved progress. Pure: the route
- * loads the progress and passes in the server's `now`.
+ * Turns the reviews a client reports into what the server saves: each card's
+ * new progress, and one log entry per review. Pure: the route loads the
+ * progress and passes in the server's `now`.
  */
+
+/**
+ * One review, ready for the `reviews` table: core's log entry (the outcome,
+ * the rating it became, and the card as it was before), plus the response
+ * time and the client's id for it.
+ */
+export type RecordedReview = SessionReview & { readonly reviewId: string }
+
+export type AppliedReviews = {
+  /** Each reviewed card's progress afterwards, once per card. */
+  readonly progress: CardProgress[]
+  /** One entry per review, in the order they were applied. */
+  readonly recorded: RecordedReview[]
+}
 
 // No study session lasts a day. A gap longer than that is a broken clock.
 const MAX_GAP_MS = 24 * 60 * 60 * 1000
@@ -36,34 +53,43 @@ export function reviewTimes(reviewedAt: readonly string[], now: Date): Date[] {
 }
 
 /**
- * Applies reviews in order, oldest first, and returns each reviewed card's
- * progress afterwards, once per card.
+ * Applies reviews in order, oldest first.
  *
  * `saved` is the learner's progress on the reviewed cards; a card with none
  * is new. The schedule is computed here with `@workspace/core`, from what
  * the server has saved. A client reports an outcome, never a schedule.
+ *
+ * The response time is capped again here with core's `capElapsedMs`: the app
+ * already does it, but the server never takes a client's word for a number.
  */
 export function applyReviews(
   saved: readonly CardProgress[],
   reviews: readonly ReviewSubmission[],
   now: Date
-): CardProgress[] {
+): AppliedReviews {
   const progress = new Map(saved.map((card) => [card.cardId, card]))
   const times = reviewTimes(
     reviews.map((review) => review.reviewedAt),
     now
   )
 
-  reviews.forEach((review, index) => {
+  const recorded = reviews.map((review, index): RecordedReview => {
     const at = times[index] ?? now
     const before =
       progress.get(review.cardId) ?? createProgress(review.cardId, at)
-    progress.set(
-      review.cardId,
-      applyOutcome(before, review.outcome, at).progress
-    )
+    const after = applyOutcome(before, review.outcome, at)
+    progress.set(review.cardId, after.progress)
+    return {
+      ...after.log,
+      reviewId: review.reviewId,
+      durationMs:
+        review.durationMs === null ? null : capElapsedMs(review.durationMs),
+    }
   })
 
   const reviewed = new Set(reviews.map((review) => review.cardId))
-  return [...reviewed].flatMap((cardId) => progress.get(cardId) ?? [])
+  return {
+    progress: [...reviewed].flatMap((cardId) => progress.get(cardId) ?? []),
+    recorded,
+  }
 }

@@ -7,6 +7,7 @@ import {
   submitReviewsResponseSchema,
   type ReviewSubmission,
 } from "@workspace/schemas/srs/review"
+import { asc } from "drizzle-orm"
 import {
   afterAll,
   afterEach,
@@ -19,7 +20,9 @@ import {
 } from "vitest"
 
 import { progressFromRow } from "../db/progress"
-import { userProgress } from "../db/schema"
+import { saveReviews } from "../db/reviews"
+import { reviews as reviewLog, userProgress } from "../db/schema"
+import { applyReviews } from "../lib/review-batch"
 import {
   VIEWER_ID,
   addCourse,
@@ -58,6 +61,7 @@ function review(
   reviewedAt: Date = now
 ): ReviewSubmission {
   return {
+    reviewId: crypto.randomUUID(),
     cardId,
     outcome,
     reviewedAt: reviewedAt.toISOString(),
@@ -83,6 +87,11 @@ async function submit(
 
 async function savedRows(): Promise<(typeof userProgress.$inferSelect)[]> {
   return api.db.select().from(userProgress)
+}
+
+/** The review log, oldest first. */
+async function loggedRows(): Promise<(typeof reviewLog.$inferSelect)[]> {
+  return api.db.select().from(reviewLog).orderBy(asc(reviewLog.reviewedAt))
 }
 
 describe("POST /api/reviews", () => {
@@ -112,6 +121,7 @@ describe("POST /api/reviews", () => {
   })
 
   it("builds the next review on what was saved", async () => {
+    // A new review of the same card, with its own id, does count.
     await addCourse(api.db, "spanish", 1)
     const [first] = await submit([review("spanish-1")])
     if (first === undefined) throw new Error("No progress came back")
@@ -160,6 +170,7 @@ describe("POST /api/reviews", () => {
       error: { code: "NOT_FOUND" },
     })
     expect(await savedRows()).toEqual([])
+    expect(await loggedRows()).toEqual([])
   })
 
   it.each([
@@ -175,6 +186,11 @@ describe("POST /api/reviews", () => {
       { reviews: [{ ...review("a"), reviewedAt: "yesterday" }] },
     ],
     ["a negative duration", { reviews: [{ ...review("a"), durationMs: -1 }] }],
+    [
+      "a review id that is not a UUID",
+      { reviews: [{ ...review("a"), reviewId: "1" }] },
+    ],
+    ["no review id", { reviews: [{ ...review("a"), reviewId: undefined }] }],
   ])("answers INVALID_REQUEST for %s", async (_name, body) => {
     const res = await post(body)
 
@@ -185,14 +201,142 @@ describe("POST /api/reviews", () => {
     expect(await savedRows()).toEqual([])
   })
 
-  it("saves a batch larger than D1 lets one query list", async () => {
-    // D1 allows 100 bound values per statement; this request names 120 cards.
+  it("saves a request larger than D1 lets one query list", async () => {
+    // D1 allows 100 bound values per statement; this request names 120 cards
+    // and 120 review ids, and saves 240 rows in one batch.
     const cardIds = await addCourse(api.db, "spanish", 120)
 
     const progress = await submit(cardIds.map((cardId) => review(cardId)))
 
     expect(progress.map((card) => card.cardId)).toEqual(cardIds)
     expect(await savedRows()).toHaveLength(120)
+    expect(await loggedRows()).toHaveLength(120)
+  })
+})
+
+describe("the review log", () => {
+  it("keeps one row per review: the outcome, its rating, and the card before", async () => {
+    await addCourse(api.db, "spanish", 1)
+    const earlier = new Date(now.getTime() - 5 * minute)
+    const missed = review("spanish-1", "missed", earlier)
+    const gotIt = review("spanish-1", "got_it", now)
+    const afterMiss = applyOutcome(
+      createProgress("spanish-1", earlier),
+      "missed",
+      earlier
+    ).progress
+
+    await submit([missed, gotIt])
+
+    expect(await loggedRows()).toEqual([
+      {
+        id: missed.reviewId,
+        userId: VIEWER_ID,
+        cardId: "spanish-1",
+        outcome: "missed",
+        rating: 1,
+        reviewedAt: earlier,
+        durationMs: 4_000,
+        priorState: "new",
+        priorDue: earlier,
+        priorLastReview: null,
+        priorStability: 0,
+        priorStabilityFast: 0,
+        priorDifficulty: 0,
+        priorLearningStep: 0,
+        priorScheduledDays: 0,
+      },
+      {
+        id: gotIt.reviewId,
+        userId: VIEWER_ID,
+        cardId: "spanish-1",
+        outcome: "got_it",
+        rating: 3,
+        reviewedAt: now,
+        durationMs: 4_000,
+        priorState: afterMiss.state,
+        priorDue: new Date(afterMiss.due),
+        priorLastReview: earlier,
+        priorStability: afterMiss.stability,
+        priorStabilityFast: afterMiss.stabilityFast,
+        priorDifficulty: afterMiss.difficulty,
+        priorLearningStep: afterMiss.learningStep,
+        priorScheduledDays: afterMiss.scheduledDays,
+      },
+    ])
+  })
+
+  it("caps a response time the client did not cap", async () => {
+    await addCourse(api.db, "spanish", 2)
+
+    await submit([
+      { ...review("spanish-1"), durationMs: 600_000 },
+      { ...review("spanish-2"), durationMs: null },
+    ])
+
+    const durations = new Map(
+      (await loggedRows()).map((row) => [row.cardId, row.durationMs])
+    )
+    expect(durations.get("spanish-1")).toBe(30_000)
+    expect(durations.get("spanish-2")).toBeNull()
+  })
+})
+
+describe("a request sent twice", () => {
+  it("counts each review once and answers the same progress", async () => {
+    await addCourse(api.db, "spanish", 1)
+    const reviews = [review("spanish-1")]
+
+    const first = await submit(reviews)
+    vi.setSystemTime(new Date(now.getTime() + minute))
+    const again = await submit(reviews)
+
+    expect(again).toEqual(first)
+    expect(again[0]?.reps).toBe(1)
+    expect(await loggedRows()).toHaveLength(1)
+    expect((await savedRows())[0]?.updatedAt).toEqual(now)
+  })
+
+  it("records only the reviews it has not seen", async () => {
+    await addCourse(api.db, "spanish", 2)
+    const sent = review("spanish-1")
+    await submit([sent])
+
+    const progress = await submit([sent, review("spanish-2", "easy")])
+
+    expect(progress.map((card) => [card.cardId, card.reps])).toEqual([
+      ["spanish-1", 1],
+      ["spanish-2", 1],
+    ])
+    expect(await loggedRows()).toHaveLength(2)
+  })
+
+  it("saves nothing when two copies race and the second reaches the database", async () => {
+    // Both copies looked before either saved, so the route's check missed.
+    // The review id is the primary key: the second log row is refused, and
+    // the batch takes its progress update down with it.
+    await addCourse(api.db, "spanish", 1)
+    const sent = review("spanish-1")
+    const [saved] = await submit([sent])
+    if (saved === undefined) throw new Error("No progress came back")
+    const copy = applyReviews([saved], [sent], now)
+
+    await expect(
+      saveReviews(api.db, VIEWER_ID, copy.recorded, copy.progress, now)
+    ).rejects.toThrow()
+
+    expect((await savedRows()).map(progressFromRow)).toEqual([saved])
+    expect(await loggedRows()).toHaveLength(1)
+  })
+
+  it("counts a review once when one request names it twice", async () => {
+    await addCourse(api.db, "spanish", 1)
+    const sent = review("spanish-1")
+
+    const [progress] = await submit([sent, sent])
+
+    expect(progress?.reps).toBe(1)
+    expect(await loggedRows()).toHaveLength(1)
   })
 })
 

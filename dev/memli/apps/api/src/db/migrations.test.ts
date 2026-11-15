@@ -123,3 +123,61 @@ describe("courses, cards and mnemonics", () => {
     ).toThrow(/UNIQUE constraint failed: cards.course_id, cards.position/)
   })
 })
+
+describe("reviews", () => {
+  const reviewRow = `
+    INSERT INTO reviews (id, user_id, card_id, outcome, rating, reviewed_at,
+      duration_ms, prior_state, prior_due, prior_last_review, prior_stability,
+      prior_stability_fast, prior_difficulty, prior_learning_step,
+      prior_scheduled_days)
+    VALUES ('0b7e2a52-6c1f-4d0e-9a57-3f8a1c2d4e5f', 'usr_prototype_01',
+      'es-gato', 'got_it', 3, 1794700000000, 4200, 'new', 1794700000000, NULL,
+      0, 0, 0, 0, 0)`
+
+  it("records a review once, by its id", () => {
+    db.exec(reviewRow)
+
+    expect(() => db.exec(reviewRow)).toThrow(
+      /UNIQUE constraint failed: reviews.id/
+    )
+  })
+
+  it("keeps many reviews of one card", () => {
+    db.exec(reviewRow)
+    db.exec(reviewRow.replace("0b7e2a52", "1c8f3b63"))
+
+    expect(count("reviews")).toBe(2)
+  })
+
+  it.each([
+    ["an outcome core does not know", "'got_it'", "'good'", /outcome_check/],
+    ["a rating outside 1 to 4", "'got_it', 3", "'got_it', 5", /rating_check/],
+    ["a negative response time", "4200", "-1", /duration_check/],
+    ["a state core does not know", "'new'", "'fresh'", /prior_state_check/],
+  ])("refuses %s", (_name, from, to, error) => {
+    expect(() => db.exec(reviewRow.replace(from, to))).toThrow(error)
+  })
+
+  it("allows an unknown response time", () => {
+    db.exec(reviewRow.replace("4200", "NULL"))
+
+    expect(count("reviews")).toBe(1)
+  })
+
+  it("goes away with the learner, and with the card", () => {
+    db.exec(reviewRow)
+    db.exec(reviewRow.replace("0b7e2a52", "1c8f3b63"))
+
+    db.exec("DELETE FROM cards WHERE id = 'es-gato'")
+    expect(count("reviews")).toBe(0)
+
+    db.exec(`
+      INSERT INTO cards (id, course_id, position, term, part_of_speech,
+        answers, phonetic, example_text, example_translation)
+        VALUES ('es-gato', 'spanish-core-1000', 1, 'gato', 'noun', '["cat"]',
+          '/ˈɡato/', 'El gato duerme.', 'The cat sleeps.')`)
+    db.exec(reviewRow)
+    db.exec("DELETE FROM users WHERE id = 'usr_prototype_01'")
+    expect(count("reviews")).toBe(0)
+  })
+})
