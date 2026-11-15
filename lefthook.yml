@@ -11,6 +11,12 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx}"
       run: bunx --bun eslint --fix {staged_files}
       stage_fixed: true
+    eslint-api:
+      priority: 1
+      root: "dev/memli/apps/api/"
+      glob: "*.{ts,tsx,js,jsx}"
+      run: bunx --bun eslint --fix {staged_files}
+      stage_fixed: true
     eslint-ui:
       priority: 1
       root: "dev/memli/packages/ui/"

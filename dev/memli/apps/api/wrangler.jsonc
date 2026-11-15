@@ -1,0 +1,12 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "memli-api",
+  "main": "src/index.ts",
+  // The newest date the installed local runtime (workerd) accepts. `wrangler dev`
+  // refuses to start on a later one, so raise this only alongside wrangler.
+  "compatibility_date": "2026-06-24",
+  // Local only for now. `apps/web` proxies /api/* here (apps/web/vite.config.ts).
+  "dev": {
+    "port": 8787
+  }
+}

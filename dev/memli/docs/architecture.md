@@ -126,7 +126,7 @@ Until then, keep route groups and invest in the product.
 ### Hosting shape
 
 - **Production:** `api.{brand}.com`
-- **Local:** `localhost` port or Vite/ wrangler proxy to `/api` — either is fine; document in API README when created
+- **Local:** `wrangler dev` on `localhost:8787`, reached through the Vite proxy at `/api/*` on the web origin. The app is mounted at `basePath("/api")`, so no path is rewritten. See [`apps/api/README.md`](../apps/api/README.md)
 
 ### Contract sharing
 

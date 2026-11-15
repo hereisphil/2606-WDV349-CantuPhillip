@@ -1,6 +1,6 @@
 # Memli — community mnemonic language learning (monorepo)
 
-Vite + React web app (`apps/web`), pure TypeScript domain package (`packages/core` — answer checking, FSRS-7 scheduling via `ts-fsrs`, and the study-session reducer), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
+Vite + React web app (`apps/web`), Hono API on Cloudflare Workers (`apps/api`), pure TypeScript domain package (`packages/core` — answer checking, FSRS-7 scheduling via `ts-fsrs`, and the study-session reducer), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
 
 **Planned public brand:** FluentVine (see docs). Product and architecture decisions live in [`docs/`](./docs/README.md) — start with the [roadmap](./docs/roadmap.md).
 
@@ -17,7 +17,7 @@ bun install
 
 | Script | Purpose |
 |--------|---------|
-| `bun run dev` | Start web (Turbo) |
+| `bun run dev` | Start web (`:5173`) and API (`:8787`) with Turbo. Web proxies `/api/*` to the API ([`apps/api/README.md`](./apps/api/README.md)) |
 | `bun run lint` | ESLint via Turbo |
 | `bun run format` / `format:check` | Prettier write / check |
 | `bun run typecheck` | TypeScript via Turbo |
@@ -27,7 +27,7 @@ bun install
 
 ## Git hooks (Lefthook)
 
-Config lives at the **repository root** ([`lefthook.yml`](../../lefthook.yml)) because Git hooks are always repo-scoped; commands are limited to `dev/memli/` (and ESLint runs from `apps/web` / `packages/ui` so each flat config resolves).
+Config lives at the **repository root** ([`lefthook.yml`](../../lefthook.yml)) because Git hooks are always repo-scoped; commands are limited to `dev/memli/` (and ESLint runs from `apps/web`, `apps/api`, `packages/ui` and `packages/core` so each flat config resolves).
 
 | Hook | What runs |
 |------|-----------|
@@ -68,7 +68,7 @@ cd dev/memli
 bun run test
 ```
 
-[`packages/core`](./packages/core) covers its domain logic and session reducer with Vitest (#132). We intentionally skip marketing UI and route components.
+[`packages/core`](./packages/core) covers its domain logic and session reducer with Vitest (#132). [`apps/api`](./apps/api) tests its routes with Vitest and Hono's `app.request()`, with no server running (#106). We intentionally skip marketing UI and route components.
 
 ## Adding shadcn/ui components
 

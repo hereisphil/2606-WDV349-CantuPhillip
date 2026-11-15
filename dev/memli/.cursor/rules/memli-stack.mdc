@@ -7,6 +7,7 @@ alwaysApply: true
 
 - App lives under `dev/memli/`.
   - `apps/web`: Vite + React frontend (`TanStack Router`).
+  - `apps/api`: Hono API on Cloudflare Workers (`wrangler dev`, port 8787). Every route sits under `/api`; `apps/web` reaches it through the Vite `/api` proxy, never by host or port (`apps/api/README.md`, #106).
   - `packages/core` (`@workspace/core`): Pure TypeScript domain package — answer Evaluator, Rating Mapper, FSRS-7 scheduling via a `ts-fsrs` wrapper, silent timing helpers, and the study-session reducer; zero React/DOM imports (`packages/core/README.md`, #132).
   - `packages/schemas` (`@workspace/schemas`): Shared Zod validation contracts and environment schemas.
   - `packages/ui` (`@workspace/ui`): Web-only component library built on shadcn/ui + Base UI primitives, including reusable `<Section>`, `<Heading>`, and `<Text>` layout/typography primitives.
