@@ -64,7 +64,8 @@ export function SessionHeader({
   const percent = total > 0 ? (completed / total) * 100 : 0
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+    // The root's scroll padding keeps focused and scrolled-to content out from under this header (WCAG 2.4.11).
+    <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 [:root:has(&)]:scroll-pt-32 md:[:root:has(&)]:scroll-pt-24">
       {/*
         Below md, two rows: Exit and Theme, then the title and progress at full width, so the title isn't squeezed.
         From md up, one row: a centered column the width of the card (max-w-xl) holds the progress, so it stays short and lines up with the card.

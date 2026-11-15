@@ -33,6 +33,7 @@ One-off scripts are forgotten, and the next change breaks what they measured. If
 
 - Sizes, wording and capitals: `floors.spec.ts`.
 - Overflow with long or right-to-left text: `pseudo.spec.ts`.
+- What is on screen after an action (scroll and focus after Reveal): `study-reveal.spec.ts`.
 - Accessibility: `dashboard.a11y.spec.ts`, `study.a11y.spec.ts`.
 
 Prove a new check can fail: break the screen on purpose, watch the spec go red, then undo it.

@@ -21,13 +21,38 @@ type AnswerBreakdownProps = {
   children?: ReactNode
 }
 
+/** Room below the answer's top edge that must be on screen, so the meaning shows. */
+const MEANING_ROOM_PX = 160
+
 /**
  * Focuses the answer when it appears, so keyboard and screen-reader users
  * land on it instead of on the page body (the reveal button is gone). A
  * module-level function keeps the ref stable, so it runs once per mount.
+ *
+ * A plain `focus()` scrolls the tall answer to the top of the screen, under
+ * the sticky header and past the meaning. Instead, the page stays put when
+ * the word (the prompt card right above the answer) and the meaning are both
+ * in view, and otherwise brings the prompt card's top just below the header
+ * (the root's `scroll-padding-top`, set by SessionHeader).
  */
 function focusOnMount(element: HTMLElement | null): void {
-  element?.focus()
+  if (element === null) {
+    return
+  }
+  element.focus({ preventScroll: true })
+  const prompt = element.previousElementSibling ?? element
+  const headerRoom =
+    Number.parseFloat(
+      getComputedStyle(document.documentElement).scrollPaddingTop
+    ) || 0
+  const promptTop = prompt.getBoundingClientRect().top
+  const answerTop = element.getBoundingClientRect().top
+  if (
+    promptTop < headerRoom ||
+    answerTop + MEANING_ROOM_PX > window.innerHeight
+  ) {
+    prompt.scrollIntoView({ block: "start" })
+  }
 }
 
 /** The revealed side of a study card: what it means, how it sounds, and an example. */
