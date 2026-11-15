@@ -6,6 +6,11 @@ node_modules/
 coverage/
 *.tsbuildinfo
 
+# Playwright output (gitignored, but Prettier only reads this file here)
+test-results/
+playwright-report/
+blob-report/
+
 # Locks & generated
 bun.lock
 routeTree.gen.ts
