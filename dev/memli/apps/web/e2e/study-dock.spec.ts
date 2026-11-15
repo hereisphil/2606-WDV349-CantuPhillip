@@ -110,11 +110,27 @@ test.describe("study session outcome dock", () => {
       "Yes, easily",
     ])
 
-    await page.keyboard.press("Enter")
-    await expect(choices).toBeVisible()
-
     await page.keyboard.press("3")
     await expect(prompt(page)).toBeFocused()
     await expect(page.getByText("4 words left")).toBeVisible()
+  })
+
+  test("Revealing nudges toward “No, I didn't”, which Enter confirms", async ({
+    page,
+  }) => {
+    await page.goto(study, { waitUntil: "networkidle" })
+    await page.getByRole("button", { name: "Reveal answer" }).click()
+
+    await expect(
+      dock(page, "Did you know it?").getByRole("button", {
+        name: "No, I didn't",
+      })
+    ).toHaveAttribute("aria-keyshortcuts", "Enter 1")
+
+    // A miss comes back this session: the count stays, and another word comes first.
+    await page.keyboard.press("Enter")
+    await expect(prompt(page)).toBeFocused()
+    await expect(prompt(page)).not.toContainText("gato")
+    await expect(page.getByText("5 words left")).toBeVisible()
   })
 })

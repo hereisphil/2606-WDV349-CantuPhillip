@@ -97,8 +97,13 @@ function copyOf(evaluation: Evaluation | null): DockCopy {
  * The choice Enter confirms, shown as the amber button, or `null` when the
  * learner has to pick. The timing nudge wins when there is one. Otherwise a
  * correct answer defaults to "got it" (never "easy", which FSRS-7 puts about
- * 54 days out on a new word), a wrong one to "missed", and a near miss or a
- * reveal has no default: only the learner knows whether they knew it.
+ * 54 days out on a new word), and a wrong one to "missed".
+ *
+ * A reveal also defaults to "missed": revealing without typing usually means
+ * the word did not come, and an honest miss brings it back this session
+ * instead of weeks from now. The other three stay one tap away.
+ *
+ * A near miss has no default: only the learner knows if it was just a typo.
  */
 function primaryOf(
   evaluation: Evaluation | null,
@@ -107,7 +112,10 @@ function primaryOf(
   if (suggested !== null) {
     return suggested
   }
-  if (evaluation === null || evaluation.verdict === "near") {
+  if (evaluation === null) {
+    return "missed"
+  }
+  if (evaluation.verdict === "near") {
     return null
   }
   return outcomeChoices(evaluation)[0] ?? null
