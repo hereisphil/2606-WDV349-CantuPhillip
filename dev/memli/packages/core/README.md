@@ -38,6 +38,7 @@ The session reducer runs the whole loop for a queue of cards.
 | `@workspace/core/srs/outcome` | `ReviewOutcome`, `outcomeChoices`, `applyOutcome`, `previewOutcomeDue` |
 | `@workspace/core/srs/progress` | `CardProgress`, `createProgress`, `isDue`, plus rating-level `applyRating` / `previewDue` |
 | `@workspace/core/study/timing` | `capElapsedMs`, `suggestOutcome`, `MAX_INFORMATIVE_MS` |
+| `@workspace/core/study/course-progress` | `summarizeCourseProgress`, `sessionCards`, `StudyMode`, `isSeen`, `isMastered`, `isTricky` and their thresholds |
 | `@workspace/core/study/session-reducer` | `startSession`, `sessionReducer`, `SessionCard`, `SessionState`, `SessionEvent`, `SessionReview` |
 
 Apps should schedule through **outcomes** (`applyOutcome`), not ratings. The rating-level helpers stay exported for the API and tests.
@@ -124,6 +125,30 @@ prompt ──SUBMIT / REVEAL──▶ answered ──RESOLVE──▶ prompt (ne
 - `reviews` keeps every review (including each miss) with its `durationMs`, ready for `POST /api/reviews`.
 - Derive, don't store: the current card is `queue[0]`, and choices and suggestions are computed from `evaluation` during render.
 - Any other `status × event` pair leaves the state unchanged; the tests cover every pair.
+
+### Course progress and session cards — `study/course-progress`
+
+Two questions, one set of rules: where does a learner stand in a course, and which cards does a session hold?
+
+| Word | Rule | Constant |
+| --- | --- | --- |
+| seen | Reviewed at least once (`state` is not `new`) | |
+| due | Seen, and `due` has passed | |
+| mastered | In `review` with stability of 21 days or more | `MASTERED_STABILITY_DAYS` |
+| tricky | Forgotten 3 times or more, and not mastered | `TRICKY_LAPSES` |
+| new today | Unseen, up to 10 | `DAILY_NEW_CARD_LIMIT` |
+
+`summarizeCourseProgress(cardCount, progress, now)` returns the dashboard's counts: `dueCount`, `newAvailable`, `masteredCount`, `learningCount`, `unseenCount`, `trickyCount`, `lastReviewedAt`. Mastered, learning and unseen always add up to the course.
+
+`sessionCards(cards, mode, { now, extra })` returns one session's cards in study order:
+
+| `mode` | Cards | Order |
+| --- | --- | --- |
+| `review` | Seen and due | Most overdue first |
+| `learn` | Unseen, up to the daily limit plus `extra` | Course order |
+| `practice` | Tricky | Most forgotten first |
+
+A test holds the two together: a session always has exactly as many cards as its count says. The three thresholds are product decisions in one place; change the constant and every client follows.
 
 ## Development
 

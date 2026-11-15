@@ -5,6 +5,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status"
 // One HTTP status per code, decided here once. `satisfies` makes TypeScript
 // fail the build when a new code is added to the schema without a status.
 const STATUS = {
+  INVALID_REQUEST: 400,
   NOT_FOUND: 404,
   INTERNAL_ERROR: 500,
 } as const satisfies Record<ApiErrorCode, ContentfulStatusCode>

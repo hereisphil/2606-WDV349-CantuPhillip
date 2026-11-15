@@ -1,6 +1,13 @@
 import { applyOutcome, type ReviewOutcome } from "@workspace/core/srs/outcome"
 import { createProgress, type CardProgress } from "@workspace/core/srs/progress"
+import type {
+  CourseProgressSummary,
+  StudyMode,
+} from "@workspace/core/study/course-progress"
 import type { SessionReview } from "@workspace/core/study/session-reducer"
+import type { CourseSummary } from "@workspace/schemas/api/courses"
+import type { StudyModeData } from "@workspace/schemas/api/study"
+import type { Course } from "@workspace/schemas/content/course"
 import {
   cardProgressSchema,
   type CardProgressData,
@@ -24,6 +31,17 @@ describe("schemas match @workspace/core", () => {
 
   it("has the same progress fields", () => {
     expectTypeOf<Readonly<CardProgressData>>().toEqualTypeOf<CardProgress>()
+  })
+
+  it("has the same study modes", () => {
+    expectTypeOf<StudyModeData>().toEqualTypeOf<StudyMode>()
+  })
+
+  it("has the same course progress counts", () => {
+    // A course summary is a course plus exactly what core counts.
+    expectTypeOf<
+      Readonly<Omit<CourseSummary, keyof Course>>
+    >().toEqualTypeOf<CourseProgressSummary>()
   })
 
   it("accepts the progress core creates and schedules", () => {

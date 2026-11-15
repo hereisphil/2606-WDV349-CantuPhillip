@@ -1,6 +1,8 @@
 import type { CardProgress } from "@workspace/core/srs/progress"
+import { and, eq, inArray } from "drizzle-orm"
 
-import type { userProgress } from "./schema"
+import { idGroups, type Database } from "./client"
+import { cards, userProgress } from "./schema"
 
 export type UserProgressRow = typeof userProgress.$inferSelect
 type NewUserProgressRow = typeof userProgress.$inferInsert
@@ -47,5 +49,90 @@ export function progressToRow(
     learningStep: progress.learningStep,
     scheduledDays: progress.scheduledDays,
     updatedAt: now,
+  }
+}
+
+/** One learner's saved progress in every course, by course id. */
+export async function progressByCourse(
+  db: Database,
+  userId: string
+): Promise<Map<string, CardProgress[]>> {
+  const rows = await db
+    .select({ courseId: cards.courseId, progress: userProgress })
+    .from(userProgress)
+    .innerJoin(cards, eq(cards.id, userProgress.cardId))
+    .where(eq(userProgress.userId, userId))
+
+  const byCourse = new Map<string, CardProgress[]>()
+  for (const { courseId, progress } of rows) {
+    const list = byCourse.get(courseId) ?? []
+    list.push(progressFromRow(progress))
+    byCourse.set(courseId, list)
+  }
+  return byCourse
+}
+
+/** One learner's saved progress in one course. Unseen cards have none. */
+export async function courseProgress(
+  db: Database,
+  userId: string,
+  courseId: string
+): Promise<CardProgress[]> {
+  const rows = await db
+    .select({ progress: userProgress })
+    .from(userProgress)
+    .innerJoin(cards, eq(cards.id, userProgress.cardId))
+    .where(and(eq(userProgress.userId, userId), eq(cards.courseId, courseId)))
+  return rows.map(({ progress }) => progressFromRow(progress))
+}
+
+/** One learner's saved progress on these cards. Unseen cards have none. */
+export async function progressForCards(
+  db: Database,
+  userId: string,
+  cardIds: readonly string[]
+): Promise<CardProgress[]> {
+  const groups = await Promise.all(
+    idGroups(cardIds).map((ids) =>
+      db
+        .select()
+        .from(userProgress)
+        .where(
+          and(
+            eq(userProgress.userId, userId),
+            inArray(userProgress.cardId, ids)
+          )
+        )
+    )
+  )
+  return groups.flat().map(progressFromRow)
+}
+
+/**
+ * Saves each card's progress for one learner: a new row the first time, the
+ * same row updated after that (an upsert on the `(user_id, card_id)` key).
+ *
+ * All of it goes in one D1 batch, which is a transaction: every card is
+ * saved or none is, so a failure never leaves half a session stored.
+ */
+export async function saveProgress(
+  db: Database,
+  userId: string,
+  progress: readonly CardProgress[],
+  now: Date
+): Promise<void> {
+  const [first, ...rest] = progress.map((cardProgress) => {
+    const row = progressToRow(userId, cardProgress, now)
+    const { userId: _userId, cardId: _cardId, ...changes } = row
+    return db
+      .insert(userProgress)
+      .values(row)
+      .onConflictDoUpdate({
+        target: [userProgress.userId, userProgress.cardId],
+        set: changes,
+      })
+  })
+  if (first !== undefined) {
+    await db.batch([first, ...rest])
   }
 }

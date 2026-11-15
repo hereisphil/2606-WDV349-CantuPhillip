@@ -2,7 +2,7 @@
 
 The Memli backend: a [Hono](https://hono.dev/) app that runs on Cloudflare Workers. The web app talks to it today, and the mobile app will later ([`docs/architecture.md`](../../docs/architecture.md)).
 
-So far: a health check, the error format, and a local D1 database with the tables for courses, cards, mnemonics and FSRS progress (#106), seeded with a learner and four starter courses (#112). Routes that read and write them come next in #112.
+So far: a health check, the error format, and a local D1 database with the tables for courses, cards, mnemonics and FSRS progress (#106). It is seeded with a learner and four starter courses, and three routes list courses, hand out a study session and save reviews (#112).
 
 ## Run it locally
 
@@ -63,8 +63,95 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 | Route | Answers | Contract |
 | --- | --- | --- |
 | `GET /api/health` | `200 {"status":"ok"}` | `@workspace/schemas/api/health` |
+| `GET /api/courses` | Every course, with the viewer's progress in each | `@workspace/schemas/api/courses` |
+| `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
+| `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
 
 `/api/health` is a liveness check: the Worker is up and routing. It does not touch the database.
+
+Every answer carries `Cache-Control: no-store`. The data is one learner's and changes with each review, so nothing between the Worker and the app may keep a copy.
+
+### `GET /api/courses`
+
+What the dashboard shows: each course, plus seven numbers for the viewer.
+
+```json
+{
+  "courses": [
+    {
+      "courseId": "spanish-core-1000",
+      "title": "Spanish Core 1000",
+      "learningLanguage": "es",
+      "answerLanguage": "en",
+      "dueCount": 0,
+      "newAvailable": 4,
+      "masteredCount": 0,
+      "learningCount": 1,
+      "unseenCount": 4,
+      "trickyCount": 0,
+      "lastReviewedAt": "2026-11-15T03:25:51.774Z"
+    }
+  ]
+}
+```
+
+The route only loads rows. `summarizeCourseProgress` in `@workspace/core/study/course-progress` does the counting, so "due", "mastered" and "tricky" mean the same thing in the API, the web app and the mobile app.
+
+### `GET /api/courses/:courseId/study`
+
+The cards for one session, in the order to study them. `?mode=` picks the kind:
+
+| `mode` | Cards | Order |
+| --- | --- | --- |
+| `review` (default) | Seen and due now | Most overdue first |
+| `learn` | Never seen, up to 10 a day | Course order |
+| `practice` | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
+
+`?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode` or `extra` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
+
+Each card is a `Card` from `@workspace/schemas` with its mnemonics nested, most upvoted first, plus `progress`. A card the viewer has never seen arrives with fresh `new` progress, so the session reducer in `@workspace/core` can use every card as it comes.
+
+The server chooses the cards with core's `sessionCards`, the same rules that produce the counts above. So the number on a dashboard button is always the number of cards its session holds.
+
+It chooses first, from card ids and progress alone, then loads the full content of the chosen cards only. A 1,000-word course costs what a 10-word session needs.
+
+### `POST /api/reviews`
+
+```json
+{
+  "reviews": [
+    { "cardId": "es-gato", "outcome": "got_it", "reviewedAt": "2026-11-15T03:25:51.000Z", "durationMs": 2100 }
+  ]
+}
+```
+
+It answers each reviewed card's progress afterwards, once per card: `{ "progress": [ ... ] }`.
+
+- **A client reports what happened, never the result.** The route loads its own saved progress and schedules with core's `applyOutcome`. Extra fields in the body (a made-up `stability`, say) are dropped by the schema.
+- **The server's clock decides when.** Devices' clocks disagree, and FSRS measures memory by the time since the last review. The last review in a request happened now, by the server's clock. Earlier ones in the same request keep their distance from it, because the gap between two reviews on one device is real even when its clock is wrong. One review per request, the usual case, is simply stamped now. See [`src/lib/review-batch.ts`](./src/lib/review-batch.ts).
+- **In order, oldest first.** A missed word comes back in the same session, so one card can appear twice.
+- **All or nothing.** One unknown card answers `NOT_FOUND` and saves nothing. The writes go in one D1 batch, which is a transaction.
+- A body that is not JSON, or that the schema refuses, answers `INVALID_REQUEST`.
+
+### Who is asking
+
+There is no sign-in until Better Auth (#108), so every request is the prototype learner, `usr_prototype_01`. Routes ask [`src/lib/viewer.ts`](./src/lib/viewer.ts) and never name a user id themselves; #108 changes that one function. Until then this API must not be deployed: anyone who can reach it is that learner.
+
+### Checking a request
+
+Routes never read a raw body or query string. `validate` in [`src/lib/validate.ts`](./src/lib/validate.ts) runs a schema from `@workspace/schemas` first:
+
+```ts
+routes.post("/", validate("json", submitReviewsRequestSchema), async (c) => {
+  const { reviews } = c.req.valid("json") // typed, and already checked
+})
+```
+
+Use `"json"` for a body and `"query"` for a query string.
+
+### D1's limit of 100 values per statement
+
+D1 allows 100 bound values (`?`) in one statement. A query that lists ids, `WHERE id IN (?, ?, ...)`, fails past that. `idGroups` in [`src/db/client.ts`](./src/db/client.ts) splits a list of ids into groups of 90, one query each. Plain SQLite has no such limit, which is why the route tests run on a real D1 (see Tests).
 
 ## Errors are codes, not sentences
 
@@ -78,6 +165,7 @@ The server never writes the sentence a learner reads. The web app maps the code 
 
 | Code | Status | When |
 | --- | --- | --- |
+| `INVALID_REQUEST` | 400 | The body or query string is not what the route accepts |
 | `NOT_FOUND` | 404 | No route matched, or the thing asked for does not exist |
 | `INTERNAL_ERROR` | 500 | A route threw. The details go to the log, never the response |
 
@@ -180,10 +268,16 @@ Never edit a migration that is already committed; write a new one. CI regenerate
 
 ### Tests
 
-Both run on an in-memory SQLite database (Node's built-in `node:sqlite`, no extra package), built from the real migration files by [`src/db/test-database.ts`](./src/db/test-database.ts).
+Two kinds of database, for two kinds of test.
+
+**Schema and seed tests** run on an in-memory SQLite database (Node's built-in `node:sqlite`, no extra package), built from the real migration files by [`src/db/test-database.ts`](./src/db/test-database.ts). They are instant.
 
 - [`src/db/migrations.test.ts`](./src/db/migrations.test.ts) checks keys, cascades and `CHECK` constraints.
 - [`src/db/seed.test.ts`](./src/db/seed.test.ts) runs the seed, reads the rows back in the shape the API will send, and parses them with the Zod schemas in `@workspace/schemas`. The seed is SQL written by hand, so this is what catches a misspelled part of speech, broken JSON, or a picture that does not exist. It also seeds twice to prove nothing is duplicated and progress survives.
+
+**Route tests** ([`src/routes/*.test.ts`](./src/routes)) need what a route needs: a D1 binding. [`src/db/test-d1.ts`](./src/db/test-d1.ts) gets one from wrangler's `getPlatformProxy`, which starts `workerd`, the runtime `wrangler dev` and Cloudflare use, with an in-memory database. So the tests call the real routes on a real D1, limits included, and never touch your local database. They add their own rows with Drizzle; one group runs the real seed.
+
+The server's clock is faked in these tests (`vi.useFakeTimers({ toFake: ["Date"] })`), so "a card comes due later" is a line of code, not a wait.
 
 To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
@@ -191,16 +285,24 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
 | File | Purpose |
 | --- | --- |
-| `src/app.ts` | The Hono app and its routes. Tests import this. |
+| `src/app.ts` | The Hono app. It mounts the routes. Tests import this. |
+| `src/routes/courses.ts` | `GET /api/courses` and `GET /api/courses/:courseId/study`. |
+| `src/routes/reviews.ts` | `POST /api/reviews`. |
 | `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
+| `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
+| `src/lib/viewer.ts` | Who is asking. The prototype learner until #108. |
+| `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |
 | `src/env.ts` | What Cloudflare passes the Worker: the `DB` binding. |
+| `src/db/client.ts` | Drizzle around the D1 binding, and `idGroups`. |
 | `src/db/schema.ts` | The tables, in Drizzle. |
-| `src/db/progress.ts` | `user_progress` rows to and from core's `CardProgress`. |
+| `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
+| `src/db/progress.ts` | Reads and saves `user_progress` as core's `CardProgress`. |
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
 | `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
-| `src/db/test-database.ts` | For tests: an in-memory database from the real migrations and seed. |
+| `src/db/test-database.ts` | For tests: an in-memory SQLite database from the real migrations and seed. |
+| `src/db/test-d1.ts` | For route tests: a real in-memory D1, plus rows to fill it. |
 | `src/index.ts` | The Worker entry. It only exports the app. |
-| `src/*.test.ts` | Vitest. `app.request("/api/...")` calls a route with no server running. |
+| `src/**/*.test.ts` | Vitest. `app.request("/api/...")` calls a route with no server running. |
 | `wrangler.jsonc` | Worker name, entry, compatibility date, D1 binding, dev port. |
 
 ## Scripts
@@ -226,5 +328,9 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 ## Not yet
 
 - **Deploying.** Nothing ships this Worker yet. Staging and production still deploy only the web assets from the root [`wrangler.jsonc`](../../wrangler.jsonc). The D1 `database_id` is a placeholder until a real database is created.
-- **Review history.** `user_progress` holds where each card stands, not how it got there. Days of study, retention, and FSRS parameter training need a review log table (#112).
+- **Sign-in.** Every request is the prototype learner until Better Auth (#108). See "Who is asking".
+- **Review history.** `user_progress` holds where each card stands, not how it got there. Days of study, retention, and FSRS parameter training need a review log table (#112). `POST /api/reviews` checks `durationMs` but does not store it yet.
+- **The daily new-word limit resets.** `newAvailable` is the unseen words, capped at 10. It does not yet subtract the new words already started today, because that needs the review log.
+- **Retries.** Sending the same review twice records it twice. A review id from the client would let the server skip the repeat; that also needs the review log.
+- **Enrollment.** `GET /api/courses` lists every course. There is no "my courses" yet.
 - **Local secrets.** When the API needs them, they go in `apps/api/.dev.vars`, which is gitignored.

@@ -13,6 +13,8 @@ const messages = {
   byline: "By <author>{author}</author>",
   // Only when the story isn't in the course's answer language.
   bylineWithLanguage: "By <author>{author}</author>, written in {language}",
+  // The author deleted their account; the story stays.
+  writtenIn: "Written in {language}",
   upvotes: { one: "{count} upvote", other: "{count} upvotes" },
   position: "{current} of {total}",
   // Read first when the story changes, so a screen reader hears where it is.
@@ -64,16 +66,23 @@ export function MnemonicFrame({
   const sameLanguage =
     new Intl.Locale(contentLocale).language ===
     new Intl.Locale(answerLanguage).language
+  const language = languageName(contentLocale)
   // The author's name stands out from "By"; the upvotes beside it are a quieter stat.
-  const byline = rich(
-    sameLanguage ? messages.byline : messages.bylineWithLanguage,
-    {
-      author: (name) => (
-        <span className="font-medium text-foreground">{name}</span>
-      ),
-    },
-    { author: author.displayName, language: languageName(contentLocale) }
-  )
+  // A story whose author deleted their account has no name to show.
+  const byline =
+    author === null
+      ? sameLanguage
+        ? null
+        : format(messages.writtenIn, { language })
+      : rich(
+          sameLanguage ? messages.byline : messages.bylineWithLanguage,
+          {
+            author: (name) => (
+              <span className="font-medium text-foreground">{name}</span>
+            ),
+          },
+          { author: author.displayName, language }
+        )
 
   return (
     <section
@@ -135,9 +144,11 @@ export function MnemonicFrame({
             </Text>
           </blockquote>
           <figcaption className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <Text variant="small" className="min-w-0 wrap-break-word">
-              {byline}
-            </Text>
+            {byline !== null ? (
+              <Text variant="small" className="min-w-0 wrap-break-word">
+                {byline}
+              </Text>
+            ) : null}
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground tabular-nums">
               <ArrowBigUp aria-hidden="true" className="size-3.5" />
               {plural(mnemonic.upvotes, messages.upvotes)}

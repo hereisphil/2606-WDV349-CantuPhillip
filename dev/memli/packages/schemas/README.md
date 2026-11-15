@@ -8,8 +8,10 @@ Use this package for validation at API boundaries, forms, and env parsing. **Do 
 
 | Import | Use for |
 |--------|---------|
+| `@workspace/schemas/api/courses` | `GET /api/courses` response: `CourseSummary`, a course plus the viewer's counts in it |
 | `@workspace/schemas/api/error` | The API's error body and its stable error codes |
 | `@workspace/schemas/api/health` | `GET /api/health` response |
+| `@workspace/schemas/api/study` | `GET /api/courses/:courseId/study`: the `mode` and `extra` query, and `StudySession` (cards with progress) |
 | `@workspace/schemas/auth/sign-in` | Sign-in form input |
 | `@workspace/schemas/content/course` | `Course` (title, `learningLanguage`, `answerLanguage`) and `CourseCards` (the cards to study). A course, never a "deck", in code as on screen |
 | `@workspace/schemas/content/card` | `Card`: the term, accepted answers, grammar codes, example, mnemonics |
@@ -50,7 +52,7 @@ Outcomes are core's codes (`missed`, `tough`, `got_it`, `easy`), never raw ratin
 
 ## Keeping in step with `@workspace/core`
 
-`ReviewOutcome` and `CardProgress` exist in core as TypeScript types and here as schemas. Core stays free of Zod, and this package stays free of FSRS. [`apps/api/src/contracts.test.ts`](../../apps/api/src/contracts.test.ts) checks that they match: change one without the other and `bun run typecheck` fails.
+`ReviewOutcome`, `CardProgress`, `StudyMode` and the course counts (`CourseProgressSummary`) exist in core as TypeScript types and here as schemas. Core stays free of Zod, and this package stays free of FSRS. [`apps/api/src/contracts.test.ts`](../../apps/api/src/contracts.test.ts) checks that they match: change one without the other and `bun run typecheck` fails.
 
 ## Why these are hand-written, not derived from Drizzle tables
 

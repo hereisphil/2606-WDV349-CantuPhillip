@@ -33,6 +33,7 @@
         "eslint": "^10",
         "typescript": "~6",
         "vitest": "^5.1.0",
+        "wrangler": "^4.103.0",
       },
     },
     "apps/web": {

@@ -5,3 +5,6 @@
 export type Env = {
   DB: D1Database
 }
+
+/** Hono's name for it: `new Hono<AppEnv>()` makes `c.env.DB` typed. */
+export type AppEnv = { Bindings: Env }
