@@ -42,6 +42,8 @@ async function expectWordAndMeaningInView(page: Page): Promise<void> {
 const sizes = [
   { width: 360, height: 640 },
   { width: 375, height: 667 },
+  // Tall enough for the dock's "Back in 5 days" lines, so its tallest layout is checked on a phone.
+  { width: 390, height: 844 },
   { width: 1280, height: 800 },
 ] as const
 

@@ -1,10 +1,15 @@
-import { useEffect, useId, useMemo, type JSX } from "react"
+import { useEffect, useId, useMemo, useState, type JSX } from "react"
 import type { Evaluation } from "@workspace/core/answer/evaluate"
-import { outcomeChoices, type ReviewOutcome } from "@workspace/core/srs/outcome"
+import {
+  outcomeChoices,
+  previewOutcomeDue,
+  type ReviewOutcome,
+} from "@workspace/core/srs/outcome"
 import type { CardProgress } from "@workspace/core/srs/progress"
 import { suggestOutcome } from "@workspace/core/study/timing"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
+import { useFormatters } from "@/lib/formatters"
 
 type OutcomeLabels = Readonly<Partial<Record<ReviewOutcome, string>>>
 
@@ -14,6 +19,12 @@ const messages = {
   question: "Did you know it?",
   missedHint: "You'll see this word again in this session.",
   enterKey: "Enter",
+  // Under each choice: when the word comes back. `time` is "in 5 days", "in 14 hours"…
+  due: "Back {time}",
+  // A missed word goes to the end of this session's queue, whatever FSRS says.
+  dueThisSession: "Back later this session",
+  // Read between a choice and its due time, so it isn't run together ("Got it Back in…").
+  dueSeparator: ", ",
   // First-person answers to "Did you know it?", never grade names (Forgot, Hard…).
   revealed: {
     missed: "No, I didn't",
@@ -206,6 +217,9 @@ export function OutcomeDock({
 }: OutcomeDockProps): JSX.Element {
   const labelId = useId()
   const hintId = useId()
+  const { format, relativeTime } = useFormatters()
+  // When the dock opened, so the due times don't shift while the learner decides.
+  const [openedAt] = useState(() => new Date())
   const { label, showLabel, hint, labels } = copyOf(evaluation)
   const choices = useMemo(
     () => [...outcomeChoices(evaluation)].sort((a, b) => RANK[a] - RANK[b]),
@@ -217,6 +231,24 @@ export function OutcomeDock({
   )
   useOutcomeKeys(choices, primary, onResolve)
 
+  // A dock with a hint already says when the word comes back.
+  const dueOf = useMemo((): Record<ReviewOutcome, string> | null => {
+    if (hint !== null) {
+      return null
+    }
+    const due = previewOutcomeDue(progress, openedAt)
+    const back = (outcome: ReviewOutcome): string =>
+      format(messages.due, {
+        time: relativeTime(new Date(due[outcome]), openedAt),
+      })
+    return {
+      missed: messages.dueThisSession,
+      tough: back("tough"),
+      got_it: back("got_it"),
+      easy: back("easy"),
+    }
+  }, [hint, progress, openedAt, format, relativeTime])
+
   return (
     <div
       role="group"
@@ -226,9 +258,9 @@ export function OutcomeDock({
       className={cn(
         "sticky bottom-0 z-10 animate-in border-t border-border bg-card px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] duration-300 fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:px-6 sm:pt-4 sm:pb-[max(1rem,env(safe-area-inset-bottom))]",
         // The root's bottom scroll padding keeps focused and scrolled-to content out from under the dock (WCAG 2.4.11).
-        // Measured: one row of choices is about 80 to 100 px tall, two rows 163 to 179 px.
+        // Measured: one row of choices is 81 to 115 px tall, two rows 163 to 179 px, or up to 223 px once the due times show.
         choices.length > 2
-          ? "[:root:has(&)]:scroll-pb-48"
+          ? "[:root:has(&)]:scroll-pb-48 [@media(min-height:45rem)]:[:root:has(&)]:scroll-pb-60"
           : "[:root:has(&)]:scroll-pb-32"
       )}
     >
@@ -258,6 +290,7 @@ export function OutcomeDock({
           {choices.map((outcome, index) => {
             const isPrimary = outcome === primary
             const digit = String(index + 1)
+            const due = dueOf?.[outcome] ?? null
             return (
               <Button
                 key={outcome}
@@ -265,7 +298,7 @@ export function OutcomeDock({
                 size={isPrimary ? "touch-xl" : "touch-lg"}
                 // One size for every label, so a row of two reads as a pair.
                 className={cn(
-                  "relative rounded-xl px-3 text-base font-semibold sm:px-5",
+                  "relative flex-col gap-0 rounded-xl px-3 text-base font-semibold sm:px-5",
                   !isPrimary && "shadow-sm"
                 )}
                 aria-keyshortcuts={isPrimary ? `Enter ${digit}` : digit}
@@ -273,7 +306,19 @@ export function OutcomeDock({
                   onResolve(outcome)
                 }}
               >
-                {labels[outcome] ?? messages.revealed[outcome]}
+                {/* The name is all the visible text ("Got it, back in 5 days"), so voice control and WCAG 2.5.3 match what is on screen. */}
+                <span>{labels[outcome] ?? messages.revealed[outcome]}</span>
+                {due === null ? null : (
+                  <>
+                    <span className="sr-only">{messages.dueSeparator}</span>
+                    <span
+                      // Shown only on screens tall enough to keep the meaning in view above the dock. Screen readers always hear it.
+                      className="sr-only text-sm font-semibold [@media(min-height:45rem)]:not-sr-only"
+                    >
+                      {due}
+                    </span>
+                  </>
+                )}
                 {/* Shortcut hint only on hover or keyboard focus, and only with a mouse or trackpad. Absolutely placed so the label never shifts. */}
                 <kbd
                   aria-hidden="true"

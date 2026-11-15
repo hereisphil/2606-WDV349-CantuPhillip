@@ -11,12 +11,20 @@ function dock(page: Page, name: string | RegExp): Locator {
   return page.getByRole("group", { name })
 }
 
-/** The dock's buttons, in order, by accessible name (the hover-only key hints are hidden from it). */
+/**
+ * The dock's buttons, in order. Each name starts with the choice, and may go
+ * on with when the word comes back ("Got it, Back in 5 days"; Chrome may
+ * add a space before the comma). The hover-only
+ * key hints are hidden from it.
+ */
 async function expectChoices(group: Locator, names: string[]): Promise<void> {
   const buttons = group.getByRole("button")
   await expect(buttons).toHaveCount(names.length)
   for (const [index, name] of names.entries()) {
-    await expect(buttons.nth(index)).toHaveAccessibleName(name)
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    await expect(buttons.nth(index)).toHaveAccessibleName(
+      new RegExp(`^${escaped}(\\s*,\\s*Back .+)?$`)
+    )
   }
 }
 
@@ -44,6 +52,23 @@ test.describe("study session outcome dock", () => {
     await expect(prompt(page)).toBeFocused()
     await expect(prompt(page)).not.toContainText("gato")
     await expect(page.getByText("4 words left")).toBeVisible()
+  })
+
+  test("Each choice says when the word comes back", async ({ page }) => {
+    await page.goto(study, { waitUntil: "networkidle" })
+    await page.getByRole("button", { name: "Reveal answer" }).click()
+
+    const choices = dock(page, "Did you know it?")
+    const dues: [string, RegExp][] = [
+      ["No, I didn't", /^Back later this session$/],
+      ["I think so", /^Back in \d+ hours?$/],
+      ["Yes, I knew it", /^Back in \d+ days?$/],
+      ["Yes, easily", /^Back in \d+ months?$/],
+    ]
+    for (const [name, due] of dues) {
+      const choice = choices.getByRole("button", { name })
+      await expect(choice.getByText(due)).toBeVisible()
+    }
   })
 
   test("A typo asks whether it was only a typo, with no default", async ({

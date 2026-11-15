@@ -11,6 +11,25 @@ export default defineConfig([
       },
     },
   },
+  // Scheduling goes through @workspace/core's outcomes (#132). The typescript-eslint copy of the
+  // rule is used so it doesn't replace the base config's `no-restricted-imports` (the `cn` guard).
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["ts-fsrs", "ts-fsrs/*"],
+              message:
+                "Schedule through @workspace/core (srs/outcome, srs/progress), never ts-fsrs directly.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // TanStack file routes export `Route` — not a React component
   {
     files: ["src/routes/**/*.{ts,tsx}"],
