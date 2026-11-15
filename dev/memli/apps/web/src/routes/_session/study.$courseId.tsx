@@ -1,5 +1,7 @@
-import { useCallback, useReducer, type JSX } from "react"
+import { useCallback, useReducer, useRef, type JSX } from "react"
+import { flushSync } from "react-dom"
 import { Link, createFileRoute, notFound } from "@tanstack/react-router"
+import type { ReviewOutcome } from "@workspace/core/srs/outcome"
 import {
   sessionReducer,
   startSession,
@@ -13,7 +15,7 @@ import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
 import { MnemonicFrame } from "./-components/MnemonicFrame"
-import { OutcomeDockSlot } from "./-components/OutcomeDockSlot"
+import { OutcomeDock } from "./-components/OutcomeDock"
 import { AnswerVerdict } from "./-components/AnswerVerdict"
 import { PromptActions } from "./-components/PromptActions"
 import {
@@ -177,6 +179,23 @@ function SessionWorkspace({
     dispatch({ type: "REVEAL", elapsedMs })
   }, [])
 
+  // The prompt card on screen, so focus can move to the next word.
+  const promptRef = useRef<HTMLElement>(null)
+  // Stable, so the dock's key listener isn't re-added on every render.
+  const onResolve = useCallback((outcome: ReviewOutcome) => {
+    // flushSync renders the next card right away, so focus can move to it in
+    // this same event. Otherwise focus is lost with the dock's button, and a
+    // keyboard or screen-reader user starts the next word from the page top.
+    flushSync(() => {
+      dispatch({ type: "RESOLVE", outcome, now: new Date() })
+    })
+    const prompt = promptRef.current
+    if (prompt !== null) {
+      prompt.focus({ preventScroll: true })
+      prompt.scrollIntoView({ block: "start" })
+    }
+  }, [])
+
   // Derive, don't store (docs/state-management.md).
   const queued = session.status === "complete" ? 0 : session.queue.length
   const derived: SessionView = {
@@ -211,6 +230,7 @@ function SessionWorkspace({
           ) : (
             <>
               <CardPrompt
+                ref={promptRef}
                 card={session.queue[0]}
                 mode={mode}
                 learningLanguage={learningLanguage}
@@ -239,14 +259,6 @@ function SessionWorkspace({
                       answerLanguage={answerLanguage}
                     />
                   </AnswerBreakdown>
-                  <OutcomeDockSlot
-                    evaluation={session.evaluation}
-                    elapsedMs={session.elapsedMs}
-                    progress={session.queue[0].progress}
-                    onResolve={(outcome) => {
-                      dispatch({ type: "RESOLVE", outcome, now: new Date() })
-                    }}
-                  />
                 </>
               ) : (
                 <PromptActions
@@ -262,6 +274,17 @@ function SessionWorkspace({
           )}
         </div>
       </main>
+      {/* Outside <main> so it can span the bottom of the screen, as the header spans the top. */}
+      {total > 0 && session.status === "answered" ? (
+        <OutcomeDock
+          // Keyed so a requeued word that comes straight back gets a fresh dock.
+          key={session.reviews.length}
+          evaluation={session.evaluation}
+          elapsedMs={session.elapsedMs}
+          progress={session.queue[0].progress}
+          onResolve={onResolve}
+        />
+      ) : null}
     </>
   )
 }

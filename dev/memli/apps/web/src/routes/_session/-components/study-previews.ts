@@ -261,6 +261,21 @@ export const studyPreviews = {
     languages: spanish,
     events: () => submit("hous"),
   },
+  // `suggestOutcome` calls "hous" quick under 3.5 s and slow from 7 s.
+  "typo-quick": {
+    group: "answer",
+    description: "A quick typo: the dock suggests it was just a typo",
+    cards: () => [casa],
+    languages: spanish,
+    events: () => [{ type: "SUBMIT", answer: "hous", elapsedMs: 2_000 }],
+  },
+  "typo-slow": {
+    group: "answer",
+    description: "A slow typo: the dock suggests it was hard",
+    cards: () => [casa],
+    languages: spanish,
+    events: () => [{ type: "SUBMIT", answer: "hous", elapsedMs: 9_000 }],
+  },
   accent: {
     group: "answer",
     description: "Right apart from accents (cafe)",

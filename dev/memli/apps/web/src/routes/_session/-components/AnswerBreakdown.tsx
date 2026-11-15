@@ -33,7 +33,9 @@ const MEANING_ROOM_PX = 160
  * the sticky header and past the meaning. Instead, the page stays put when
  * the word (the prompt card right above the answer) and the meaning are both
  * in view, and otherwise brings the prompt card's top just below the header
- * (the root's `scroll-padding-top`, set by SessionHeader).
+ * (the root's `scroll-padding-top`, set by SessionHeader). The outcome dock
+ * covers the bottom of the screen (the root's `scroll-padding-bottom`, set by
+ * OutcomeDock), so the meaning has to fit above it.
  */
 function focusOnMount(element: HTMLElement | null): void {
   if (element === null) {
@@ -41,15 +43,14 @@ function focusOnMount(element: HTMLElement | null): void {
   }
   element.focus({ preventScroll: true })
   const prompt = element.previousElementSibling ?? element
-  const headerRoom =
-    Number.parseFloat(
-      getComputedStyle(document.documentElement).scrollPaddingTop
-    ) || 0
+  const root = getComputedStyle(document.documentElement)
+  const headerRoom = Number.parseFloat(root.scrollPaddingTop) || 0
+  const dockRoom = Number.parseFloat(root.scrollPaddingBottom) || 0
   const promptTop = prompt.getBoundingClientRect().top
   const answerTop = element.getBoundingClientRect().top
   if (
     promptTop < headerRoom ||
-    answerTop + MEANING_ROOM_PX > window.innerHeight
+    answerTop + MEANING_ROOM_PX > window.innerHeight - dockRoom
   ) {
     prompt.scrollIntoView({ block: "start" })
   }

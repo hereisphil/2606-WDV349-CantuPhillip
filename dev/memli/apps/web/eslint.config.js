@@ -71,8 +71,6 @@ export default defineConfig([
       "src/components/dev-previews-menu.tsx",
       "src/routes/_app/-components/PreviewSwitcher.tsx",
       "src/routes/_session/-components/StudyPreviewSwitcher.tsx",
-      "src/routes/_session/-components/DevSlot.tsx",
-      "src/routes/_session/-components/OutcomeDockSlot.tsx",
     ],
     rules: {
       "memli/no-restricted-classes": "off",

@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react"
+import { useState, type JSX, type Ref } from "react"
 import { Volume2 } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 import { Spinner } from "@workspace/ui/components/spinner"
@@ -40,6 +40,8 @@ type CardPromptProps = {
   answerLanguage: string
   /** Once the answer shows, the instruction to recall it goes away. */
   revealed: boolean
+  /** The study session moves focus here when a new word comes up. */
+  ref?: Ref<HTMLElement>
 }
 
 /**
@@ -52,6 +54,7 @@ export function CardPrompt({
   learningLanguage,
   answerLanguage,
   revealed,
+  ref,
 }: CardPromptProps): JSX.Element {
   const { format, languageName } = useFormatters()
   const partOfSpeech = messages.partOfSpeech[card.partOfSpeech]
@@ -65,9 +68,12 @@ export function CardPrompt({
 
   return (
     <section
+      ref={ref}
+      // Focusable by script only, so the next word can take focus from the dock's button.
+      tabIndex={-1}
       aria-labelledby="session-mode"
       className={cn(
-        "flex flex-col rounded-xl border border-border bg-card p-6 sm:min-h-72 sm:gap-6 sm:p-8",
+        "flex flex-col rounded-xl border border-border bg-card p-6 outline-none sm:min-h-72 sm:gap-6 sm:p-8",
         // On phones the card tightens once revealed, so the answer sits right under the term.
         revealed ? "gap-2" : "min-h-72 gap-6"
       )}
