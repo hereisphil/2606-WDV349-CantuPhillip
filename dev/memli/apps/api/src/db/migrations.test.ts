@@ -1,39 +1,22 @@
-/// <reference types="node" />
-import { readdirSync, readFileSync } from "node:fs"
-import { join } from "node:path"
-import { DatabaseSync } from "node:sqlite"
+import type { DatabaseSync } from "node:sqlite"
 import { beforeEach, describe, expect, it } from "vitest"
 
+import { countRows, migratedDatabase } from "./test-database"
+
 /**
- * Runs the real migration and seed files on an in-memory SQLite database, the
- * engine under D1, and checks the rules a schema file alone cannot prove:
- * keys, cascades and CHECK constraints. Node's built-in `node:sqlite` needs
- * no extra package and no running Worker.
+ * Runs the real migrations on an in-memory SQLite database and checks the
+ * rules a schema file alone cannot prove: keys, cascades and CHECK
+ * constraints. The rows here are this file's own, so the tests do not depend
+ * on what the seed holds (`seed.test.ts` covers that).
  */
-
-const root = join(import.meta.dirname, "../..")
-const migrationsDir = join(root, "drizzle/migrations")
-
-function migratedDatabase(): DatabaseSync {
-  const db = new DatabaseSync(":memory:")
-  // D1 enforces foreign keys; plain SQLite needs asking.
-  db.exec("PRAGMA foreign_keys = ON")
-  const files = readdirSync(migrationsDir).filter((f) => f.endsWith(".sql"))
-  for (const file of files.sort()) {
-    const sql = readFileSync(join(migrationsDir, file), "utf8")
-    for (const statement of sql.split("--> statement-breakpoint")) {
-      db.exec(statement)
-    }
-  }
-  db.exec(readFileSync(join(root, "seed/prototype.sql"), "utf8"))
-  return db
-}
 
 let db: DatabaseSync
 
 beforeEach(() => {
   db = migratedDatabase()
   db.exec(`
+    INSERT INTO users (id, name, email)
+      VALUES ('usr_prototype_01', 'Phillip', 'learner@prototype.memli.test');
     INSERT INTO courses (id, title, learning_language, answer_language)
       VALUES ('spanish-core-1000', 'Spanish Core 1000', 'es', 'en');
     INSERT INTO cards (id, course_id, position, term, part_of_speech, gender,
@@ -50,34 +33,7 @@ const progressRow = `
   VALUES ('usr_prototype_01', 'es-gato', 'review', 1794700000000, 1794600000000,
     3.2, 0.4, 5.1, 2, 0, 0, 1.15)`
 
-function count(table: string): number {
-  const row = db.prepare(`SELECT count(*) AS n FROM ${table}`).get()
-  return Number(row?.n)
-}
-
-describe("the seeded prototype learner", () => {
-  it("is a real users row, the one useViewer() stands in for", () => {
-    expect(
-      db
-        .prepare("SELECT id, name, email, ui_locale FROM users")
-        .all()
-        .map((row) => ({ ...row }))
-    ).toEqual([
-      {
-        id: "usr_prototype_01",
-        name: "Phillip",
-        email: "learner@prototype.memli.test",
-        ui_locale: "en",
-      },
-    ])
-  })
-
-  it("can be seeded again without a duplicate", () => {
-    db.exec(readFileSync(join(root, "seed/prototype.sql"), "utf8"))
-
-    expect(count("users")).toBe(1)
-  })
-})
+const count = (table: string): number => countRows(db, table)
 
 describe("user_progress", () => {
   it("stores one row per learner and card", () => {

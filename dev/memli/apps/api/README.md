@@ -2,7 +2,7 @@
 
 The Memli backend: a [Hono](https://hono.dev/) app that runs on Cloudflare Workers. The web app talks to it today, and the mobile app will later ([`docs/architecture.md`](../../docs/architecture.md)).
 
-So far (#106): a health check, the error format, and a local D1 database with the tables for courses, cards, mnemonics and FSRS progress. Routes that read and write them come with #112.
+So far: a health check, the error format, and a local D1 database with the tables for courses, cards, mnemonics and FSRS progress (#106), seeded with a learner and four starter courses (#112). Routes that read and write them come next in #112.
 
 ## Run it locally
 
@@ -147,9 +147,27 @@ Enum columns (`part_of_speech`, `gender`, `state`) take their values from the Zo
 
 Nothing in the current tables changes.
 
-### The prototype learner
+### Seed data
 
-[`seed/prototype.sql`](./seed/prototype.sql) creates `usr_prototype_01`, the learner `useViewer()` has stood in for since MS 1, as a real `users` row. It is local data only, never a migration, so it can never reach a real database. Running it again updates the row instead of adding another. Starter courses come with #112.
+[`seed/prototype.sql`](./seed/prototype.sql) fills the local database. It is local data only, never a migration, so it can never reach a real database.
+
+| Table | Seeded rows |
+| --- | --- |
+| `users` | `usr_prototype_01`, the learner `useViewer()` has stood in for since MS 1, plus five mnemonic authors (`usr_seed_*`) |
+| `courses` | Spanish Core 1000, Japanese Hiragana & Katakana, French Travel Phrases, Portuguese Essentials |
+| `cards` | 16 words: 5 Spanish, 4 Japanese, 4 French, 3 Portuguese |
+| `mnemonics` | 6 stories on three Spanish cards, two with a picture |
+| `user_progress` | None. Every card starts new; reviews fill it in |
+
+Things worth knowing:
+
+- **Every row is an upsert.** `INSERT ... ON CONFLICT (id) DO UPDATE` adds the row the first time and updates it after that. So `bun run db:seed` is safe to run again, picks up your edits to the file, and never touches `user_progress`: reseeding keeps your reviews.
+- **A mnemonic's author is a `users` row.** The name shown under a story is that user's `name`, which is why the seed has five more users than learners.
+- **Each language is its own column.** A course has `learning_language` and `answer_language`; a mnemonic has `content_locale`. None of them is a learner's `ui_locale` ([`docs/i18n.md`](../../docs/i18n.md)).
+- **Some Spanish cards have no mnemonic, and some mnemonics have no picture**, on purpose, so those screens show up in a real course.
+- **Pictures** are files in [`apps/web/public/mnemonics`](../web/public/mnemonics). `image_src` is the path the browser asks for.
+
+To add a word, add a row to the `cards` insert with the next `position` in its course. The comments at the top of the file cover the two quoting rules (SQL doubles a quote, JSON uses double quotes).
 
 ### Changing the schema
 
@@ -162,7 +180,10 @@ Never edit a migration that is already committed; write a new one. CI regenerate
 
 ### Tests
 
-[`src/db/migrations.test.ts`](./src/db/migrations.test.ts) runs the real migration and seed on an in-memory SQLite database (Node's built-in `node:sqlite`, no extra package) and checks keys, cascades and `CHECK` constraints.
+Both run on an in-memory SQLite database (Node's built-in `node:sqlite`, no extra package), built from the real migration files by [`src/db/test-database.ts`](./src/db/test-database.ts).
+
+- [`src/db/migrations.test.ts`](./src/db/migrations.test.ts) checks keys, cascades and `CHECK` constraints.
+- [`src/db/seed.test.ts`](./src/db/seed.test.ts) runs the seed, reads the rows back in the shape the API will send, and parses them with the Zod schemas in `@workspace/schemas`. The seed is SQL written by hand, so this is what catches a misspelled part of speech, broken JSON, or a picture that does not exist. It also seeds twice to prove nothing is duplicated and progress survives.
 
 To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
@@ -176,7 +197,8 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/progress.ts` | `user_progress` rows to and from core's `CardProgress`. |
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
-| `seed/prototype.sql` | Local data: the prototype learner. |
+| `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
+| `src/db/test-database.ts` | For tests: an in-memory database from the real migrations and seed. |
 | `src/index.ts` | The Worker entry. It only exports the app. |
 | `src/*.test.ts` | Vitest. `app.request("/api/...")` calls a route with no server running. |
 | `wrangler.jsonc` | Worker name, entry, compatibility date, D1 binding, dev port. |
@@ -189,7 +211,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `bun run db:setup` | Apply migrations and seed the local database. Safe to run again |
 | `bun run db:generate` | Write a migration from `src/db/schema.ts` |
 | `bun run db:migrate` | Apply new migrations to the local database |
-| `bun run db:seed` | Create or update the prototype learner |
+| `bun run db:seed` | Create or update the seeded learner, courses, cards and mnemonics |
 | `bun run test` | Vitest |
 | `bun run typecheck` | `tsc --noEmit` with Workers types |
 | `bun run lint` | ESLint |
