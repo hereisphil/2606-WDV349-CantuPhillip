@@ -1,6 +1,6 @@
 /**
  * Pronunciation through the browser's built-in text-to-speech (Web Speech
- * API). A prototype stand-in until seeded decks ship recorded audio (#112).
+ * API). A prototype stand-in until seeded courses ship recorded audio (#112).
  * The voice depends on what the device has installed for `lang`.
  */
 export const canPronounce =

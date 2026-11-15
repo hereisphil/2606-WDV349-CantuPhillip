@@ -5,8 +5,8 @@ import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { Heading } from "@workspace/ui/components/heading"
 import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
-import type { DashboardDeck } from "./dashboard-metrics"
-import { deckAction, type DeckAction } from "./dashboard-model"
+import type { DashboardCourse } from "./dashboard-metrics"
+import { courseAction, type CourseAction } from "./dashboard-model"
 import { LanguageBadge } from "./LanguageBadge"
 
 const messages = {
@@ -47,7 +47,7 @@ const actionMessages = {
   learn: { text: messages.learn, label: messages.learnLabel },
 } as const
 
-function RowStatus({ action }: { action: DeckAction | null }): JSX.Element {
+function RowStatus({ action }: { action: CourseAction | null }): JSX.Element {
   const { plural } = useFormatters()
 
   if (action === null) {
@@ -69,9 +69,9 @@ function RowStatus({ action }: { action: DeckAction | null }): JSX.Element {
   )
 }
 
-function CourseRow({ course }: { course: DashboardDeck }): JSX.Element {
+function CourseRow({ course }: { course: DashboardCourse }): JSX.Element {
   const { plural } = useFormatters()
-  const action = deckAction(course)
+  const action = courseAction(course)
 
   return (
     // Wraps when a long translated button and the title cannot share a line: the button moves under it.
@@ -115,7 +115,7 @@ export function CourseList({
   showFindAnother,
   className,
 }: {
-  courses: readonly DashboardDeck[]
+  courses: readonly DashboardCourse[]
   filter: ReactNode
   /** With no other courses, a dashed row offers to find one, unless the hero already does. */
   showFindAnother: boolean

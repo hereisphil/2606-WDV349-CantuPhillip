@@ -13,7 +13,7 @@ Goal: make impossible states unrepresentable and keep "what happened" (events) s
 
 | Kind of state | Owner | Never |
 | --- | --- | --- |
-| Data from the API (decks, cards, review history) | **TanStack Query** (`useQuery` / `useMutation`) | hand-rolled `isLoading` / `isError` / `data` |
+| Data from the API (courses, cards, review history) | **TanStack Query** (`useQuery` / `useMutation`) | hand-rolled `isLoading` / `isError` / `data` |
 | Shareable or bookmarkable (card index, filters, tab) | **TanStack Router** search params | mirrored into component state |
 | Anything with a lifecycle, or ≥2 values that change together | **`useReducer`** with a discriminated union (default) | multiple `useState` calls |
 | A transition that must fire a side effect (audio, timer, persist) | `useReducer` **+ `use-effect-reducer`** (`exec` inside the reducer) — see §4 | reducer sets a flag, `useEffect` watches the flag |

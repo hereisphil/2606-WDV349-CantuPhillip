@@ -1,5 +1,5 @@
 import type { SessionEvent } from "@workspace/core/study/session-reducer"
-import { findDeckCards, type Mnemonic, type StudyCard } from "./study-cards"
+import { findCourseCards, type Mnemonic, type StudyCard } from "./study-cards"
 
 /** What the session header renders. `view` overrides replace the derived values. */
 export type SessionView = {
@@ -23,11 +23,11 @@ export type StudyPreview = {
   /** One line on what to check, shown as the switcher link's tooltip. */
   description: string
   /**
-   * The session's cards, given every seeded card in the open deck. Leave it
-   * out to use the real queue for the deck and mode.
+   * The session's cards, given every seeded card in the open course. Leave it
+   * out to use the real queue for the course and mode.
    */
-  cards?: (deck: readonly StudyCard[]) => readonly StudyCard[]
-  /** Set with `cards` that bring their own content, so `lang` stays right on any deck. */
+  cards?: (seeded: readonly StudyCard[]) => readonly StudyCard[]
+  /** Set with `cards` that bring their own content, so `lang` stays right on any course. */
   languages?: { learning: string; answer: string }
   /** Replayed in order after the session starts. */
   events?: (cards: readonly StudyCard[]) => readonly SessionEvent[]
@@ -44,7 +44,7 @@ export const studyPreviewGroups = {
 
 type StudyPreviewGroup = keyof typeof studyPreviewGroups
 
-// Fixture cards that every deck lacks: an accent, a 4+ letter answer for a typo, long text, non-Latin script.
+// Fixture cards that every course lacks: an accent, a 4+ letter answer for a typo, long text, non-Latin script.
 const spanish = { learning: "es", answer: "en" } as const
 
 const cafe: StudyCard = {
@@ -101,8 +101,8 @@ const kana: StudyCard = {
   },
 }
 
-// The seeded gato card, whose mnemonic has a picture, so the preview works on any deck.
-const gato: StudyCard = findDeckCards("spanish-core-1000")?.cards[0] ?? casa
+// The seeded gato card, whose mnemonic has a picture, so the preview works on any course.
+const gato: StudyCard = findCourseCards("spanish-core-1000")?.cards[0] ?? casa
 
 // The story every fixture mnemonic tells, so each preview only changes what it tests.
 const casaStory: Omit<Mnemonic, "mnemonicId"> = {
@@ -141,7 +141,7 @@ const noImage: StudyCard = {
   mnemonics: [{ ...casaStory, mnemonicId: "preview-no-image-1" }],
 }
 
-// A story written in another language than the deck's answers, with a long author name.
+// A story written in another language than the course's answers, with a long author name.
 const otherLanguage: StudyCard = {
   ...gato,
   cardId: "preview-other-language",
@@ -179,33 +179,33 @@ function submit(answer: string): SessionEvent[] {
 }
 
 export const studyPreviews = {
-  // Progress: the header bar and session lifecycle, using the open deck's cards.
+  // Progress: the header bar and session lifecycle, using the open course's cards.
   default: {
     group: "progress",
-    description: "The real session for this deck and mode",
+    description: "The real session for this course and mode",
   },
   midway: {
     group: "progress",
-    description: "Half the deck answered",
-    cards: (deck) => deck,
+    description: "Half the words answered",
+    cards: (cards) => cards,
     events: (cards) => finish(cards, Math.floor(cards.length / 2)),
   },
   "last-card": {
     group: "progress",
     description: "Every card but the last answered",
-    cards: (deck) => deck,
+    cards: (cards) => cards,
     events: (cards) => finish(cards, cards.length - 1),
   },
   complete: {
     group: "progress",
     description: "Every card answered",
-    cards: (deck) => deck,
+    cards: (cards) => cards,
     events: (cards) => finish(cards, cards.length),
   },
   "complete-mixed": {
     group: "progress",
     description: "Every card answered; the first was missed once",
-    cards: (deck) => deck,
+    cards: (cards) => cards,
     events: (cards) => {
       const [first, ...rest] = cards
       if (first === undefined) return []
@@ -220,7 +220,7 @@ export const studyPreviews = {
   "one-card": {
     group: "progress",
     description: "A one-card session",
-    cards: (deck) => deck.slice(0, 1),
+    cards: (cards) => cards.slice(0, 1),
   },
   empty: {
     group: "progress",
@@ -229,7 +229,7 @@ export const studyPreviews = {
   },
   "long-title": {
     group: "progress",
-    description: "A deck title too long for the header",
+    description: "A course title too long for the header",
     view: (derived) => ({
       ...derived,
       title:
@@ -242,7 +242,7 @@ export const studyPreviews = {
     view: (derived) => ({ ...derived, total: 1250, completed: 312 }),
   },
 
-  // Card: prompt content that the seeded decks don't cover.
+  // Card: prompt content that the seeded courses don't cover.
   "long-text": {
     group: "card",
     description: "A long phrase, answer and example",
@@ -260,13 +260,13 @@ export const studyPreviews = {
   revealed: {
     group: "answer",
     description: "Revealed without typing: no verdict",
-    cards: (deck) => deck,
+    cards: (cards) => cards,
     events: () => [{ type: "REVEAL", elapsedMs: null }],
   },
   correct: {
     group: "answer",
     description: "Typed the answer exactly",
-    cards: (deck) => deck,
+    cards: (cards) => cards,
     events: (cards) => submit(cards[0]?.answers[0] ?? ""),
   },
   typo: {
@@ -301,7 +301,7 @@ export const studyPreviews = {
   wrong: {
     group: "answer",
     description: "A wrong answer",
-    cards: (deck) => deck,
+    cards: (cards) => cards,
     events: () => submit("banana"),
   },
   "long-revealed": {

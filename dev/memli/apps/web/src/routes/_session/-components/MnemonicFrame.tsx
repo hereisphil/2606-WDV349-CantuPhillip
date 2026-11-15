@@ -11,7 +11,7 @@ import type { MnemonicStoryPart, StudyCard } from "./study-cards"
 const messages = {
   heading: "Community mnemonic",
   byline: "By <author>{author}</author>",
-  // Only when the story isn't in the deck's answer language.
+  // Only when the story isn't in the course's answer language.
   bylineWithLanguage: "By <author>{author}</author>, written in {language}",
   upvotes: { one: "{count} upvote", other: "{count} upvotes" },
   position: "{current} of {total}",
@@ -25,7 +25,7 @@ type MnemonicFrameProps = {
   card: StudyCard
   /** BCP 47 tag of the term the mnemonic anchors. */
   learningLanguage: string
-  /** BCP 47 tag of the deck's meanings, to tell when a story is in another language. */
+  /** BCP 47 tag of the course's meanings, to tell when a story is in another language. */
   answerLanguage: string
 }
 

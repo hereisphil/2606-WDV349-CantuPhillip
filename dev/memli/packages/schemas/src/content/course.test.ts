@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { cardSchema } from "./card"
-import { deckCardsSchema, deckSchema } from "./deck"
+import { courseCardsSchema, courseSchema } from "./course"
 import { mnemonicSchema } from "./mnemonic"
 
 const gato = {
@@ -33,20 +33,23 @@ const gato = {
   ],
 }
 
-describe("deckSchema", () => {
+describe("courseSchema", () => {
   it("keeps the learning language and the answer language apart", () => {
-    const deck = deckSchema.parse({
-      deckId: "japanese-basics",
+    const course = courseSchema.parse({
+      courseId: "japanese-basics",
       title: "Japanese Basics",
       learningLanguage: "ja",
       answerLanguage: "en",
     })
 
-    expect(deck).toMatchObject({ learningLanguage: "ja", answerLanguage: "en" })
+    expect(course).toMatchObject({
+      learningLanguage: "ja",
+      answerLanguage: "en",
+    })
   })
 
   it("has no single `language` field to conflate the two", () => {
-    expect(Object.keys(deckSchema.shape)).not.toContain("language")
+    expect(Object.keys(courseSchema.shape)).not.toContain("language")
   })
 })
 
@@ -98,10 +101,10 @@ describe("mnemonicSchema", () => {
   })
 })
 
-describe("deckCardsSchema", () => {
-  it("never allows an empty deck, so a session always has a first card", () => {
+describe("courseCardsSchema", () => {
+  it("never allows an empty course, so a session always has a first card", () => {
     expect(
-      deckCardsSchema.safeParse({ answerLanguage: "en", cards: [] }).success
+      courseCardsSchema.safeParse({ answerLanguage: "en", cards: [] }).success
     ).toBe(false)
   })
 })

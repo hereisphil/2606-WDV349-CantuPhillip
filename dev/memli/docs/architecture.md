@@ -119,7 +119,7 @@ Until then, keep route groups and invest in the product.
 ### Role
 
 - Source of truth for auth sessions / tokens (exact scheme TBD in implementation)
-- Decks, cards, mnemonics, review grading persistence
+- Courses, cards, mnemonics, review grading persistence
 - Shared by `apps/web` and later `apps/mobile`
 - May call into `packages/core` for pure domain operations (e.g. FSRS grading via the `ts-fsrs` wrapper) so mobile/web/API never diverge on formulas
 

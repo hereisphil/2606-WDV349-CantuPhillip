@@ -7,7 +7,7 @@ import { languageTagSchema } from "../locale/language-tag"
  * text is never parsed as HTML.
  *
  * - `plain`: story text, in the mnemonic's `contentLocale`.
- * - `term`: the word being learned, in the deck's `learningLanguage`.
+ * - `term`: the word being learned, in the course's `learningLanguage`.
  * - `keyword`: the sound-alike hook that links the term to its meaning.
  */
 export const mnemonicStoryPartSchema = z.object({
@@ -21,9 +21,9 @@ export type MnemonicStoryPart = z.infer<typeof mnemonicStoryPartSchema>
 export const mnemonicSchema = z.object({
   mnemonicId: z.string().min(1),
   /**
-   * What the story and image description are written in. Often the deck's
+   * What the story and image description are written in. Often the course's
    * `answerLanguage`, but not always: a Spanish speaker can share a story in
-   * Spanish on an English-to-Japanese deck.
+   * Spanish on an English-to-Japanese course.
    */
   contentLocale: languageTagSchema,
   story: z.array(mnemonicStoryPartSchema).nonempty(),

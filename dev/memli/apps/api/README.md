@@ -2,7 +2,7 @@
 
 The Memli backend: a [Hono](https://hono.dev/) app that runs on Cloudflare Workers. The web app talks to it today, and the mobile app will later ([`docs/architecture.md`](../../docs/architecture.md)).
 
-It is a shell for now (#106): a health check and the error format. Shared deck and review schemas and the Drizzle + D1 tables land in the next tasks of the same issue.
+It is a shell for now (#106): a health check and the error format. The Drizzle + D1 tables land in the last task of the same issue.
 
 ## Run it locally
 
@@ -80,7 +80,7 @@ In a route, send an error with the helper from [`src/lib/errors.ts`](./src/lib/e
 ```ts
 import { errorResponse } from "./lib/errors"
 
-app.get("/decks/:id", (c) => {
+app.get("/courses/:id", (c) => {
   // ...
   return errorResponse(c, "NOT_FOUND")
 })

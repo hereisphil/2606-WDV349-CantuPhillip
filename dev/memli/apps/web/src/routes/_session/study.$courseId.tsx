@@ -11,7 +11,7 @@ import { buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
-import type { DashboardDeck } from "../_app/-components/dashboard-metrics"
+import type { DashboardCourse } from "../_app/-components/dashboard-metrics"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
 import { MnemonicFrame } from "./-components/MnemonicFrame"
@@ -27,9 +27,9 @@ import { SessionHeader } from "./-components/SessionHeader"
 import { SessionSummary } from "./-components/SessionSummary"
 import { useActiveTime } from "./-components/use-active-time"
 import {
-  findDeckCards,
+  findCourseCards,
   withNewProgress,
-  type DeckCards,
+  type CourseCards,
   type SessionStudyCard,
 } from "./-components/study-cards"
 import {
@@ -87,26 +87,26 @@ export const Route = createFileRoute("/_session/study/$courseId")({
   },
   loader: ({ params }) => {
     const course = findCourse(params.courseId)
-    const deckCards = findDeckCards(params.courseId)
-    if (course === null || deckCards === null) {
+    const courseCards = findCourseCards(params.courseId)
+    if (course === null || courseCards === null) {
       throw notFound()
     }
-    return { course, deckCards }
+    return { course, courseCards }
   },
   component: StudySession,
   notFoundComponent: CourseNotFound,
 })
 
 function StudySession(): JSX.Element {
-  const { course, deckCards } = Route.useLoaderData()
+  const { course, courseCards } = Route.useLoaderData()
   const { mode, extra, preview } = Route.useSearch()
 
   return (
-    // Keyed so switching deck, session kind or preview starts a fresh session instead of keeping the old reducer state.
+    // Keyed so switching course, session kind or preview starts a fresh session instead of keeping the old reducer state.
     <SessionWorkspace
       key={`${course.courseId}:${mode}:${String(extra)}:${preview ?? ""}`}
       course={course}
-      deckCards={deckCards}
+      courseCards={courseCards}
       mode={mode}
       queueSize={sessionQueueSize(course, mode, extra)}
       preview={preview}
@@ -115,10 +115,10 @@ function StudySession(): JSX.Element {
 }
 
 type SessionWorkspaceProps = {
-  course: DashboardDeck
-  deckCards: DeckCards
+  course: DashboardCourse
+  courseCards: CourseCards
   mode: StudyMode
-  /** Cards this kind of session should hold, from the deck's counts. */
+  /** Cards this kind of session should hold, from the course's counts. */
   queueSize: number
   preview: StudyPreviewName | undefined
 }
@@ -133,20 +133,20 @@ function previewOf(
 }
 
 /**
- * The first session state: the seeded cards, capped at what the deck has
+ * The first session state: the seeded cards, capped at what the course has
  * waiting. A preview may swap the cards and replay events through the reducer.
  */
 function initialSession({
-  deckCards,
+  courseCards,
   queueSize,
   preview,
 }: Pick<
   SessionWorkspaceProps,
-  "deckCards" | "queueSize" | "preview"
+  "courseCards" | "queueSize" | "preview"
 >): SessionState<SessionStudyCard> {
   const seeded = previewOf(preview)
   const cards =
-    seeded?.cards?.(deckCards.cards) ?? deckCards.cards.slice(0, queueSize)
+    seeded?.cards?.(courseCards.cards) ?? courseCards.cards.slice(0, queueSize)
   const events = seeded?.events?.(cards) ?? []
   return events.reduce(
     sessionReducer<SessionStudyCard>,
@@ -156,7 +156,7 @@ function initialSession({
 
 function SessionWorkspace({
   course,
-  deckCards,
+  courseCards,
   mode,
   queueSize,
   preview,
@@ -164,13 +164,13 @@ function SessionWorkspace({
   // The study-session state machine from @workspace/core: prompt → answered → … → complete.
   const [session, dispatch] = useReducer(
     sessionReducer<SessionStudyCard>,
-    { deckCards, queueSize, preview },
+    { courseCards, queueSize, preview },
     initialSession
   )
   const seeded = previewOf(preview)
   const learningLanguage =
     seeded?.languages?.learning ?? course.learningLanguage
-  const answerLanguage = seeded?.languages?.answer ?? deckCards.answerLanguage
+  const answerLanguage = seeded?.languages?.answer ?? courseCards.answerLanguage
 
   // Stable, so the reveal shortcut's key listener isn't re-added on every render.
   const onReveal = useCallback((elapsedMs: number | null) => {

@@ -4,7 +4,7 @@ import { z } from "zod"
  * A BCP 47 language tag in canonical form: `es`, `pt-BR`, `es-419`.
  *
  * Every language field uses this, whatever it means: `learningLanguage` (what
- * a deck teaches), `answerLanguage` (what its meanings are written in),
+ * a course teaches), `answerLanguage` (what its meanings are written in),
  * `contentLocale` (what a mnemonic is written in) and `uiLocale` (the app's
  * own language). They are separate fields because they are separate facts
  * (docs/i18n.md); the shape of the value is the same.

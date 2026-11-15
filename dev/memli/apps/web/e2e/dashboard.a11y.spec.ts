@@ -10,7 +10,7 @@ const themes: Theme[] = ["light", "dark"]
 const paths = [
   "/dashboard",
   ...previewNames.map((name) => `/dashboard?preview=${name}`),
-  "/dashboard?preview=many-decks&studying=de",
+  "/dashboard?preview=many-courses&studying=de",
 ]
 
 async function openDashboard(

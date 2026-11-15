@@ -1,15 +1,15 @@
 import {
   prototypeDashboardMetrics,
-  type DashboardDeck,
+  type DashboardCourse,
 } from "../../_app/-components/dashboard-metrics"
 
 export type StudyMode = "review" | "learn" | "practice"
 
-/** The deck behind a study session. #112 swaps the seeded decks for the API. */
-export function findCourse(courseId: string): DashboardDeck | null {
+/** The course behind a study session. #112 swaps the seeded courses for the API. */
+export function findCourse(courseId: string): DashboardCourse | null {
   return (
-    prototypeDashboardMetrics.decks.find(
-      (deck) => deck.courseId === courseId
+    prototypeDashboardMetrics.courses.find(
+      (course) => course.courseId === courseId
     ) ?? null
   )
 }
@@ -19,16 +19,16 @@ export function findCourse(courseId: string): DashboardDeck | null {
  * today's limit, and only applies to `learn`.
  */
 export function sessionQueueSize(
-  deck: DashboardDeck,
+  course: DashboardCourse,
   mode: StudyMode,
   extra: number | undefined
 ): number {
   switch (mode) {
     case "review":
-      return deck.dueCount
+      return course.dueCount
     case "learn":
-      return Math.min(deck.unseenCount, deck.newAvailable + (extra ?? 0))
+      return Math.min(course.unseenCount, course.newAvailable + (extra ?? 0))
     case "practice":
-      return deck.trickyCount
+      return course.trickyCount
   }
 }

@@ -10,9 +10,9 @@ afterEach(() => {
 
 describe("errorResponse", () => {
   it("sends the code with its HTTP status", async () => {
-    const app = new Hono().get("/deck", (c) => errorResponse(c, "NOT_FOUND"))
+    const app = new Hono().get("/course", (c) => errorResponse(c, "NOT_FOUND"))
 
-    const res = await app.request("/deck")
+    const res = await app.request("/course")
 
     expect(res.status).toBe(404)
     expect(res.headers.get("content-type")).toContain("application/json")
@@ -23,7 +23,7 @@ describe("errorResponse", () => {
 describe("handleError", () => {
   it("turns a thrown error into INTERNAL_ERROR and keeps the details in the log", async () => {
     const logged = vi.spyOn(console, "error").mockImplementation(() => {})
-    const failure = new Error("SQLITE_ERROR: no such table: decks")
+    const failure = new Error("SQLITE_ERROR: no such table: courses")
     const app = new Hono().get("/boom", () => {
       throw failure
     })

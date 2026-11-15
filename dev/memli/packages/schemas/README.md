@@ -11,7 +11,7 @@ Use this package for validation at API boundaries, forms, and env parsing. **Do 
 | `@workspace/schemas/api/error` | The API's error body and its stable error codes |
 | `@workspace/schemas/api/health` | `GET /api/health` response |
 | `@workspace/schemas/auth/sign-in` | Sign-in form input |
-| `@workspace/schemas/content/deck` | `Deck` (title, `learningLanguage`, `answerLanguage`) and `DeckCards` (the cards to study) |
+| `@workspace/schemas/content/course` | `Course` (title, `learningLanguage`, `answerLanguage`) and `CourseCards` (the cards to study). A course, never a "deck", in code as on screen |
 | `@workspace/schemas/content/card` | `Card`: the term, accepted answers, grammar codes, example, mnemonics |
 | `@workspace/schemas/content/mnemonic` | `Mnemonic` and its story parts |
 | `@workspace/schemas/srs/progress` | `CardProgress` as data: the eleven FSRS-7 fields |
@@ -35,8 +35,8 @@ Never one `language` field ([`docs/i18n.md`](../../docs/i18n.md)). Each says wha
 
 | Field | On | Means |
 |-------|----|-------|
-| `learningLanguage` | Deck | What the deck teaches: the language of each card's `term` and example sentence |
-| `answerLanguage` | Deck, DeckCards | What each card's `answers` and example translation are written in |
+| `learningLanguage` | Course | What the course teaches: the language of each card's `term` and example sentence |
+| `answerLanguage` | Course, CourseCards | What each card's `answers` and example translation are written in |
 | `contentLocale` | Mnemonic | What the story and image description are written in |
 | `uiLocale` | The viewer (Better Auth, #108) | The app's own language. Never stored on content |
 

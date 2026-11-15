@@ -22,18 +22,18 @@ export const grammaticalGenderSchema = z.enum([
 export type GrammaticalGender = z.infer<typeof grammaticalGenderSchema>
 
 /**
- * One word to learn: what the deck teaches, never how well a learner knows
+ * One word to learn: what the course teaches, never how well a learner knows
  * it. That is `CardProgress` (`@workspace/schemas/srs/progress`).
  */
 export const cardSchema = z.object({
   cardId: z.string().min(1),
-  /** The word or phrase being learned, in the deck's `learningLanguage`. */
+  /** The word or phrase being learned, in the course's `learningLanguage`. */
   term: z.string().min(1),
   partOfSpeech: partOfSpeechSchema,
   /** Only for languages and words that have one. */
   gender: grammaticalGenderSchema.optional(),
   /**
-   * Accepted meanings in the deck's `answerLanguage`; typing any one counts.
+   * Accepted meanings in the course's `answerLanguage`; typing any one counts.
    * The first is the one shown on reveal. Same field `@workspace/core`'s
    * `SessionCard` uses, so a card can feed the session reducer as is.
    */
@@ -42,9 +42,9 @@ export const cardSchema = z.object({
   phonetic: z.string().min(1),
   /** A sentence using the term, and what it means. Shown on reveal. */
   example: z.object({
-    /** In the deck's `learningLanguage`. */
+    /** In the course's `learningLanguage`. */
     text: z.string().min(1),
-    /** In the deck's `answerLanguage`. */
+    /** In the course's `answerLanguage`. */
     translation: z.string().min(1),
   }),
   /**

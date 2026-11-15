@@ -1,13 +1,13 @@
 import { createProgress } from "@workspace/core/srs/progress"
 import type { SessionCard } from "@workspace/core/study/session-reducer"
 import type { Card } from "@workspace/schemas/content/card"
-import type { DeckCards } from "@workspace/schemas/content/deck"
+import type { CourseCards } from "@workspace/schemas/content/course"
 
 /**
  * Card content for a study session. The shapes live in `@workspace/schemas`,
  * so the API (#112) sends exactly what this file seeds today.
  */
-export type { DeckCards }
+export type { CourseCards }
 export type {
   Mnemonic,
   MnemonicStoryPart,
@@ -16,8 +16,8 @@ export type {
 /** A card's content, as the study screens use it. */
 export type StudyCard = Card
 
-// Prototype stand-in for the seeded mnemonic decks (#112), keyed by courseId.
-const seededDeckCards: Record<string, DeckCards> = {
+// Prototype stand-in for the seeded mnemonic courses (#112), keyed by courseId.
+const seededCourseCards: Record<string, CourseCards> = {
   "spanish-core-1000": {
     answerLanguage: "en",
     cards: [
@@ -136,7 +136,7 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "Vamos a comer a las dos.",
           translation: "We're going to eat at two.",
         },
-        // A mnemonic without a picture, so the fallback shows in a real deck.
+        // A mnemonic without a picture, so the fallback shows in a real course.
         mnemonics: [
           {
             mnemonicId: "mn-es-comer-1",
@@ -333,7 +333,7 @@ export function withNewProgress(
   }))
 }
 
-/** The cards behind a deck, or null when it has none seeded. */
-export function findDeckCards(courseId: string): DeckCards | null {
-  return seededDeckCards[courseId] ?? null
+/** The cards behind a course, or null when it has none seeded. */
+export function findCourseCards(courseId: string): CourseCards | null {
+  return seededCourseCards[courseId] ?? null
 }
