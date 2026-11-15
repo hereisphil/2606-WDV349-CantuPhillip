@@ -15,6 +15,13 @@
       "when": 1794713701054,
       "tag": "0001_review_log",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794742276102,
+      "tag": "0002_language_tag_checks",
+      "breakpoints": true
     }
   ]
 }

@@ -28,6 +28,15 @@ import {
  * the ISO strings `@workspace/schemas` uses.
  */
 
+/*
+ * Language columns (`ui_locale`, `learning_language`, `answer_language`,
+ * `content_locale`) hold a canonical BCP 47 tag, as `languageTagSchema` in
+ * `@workspace/schemas` defines it. The database enforces that with triggers
+ * in drizzle/migrations/0002_language_tag_checks.sql, not CHECK constraints:
+ * adding a CHECK means rebuilding the table, which on D1 deletes every row
+ * that hangs off it. Read that migration before changing these columns.
+ */
+
 const now = sql`(cast(unixepoch('subsecond') * 1000 as integer))`
 
 // Shared by every table, as Drizzle's docs suggest for repeated columns.
@@ -88,6 +97,7 @@ export const users = sqliteTable("users", {
     .notNull()
     .default(false),
   image: text("image"),
+  /** A language tag; checked by a trigger (see the note at the top). */
   uiLocale: text("ui_locale").notNull().default("en"),
   ...timestamps,
 })
@@ -98,9 +108,9 @@ export const courses = sqliteTable(
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
-    /** What the course teaches: the language of each card's term. */
+    /** What the course teaches: the language of each card's term. A language tag. */
     learningLanguage: text("learning_language").notNull(),
-    /** What the answers and example translations are written in. */
+    /** What the answers and example translations are written in. A language tag. */
     answerLanguage: text("answer_language").notNull(),
     ...timestamps,
   },
@@ -154,7 +164,7 @@ export const mnemonics = sqliteTable(
     authorId: text("author_id").references(() => users.id, {
       onDelete: "set null",
     }),
-    /** What the story and image description are written in. */
+    /** What the story and image description are written in. A language tag. */
     contentLocale: text("content_locale").notNull(),
     /** The story as data, a JSON array of parts, never markup. */
     story: text("story", { mode: "json" })

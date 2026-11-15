@@ -16,16 +16,24 @@ export const apiRoot = join(import.meta.dirname, "../..")
 
 const migrationsDir = join(apiRoot, "drizzle/migrations")
 
-/** Every statement of every migration, in the order they apply. */
-export function migrationStatements(): string[] {
+export type Migration = { name: string; statements: string[] }
+
+/** Every migration file, in the order they apply, split into statements. */
+export function migrations(): Migration[] {
   return readdirSync(migrationsDir)
     .filter((file) => file.endsWith(".sql"))
     .sort()
-    .flatMap((file) =>
-      readFileSync(join(migrationsDir, file), "utf8").split(
+    .map((name) => ({
+      name,
+      statements: readFileSync(join(migrationsDir, name), "utf8").split(
         "--> statement-breakpoint"
-      )
-    )
+      ),
+    }))
+}
+
+/** Every statement of every migration, in the order they apply. */
+export function migrationStatements(): string[] {
+  return migrations().flatMap((migration) => migration.statements)
 }
 
 /** `seed/prototype.sql`, what `bun run db:seed` runs on the local D1. */

@@ -32,13 +32,31 @@ export type TestApi = {
   stop: () => Promise<void>
 }
 
-export async function startTestApi(): Promise<TestApi> {
+/** An empty in-memory D1 and `workerd` behind it. Nothing is migrated yet. */
+export async function startD1(): Promise<{
+  env: Env
+  /** Runs statements as one batch, a transaction, the way migrations run. */
+  run: (statements: readonly string[]) => Promise<unknown>
+  /** Runs `seed/prototype.sql`, split the way `bun run db:seed` splits it. */
+  seed: () => Promise<unknown>
+  stop: () => Promise<void>
+}> {
   const { env, dispose } = await getPlatformProxy<Env>({
     configPath: join(apiRoot, "wrangler.jsonc"),
     persist: false,
   })
-  const run = (statements: string[]): Promise<unknown> =>
+  const run = (statements: readonly string[]): Promise<unknown> =>
     env.DB.batch(statements.map((statement) => env.DB.prepare(statement)))
+  return {
+    env,
+    run,
+    seed: () => run(unstable_splitSqlQuery(seedSql())),
+    stop: dispose,
+  }
+}
+
+export async function startTestApi(): Promise<TestApi> {
+  const { env, run, seed, stop } = await startD1()
 
   await run(migrationStatements())
 
@@ -50,9 +68,9 @@ export async function startTestApi(): Promise<TestApi> {
       await run(["DELETE FROM courses", "DELETE FROM users"])
     },
     seed: async () => {
-      await run(unstable_splitSqlQuery(seedSql()))
+      await seed()
     },
-    stop: dispose,
+    stop,
   }
 }
 

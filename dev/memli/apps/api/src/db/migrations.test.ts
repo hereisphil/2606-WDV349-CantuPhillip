@@ -1,4 +1,5 @@
 import type { DatabaseSync } from "node:sqlite"
+import { languageTagSchema } from "@workspace/schemas/locale/language-tag"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { countRows, migratedDatabase } from "./test-database"
@@ -179,5 +180,110 @@ describe("reviews", () => {
     db.exec(reviewRow)
     db.exec("DELETE FROM users WHERE id = 'usr_prototype_01'")
     expect(count("reviews")).toBe(0)
+  })
+})
+
+describe("language columns", () => {
+  // Every column that holds a language, and a row that sets it.
+  const columns = [
+    {
+      column: "users.ui_locale",
+      insert: (tag: string) => `
+        INSERT INTO users (id, name, email, ui_locale)
+          VALUES ('usr_2', 'Ana', 'ana@memli.test', ${tag})`,
+      update: (tag: string) =>
+        `UPDATE users SET ui_locale = ${tag} WHERE id = 'usr_prototype_01'`,
+    },
+    {
+      column: "courses.learning_language",
+      insert: (tag: string) => `
+        INSERT INTO courses (id, title, learning_language, answer_language)
+          VALUES ('c2', 'Course', ${tag}, 'en')`,
+      update: (tag: string) => `UPDATE courses SET learning_language = ${tag}`,
+    },
+    {
+      column: "courses.answer_language",
+      insert: (tag: string) => `
+        INSERT INTO courses (id, title, learning_language, answer_language)
+          VALUES ('c2', 'Course', 'es', ${tag})`,
+      update: (tag: string) => `UPDATE courses SET answer_language = ${tag}`,
+    },
+    {
+      column: "mnemonics.content_locale",
+      insert: (tag: string) => `
+        INSERT INTO mnemonics (id, card_id, content_locale, story)
+          VALUES ('mn-2', 'es-gato', ${tag}, '[{"kind":"plain","text":"x"}]')`,
+      update: (tag: string) => `
+        INSERT INTO mnemonics (id, card_id, content_locale, story)
+          VALUES ('mn-3', 'es-gato', 'en', '[{"kind":"plain","text":"x"}]');
+        UPDATE mnemonics SET content_locale = ${tag}`,
+    },
+  ]
+
+  const valid = ["es", "en", "pt-BR", "es-419", "zh-Hant", "zh-Hant-TW", "yue"]
+  const invalid = [
+    "",
+    "ES",
+    "Es",
+    "english",
+    "pt-br",
+    "pt_BR",
+    "en-",
+    "en--US",
+    "e",
+    "es ",
+  ]
+
+  it("uses the same rule as languageTagSchema for every sample", () => {
+    // The database and the schemas must agree, or a row could be stored
+    // that the API cannot send.
+    expect(
+      valid.filter((tag) => !languageTagSchema.safeParse(tag).success)
+    ).toEqual([])
+    expect(
+      invalid.filter((tag) => languageTagSchema.safeParse(tag).success)
+    ).toEqual([])
+  })
+
+  describe.each(columns)("$column", ({ column, insert, update }) => {
+    const rule = `${column.replace(".", "_")}_check`
+
+    it.each(valid)("accepts %j", (tag) => {
+      expect(() => db.exec(insert(`'${tag}'`))).not.toThrow()
+      expect(() => db.exec(update(`'${tag}'`))).not.toThrow()
+    })
+
+    it.each(invalid)("refuses %j on insert and on update", (tag) => {
+      expect(() => db.exec(insert(`'${tag}'`))).toThrow(rule)
+      expect(() => db.exec(update(`'${tag}'`))).toThrow(rule)
+    })
+  })
+
+  it("are never one unqualified `language` column, and all are checked", () => {
+    const languageColumns = db
+      .prepare(
+        `SELECT m.name AS tableName, p.name AS columnName
+         FROM sqlite_master m, pragma_table_info(m.name) p
+         WHERE m.type = 'table'
+           AND (p.name LIKE '%language%' OR p.name LIKE '%locale%' OR p.name = 'lang')
+         ORDER BY 1, 2`
+      )
+      .all()
+      .map((row) => `${String(row.tableName)}.${String(row.columnName)}`)
+    const triggers = new Set(
+      db
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'trigger'")
+        .all()
+        .map((row) => String(row.name))
+    )
+
+    // A new language column must say what its language is about, and be
+    // added to this test and to a trigger migration like 0002.
+    expect(languageColumns).toEqual(columns.map(({ column }) => column).sort())
+    for (const column of languageColumns) {
+      const rule = `${column.replace(".", "_")}_check`
+      expect(triggers).toContain(`${rule}_insert`)
+      expect(triggers).toContain(`${rule}_update`)
+    }
   })
 })

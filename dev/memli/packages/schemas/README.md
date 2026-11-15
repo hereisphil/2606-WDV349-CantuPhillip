@@ -44,6 +44,8 @@ Never one `language` field ([`docs/i18n.md`](../../docs/i18n.md)). Each says wha
 
 All four take the same value, a canonical BCP 47 tag (`es`, `pt-BR`, `es-419`), so filtering by language is a plain equality check. `pt-br` and `english` are rejected.
 
+[`src/locale/language-fields.test.ts`](./src/locale/language-fields.test.ts) keeps it that way. It walks every schema this package exports, nested fields included, and fails if a field is named just `language`, `lang` or `locale`, or if a field ending in `Language` or `Locale` accepts anything but a canonical tag. New files and fields are covered without being listed. The D1 tables have the same rule (`apps/api/README.md`, "Language columns").
+
 ## Reviews: outcomes in, progress out
 
 A client never sends FSRS numbers. It sends what happened (`reviewId`, `cardId`, `outcome`, `reviewedAt`, `durationMs`), and the API loads its own saved progress and schedules with `@workspace/core`'s `applyOutcome`. A tampered request can report a wrong outcome, but it cannot set its own stability or due date. Extra fields are dropped when parsed.

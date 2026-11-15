@@ -262,6 +262,23 @@ Integers of milliseconds since 1970, UTC, which Drizzle reads as `Date`. They co
 
 Enum columns (`part_of_speech`, `gender`, `state`) take their values from the Zod enums in `@workspace/schemas` and get a SQL `CHECK` constraint. The database refuses a value the API would refuse, even from a hand-written insert.
 
+### Language columns
+
+Four columns hold a language, and each says which one ([`docs/i18n.md`](../../docs/i18n.md)). No table has a plain `language` column.
+
+| Column | Means |
+| --- | --- |
+| `users.ui_locale` | The app's own language for this learner |
+| `courses.learning_language` | What the course teaches |
+| `courses.answer_language` | What its answers and translations are written in |
+| `mnemonics.content_locale` | What the story and picture description are written in |
+
+All four are `NOT NULL` and hold a canonical BCP 47 tag (`es`, `pt-BR`, `es-419`), the rule `languageTagSchema` uses. SQL has no `Intl`, so the database checks the shape: it refuses `''`, `English`, `ES`, `pt-br` and `pt_BR`, and a test proves it agrees with `languageTagSchema` on every sample.
+
+The rule is enforced by **triggers** in [`0002_language_tag_checks.sql`](./drizzle/migrations/0002_language_tag_checks.sql), not `CHECK` constraints. Adding a `CHECK` to an existing SQLite table means rebuilding it, and that is not safe on D1 (see "Changing the schema"). A trigger is added in place. Drizzle does not model triggers, so the columns in `src/db/schema.ts` point to that file.
+
+A test lists every column whose name contains `language` or `locale` and fails if one is missing its two triggers (before insert, before update). A new language column needs a name that says what it is about, and a migration like `0002`.
+
 ### Ready for Better Auth (#108)
 
 `users` has exactly Better Auth's core user fields (`id`, `name`, `email`, `emailVerified`, `image`, `createdAt`, `updatedAt`). In MS 4:
@@ -303,14 +320,22 @@ To add a word, add a row to the `cards` insert with the next `position` in its c
 
 Never edit a migration that is already committed; write a new one. CI regenerates the migrations and fails if anything changes, so a schema edit without its migration cannot merge. Prettier skips `drizzle/` for the same reason.
 
+**Watch for table rebuilds.** SQLite cannot change most constraints in place, so for those `drizzle-kit` writes a rebuild: `PRAGMA foreign_keys=OFF`, create `__new_<table>`, copy the rows, drop the old table, rename. On D1 that destroys data. D1 runs each migration as one transaction, where that pragma does nothing, so dropping the old table fires every `ON DELETE CASCADE`. Rebuilding `courses` deletes every card, mnemonic, progress row and review; `PRAGMA defer_foreign_keys` does not stop it either. Both were tried while writing `0002`.
+
+If a generated migration has `__new_` in it and the table has children, do not commit it. Reach the same rule another way: a trigger (as in `0002`), a new column, or a new table. For hand-written SQL, `bunx drizzle-kit generate --custom --name <name>` makes an empty migration that CI's regenerate check accepts.
+
+[`src/db/migrations-d1.test.ts`](./src/db/migrations-d1.test.ts) guards this. It applies the first migration to a real D1, seeds it, then applies each later one and fails if any table lost rows.
+
 ### Tests
 
 Two kinds of database, for two kinds of test.
 
 **Schema and seed tests** run on an in-memory SQLite database (Node's built-in `node:sqlite`, no extra package), built from the real migration files by [`src/db/test-database.ts`](./src/db/test-database.ts). They are instant.
 
-- [`src/db/migrations.test.ts`](./src/db/migrations.test.ts) checks keys, cascades and `CHECK` constraints.
+- [`src/db/migrations.test.ts`](./src/db/migrations.test.ts) checks keys, cascades, `CHECK` constraints and the language triggers.
 - [`src/db/seed.test.ts`](./src/db/seed.test.ts) runs the seed, reads the rows back in the shape the API will send, and parses them with the Zod schemas in `@workspace/schemas`. The seed is SQL written by hand, so this is what catches a misspelled part of speech, broken JSON, or a picture that does not exist. It also seeds twice to prove nothing is duplicated and progress survives.
+
+**Migration safety** ([`src/db/migrations-d1.test.ts`](./src/db/migrations-d1.test.ts)) also needs a real D1, because plain SQLite applies `PRAGMA foreign_keys=OFF` and would hide the data loss described in "Changing the schema".
 
 **Route tests** ([`src/routes/*.test.ts`](./src/routes)) need what a route needs: a D1 binding. [`src/db/test-d1.ts`](./src/db/test-d1.ts) gets one from wrangler's `getPlatformProxy`, which starts `workerd`, the runtime `wrangler dev` and Cloudflare use, with an in-memory database. So the tests call the real routes on a real D1, limits included, and never touch your local database. They add their own rows with Drizzle; one group runs the real seed.
 
@@ -338,7 +363,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
 | `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
 | `src/db/test-database.ts` | For tests: an in-memory SQLite database from the real migrations and seed. |
-| `src/db/test-d1.ts` | For route tests: a real in-memory D1, plus rows to fill it. |
+| `src/db/test-d1.ts` | For route and migration tests: a real in-memory D1, plus rows to fill it. |
 | `src/index.ts` | The Worker entry. It only exports the app. |
 | `src/**/*.test.ts` | Vitest. `app.request("/api/...")` calls a route with no server running. |
 | `wrangler.jsonc` | Worker name, entry, compatibility date, D1 binding, dev port. |
