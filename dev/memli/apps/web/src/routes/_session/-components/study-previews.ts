@@ -202,6 +202,21 @@ export const studyPreviews = {
     cards: (deck) => deck,
     events: (cards) => finish(cards, cards.length),
   },
+  "complete-mixed": {
+    group: "progress",
+    description: "Every card answered; the first was missed once",
+    cards: (deck) => deck,
+    events: (cards) => {
+      const [first, ...rest] = cards
+      if (first === undefined) return []
+      // A miss sends the first card to the back of the queue, so it is answered last.
+      return [
+        ...submit("banana"),
+        { type: "RESOLVE", outcome: "missed", now: new Date() },
+        ...finish([...rest, first], cards.length),
+      ]
+    },
+  },
   "one-card": {
     group: "progress",
     description: "A one-card session",
@@ -260,6 +275,21 @@ export const studyPreviews = {
     cards: () => [casa],
     languages: spanish,
     events: () => submit("hous"),
+  },
+  // `suggestOutcome` calls "hous" quick under 3.5 s and slow from 7 s.
+  "typo-quick": {
+    group: "answer",
+    description: "A quick typo: the dock suggests it was just a typo",
+    cards: () => [casa],
+    languages: spanish,
+    events: () => [{ type: "SUBMIT", answer: "hous", elapsedMs: 2_000 }],
+  },
+  "typo-slow": {
+    group: "answer",
+    description: "A slow typo: the dock suggests it was hard",
+    cards: () => [casa],
+    languages: spanish,
+    events: () => [{ type: "SUBMIT", answer: "hous", elapsedMs: 9_000 }],
   },
   accent: {
     group: "answer",

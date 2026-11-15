@@ -11,6 +11,25 @@ export default defineConfig([
       },
     },
   },
+  // Scheduling goes through @workspace/core's outcomes (#132). The typescript-eslint copy of the
+  // rule is used so it doesn't replace the base config's `no-restricted-imports` (the `cn` guard).
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["ts-fsrs", "ts-fsrs/*"],
+              message:
+                "Schedule through @workspace/core (srs/outcome, srs/progress), never ts-fsrs directly.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // TanStack file routes export `Route` — not a React component
   {
     files: ["src/routes/**/*.{ts,tsx}"],
@@ -71,8 +90,6 @@ export default defineConfig([
       "src/components/dev-previews-menu.tsx",
       "src/routes/_app/-components/PreviewSwitcher.tsx",
       "src/routes/_session/-components/StudyPreviewSwitcher.tsx",
-      "src/routes/_session/-components/DevSlot.tsx",
-      "src/routes/_session/-components/OutcomeDockSlot.tsx",
     ],
     rules: {
       "memli/no-restricted-classes": "off",

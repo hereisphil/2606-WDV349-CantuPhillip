@@ -1,9 +1,10 @@
 import { expect, test, type Page } from "@playwright/test"
 
 /**
- * After Reveal or Submit, the word and its meaning are both on screen and
- * not under the sticky header, and focus is on the answer. A plain `focus()`
- * once scrolled phones to the middle of the answer, past the meaning.
+ * After Reveal or Submit, the word and its meaning are both on screen, not
+ * under the sticky header or the outcome dock, and focus is on the answer. A
+ * plain `focus()` once scrolled phones to the middle of the answer, past the
+ * meaning.
  */
 const path = "/study/spanish-core-1000?mode=review"
 
@@ -16,7 +17,10 @@ async function expectWordAndMeaningInView(page: Page): Promise<void> {
   const headerBottom = await page
     .locator("header")
     .evaluate((header) => header.getBoundingClientRect().bottom)
-  const viewportHeight = page.viewportSize()?.height ?? 0
+  // The dock's name is its question after a reveal, and its label after a typed answer.
+  const dockTop = await page
+    .getByRole("group", { name: /^(Did you know it\?|How did it go\?)$/ })
+    .evaluate((dock) => dock.getBoundingClientRect().top)
 
   for (const text of [
     page.locator("main p", { hasText: /^gato$/ }),
@@ -30,14 +34,16 @@ async function expectWordAndMeaningInView(page: Page): Promise<void> {
     )
     expect(
       (box?.y ?? 0) + (box?.height ?? 0),
-      "below the first screen"
-    ).toBeLessThanOrEqual(viewportHeight)
+      "hidden under the outcome dock"
+    ).toBeLessThanOrEqual(dockTop)
   }
 }
 
 const sizes = [
   { width: 360, height: 640 },
   { width: 375, height: 667 },
+  // Tall enough for the dock's "Back in 5 days" lines, so its tallest layout is checked on a phone.
+  { width: 390, height: 844 },
   { width: 1280, height: 800 },
 ] as const
 
