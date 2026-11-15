@@ -177,19 +177,28 @@ function SessionWorkspace({
     dispatch({ type: "REVEAL", elapsedMs })
   }, [])
 
-  // Time on screen this visit, for the summary. Hidden-tab time is left out.
+  // Time on screen this visit. Hidden-tab time is left out.
   const activeMs = useActiveTime()
+  // Like a stopwatch lap: where the clock stood when this round began (0 for
+  // the first), so a summary after "Study these words again" counts that
+  // round only. A ref, since nothing renders from it.
+  const roundStartMs = useRef(0)
+  const roundMs = useCallback((): number | null => {
+    const now = activeMs()
+    return now === null ? null : now - roundStartMs.current
+  }, [activeMs])
 
   // The prompt card on screen, so focus can move to the next word.
   const promptRef = useRef<HTMLElement>(null)
   // Starting over hands focus to the first word, as moving on does.
   const onRestart = useCallback(() => {
+    roundStartMs.current = activeMs() ?? 0
     flushSync(() => {
       dispatch({ type: "RESTART" })
     })
     promptRef.current?.focus({ preventScroll: true })
     promptRef.current?.scrollIntoView({ block: "start" })
-  }, [])
+  }, [activeMs])
   // Stable, so the dock's key listener isn't re-added on every render.
   const onResolve = useCallback((outcome: ReviewOutcome) => {
     // flushSync renders the next card right away, so focus can move to it in
@@ -234,7 +243,7 @@ function SessionWorkspace({
             <SessionSummary
               finished={session.finished}
               reviews={session.reviews}
-              activeMs={activeMs}
+              activeMs={roundMs}
               learningLanguage={learningLanguage}
               onRestart={onRestart}
             />

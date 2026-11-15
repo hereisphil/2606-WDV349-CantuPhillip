@@ -59,6 +59,26 @@ test.describe("study session summary", () => {
     await expect(stats).toContainText("80%remembered the first time")
   })
 
+  test("Each round counts only its own minutes", async ({ page }) => {
+    await page.clock.install()
+    await page.goto(study, { waitUntil: "networkidle" })
+    const stats = page.getByRole("list", { name: "Session results" })
+
+    await page.clock.runFor(3 * 60_000)
+    for (let word = 0; word < WORDS; word += 1) {
+      await revealAndPick(page, "3")
+    }
+    await expect(stats).toContainText("3minutes studied")
+
+    await page.getByRole("button", { name: "Study these words again" }).click()
+    await page.clock.runFor(60_000)
+    for (let word = 0; word < WORDS; word += 1) {
+      await revealAndPick(page, "3")
+    }
+    // Not 4: the first round's minutes stay with the first summary.
+    await expect(stats).toContainText("1minute studied")
+  })
+
   test("Studying again starts from the first word", async ({ page }) => {
     await page.goto(`${study}&preview=complete`, { waitUntil: "networkidle" })
     await page.getByRole("button", { name: "Study these words again" }).click()

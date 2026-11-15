@@ -30,7 +30,7 @@ const messages = {
 type SessionSummaryProps = {
   finished: readonly SessionStudyCard[]
   reviews: readonly SessionReview[]
-  /** Time on screen this visit, hidden-tab time left out (`useActiveTime`). */
+  /** Time on screen this round, hidden-tab time left out. */
   activeMs: () => number | null
   /** BCP 47 tag of the terms. */
   learningLanguage: string
