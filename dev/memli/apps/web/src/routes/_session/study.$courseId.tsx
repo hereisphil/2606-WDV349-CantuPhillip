@@ -24,6 +24,8 @@ import {
   type StudyMode,
 } from "./-components/session-model"
 import { SessionHeader } from "./-components/SessionHeader"
+import { SessionSummary } from "./-components/SessionSummary"
+import { useActiveTime } from "./-components/use-active-time"
 import {
   findDeckCards,
   withNewProgress,
@@ -57,10 +59,6 @@ const messages = {
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
-  complete: {
-    heading: "Session complete",
-    body: "You've been through every word in this session.",
-  },
 } as const
 
 function parseMode(value: unknown): StudyMode {
@@ -179,8 +177,19 @@ function SessionWorkspace({
     dispatch({ type: "REVEAL", elapsedMs })
   }, [])
 
+  // Time on screen this visit, for the summary. Hidden-tab time is left out.
+  const activeMs = useActiveTime()
+
   // The prompt card on screen, so focus can move to the next word.
   const promptRef = useRef<HTMLElement>(null)
+  // Starting over hands focus to the first word, as moving on does.
+  const onRestart = useCallback(() => {
+    flushSync(() => {
+      dispatch({ type: "RESTART" })
+    })
+    promptRef.current?.focus({ preventScroll: true })
+    promptRef.current?.scrollIntoView({ block: "start" })
+  }, [])
   // Stable, so the dock's key listener isn't re-added on every render.
   const onResolve = useCallback((outcome: ReviewOutcome) => {
     // flushSync renders the next card right away, so focus can move to it in
@@ -222,10 +231,12 @@ function SessionWorkspace({
               body={messages.empty.body}
             />
           ) : session.status === "complete" ? (
-            // Placeholder until the session summary (`07 - Study session final page.png`) is built.
-            <EmptyState
-              heading={messages.complete.heading}
-              body={messages.complete.body}
+            <SessionSummary
+              finished={session.finished}
+              reviews={session.reviews}
+              activeMs={activeMs}
+              learningLanguage={learningLanguage}
+              onRestart={onRestart}
             />
           ) : (
             <>

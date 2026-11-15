@@ -83,9 +83,7 @@ test.describe("study session outcome dock", () => {
     await expect(choices).toBeVisible()
 
     await page.keyboard.press("2")
-    await expect(
-      page.getByRole("heading", { name: "Session complete" })
-    ).toBeVisible()
+    await expect(page.getByRole("heading", { name: "All done!" })).toBeVisible()
   })
 
   test("A quick typo pre-selects “just a typo” for Enter", async ({ page }) => {
@@ -99,9 +97,7 @@ test.describe("study session outcome dock", () => {
     ).toHaveAttribute("aria-keyshortcuts", "Enter 2")
 
     await page.keyboard.press("Enter")
-    await expect(
-      page.getByRole("heading", { name: "Session complete" })
-    ).toBeVisible()
+    await expect(page.getByRole("heading", { name: "All done!" })).toBeVisible()
   })
 
   test("A wrong answer comes back later in the session", async ({ page }) => {
