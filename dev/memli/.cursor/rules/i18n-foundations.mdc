@@ -20,6 +20,10 @@ Full detail: `docs/i18n.md`.
 - Avoid sentence concatenation (`"Hello, " + name`). Use single templates with placeholders when adding messages.
 - Persist timestamps in UTC/ISO; format for display with `Intl` and the active UI locale.
 - Learning content (decks, cards, mnemonics): plan/include a content language/locale in new models.
+- Text in a learning or content language carries `lang` (`<p lang={learningLanguage}>`), so screen readers pick the right voice and copy checks skip it.
+- Logical CSS properties only (`ms-`, `pe-`, `start-`, `text-start`), so layouts flip in right-to-left languages. Enforced by `memli/no-restricted-classes` (`ui-design.mdc`).
+- Check layout changes with `?pseudo=long`, `?pseudo=cjk` and `?pseudo=rtl` (`docs/i18n.md` section 8). `apps/web/e2e/pseudo.spec.ts` runs them in CI.
+- No em dashes in copy, and no sentence over 12 words: both translate badly (`ui-design.mdc`).
 
 ## Do not
 

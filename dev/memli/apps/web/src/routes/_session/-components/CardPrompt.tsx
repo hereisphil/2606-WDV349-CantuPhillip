@@ -74,13 +74,13 @@ export function CardPrompt({
     >
       <p
         id="session-mode"
-        className="self-end text-xs font-medium tracking-widest text-muted-foreground uppercase"
+        className="self-end text-sm font-semibold text-foreground"
       >
         {messages.mode[mode]}
       </p>
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
         {revealed ? null : (
-          <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+          <p className="text-base text-muted-foreground">
             {format(messages.instruction, {
               language: languageName(answerLanguage),
             })}
@@ -140,8 +140,8 @@ function PronounceButton({
   return (
     <Button
       variant="secondary"
-      size="icon-lg"
-      className="size-11 rounded-full"
+      size="icon-touch"
+      className="rounded-full"
       aria-label={messages.pronounce}
       // Not `disabled`: that would drop keyboard focus mid-press. Repeat presses are ignored instead.
       aria-busy={isStarting}

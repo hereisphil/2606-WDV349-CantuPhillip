@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 
 /**
  * Pseudo-localization (REDESIGN.md section 12): with stretched, CJK and
- * right-to-left text, the dashboard never scrolls sideways and the main
+ * right-to-left text, no screen scrolls sideways, and the dashboard's main
  * button stays on the first screen.
  */
 const modes = ["long", "cjk", "rtl"] as const
@@ -18,6 +18,39 @@ const sizes = [
   { width: 1024, height: 768, fold: true },
   { width: 1440, height: 900, fold: true },
 ] as const
+
+/** Study screens with the most text: a prompt, a revealed answer, and a mnemonic with its arrows. */
+const study = "/study/spanish-core-1000?mode=review"
+const studyPaths = [
+  study,
+  `${study}&preview=long-revealed`,
+  `${study}&preview=mnemonic-image`,
+]
+
+test.describe("study session pseudo-localization", () => {
+  test.skip(({ isMobile }) => isMobile, "Runs once, in the desktop project.")
+
+  for (const mode of modes) {
+    for (const path of studyPaths) {
+      for (const { width, height } of sizes) {
+        test(`${mode} ${width}x${height} ${path}`, async ({ page }) => {
+          await page.setViewportSize({ width, height })
+          await page.goto(`${path}&pseudo=${mode}`, {
+            waitUntil: "networkidle",
+          })
+          await expect(page.locator("main")).toBeVisible()
+
+          const pageWidth = await page.evaluate(
+            () => document.documentElement.scrollWidth
+          )
+          expect(pageWidth, "the page scrolls sideways").toBeLessThanOrEqual(
+            width
+          )
+        })
+      }
+    }
+  }
+})
 
 test.describe("dashboard pseudo-localization", () => {
   // The sizes are set here, so one browser project is enough.

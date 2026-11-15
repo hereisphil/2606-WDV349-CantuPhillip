@@ -279,7 +279,7 @@ function EmptyState({
         {heading}
       </Heading>
       <Text variant="muted">{body}</Text>
-      <Link to="/dashboard" className={cn(buttonVariants())}>
+      <Link to="/dashboard" className={cn(buttonVariants({ size: "touch" }))}>
         {messages.back}
       </Link>
     </div>

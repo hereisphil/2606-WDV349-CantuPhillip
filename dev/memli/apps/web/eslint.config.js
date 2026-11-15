@@ -51,6 +51,51 @@ export default defineConfig([
       ],
     },
   },
+  // Design floors for learner-facing screens (.cursor/rules/ui-design.mdc).
+  {
+    files: [
+      "src/routes/_app/**/*.{ts,tsx}",
+      "src/routes/_session/**/*.{ts,tsx}",
+      "src/components/**/*.{ts,tsx}",
+    ],
+    // Marketing chrome keeps its own look until it gets a design pass.
+    ignores: ["src/components/site-*.tsx"],
+    rules: {
+      "memli/no-restricted-classes": "error",
+      "memli/touch-button-size": "error",
+    },
+  },
+  // DEV-only tools never reach learners, so they stay small and out of the way.
+  {
+    files: [
+      "src/components/dev-previews-menu.tsx",
+      "src/routes/_app/-components/PreviewSwitcher.tsx",
+      "src/routes/_session/-components/StudyPreviewSwitcher.tsx",
+      "src/routes/_session/-components/DevSlot.tsx",
+      "src/routes/_session/-components/OutcomeDockSlot.tsx",
+    ],
+    rules: {
+      "memli/no-restricted-classes": "off",
+      "memli/touch-button-size": "off",
+    },
+  },
+  // No em dashes in copy: they read as a pause only in English, and screen readers skip them.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...[
+          "Literal[value=/\u2014/]",
+          "TemplateElement[value.raw=/\u2014/]",
+          "JSXText[value=/\u2014/]",
+        ].map((selector) => ({
+          selector,
+          message: "No em dashes in copy. Use a period, a comma or a colon.",
+        })),
+      ],
+    },
+  },
   // React state guardrail exemptions (docs/state-management.md).
   {
     files: [

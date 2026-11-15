@@ -83,11 +83,11 @@ export function MnemonicFrame({
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <Heading
           level={2}
-          weight="medium"
+          weight="semibold"
           id={headingId}
-          className="flex items-center gap-2 font-sans text-xs tracking-widest text-muted-foreground uppercase"
+          className="flex items-center gap-2 font-sans text-sm text-foreground"
         >
-          <ThumbsUp aria-hidden="true" className="size-3.5" />
+          <ThumbsUp aria-hidden="true" className="size-4" />
           {messages.heading}
         </Heading>
         {total > 1 ? (
@@ -95,6 +95,7 @@ export function MnemonicFrame({
           <MnemonicNav
             position={position}
             onStep={step}
+            layout="header"
             className="hidden sm:flex"
           />
         ) : null}
@@ -137,7 +138,7 @@ export function MnemonicFrame({
             <Text variant="small" className="min-w-0 wrap-break-word">
               {byline}
             </Text>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground tabular-nums">
               <ArrowBigUp aria-hidden="true" className="size-3.5" />
               {plural(mnemonic.upvotes, messages.upvotes)}
             </span>
@@ -149,6 +150,7 @@ export function MnemonicFrame({
         <MnemonicNav
           position={position}
           onStep={step}
+          layout="bar"
           className="flex justify-between border-t border-border pt-4 sm:hidden"
         />
       ) : null}
@@ -158,42 +160,50 @@ export function MnemonicFrame({
 
 /**
  * Previous / position / next. Rendered once per layout and hidden with CSS
- * in the other, so only one is ever in the accessibility tree.
+ * in the other, so only one is ever in the accessibility tree. Each layout
+ * writes its parts in the order they appear, so nothing is reordered with CSS.
  */
 function MnemonicNav({
   position,
   onStep,
+  layout,
   className,
 }: {
   position: { current: number; total: number }
   onStep: (by: 1 | -1) => void
+  /** `header`: position, then both arrows. `bar`: the position between the arrows. */
+  layout: "header" | "bar"
   className: string
 }): JSX.Element {
   const { format } = useFormatters()
+  const previous = (
+    <Button
+      variant="outline"
+      size="icon-touch"
+      aria-label={messages.previous}
+      onClick={() => {
+        onStep(-1)
+      }}
+    >
+      <ChevronLeft aria-hidden="true" />
+    </Button>
+  )
+  // The figure's live region says the position for screen readers.
+  const count = (
+    <span
+      aria-hidden="true"
+      className="text-sm font-semibold text-foreground tabular-nums"
+    >
+      {format(messages.position, position)}
+    </span>
+  )
   return (
-    <div className={cn("items-center gap-1", className)}>
+    <div className={cn("items-center gap-2", className)}>
+      {layout === "header" ? count : previous}
+      {layout === "header" ? previous : count}
       <Button
         variant="outline"
-        size="icon"
-        className="size-11 sm:order-2 sm:size-8"
-        aria-label={messages.previous}
-        onClick={() => {
-          onStep(-1)
-        }}
-      >
-        <ChevronLeft aria-hidden="true" />
-      </Button>
-      {/* The figure's live region says the position for screen readers. */}
-      <span
-        aria-hidden="true"
-        className="text-sm text-muted-foreground tabular-nums sm:order-1 sm:mr-2"
-      >
-        {format(messages.position, position)}
-      </span>
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-11 sm:order-3 sm:size-8"
+        size="icon-touch"
         aria-label={messages.next}
         onClick={() => {
           onStep(1)

@@ -27,6 +27,8 @@ export function StudyPreviewSwitcher({
   return (
     <nav
       aria-label="Study session previews"
+      // Design-floor checks (e2e/floors.spec.ts) skip DEV-only tools.
+      data-dev-only=""
       className="flex flex-col gap-1.5 rounded-lg border border-dashed border-muted-foreground/40 p-2 text-xs"
     >
       {groups.map(({ label, names }) => (

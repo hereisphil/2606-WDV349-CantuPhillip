@@ -16,7 +16,11 @@ export function DevSlot({
   children?: ReactNode
 }): JSX.Element {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-dashed border-muted-foreground/40 p-4 text-xs text-muted-foreground">
+    <div
+      // Design-floor checks (e2e/floors.spec.ts) skip DEV-only tools.
+      data-dev-only=""
+      className="flex flex-col gap-2 rounded-xl border border-dashed border-muted-foreground/40 p-4 text-xs text-muted-foreground"
+    >
       <p>
         <span className="font-medium text-foreground">{name}</span> slot · built
         in {issue} · development only

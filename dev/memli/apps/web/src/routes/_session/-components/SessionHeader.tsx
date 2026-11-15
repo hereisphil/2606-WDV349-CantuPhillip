@@ -64,18 +64,19 @@ export function SessionHeader({
   const percent = total > 0 ? (completed / total) * 100 : 0
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+    // The root's scroll padding keeps focused and scrolled-to content out from under this header (WCAG 2.4.11).
+    <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 [:root:has(&)]:scroll-pt-32 md:[:root:has(&)]:scroll-pt-24">
       {/*
         Below md, two rows: Exit and Theme, then the title and progress at full width, so the title isn't squeezed.
         From md up, one row: a centered column the width of the card (max-w-xl) holds the progress, so it stays short and lines up with the card.
       */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 sm:gap-x-4 sm:px-6 md:grid md:grid-cols-[1fr_minmax(0,36rem)_1fr] md:gap-6">
+      <div className="grid grid-cols-[auto_auto] items-center justify-between gap-x-3 gap-y-2 px-4 py-3 sm:gap-x-4 sm:px-6 md:grid-cols-[1fr_minmax(0,36rem)_1fr] md:justify-normal md:gap-6">
         <Link
           to="/dashboard"
           aria-keyshortcuts="Escape"
           className={cn(
             buttonVariants({ variant: "ghost", size: "touch" }),
-            "shrink-0 px-3 md:justify-self-start"
+            "col-start-1 row-start-1 shrink-0 justify-self-start px-3"
           )}
         >
           <X aria-hidden="true" className="size-5" />
@@ -84,12 +85,12 @@ export function SessionHeader({
           {/* Shortcut hint only while hovering (or keyboard-focusing) the control. */}
           <kbd
             aria-hidden="true"
-            className="hidden rounded border border-border px-1.5 font-sans text-xs font-medium text-muted-foreground group-hover/button:inline group-focus-visible/button:inline"
+            className="hidden rounded border border-border px-1.5 font-sans text-sm font-medium text-muted-foreground group-hover/button:inline group-focus-visible/button:inline"
           >
             {messages.exitKey}
           </kbd>
         </Link>
-        <div className="order-last flex w-full min-w-0 flex-col gap-2 md:order-none md:w-auto">
+        <div className="col-span-2 row-start-2 flex min-w-0 flex-col gap-2 md:col-span-1 md:col-start-2 md:row-start-1">
           <div className="flex items-baseline justify-between gap-3">
             <h1 className="truncate font-heading text-base font-semibold">
               {title}
@@ -118,7 +119,7 @@ export function SessionHeader({
           ) : null}
         </div>
         {/* Same "Theme" menu as the app's phone header, so it reads the same everywhere. */}
-        <div className="shrink-0 md:justify-self-end">
+        <div className="col-start-2 row-start-1 shrink-0 justify-self-end md:col-start-3">
           <ThemeMenu placement="topBar" />
         </div>
       </div>
