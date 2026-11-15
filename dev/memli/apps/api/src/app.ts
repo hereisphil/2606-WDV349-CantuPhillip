@@ -1,13 +1,14 @@
 import type { HealthResponse } from "@workspace/schemas/api/health"
 import { Hono } from "hono"
 
+import type { Env } from "./env"
 import { handleError, handleNotFound } from "./lib/errors"
 
 /**
  * The Memli API. Every route lives under `/api`, so the same paths work behind
  * the Vite dev proxy and on a same-origin deploy, with no path rewriting.
  */
-export const app = new Hono().basePath("/api")
+export const app = new Hono<{ Bindings: Env }>().basePath("/api")
 
 app.notFound(handleNotFound)
 app.onError(handleError)

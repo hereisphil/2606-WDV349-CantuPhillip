@@ -5,6 +5,16 @@
   // The newest date the installed local runtime (workerd) accepts. `wrangler dev`
   // refuses to start on a later one, so raise this only alongside wrangler.
   "compatibility_date": "2026-06-24",
+  // Local D1 lives in .wrangler/state (gitignored). Nothing is created on
+  // Cloudflare until this Worker deploys, so there is no real database_id yet.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "memli",
+      "database_id": "local-only",
+      "migrations_dir": "drizzle/migrations"
+    }
+  ],
   // Local only for now. `apps/web` proxies /api/* here (apps/web/vite.config.ts).
   "dev": {
     "port": 8787

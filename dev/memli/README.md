@@ -17,7 +17,7 @@ bun install
 
 | Script | Purpose |
 |--------|---------|
-| `bun run dev` | Start web (`:5173`) and API (`:8787`) with Turbo. Web proxies `/api/*` to the API ([`apps/api/README.md`](./apps/api/README.md)) |
+| `bun run dev` | Start web (`:5173`) and API (`:8787`) with Turbo. Web proxies `/api/*` to the API ([`apps/api/README.md`](./apps/api/README.md)). First run `bun run db:setup` in `apps/api` for the local D1 database |
 | `bun run lint` | ESLint via Turbo |
 | `bun run format` / `format:check` | Prettier write / check |
 | `bun run typecheck` | TypeScript via Turbo |

@@ -27,7 +27,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 | Shared packages | `packages/core` (Evaluator, Rating Mapper, FSRS-7 via `ts-fsrs`, session reducer), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
 | Routing | TanStack Router route groups: `_marketing`, `_auth`, `_app` |
 | Marketing vs app | **Logical** split only (same deployable, same origin) |
-| API | `apps/api` Hono shell on a local Cloudflare Worker; `apps/web` proxies `/api/*` to it in dev (#106). No database or deploy yet |
+| API | `apps/api` Hono shell on a local Cloudflare Worker; `apps/web` proxies `/api/*` to it in dev (#106). Local D1 with Drizzle tables for courses, cards, mnemonics and FSRS progress. No deploy yet |
 | Mobile | Not started |
 | i18n | English UI; no i18n framework yet |
 | DX inspectors | TanStack Router Devtools in web; Reactotron deferred |
