@@ -26,7 +26,7 @@ function timeOfDay(date: Date): TimeOfDay {
 
 type DashboardGreetingProps = {
   name: string
-  hasDecks: boolean
+  hasCourses: boolean
   now: Date
 }
 
@@ -36,11 +36,11 @@ type DashboardGreetingProps = {
  */
 export function DashboardGreeting({
   name,
-  hasDecks,
+  hasCourses,
   now,
 }: DashboardGreetingProps): JSX.Element {
   const { format } = useFormatters()
-  const template = hasDecks
+  const template = hasCourses
     ? messages.greeting[timeOfDay(now)]
     : messages.welcome
 

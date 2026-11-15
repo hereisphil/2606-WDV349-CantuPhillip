@@ -8,7 +8,8 @@ import { defineConfig, globalIgnores } from "eslint/config"
  * local eslint.config.js when they need project-aware parsing.
  */
 export default defineConfig([
-  globalIgnores(["dist", ".turbo", "node_modules", "coverage"]),
+  // `.wrangler` holds the bundles `wrangler dev` writes while it runs.
+  globalIgnores(["dist", ".turbo", ".wrangler", "node_modules", "coverage"]),
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     extends: [js.configs.recommended, tseslint.configs.recommended],

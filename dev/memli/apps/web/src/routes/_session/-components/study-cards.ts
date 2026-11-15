@@ -1,84 +1,23 @@
 import { createProgress } from "@workspace/core/srs/progress"
 import type { SessionCard } from "@workspace/core/study/session-reducer"
+import type { Card } from "@workspace/schemas/content/card"
+import type { CourseCards } from "@workspace/schemas/content/course"
 
 /**
- * Card content for a study session. #112 replaces {@link seededDeckCards}
- * with cards from the API in this same shape.
- *
- * Grammar fields are stable codes; the UI maps them to labels in the UI
- * locale (docs/i18n.md).
+ * Card content for a study session. The shapes live in `@workspace/schemas`,
+ * so the API (#112) sends exactly what this file seeds today.
  */
-type PartOfSpeech = "noun" | "verb" | "adjective" | "adverb" | "phrase"
+export type { CourseCards }
+export type {
+  Mnemonic,
+  MnemonicStoryPart,
+} from "@workspace/schemas/content/mnemonic"
 
-type GrammaticalGender = "masculine" | "feminine" | "neuter"
+/** A card's content, as the study screens use it. */
+export type StudyCard = Card
 
-/**
- * One run of a mnemonic story. Parts are data, not markup, so community
- * text is never parsed.
- * - `plain`: story text, in the mnemonic's `contentLocale`.
- * - `term`: the word being learned, in the deck's `learningLanguage`.
- * - `keyword`: the sound-alike hook that links the term to its meaning.
- */
-export type MnemonicStoryPart = {
-  kind: "plain" | "term" | "keyword"
-  text: string
-}
-
-/** A memory hook for one card, written by the community (#50). */
-export type Mnemonic = {
-  mnemonicId: string
-  /** BCP 47 tag of the story and image description. May differ from the deck's `answerLanguage`. */
-  contentLocale: string
-  story: readonly [MnemonicStoryPart, ...MnemonicStoryPart[]]
-  author: { displayName: string }
-  /** Learners who found it useful. `StudyCard.mnemonics` is sorted by this, highest first. */
-  upvotes: number
-  /** Picture for the hook. Optional: a story works without one. */
-  image?:
-    | {
-        src: string
-        /** Describes the picture, in `contentLocale`. */
-        alt: string
-      }
-    | undefined
-}
-
-export type StudyCard = {
-  cardId: string
-  /** The word or phrase being learned, in the deck's `learningLanguage`. */
-  term: string
-  partOfSpeech: PartOfSpeech
-  /** Only for languages and words that have one. */
-  gender?: GrammaticalGender | undefined
-  /**
-   * Accepted meanings in the deck's `answerLanguage`; typing any one counts.
-   * The first is the one shown on reveal. Same field `@workspace/core`'s
-   * `SessionCard` uses, so these cards can feed the session reducer.
-   */
-  answers: readonly [string, ...string[]]
-  /** IPA, or a romanization for non-Latin scripts. Shown on reveal. */
-  phonetic: string
-  /** A sentence using the term, and what it means. Shown on reveal. */
-  example: {
-    text: string
-    translation: string
-  }
-  /**
-   * Shown on reveal, most upvoted first; the learner can cycle through the
-   * rest. Empty or missing when the card has none yet.
-   */
-  mnemonics?: readonly Mnemonic[] | undefined
-}
-
-export type DeckCards = {
-  /** BCP 47 tag of `answers` and example translations. Never the viewer's `uiLocale`. */
-  answerLanguage: string
-  /** Never empty, so a session always has a first card. */
-  cards: readonly [StudyCard, ...StudyCard[]]
-}
-
-// Prototype stand-in for the seeded mnemonic decks (#112), keyed by courseId.
-const seededDeckCards: Record<string, DeckCards> = {
+// Prototype stand-in for the seeded mnemonic courses (#112), keyed by courseId.
+const seededCourseCards: Record<string, CourseCards> = {
   "spanish-core-1000": {
     answerLanguage: "en",
     cards: [
@@ -197,7 +136,7 @@ const seededDeckCards: Record<string, DeckCards> = {
           text: "Vamos a comer a las dos.",
           translation: "We're going to eat at two.",
         },
-        // A mnemonic without a picture, so the fallback shows in a real deck.
+        // A mnemonic without a picture, so the fallback shows in a real course.
         mnemonics: [
           {
             mnemonicId: "mn-es-comer-1",
@@ -394,7 +333,7 @@ export function withNewProgress(
   }))
 }
 
-/** The cards behind a deck, or null when it has none seeded. */
-export function findDeckCards(courseId: string): DeckCards | null {
-  return seededDeckCards[courseId] ?? null
+/** The cards behind a course, or null when it has none seeded. */
+export function findCourseCards(courseId: string): CourseCards | null {
+  return seededCourseCards[courseId] ?? null
 }

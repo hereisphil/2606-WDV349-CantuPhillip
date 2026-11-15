@@ -23,8 +23,8 @@ tester.run("no-literal-ui-strings", rule, {
     {
       name: "text from a messages object",
       code: `
-        const messages = { heading: "Other decks" }
-        function Decks() {
+        const messages = { heading: "Other courses" }
+        function Courses() {
           return <h2>{messages.heading}</h2>
         }
       `,
@@ -32,9 +32,9 @@ tester.run("no-literal-ui-strings", rule, {
     {
       name: "a formatter call as text and as a label",
       code: `
-        function Row({ count, deck }) {
+        function Row({ count, course }) {
           return (
-            <Button aria-label={plural(count, messages.reviewLabel, { deck })}>
+            <Button aria-label={plural(count, messages.reviewLabel, { course })}>
               {format(messages.review, { count })}
             </Button>
           )

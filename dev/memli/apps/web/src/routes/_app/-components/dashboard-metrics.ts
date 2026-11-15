@@ -4,10 +4,10 @@ import { addDays, localDateKey } from "@/lib/dates"
  * Dashboard contract. #112 replaces {@link prototypeDashboardMetrics}
  * with Hono/D1 data of this same shape. Component markup stays put.
  */
-export type DashboardDeck = {
+export type DashboardCourse = {
   courseId: string
   title: string
-  /** BCP 47 tag for the deck's content. Never the viewer's `uiLocale`. */
+  /** BCP 47 tag for the course's content. Never the viewer's `uiLocale`. */
   learningLanguage: string
   dueCount: number
   /** New cards the learner can start today, after the daily new-card limit. */
@@ -15,9 +15,9 @@ export type DashboardDeck = {
   masteredCount: number
   learningCount: number
   unseenCount: number
-  /** Cards in this deck the learner keeps forgetting. */
+  /** Cards in this course the learner keeps forgetting. */
   trickyCount: number
-  /** ISO 8601 UTC, or null when the deck has never been studied. */
+  /** ISO 8601 UTC, or null when the course has never been studied. */
   lastReviewedAt: string | null
 }
 
@@ -28,7 +28,7 @@ export type DailyStudy = {
   cardsStudied: number
   /**
    * Nothing was left due and the new-card limit was used up by the end of
-   * the day. Counts as meeting the goal. Today reads the live deck counts.
+   * the day. Counts as meeting the goal. Today reads the live course counts.
    */
   cleared: boolean
 }
@@ -52,7 +52,7 @@ export type ProgressTrendsData = {
 }
 
 export type DashboardMetrics = {
-  decks: readonly DashboardDeck[]
+  courses: readonly DashboardCourse[]
   dailyGoal: {
     /** Cards studied per day, reviews and new cards together. */
     target: number
@@ -89,7 +89,7 @@ function recentDays(
 
 // Prototype stand-in for usr_prototype_01. #112 replaces this value.
 export const prototypeDashboardMetrics = {
-  decks: [
+  courses: [
     {
       courseId: "spanish-core-1000",
       title: "Spanish Core 1000",

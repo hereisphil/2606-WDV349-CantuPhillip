@@ -38,7 +38,7 @@ These are floors, not a style guide. Each one exists because a real screen broke
 
 ## Copy
 
-- One word per idea. Say **course** (not deck), **words** (not cards), **to review** (not due), **learned** (not mastered), **days of study** (not streak), **All done** (not caught up), **Dashboard** (not home or decks). Code identifiers such as `dueCount` can stay.
+- One word per idea. Say **course** (not deck), **words** (not cards), **to review** (not due), **learned** (not mastered), **days of study** (not streak), **All done** (not caught up), **Dashboard** (not home or decks). "Course" is the code and data name too (`courseId`, `Course`, the `courses` table), never "deck". Other code identifiers such as `dueCount` can stay.
 - No em dashes. Use a period, a comma or a colon.
 - No sentence over 12 words. No idioms.
 - A count and the button next to it mean the same thing: the number in "16 words to review" is what "Start review" opens.

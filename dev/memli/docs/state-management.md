@@ -20,8 +20,8 @@ This document records *why* Memli routes React state the way it does. The short,
 
 | Kind of state | Owner | Rejected alternative |
 | --- | --- | --- |
-| Data from the API — decks, cards, review history, viewer | **TanStack Query** (`useQuery`, `useMutation`, optimistic updates) | `useState` + `useEffect(fetch)`; hand-rolled `isLoading` / `isError` / `data` |
-| Shareable or bookmarkable — card index, deck filters, active tab | **TanStack Router** search params (validated, typed) | mirroring the URL into component state |
+| Data from the API — courses, cards, review history, viewer | **TanStack Query** (`useQuery`, `useMutation`, optimistic updates) | `useState` + `useEffect(fetch)`; hand-rolled `isLoading` / `isError` / `data` |
+| Shareable or bookmarkable — card index, course filters, active tab | **TanStack Router** search params (validated, typed) | mirroring the URL into component state |
 | Lifecycle or coupled values — study session, grading dock, form submission | **`useReducer`** + discriminated union on `status` | several `useState` booleans |
 | Transition that must fire a side effect — audio, timers, persist | `useReducer` **+ `use-effect-reducer`** (`exec` in the reducer) | set a flag in the reducer, watch it with `useEffect` |
 | One uncoupled primitive — `isOpen`, one input | **`useState`** | a reducer for a boolean (ceremony, no gain) |

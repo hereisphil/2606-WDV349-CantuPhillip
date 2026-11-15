@@ -5,8 +5,8 @@ import { useViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
 import {
   learningLanguages,
-  selectFocusDeck,
-  sortDecks,
+  selectFocusCourse,
+  sortCourses,
   tipFor,
   todayState,
   totalMastered,
@@ -67,16 +67,16 @@ function Dashboard(): JSX.Element {
     import.meta.env.DEV && preview !== undefined
       ? dashboardPreviews[preview]
       : { metrics: prototypeDashboardMetrics }
-  const { decks: allDecks, dailyGoal, progressTrends } = seeded.metrics
+  const { courses: allCourses, dailyGoal, progressTrends } = seeded.metrics
   const streakDays = seeded.streakDays ?? viewer.streakDays
   const now = new Date()
 
   // The hero, the week and the tip cover every course. The Studying menu
   // narrows only the list of other courses (REDESIGN.md 5.4).
-  const today = todayState(allDecks)
-  const focusDeck = selectFocusDeck(allDecks)
-  const otherCourses = sortDecks(allDecks).filter(
-    (deck) => deck.courseId !== focusDeck?.courseId
+  const today = todayState(allCourses)
+  const focusCourse = selectFocusCourse(allCourses)
+  const otherCourses = sortCourses(allCourses).filter(
+    (course) => course.courseId !== focusCourse?.courseId
   )
   const languages = learningLanguages(otherCourses)
   // With five or fewer other courses, every course is already one tap away.
@@ -102,8 +102,8 @@ function Dashboard(): JSX.Element {
   const listedCourses =
     studying === undefined
       ? otherCourses
-      : otherCourses.filter((deck) => deck.learningLanguage === studying)
-  const tip = tipFor(allDecks, today)
+      : otherCourses.filter((course) => course.learningLanguage === studying)
+  const tip = tipFor(allCourses, today)
   // The finished hero already links to "Find another course".
   const heroFindsAnother =
     today.status === "caught-up" && today.keepGoing === null
@@ -119,10 +119,10 @@ function Dashboard(): JSX.Element {
       ) : null}
       <DashboardGreeting
         name={viewer.displayName}
-        hasDecks={allDecks.length > 0}
+        hasCourses={allCourses.length > 0}
         now={now}
       />
-      {focusDeck === null ? (
+      {focusCourse === null ? (
         <div className="max-w-2xl">
           <StudyHero state={today} />
         </div>
@@ -173,8 +173,8 @@ function Dashboard(): JSX.Element {
                 <ProgressDisclosure
                   retentionPercent={progressTrends.retentionPercent}
                   newCardsThisMonth={progressTrends.newCardsThisMonth}
-                  wordsLearned={totalMastered(allDecks)}
-                  courses={sortDecks(allDecks)}
+                  wordsLearned={totalMastered(allCourses)}
+                  courses={sortCourses(allCourses)}
                 />
               </div>
             </div>

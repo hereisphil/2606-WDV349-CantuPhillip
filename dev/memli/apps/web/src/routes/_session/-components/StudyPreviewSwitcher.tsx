@@ -8,7 +8,7 @@ import {
   type StudyPreviewName,
 } from "./study-previews"
 
-/** Links between seeded study session states, keeping the open deck and mode. */
+/** Links between seeded study session states, keeping the open course and mode. */
 export function StudyPreviewSwitcher({
   courseId,
   current,

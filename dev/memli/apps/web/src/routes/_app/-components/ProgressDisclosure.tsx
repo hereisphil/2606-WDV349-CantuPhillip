@@ -2,7 +2,7 @@ import { useId, type JSX } from "react"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
-import type { DashboardDeck, ProgressTrendsData } from "./dashboard-metrics"
+import type { DashboardCourse, ProgressTrendsData } from "./dashboard-metrics"
 
 const messages = {
   heading: "Your progress",
@@ -56,7 +56,7 @@ export function ProgressDisclosure({
   courses,
 }: Pick<ProgressTrendsData, "retentionPercent" | "newCardsThisMonth"> & {
   wordsLearned: number
-  courses: readonly DashboardDeck[]
+  courses: readonly DashboardCourse[]
 }): JSX.Element {
   const { number, percent } = useFormatters()
   const captionId = useId()

@@ -12,6 +12,9 @@
         "!src/routeTree.gen.ts"
       ]
     },
+    "apps/api": {
+      "project": ["src/**/*.ts"]
+    },
     "packages/ui": {
       "project": ["src/**/*.{ts,tsx}"]
     },

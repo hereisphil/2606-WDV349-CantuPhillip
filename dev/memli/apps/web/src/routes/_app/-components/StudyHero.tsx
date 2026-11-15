@@ -4,9 +4,9 @@ import { Check } from "lucide-react"
 import { buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
-import type { DashboardDeck } from "./dashboard-metrics"
+import type { DashboardCourse } from "./dashboard-metrics"
 import {
-  deckTotal,
+  courseTotal,
   startedCount,
   type KeepGoing,
   type TodayState,
@@ -94,15 +94,15 @@ const mutedClass = "text-lg text-hero-muted-foreground"
 // free space on the end side is kept for mnemonic pictures later.
 const textBlockClass = "flex max-w-120 flex-col gap-1"
 
-function CourseHeading({ deck }: { deck: DashboardDeck }): JSX.Element {
+function CourseHeading({ course }: { course: DashboardCourse }): JSX.Element {
   return (
     <div className="flex max-w-120 items-center gap-3">
-      <LanguageBadge tag={deck.learningLanguage} size="hero" tone="hero" />
+      <LanguageBadge tag={course.learningLanguage} size="hero" tone="hero" />
       <h2
         id={headingId}
         className="min-w-0 font-heading text-lg font-semibold text-pretty wrap-break-word"
       >
-        {deck.title}
+        {course.title}
       </h2>
     </div>
   )
@@ -136,10 +136,10 @@ function BigCount({
 }
 
 /** One fill for the words started. The sentence carries the numbers, so the bar is hidden from screen readers. */
-function CourseProgress({ deck }: { deck: DashboardDeck }): JSX.Element {
+function CourseProgress({ course }: { course: DashboardCourse }): JSX.Element {
   const { plural } = useFormatters()
-  const total = deckTotal(deck)
-  const started = startedCount(deck)
+  const total = courseTotal(course)
+  const started = startedCount(course)
   const share = total > 0 ? (started / total) * 100 : 0
 
   return (
@@ -166,7 +166,7 @@ function ReviewContent({
   state: Extract<TodayState, { status: "review" }>
 }): JSX.Element {
   const { format, plural, duration } = useFormatters()
-  const { dueCount, minutes, focusDeck: deck } = state
+  const { dueCount, minutes, focusCourse: course } = state
 
   return (
     <>
@@ -179,28 +179,28 @@ function ReviewContent({
       <div className={actionsClass}>
         <Link
           to="/study/$courseId"
-          params={{ courseId: deck.courseId }}
+          params={{ courseId: course.courseId }}
           search={{ mode: "review" }}
           aria-label={plural(dueCount, messages.review.startLabel, {
-            course: deck.title,
+            course: course.title,
           })}
           className={mainButtonClass}
         >
           {messages.review.start}
         </Link>
-        {deck.newAvailable > 0 ? (
+        {course.newAvailable > 0 ? (
           <Link
             to="/study/$courseId"
-            params={{ courseId: deck.courseId }}
+            params={{ courseId: course.courseId }}
             search={{ mode: "learn" }}
             aria-label={plural(
-              deck.newAvailable,
+              course.newAvailable,
               messages.review.learnNewLabel,
-              { course: deck.title }
+              { course: course.title }
             )}
             className={quietButtonClass}
           >
-            {plural(deck.newAvailable, messages.review.learnNew)}
+            {plural(course.newAvailable, messages.review.learnNew)}
           </Link>
         ) : null}
       </div>
@@ -208,22 +208,22 @@ function ReviewContent({
   )
 }
 
-function LearnContent({ deck }: { deck: DashboardDeck }): JSX.Element {
+function LearnContent({ course }: { course: DashboardCourse }): JSX.Element {
   const { plural } = useFormatters()
 
   return (
     <>
       <div className={textBlockClass}>
-        <BigCount count={deck.newAvailable} message={messages.learn.count} />
+        <BigCount count={course.newAvailable} message={messages.learn.count} />
         <p className={mutedClass}>{messages.learn.nothingToReview}</p>
       </div>
       <div className={actionsClass}>
         <Link
           to="/study/$courseId"
-          params={{ courseId: deck.courseId }}
+          params={{ courseId: course.courseId }}
           search={{ mode: "learn" }}
-          aria-label={plural(deck.newAvailable, messages.learn.startLabel, {
-            course: deck.title,
+          aria-label={plural(course.newAvailable, messages.learn.startLabel, {
+            course: course.title,
           })}
           className={mainButtonClass}
         >
@@ -240,7 +240,7 @@ function KeepGoingActions({
   keepGoing: KeepGoing
 }): JSX.Element {
   const { plural } = useFormatters()
-  const { deck, extraNew, trickyCount } = keepGoing
+  const { course, extraNew, trickyCount } = keepGoing
 
   return (
     <div className="flex flex-col gap-3">
@@ -249,7 +249,7 @@ function KeepGoingActions({
         {extraNew > 0 ? (
           <Link
             to="/study/$courseId"
-            params={{ courseId: deck.courseId }}
+            params={{ courseId: course.courseId }}
             search={{ mode: "learn", extra: extraNew }}
             className={quietButtonClass}
           >
@@ -259,7 +259,7 @@ function KeepGoingActions({
         {trickyCount > 0 ? (
           <Link
             to="/study/$courseId"
-            params={{ courseId: deck.courseId }}
+            params={{ courseId: course.courseId }}
             search={{ mode: "practice" }}
             className={quietButtonClass}
           >
@@ -344,7 +344,7 @@ function HeroFrame({ children }: { children: ReactNode }): JSX.Element {
 /** The one thing to do today: the focus course, its count and its button. */
 export function StudyHero({ state }: { state: TodayState }): JSX.Element {
   switch (state.status) {
-    case "no-decks":
+    case "no-courses":
       return (
         <HeroFrame>
           <EmptyContent />
@@ -353,25 +353,25 @@ export function StudyHero({ state }: { state: TodayState }): JSX.Element {
     case "review":
       return (
         <HeroFrame>
-          <CourseHeading deck={state.focusDeck} />
+          <CourseHeading course={state.focusCourse} />
           <ReviewContent state={state} />
-          <CourseProgress deck={state.focusDeck} />
+          <CourseProgress course={state.focusCourse} />
         </HeroFrame>
       )
     case "learn":
       return (
         <HeroFrame>
-          <CourseHeading deck={state.deck} />
-          <LearnContent deck={state.deck} />
-          <CourseProgress deck={state.deck} />
+          <CourseHeading course={state.course} />
+          <LearnContent course={state.course} />
+          <CourseProgress course={state.course} />
         </HeroFrame>
       )
     case "caught-up":
       return (
         <HeroFrame>
-          <CourseHeading deck={state.deck} />
+          <CourseHeading course={state.course} />
           <DoneContent keepGoing={state.keepGoing} />
-          <CourseProgress deck={state.deck} />
+          <CourseProgress course={state.course} />
         </HeroFrame>
       )
   }

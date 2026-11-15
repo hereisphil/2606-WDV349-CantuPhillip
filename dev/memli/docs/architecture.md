@@ -119,14 +119,14 @@ Until then, keep route groups and invest in the product.
 ### Role
 
 - Source of truth for auth sessions / tokens (exact scheme TBD in implementation)
-- Decks, cards, mnemonics, review grading persistence
+- Courses, cards, mnemonics, review grading persistence
 - Shared by `apps/web` and later `apps/mobile`
 - May call into `packages/core` for pure domain operations (e.g. FSRS grading via the `ts-fsrs` wrapper) so mobile/web/API never diverge on formulas
 
 ### Hosting shape
 
 - **Production:** `api.{brand}.com`
-- **Local:** `localhost` port or Vite/ wrangler proxy to `/api` — either is fine; document in API README when created
+- **Local:** `wrangler dev` on `localhost:8787`, reached through the Vite proxy at `/api/*` on the web origin. The app is mounted at `basePath("/api")`, so no path is rewritten. See [`apps/api/README.md`](../apps/api/README.md)
 
 ### Contract sharing
 
@@ -238,7 +238,7 @@ Record the outcome here when chosen:
 | Topic | Options | Status |
 | --- | --- | --- |
 | Post-login canonical path | `/dashboard` vs `/learn` | **Chosen: `/dashboard`** (active study sessions use `/study/$courseId`) |
-| Auth mechanism | Cookie session vs JWT/bearer hybrid | Better Auth in `359 MS 4` (seeded `useViewer()` test user `usr_prototype_01` in `359 MS 1`–`359 MS 3`) |
+| Auth mechanism | Cookie session vs JWT/bearer hybrid | Better Auth in `359 MS 4` (seeded `useViewer()` test user `usr_prototype_01` in `359 MS 1`–`359 MS 3`, a real `users` row from #106). `users` already has Better Auth's core user fields |
 | Auth route ownership after Astro split | App only vs lightweight marketing links out | Open — default lean: app owns auth pages |
 | App path prefix | Root paths vs `/app/*` | Open — only if proxy/SEO needs it |
 | Hosting | Cloudflare-centric (already in repo tooling) vs other | Lean current stack unless requirements change |

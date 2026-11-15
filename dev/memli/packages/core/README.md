@@ -77,7 +77,7 @@ Outcomes are stable codes; `apps/web` maps them to localized labels.
 
 ### FSRS scheduling — `srs/progress`
 
-`CardProgress` is plain JSON (UTC ISO timestamps), so the same value works in React state, TanStack Query, HTTP and a D1 row. Persist all eleven fields:
+`CardProgress` is plain JSON (UTC ISO timestamps), so the same value works in React state, TanStack Query, HTTP and a D1 row. `@workspace/schemas/srs/progress` validates it at the HTTP boundary. Persist all eleven fields:
 
 | Field | Meaning |
 | --- | --- |

@@ -125,7 +125,7 @@ Auth
 
 Product
   /dashboard        home base (or /learn)
-  /decks…           library
+  /courses…           library
   /learn or /review session engine
   /settings         includes UI language + learning goals (see i18n.md)
 ```
@@ -149,7 +149,7 @@ Ideas cut on purpose, worth revisiting once the conditions are met.
 When UX copy is written:
 
 - Prefer plain language over developer metaphors (“deploy”, “workspace”, “org”).
-- Empty deck lists should teach the next action (“Create a deck” / “Browse community”) in the user’s **UI locale** once i18n exists.
+- Empty course lists should teach the next action (“Create a course” / “Browse community”) in the user’s **UI locale** once i18n exists.
 - Mnemonics examples on marketing pages should eventually consider LATAM cultural fit ([i18n.md](./i18n.md)) — not only literal translation.
 
 ---

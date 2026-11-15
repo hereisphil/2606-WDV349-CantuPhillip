@@ -6,7 +6,14 @@ node_modules/
 coverage/
 *.tsbuildinfo
 
+# Playwright output (gitignored, but Prettier only reads this file here)
+test-results/
+playwright-report/
+blob-report/
+
 # Locks & generated
+# drizzle-kit owns these; CI regenerates and diffs them byte for byte
+apps/api/drizzle/
 bun.lock
 routeTree.gen.ts
 wrangler.jsonc

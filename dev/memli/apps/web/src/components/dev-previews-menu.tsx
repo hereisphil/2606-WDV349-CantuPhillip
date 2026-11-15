@@ -17,7 +17,7 @@ import { prototypeDashboardMetrics } from "@/routes/_app/-components/dashboard-m
 // Development-only shortcut to the `?preview=` snapshots. `__root.tsx` lazy-loads it
 // behind `import.meta.env.DEV`, so it never reaches production or the axe audit.
 
-const studyCourseId = prototypeDashboardMetrics.decks[0].courseId
+const studyCourseId = prototypeDashboardMetrics.courses[0].courseId
 
 export default function DevPreviewsMenu(): JSX.Element {
   const inPreview = useLocation({

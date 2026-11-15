@@ -12,7 +12,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 
 1. **Best UX for non-technical learners** — one consumer hostname; users never need to remember `app.*`.
 2. **Clear separation of concerns over time** — marketing site, authenticated web app, shared API, and eventually mobile — without fragmenting the user journey across subdomains.
-3. **Ship a real learning loop first** — decks, visual/story mnemonics, and FSRS (`ts-fsrs`) SRS review — before real auth boilerplate or speculative platform splits.
+3. **Ship a real learning loop first** — courses, visual/story mnemonics, and FSRS (`ts-fsrs`) SRS review — before real auth boilerplate or speculative platform splits.
 4. **LATAM-ready foundations** — plan and prepare i18n early; full translation can follow once UI chrome stabilizes.
 5. **Mobile when the API and domain model are stable** — React Native shares logic and schemas, not web DOM components.
 
@@ -27,7 +27,7 @@ This document is the **hub**. It sequences work and points at deeper docs. It do
 | Shared packages | `packages/core` (Evaluator, Rating Mapper, FSRS-7 via `ts-fsrs`, session reducer), `packages/schemas` (Zod contracts), `packages/ui` (shadcn/Base UI web components) |
 | Routing | TanStack Router route groups: `_marketing`, `_auth`, `_app` |
 | Marketing vs app | **Logical** split only (same deployable, same origin) |
-| API | Not yet a separate `apps/api` Hono service (scheduled in `359 MS 3`) |
+| API | `apps/api` Hono shell on a local Cloudflare Worker; `apps/web` proxies `/api/*` to it in dev (#106). Local D1 with Drizzle tables for courses, cards, mnemonics and FSRS progress. No deploy yet |
 | Mobile | Not started |
 | i18n | English UI; no i18n framework yet |
 | DX inspectors | TanStack Router Devtools in web; Reactotron deferred |
@@ -92,7 +92,7 @@ Phases can **overlap lightly** (e.g. i18n schema habits during Phase 1), but **d
 
 ## Phase 1 — Core web product + shared Hono API
 
-**Goal:** A learner can study language decks with visual/narrative mnemonics and complete persistent FSRS SRS review sessions on the web, backed by a shared Hono + Drizzle + D1 API and real authentication.
+**Goal:** A learner can study language courses with visual/narrative mnemonics and complete persistent FSRS SRS review sessions on the web, backed by a shared Hono + Drizzle + D1 API and real authentication.
 
 ### Prototype-First execution sequence (WDV359 Milestones `359 MS 1`–`359 MS 4`)
 
@@ -103,11 +103,11 @@ To guarantee the core learning loop ships first without getting blocked on authe
    - Disable the `/signin` form inputs, add a **"Skip & Continue to Prototype →"** button to `/dashboard`, and provide a seeded test learner (`usr_prototype_01`) via a typed `SessionContext` / `useViewer()` hook (#110).
    - Build the `/dashboard` authenticated application shell (#45).
 2. **`359 MS 2` (Week 2 — Dashboard Decks + Study Session & Card UI):**
-   - Build the `/dashboard` User Metrics Banner (#46) and the study dashboard (#47): a Today panel with the next action, a focus deck, compact rows for the other decks, a This week aside, and a learning-language filter, all linking to `/study/$courseId`. Plan: [`docs/designs/dashboards/PLAN.md`](../../../docs/designs/dashboards/PLAN.md).
+   - Build the `/dashboard` User Metrics Banner (#46) and the study dashboard (#47): a Today panel with the next action, a focus course, compact rows for the other courses, a This week aside, and a learning-language filter, all linking to `/study/$courseId`. Plan: [`docs/designs/dashboards/PLAN.md`](../../../docs/designs/dashboards/PLAN.md).
    - Build the `/study/$courseId` Session Layout (#48) and interactive Core Study Card Display (#49).
 3. **`359 MS 3` (Week 3 — Mnemonic Engine + Persistent SRS Loop):**
    - Restore `@workspace/core` as a real package wrapping `ts-fsrs` (see `packages/core/README.md` / #130); build the Mnemonic Caption & Image Overlay Frame (#50) and Session Grading Controls Dock (#51) against that API.
-   - Scaffold `apps/api` (Hono + Drizzle ORM + Cloudflare D1/SQLite) and shared deck/review schemas in `@workspace/schemas` (#106), persisting seeded mnemonic decks and FSRS card state for `usr_prototype_01` (#112). The streak count follows the "days of study" rule in [`REDESIGN.md` section 5.7](../../../docs/designs/REDESIGN.md): any study counts, and one day off is forgiven.
+   - Scaffold `apps/api` (Hono + Drizzle ORM + Cloudflare D1/SQLite) and shared course/review schemas in `@workspace/schemas` (#106), persisting seeded mnemonic courses and FSRS card state for `usr_prototype_01` (#112). The streak count follows the "days of study" rule in [`REDESIGN.md` section 5.7](../../../docs/designs/REDESIGN.md): any study counts, and one day off is forgiven.
    - Redesign `/dashboard` around one focal point (#151): a navy study hero with one amber button, a visible Match my device / Light / Dark theme control with real dark mode, three-tier OKLCH color tokens checked against WCAG 2.2 and APCA, plain words (course, words, to review), and a calmer This week, course list, tip card and "Your progress". Plan: [`docs/designs/REDESIGN.md`](../../../docs/designs/REDESIGN.md).
 4. **`359 MS 4` (Week 4 — MVP Polish, Auth Integration & Beta Showcase):**
    - Replace the `/signin` prototype bypass with real Better Auth Email/Password (#108) and Google OAuth / Passkeys (#107) by swapping the inside of `useViewer()`.
@@ -134,7 +134,7 @@ Even before an i18n library:
 
 - Do not put English UI copy inside `packages/core`.
 - Prefer API **error codes** over finalized English sentences from the server.
-- When modeling content, assume decks/cards/mnemonics will need a **content language** field.
+- When modeling content, assume courses/cards/mnemonics will need a **content language** field.
 - See [i18n.md](./i18n.md).
 
 ### Explicitly out of scope for Phase 1
@@ -181,7 +181,7 @@ Even before an i18n library:
 - [ ] UI locale and learning language are distinct in settings and data model
 - [ ] `es-419` covers primary authenticated chrome
 - [ ] New user-facing strings have a clear place to land (no drive-by hardcoded English in new features without messages)
-- [ ] Content model supports non-English decks/mnemonics
+- [ ] Content model supports non-English courses/mnemonics
 
 Deep dive: [i18n.md](./i18n.md).
 
@@ -284,7 +284,7 @@ dev/memli/   # or future fluentvine root name
   docs/            # you are here
 ```
 
-Today only `apps/web` exists among the apps; that is expected.
+Today `apps/web` and `apps/api` exist among the apps; that is expected.
 
 ---
 

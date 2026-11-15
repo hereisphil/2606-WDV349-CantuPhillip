@@ -64,6 +64,19 @@ jobs:
       - name: Test
         run: bun run test
 
+      # apps/api/src/db/schema.ts and the committed migrations must agree.
+      # Regenerating must change nothing: a schema edit without
+      # `bun run db:generate` writes a new migration here and fails the job.
+      - name: Migrations Match Schema
+        working-directory: dev/memli/apps/api
+        run: |
+          bun run db:generate
+          git diff --exit-code -- drizzle
+          test -z "$(git ls-files --others --exclude-standard -- drizzle)" || {
+            echo "::error::src/db/schema.ts changed without a migration. Run 'bun run db:generate' in apps/api and commit drizzle/."
+            exit 1
+          }
+
       - name: Unused Code (Knip)
         run: bun run knip
 
