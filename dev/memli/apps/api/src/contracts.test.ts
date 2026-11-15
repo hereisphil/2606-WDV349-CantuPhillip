@@ -1,0 +1,58 @@
+import { applyOutcome, type ReviewOutcome } from "@workspace/core/srs/outcome"
+import { createProgress, type CardProgress } from "@workspace/core/srs/progress"
+import type { SessionReview } from "@workspace/core/study/session-reducer"
+import {
+  cardProgressSchema,
+  type CardProgressData,
+} from "@workspace/schemas/srs/progress"
+import {
+  reviewSubmissionSchema,
+  type ReviewOutcomeData,
+  type ReviewSubmission,
+} from "@workspace/schemas/srs/review"
+import { describe, expect, expectTypeOf, it } from "vitest"
+
+/**
+ * The API is where the HTTP contracts (@workspace/schemas) meet the domain
+ * (@workspace/core), so this is where the two must agree. The type checks
+ * run in `bun run typecheck`; the rest in `bun run test`.
+ */
+describe("schemas match @workspace/core", () => {
+  it("has the same review outcomes", () => {
+    expectTypeOf<ReviewOutcomeData>().toEqualTypeOf<ReviewOutcome>()
+  })
+
+  it("has the same progress fields", () => {
+    expectTypeOf<Readonly<CardProgressData>>().toEqualTypeOf<CardProgress>()
+  })
+
+  it("accepts the progress core creates and schedules", () => {
+    const now = new Date("2026-11-14T20:00:00.000Z")
+    const fresh = createProgress("es-gato", now)
+    const reviewed = applyOutcome(fresh, "got_it", now).progress
+
+    expect(cardProgressSchema.parse(fresh)).toEqual(fresh)
+    expect(cardProgressSchema.parse(reviewed)).toEqual(reviewed)
+  })
+
+  it("can build a review submission from a session review", () => {
+    // What the web app will send for each review the session reducer records.
+    const toSubmission = (review: SessionReview): ReviewSubmission => ({
+      cardId: review.cardId,
+      outcome: review.outcome,
+      reviewedAt: review.reviewedAt,
+      durationMs: review.durationMs,
+    })
+    const now = new Date("2026-11-14T20:00:00.000Z")
+    const { log } = applyOutcome(createProgress("es-gato", now), "tough", now)
+
+    const submission = toSubmission({ ...log, durationMs: 4_000 })
+
+    expect(reviewSubmissionSchema.parse(submission)).toEqual({
+      cardId: "es-gato",
+      outcome: "tough",
+      reviewedAt: "2026-11-14T20:00:00.000Z",
+      durationMs: 4_000,
+    })
+  })
+})

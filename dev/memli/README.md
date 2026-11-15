@@ -68,7 +68,7 @@ cd dev/memli
 bun run test
 ```
 
-[`packages/core`](./packages/core) covers its domain logic and session reducer with Vitest (#132). [`apps/api`](./apps/api) tests its routes with Vitest and Hono's `app.request()`, with no server running (#106). We intentionally skip marketing UI and route components.
+[`packages/core`](./packages/core) covers its domain logic and session reducer with Vitest (#132). [`apps/api`](./apps/api) tests its routes with Vitest and Hono's `app.request()`, with no server running, and checks that `@workspace/schemas` and `@workspace/core` agree. [`packages/schemas`](./packages/schemas) tests its validation rules (#106). We intentionally skip marketing UI and route components.
 
 ## Adding shadcn/ui components
 
