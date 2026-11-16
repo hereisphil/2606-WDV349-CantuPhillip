@@ -177,7 +177,7 @@ Each review saves two things together: the card's new state in `user_progress`, 
 
 ### Who is asking
 
-There is no sign-in until Better Auth (#108), so every request is the prototype learner, `usr_prototype_01`. Routes ask [`src/lib/viewer.ts`](./src/lib/viewer.ts) and never name a user id themselves; #108 changes that one function. Until then this API must not be deployed: anyone who can reach it is that learner.
+There is no sign-in until Better Auth (#108), so every request is the prototype learner, `usr_prototype_01`. Routes ask [`src/lib/viewer.ts`](./src/lib/viewer.ts) and never name a user id themselves; #108 changes that one function. Until then anyone who can reach this API is that learner, so it runs only on staging, with no public URL, behind the staging password (#165). Production waits for #108.
 
 ### Checking a request
 
@@ -233,7 +233,7 @@ A code is a contract. Adding one is safe. Renaming or removing one breaks every 
 
 ## Database: D1 + Drizzle
 
-D1 is Cloudflare's database, and it is SQLite. Locally, `wrangler` keeps it in a file under `.wrangler/state` (gitignored), and `wrangler dev` hands it to the Worker as `env.DB`. Nothing exists on Cloudflare yet; that comes with the first API deploy.
+D1 is Cloudflare's database, and it is SQLite. Locally, `wrangler` keeps it in a file under `.wrangler/state` (gitignored), and `wrangler dev` hands it to the Worker as `env.DB`. Staging uses `memli-staging` on Cloudflare (`env.staging` in [`wrangler.jsonc`](./wrangler.jsonc)). Production has no database yet.
 
 [Drizzle](https://orm.drizzle.team/) describes the tables in TypeScript ([`src/db/schema.ts`](./src/db/schema.ts)) and writes the SQL migrations from them. Wrangler applies the migrations.
 
@@ -416,6 +416,9 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `bun run typecheck` | `tsc --noEmit` with the generated Workers types |
 | `bun run lint` | ESLint |
 | `bun run build` | `wrangler deploy --dry-run`: bundles the Worker and uploads nothing. It fails if an import cannot run on Workers. |
+| `bun run db:migrate:staging` | Apply new migrations to `memli-staging`. The staging deploy runs it first |
+| `bun run db:seed:staging` | Seed `memli-staging`. Run by hand after changing the seed; deploys don't |
+| `bun run deploy:staging` | Deploy `memli-api-staging`. The staging deploy runs it before the gate Worker |
 
 ## Rules
 
@@ -425,7 +428,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
 ## Not yet
 
-- **Deploying.** Nothing ships this Worker yet. Staging and production still deploy only the web assets from the root [`wrangler.jsonc`](../../wrangler.jsonc). The D1 `database_id` is a placeholder until a real database is created.
+- **Production.** Only staging runs this Worker (#165). [`staging.yml`](../../../../.github/workflows/staging.yml) migrates `memli-staging`, deploys `memli-api-staging`, then deploys the root gate Worker, which sends `/api/*` to it through its `API` binding after the password check. Production waits for sign-in (#108); until then its `/api/*` answers a JSON 503.
 - **Sign-in.** Every request is the prototype learner until Better Auth (#108). See "Who is asking".
 - **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
 - **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
