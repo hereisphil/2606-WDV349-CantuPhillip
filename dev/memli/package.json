@@ -19,7 +19,6 @@
     "deploy:prod": "turbo build && bunx wrangler deploy --env=\"\""
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261113.1",
     "@workspace/typescript-config": "workspace:*",
     "knip": "^6.29.0",
     "lefthook": "^2.1.10",
