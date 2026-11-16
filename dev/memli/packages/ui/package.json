@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/culori": "^4.0.1",
-    "@types/node": "^24",
+    "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@workspace/eslint-config": "workspace:*",
