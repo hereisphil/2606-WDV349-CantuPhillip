@@ -290,6 +290,8 @@ export type ApiStub = {
   courses?: CourseSummary[]
   /** Answers `GET /api/courses` with a server error. */
   coursesFail?: boolean
+  /** Answers `GET /api/courses` with an HTML page and a 200, as staging once did (#165). */
+  coursesHtml?: boolean
   /** Replaces what `GET /api/history` answers. */
   history?: Partial<StudyHistoryData>
   /** Answers `POST /api/reviews` with a server error. */
@@ -315,13 +317,19 @@ async function stubApi(
   await page.route(path(/^\/api\//), (route) =>
     route.fulfill({ status: 404, json: { error: { code: "NOT_FOUND" } } })
   )
-  await page.route(path(/^\/api\/courses$/), (route) =>
-    route.fulfill(
+  await page.route(path(/^\/api\/courses$/), (route) => {
+    if (stub.coursesHtml) {
+      return route.fulfill({
+        contentType: "text/html",
+        body: "<!doctype html><title>Memli</title>",
+      })
+    }
+    return route.fulfill(
       stub.coursesFail
         ? serverError
         : { json: { courses: stub.courses ?? courses } }
     )
-  )
+  })
   await page.route(path(/^\/api\/history$/), (route) =>
     route.fulfill({ json: { ...history(), ...stub.history } })
   )

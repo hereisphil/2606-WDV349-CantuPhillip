@@ -103,6 +103,28 @@ test.describe("when the courses cannot load", () => {
   })
 })
 
+test.describe("when the courses answer is not JSON", () => {
+  test.skip(({ isMobile }) => isMobile, "Runs once, in the desktop project.")
+  test.use({ api: { coursesHtml: true } })
+
+  test("The dashboard shows its error state, reported as INVALID_RESPONSE", async ({
+    page,
+  }) => {
+    const errors: string[] = []
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text())
+    })
+    await page.goto("/dashboard")
+
+    await expect(page.getByRole("alert")).toContainText(
+      "We couldn't load your courses",
+      afterRetries
+    )
+    expect(errors.join("\n")).toContain("INVALID_RESPONSE")
+    expect(errors.join("\n")).not.toContain("ZodError")
+  })
+})
+
 test.describe("the dashboard's history", () => {
   test.skip(({ isMobile }) => isMobile, "Runs once, in the desktop project.")
 
