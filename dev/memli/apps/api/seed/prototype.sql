@@ -1,5 +1,6 @@
--- Local development data only. Never part of a migration, so it can never
--- reach a real database.
+-- Prototype data for local development and the gated staging database
+-- (`bun run db:seed:staging`, #165). Never part of a migration, and never
+-- loaded into production.
 --
 -- Safe to run again. Every row is an upsert keyed by its id: a second run
 -- updates what is here and never touches `user_progress`, so reseeding keeps

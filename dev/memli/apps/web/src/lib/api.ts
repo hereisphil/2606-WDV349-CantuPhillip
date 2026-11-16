@@ -8,16 +8,19 @@ import { apiErrorSchema, type ApiErrorCode } from "@workspace/schemas/api/error"
 /** The part of a Zod schema this file uses. */
 type Schema<T> = { parse: (value: unknown) => T }
 
+/** `NETWORK_ERROR`: no answer came back. `INVALID_RESPONSE`: a success answer that isn't JSON. */
+type ClientErrorCode = "NETWORK_ERROR" | "INVALID_RESPONSE"
+
 /**
  * A request that failed. `code` is the API's stable error code, which the UI
- * maps to copy, or `NETWORK_ERROR` when no answer came back at all.
+ * maps to copy, or a ClientErrorCode when the API itself never answered.
  */
 export class ApiError extends Error {
-  readonly code: ApiErrorCode | "NETWORK_ERROR"
+  readonly code: ApiErrorCode | ClientErrorCode
   /** The HTTP status, or `null` when no answer came back. */
   readonly status: number | null
 
-  constructor(code: ApiErrorCode | "NETWORK_ERROR", status: number | null) {
+  constructor(code: ApiErrorCode | ClientErrorCode, status: number | null) {
     super(code)
     this.name = "ApiError"
     this.code = code
@@ -49,7 +52,8 @@ export async function apiRequest<T>(
     throw new ApiError("NETWORK_ERROR", null)
   }
 
-  const body: unknown = await res.json().catch(() => null)
+  // JSON never parses to `undefined`, so it marks an answer that isn't JSON.
+  const body: unknown = await res.json().catch(() => undefined)
   if (!res.ok) {
     const error = apiErrorSchema.safeParse(body)
     throw new ApiError(
@@ -57,6 +61,8 @@ export async function apiRequest<T>(
       res.status
     )
   }
+  // Staging once answered /api/* with index.html and a 200 (#165).
+  if (body === undefined) throw new ApiError("INVALID_RESPONSE", res.status)
   return schema.parse(body)
 }
 

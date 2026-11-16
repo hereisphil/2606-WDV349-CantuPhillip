@@ -113,3 +113,7 @@ jobs:
       # Cloudflare credentials (the web dist/ from Build must exist first).
       - name: Wrangler Dry Run (Staging)
         run: bunx wrangler deploy --dry-run --env staging
+
+      - name: Wrangler Dry Run (API Staging)
+        working-directory: dev/memli/apps/api
+        run: bunx wrangler deploy --dry-run --env staging --outdir "$RUNNER_TEMP/api-staging"
