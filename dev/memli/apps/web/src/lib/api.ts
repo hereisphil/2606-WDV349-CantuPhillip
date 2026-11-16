@@ -1,13 +1,8 @@
 import { apiErrorSchema, type ApiErrorCode } from "@workspace/schemas/api/error"
 
 /**
- * Talks to `apps/api`. Every path is relative (`/api/...`): in development
- * Vite forwards it to the API, so the browser never names a host or a port
- * (`apps/api/README.md`).
- *
- * Components never call this directly. They use the query and mutation
- * definitions in `queries.ts`, so TanStack Query owns loading, errors,
- * caching and retries (docs/state-management.md).
+ * Talks to `apps/api` on relative `/api/...` paths, which Vite proxies in dev.
+ * Components go through `queries.ts`, not this (docs/state-management.md).
  */
 
 /** The part of a Zod schema this file uses. */
@@ -31,10 +26,8 @@ export class ApiError extends Error {
 }
 
 /**
- * Sends a request and checks the answer against its contract from
- * `@workspace/schemas`. An answer that does not match throws, so a change on
- * one side that the other has not caught up with fails loudly, not as
- * `undefined` three components later.
+ * Parses the answer with its `@workspace/schemas` contract, so contract drift
+ * fails loudly here, not as `undefined` three components later.
  */
 export async function apiRequest<T>(
   path: string,
@@ -67,11 +60,7 @@ export async function apiRequest<T>(
   return schema.parse(body)
 }
 
-/**
- * Whether a failed request is worth sending again. A network drop or a
- * server error may pass on a second try. A 4xx will not: the request itself
- * is wrong, or the thing it names does not exist.
- */
+/** A network drop or 5xx may pass on a retry; a 4xx never will. */
 export function shouldRetry(failureCount: number, error: unknown): boolean {
   const clientError =
     error instanceof ApiError &&

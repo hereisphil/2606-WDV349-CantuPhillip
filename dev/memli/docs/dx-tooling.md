@@ -21,6 +21,7 @@ Already in play or available without new products:
 | Design-floor lint | `memli/no-restricted-classes` and `memli/touch-button-size` on learner-facing screens (`.cursor/rules/ui-design.mdc`, `packages/eslint-config/README.md`) |
 | Token registration | `packages/ui/src/styles/tokens.test.ts` fails for a `--color-*` utility with no contrast pairing |
 | TypeScript + ESLint + Prettier + Lefthook | Quality gates |
+| `memli/max-comment-lines` (local ESLint rule) | Comments stay at two lines or fewer in every JS/TS file; the long version goes in a doc, an issue or a linked URL (#146) |
 | `memli/no-use-state-sprawl` (local ESLint rule) | Pushes component state into `useReducer` + discriminated unions — see [state-management.md](./state-management.md) |
 | Knip | Unused code/deps hygiene |
 

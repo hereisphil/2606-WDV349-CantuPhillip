@@ -312,9 +312,8 @@ describe("a request sent twice", () => {
   })
 
   it("saves nothing when two copies race and the second reaches the database", async () => {
-    // Both copies looked before either saved, so the route's check missed.
-    // The review id is the primary key: the second log row is refused, and
-    // the batch takes its progress update down with it.
+    // Both copies passed the route's check before either saved. The review id
+    // is the primary key, so the second log row fails its whole batch.
     await addCourse(api.db, "spanish", 1)
     const sent = review("spanish-1")
     const [saved] = await submit([sent])

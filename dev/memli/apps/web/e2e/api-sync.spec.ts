@@ -2,9 +2,8 @@ import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 
 /**
- * The web app and the API (#112): reviews are saved as they happen, safely
- * retried, and failures are said out loud. The API itself is the stand-in in
- * `api.ts`; `apps/api` tests the real one on D1.
+ * Reviews save as they happen, retry safely and report failures (#112).
+ * The API here is the stand-in in `api.ts`; `apps/api` tests the real one.
  */
 const study = "/study/spanish-core-1000?mode=learn"
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/

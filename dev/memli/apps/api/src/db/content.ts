@@ -7,9 +7,8 @@ import { idGroups, type Database } from "./client"
 import { cards, courses, mnemonics, users } from "./schema"
 
 /**
- * Reads what a course teaches (courses, cards, mnemonics) and turns rows into
- * the shapes in `@workspace/schemas`. Tables store one row per thing; clients
- * get a card with its mnemonics nested and sorted, ready to show.
+ * Reads courses, cards and mnemonics as `@workspace/schemas` shapes, each card
+ * with its mnemonics nested and sorted, ready to show.
  */
 
 type CourseRow = typeof courses.$inferSelect
@@ -79,7 +78,6 @@ export async function cardIdsInOrder(
   return rows.map((row) => row.id)
 }
 
-/** Which of these card ids exist. */
 export async function existingCardIds(
   db: Database,
   cardIds: readonly string[]

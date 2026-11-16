@@ -2,10 +2,8 @@ import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 
 /**
- * After Reveal or Submit, the word and its meaning are both on screen, not
- * under the sticky header or the outcome dock, and focus is on the answer. A
- * plain `focus()` once scrolled phones to the middle of the answer, past the
- * meaning.
+ * After Reveal or Submit, the word and meaning sit clear of the header and dock.
+ * A plain `focus()` once scrolled phones past the meaning.
  */
 const path = "/study/spanish-core-1000?mode=learn"
 

@@ -21,7 +21,6 @@ describe("scheduler", () => {
       expect(a).toEqual(b)
       ours = a.card
       theirs = b.card
-      // Come back an hour after the card is due.
       now = new Date(a.card.dueAt.getTime() + 60 * 60 * 1000)
     }
   })

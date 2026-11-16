@@ -1,6 +1,5 @@
 /**
- * Pronunciation through the browser's built-in text-to-speech (Web Speech
- * API). A prototype stand-in until seeded courses ship recorded audio (#112).
+ * Browser text-to-speech (Web Speech API) until seeded courses ship recorded audio (#112).
  * The voice depends on what the device has installed for `lang`.
  */
 export const canPronounce =
@@ -10,10 +9,8 @@ export const canPronounce =
 const START_TIMEOUT_MS = 3000
 
 /**
- * Reads `text` aloud in `lang` (BCP 47), cutting off anything still playing.
- * Resolves once the audio starts, fails, or {@link START_TIMEOUT_MS} passes,
- * so the UI can show it loading. Recorded audio (#112) keeps this contract
- * by resolving on the `<audio>` element's `playing` event.
+ * Speaks `text` in `lang` (BCP 47), cutting off anything playing. Resolves when audio starts, fails or times out,
+ * so the UI can show loading. Recorded audio (#112) keeps this contract via `<audio>`'s `playing` event.
  */
 export function pronounce(text: string, lang: string): Promise<void> {
   if (!canPronounce) {

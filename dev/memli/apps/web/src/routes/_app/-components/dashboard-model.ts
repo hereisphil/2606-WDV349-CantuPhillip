@@ -48,9 +48,7 @@ export function sortCourses(
 }
 
 /** Each learning language once, in the order its first course appears. */
-export function learningLanguages(
-  courses: readonly DashboardCourse[]
-): string[] {
+function learningLanguages(courses: readonly DashboardCourse[]): string[] {
   return [...new Set(courses.map((course) => course.learningLanguage))]
 }
 
@@ -58,6 +56,29 @@ export function selectFocusCourse(
   courses: readonly DashboardCourse[]
 ): DashboardCourse | null {
   return sortCourses(courses)[0] ?? null
+}
+
+/** Every course but the hero's, most in need first. */
+export function otherCourses(
+  courses: readonly DashboardCourse[]
+): DashboardCourse[] {
+  const focus = selectFocusCourse(courses)
+  return sortCourses(courses).filter(
+    (course) => course.courseId !== focus?.courseId
+  )
+}
+
+/** Above this many other courses, the list offers the Studying menu. */
+const MAX_UNFILTERED_COURSES = 5
+
+/** The Studying menu's languages. Empty when every course is one tap away. */
+export function studyingLanguages(
+  others: readonly DashboardCourse[]
+): string[] {
+  const languages = learningLanguages(others)
+  return others.length > MAX_UNFILTERED_COURSES && languages.length >= 2
+    ? languages
+    : []
 }
 
 export function courseTotal(course: DashboardCourse): number {
@@ -146,9 +167,8 @@ export type Tip =
   | { kind: "study" }
 
 /**
- * The tricky words of one course: the one most in need, so the hero's course
- * comes first. A study tip when no course has tricky words. Hidden when the
- * all-done hero already offers to practice the same words.
+ * Tricky words of the course most in need (so the hero's comes first), else a study tip.
+ * Hidden when the all-done hero already offers to practice the same words.
  */
 export function tipFor(
   courses: readonly DashboardCourse[],
@@ -213,11 +233,8 @@ export type WeekDay = {
 }
 
 /**
- * The calendar week containing `now`, starting on `firstDayOfWeek`
- * (1 = Monday … 7 = Sunday). A day meets the goal by reaching the target
- * or by clearing everything scheduled. Otherwise, past days and today are
- * "partial" when some words were studied and "none" when none were.
- * Days without a record had no study.
+ * The calendar week containing `now`, starting on `firstDayOfWeek` (1 = Monday … 7 = Sunday).
+ * A day is "met" by reaching the target or clearing everything scheduled. Days without a record had no study.
  */
 export function weekDays(
   now: Date,

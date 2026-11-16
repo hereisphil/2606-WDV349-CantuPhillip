@@ -1,15 +1,6 @@
 /**
- * Development-only pseudo-localization (REDESIGN.md section 12).
- *
- * `?pseudo=long` stretches every visible string by the translation budget
- * (3x up to 10 characters, 2x up to 20, 1.6x up to 50, 1.3x beyond) with
- * accented letters, `?pseudo=cjk` swaps words for CJK characters with no
- * spaces, and `?pseudo=rtl` flips the page to right-to-left. `?pseudo=off`
- * turns it off. The choice lasts for the browser tab, because the router drops
- * search params a route does not declare.
- *
- * It rewrites text nodes in the DOM, so it reaches every string, including the
- * ones rendered straight from `messages` objects. Numbers are left alone.
+ * Dev-only `?pseudo=long|cjk|rtl|off` (REDESIGN.md section 12). It rewrites DOM
+ * text, and sessionStorage keeps the mode since the router drops unknown params.
  */
 
 type PseudoMode = "long" | "rtl" | "cjk"

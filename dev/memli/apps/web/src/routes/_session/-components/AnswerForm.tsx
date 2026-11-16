@@ -27,7 +27,6 @@ export function AnswerForm({
   const { format, languageName } = useFormatters()
   const inputId = useId()
   const hintId = useId()
-  // One controlled input, so `useState` (docs/state-management.md).
   const [value, setValue] = useState("")
   const answer = value.trim()
 

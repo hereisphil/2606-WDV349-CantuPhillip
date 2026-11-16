@@ -8,15 +8,8 @@ import {
 import type { CardProgress } from "../srs/progress"
 import { capElapsedMs } from "./timing"
 
-/**
- * The pure study-session state machine (docs/state-management.md). Apps add
- * only the React wrapper: `useReducer(sessionReducer, cards, startSession)`.
- *
- *   prompt ──SUBMIT / REVEAL──▶ answered ──RESOLVE──▶ prompt (next card)
- *                                                └──▶ complete ──RESTART──▶ prompt
- *
- * Any other event leaves the state unchanged.
- */
+// The study-session state machine (docs/state-management.md; diagram in
+// packages/core/README.md). Any other status × event pair is a no-op.
 
 /** The least a card needs to be studied. Apps extend it with the prompt, mnemonic, audio… */
 export type SessionCard = {
@@ -66,9 +59,8 @@ export type SessionEvent =
   /** The learner revealed the answer without typing. */
   | { readonly type: "REVEAL"; readonly elapsedMs: number | null }
   /**
-   * The learner settled how it went. Must be one of `outcomeChoices` for the
-   * answer, or the event is ignored. `missed` sends the card to the back of
-   * the queue until it is no longer missed.
+   * Ignored unless the outcome is in `outcomeChoices`. `missed` requeues the
+   * card at the back until it is no longer missed.
    */
   | {
       readonly type: "RESOLVE"

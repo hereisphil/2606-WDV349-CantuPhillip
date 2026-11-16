@@ -48,12 +48,8 @@ export async function recordedReviewIds(
 }
 
 /**
- * Saves a request's reviews: one log row per review, and each card's new
- * progress. Both or neither.
- *
- * A review id is the table's primary key, so if two copies of one request
- * race each other, the second insert fails and takes its progress update
- * down with it. A review can never be counted twice.
+ * Saves the log rows and each card's new progress, both or neither. The review
+ * id is the primary key, so a racing duplicate fails and is never counted twice.
  */
 export async function saveReviews(
   db: Database,
@@ -73,12 +69,8 @@ export async function saveReviews(
 export type CourseReview = HistoryReview & { courseId: string }
 
 /**
- * One learner's reviews since `since`, oldest first, with each card's
- * course: the rows the study history and the daily new-word limit read.
- *
- * Only the columns those need. Days are decided in the learner's time zone
- * by `@workspace/core`, which SQL cannot do, so the API asks for a little
- * more time than it needs and core keeps the right days.
+ * One learner's reviews since `since`, oldest first, with each card's course.
+ * SQL has no time zones, so callers ask a little early and core keeps the days.
  */
 export async function reviewsSince(
   db: Database,
@@ -116,23 +108,15 @@ export async function reviewsSince(
 const QUARTER_HOUR_MS = 15 * 60 * 1000
 
 /**
- * The quarter hours in which one learner reviewed anything, as instants,
- * newest first: enough for days of study to find every study day, however
- * far back it reaches.
- *
- * Why quarter hours: a day of study is a date where the learner is, and
- * SQLite cannot convert to a time zone. Every zone's offset from UTC is a
- * whole number of quarter hours (India is +5:30, Nepal +5:45), so a quarter
- * hour never straddles anyone's midnight. Core turns each one into a date.
- * It is at most 96 rows a day of study, instead of every review.
+ * The quarter hours with any review, newest first. No UTC offset splits one, so
+ * core can date each in any zone. See apps/api/README.md, `GET /api/history`.
  */
 export async function studyQuarterHours(
   db: Database,
   userId: string
 ): Promise<Date[]> {
-  // Written into the SQL, not bound: D1 binds a JS number as a float, and
-  // `integer / float` is not integer division, so nothing would be grouped.
-  // A constant of ours, never input, so `sql.raw` is safe here.
+  // Inlined, not bound: D1 binds a JS number as a float, which breaks integer
+  // division. It is our constant, never input, so `sql.raw` is safe.
   const bucket = sql<number>`cast(${reviews.reviewedAt} / ${sql.raw(String(QUARTER_HOUR_MS))} as integer)`
   const rows = await db
     .selectDistinct({ bucket })

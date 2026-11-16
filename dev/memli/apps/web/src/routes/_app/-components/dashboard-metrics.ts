@@ -2,18 +2,7 @@ import type { CourseSummary } from "@workspace/schemas/api/courses"
 import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import { addDays, localDateKey } from "@/lib/dates"
 
-/**
- * Dashboard contract.
- *
- * Courses come from `GET /api/courses` (#112): a `CourseSummary` from
- * `@workspace/schemas`, whose counts `@workspace/core` works out. The
- * dashboard reads every field but `answerLanguage`, which only a study
- * session needs, so previews can leave it out.
- *
- * The week, days of study, retention and new words this month come from
- * `GET /api/history`, worked out from the review log
- * ({@link metricsFromApi}).
- */
+/** A course from `GET /api/courses` (#112). Only a study session needs `answerLanguage`, so previews leave it out. */
 export type DashboardCourse = Omit<CourseSummary, "answerLanguage">
 
 export type DailyStudy = {
@@ -131,13 +120,8 @@ export const prototypeDashboardMetrics = {
 } as const satisfies DashboardMetrics
 
 /**
- * The dashboard from the API: courses from `GET /api/courses`, everything
- * else from `GET /api/history`.
- *
- * A past day is never marked cleared. "Cleared" means nothing was left due
- * and the new-word limit was used up by the day's end, which the review log
- * cannot tell yet, so a past day shows a check only when it reached the
- * goal. Today still reads the live course counts (`todayState`).
+ * Courses from `GET /api/courses`, the rest from `GET /api/history` (the review log).
+ * Past days are never `cleared`: the log can't tell yet. Today reads live course counts (`todayState`).
  */
 export function metricsFromApi(
   courses: readonly DashboardCourse[],

@@ -1,4 +1,4 @@
-import { useCallback, type JSX } from "react"
+import type { JSX } from "react"
 import { AnswerForm } from "./AnswerForm"
 import { RevealButton } from "./RevealButton"
 import { useActiveTime } from "./use-active-time"
@@ -20,11 +20,6 @@ export function PromptActions({
   onReveal,
 }: PromptActionsProps): JSX.Element {
   const elapsedMs = useActiveTime()
-  // Stable, so the Space shortcut listener isn't re-added on every keystroke.
-  const reveal = useCallback(() => {
-    onReveal(elapsedMs())
-  }, [onReveal, elapsedMs])
-
   return (
     <>
       <AnswerForm
@@ -33,7 +28,11 @@ export function PromptActions({
           onSubmit(answer, elapsedMs())
         }}
       />
-      <RevealButton onReveal={reveal} />
+      <RevealButton
+        onReveal={() => {
+          onReveal(elapsedMs())
+        }}
+      />
     </>
   )
 }

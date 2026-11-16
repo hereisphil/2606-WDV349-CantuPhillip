@@ -2,13 +2,8 @@ import type { Locator, Page } from "@playwright/test"
 import { expect, test } from "./api"
 
 /**
- * The response timer (#51): time from showing a word to Submit, paused while
- * the tab is hidden and capped by @workspace/core, so a break never counts
- * against the learner. Its only visible effect is the dock's nudge, so that
- * is what these check, on the real timer with Playwright's fake clock.
- *
- * "casa" means "house": a typo ("hous") is quick under 3.5 s and slow from 7 s
- * (`suggestOutcome`). The nudged choice is the one Enter confirms.
+ * The response timer (#51) shows only as the dock's nudge, so that is checked.
+ * A typo ("hous") is quick under 3.5 s and slow from 7 s (`suggestOutcome`).
  */
 const study = "/study/spanish-core-1000?mode=learn"
 

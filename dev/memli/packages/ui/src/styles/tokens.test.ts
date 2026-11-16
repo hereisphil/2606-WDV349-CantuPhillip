@@ -1,6 +1,5 @@
-// Every text and control pairing the app relies on must pass WCAG 2.2 and its
-// APCA target in both themes. The values come straight from globals.css.
-// Thresholds and the first pairings come from docs/designs/REDESIGN.md, section 7.
+// Every pairing must pass WCAG 2.2 and its APCA target in both themes, using globals.css.
+// Thresholds and the first pairings: docs/designs/REDESIGN.md, section 7.
 import { readFileSync } from "node:fs"
 import { describe, expect, test } from "vitest"
 import {
@@ -88,9 +87,8 @@ const pairings: readonly Pairing[] = [
   ["Main button label pressed", "cta-foreground", "cta-active", "labelPressed"],
   ["Main button against hero", "cta", "hero", "nonText"],
   ["Main button on hover against hero", "cta-hover", "hero", "nonText"],
-  // The edge against the hero is depth only, so it is not gated: the fill
-  // already stands out from the hero. In light it measures 3.2:1 but Lc 27.
-  // On a card or the page, the edge is the button's boundary, so it is gated.
+  // The edge is only gated on a card or the page, where it is the boundary. On the
+  // hero it is depth only (light: 3.2:1 but Lc 27); the fill already stands out.
   ["Main button edge against card", "cta-edge", "card", "nonText"],
   ["Main button edge against page", "cta-edge", "background", "nonText"],
   ["Brand button label", "primary-foreground", "primary", "label"],
@@ -187,9 +185,8 @@ const pairings: readonly Pairing[] = [
 ]
 
 /**
- * Color utilities that are in no pairing, each with the reason. A new
- * `--color-*` token fails the "registered" test below until it is in a
- * pairing or listed here.
+ * Color utilities in no pairing, with the reason. A new `--color-*` token fails
+ * the "registered" test until it is in a pairing or listed here.
  */
 const marketing = "Marketing pages only: a fixed value that is not themed."
 const unused = "Not used yet. Give it a pairing with its first use."
@@ -211,7 +208,6 @@ const notChecked: Readonly<Record<string, string>> = {
   "sidebar-primary-foreground": unused,
 }
 
-/** The `--color-*` utilities declared in the `@theme` block. */
 const utilities = [...css.matchAll(/^\s*--color-([a-z0-9-]+):/gm)].map(
   ([, name]) => name ?? ""
 )

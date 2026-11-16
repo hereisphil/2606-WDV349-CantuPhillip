@@ -1,7 +1,6 @@
 /**
- * Every button a learner taps is at least 44 px tall. `Button` and
- * `buttonVariants` default to 32 px, so learner-facing screens name a touch
- * size. See `.cursor/rules/ui-design.mdc`.
+ * Learner-facing buttons name a touch size (44 px or taller); the default is 32 px.
+ * See ../README.md and `.cursor/rules/ui-design.mdc`.
  */
 
 const DEFAULT_SIZES = ["touch", "touch-lg", "touch-xl", "icon-touch"]

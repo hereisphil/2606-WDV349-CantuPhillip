@@ -1,15 +1,8 @@
 import type { ReviewOutcome } from "../srs/outcome"
 import type { ProgressState } from "../srs/progress"
 
-/**
- * A learner's study history from their review log: the words studied each
- * day, days of study, how often reviews were remembered, and new words this
- * month. Pure, like the rest of core: the API loads the reviews and passes
- * in `now` and the learner's time zone.
- *
- * Days are calendar days where the learner is. A review at 11 pm in Mexico
- * City is on that day, even though it is already tomorrow in UTC.
- */
+// Days are calendar days in the learner's time zone: 11 pm in Mexico City is
+// still that day, though it is already tomorrow in UTC.
 
 /** Words a day of study aims for. One goal for everyone until learners can set their own. */
 export const DAILY_GOAL_WORDS = 50
@@ -75,14 +68,8 @@ export function shiftDate(date: string, days: number): string {
 }
 
 /**
- * Days of study (REDESIGN.md section 5.7), counting back from `today`:
- *
- * 1. Any study counts: one word reviewed or learned makes a study day.
- * 2. Never miss twice: one day off is forgiven, a second in a row ends the count.
- * 3. Only study days are counted, never a forgiven day off.
- * 4. Today is never a miss yet.
- *
- * `studyDates` are the calendar dates with any study, in any order.
+ * Days of study (REDESIGN.md section 5.7), counting back from `today`: one day
+ * off is forgiven but not counted, and a second in a row ends the count.
  */
 export function daysOfStudy(
   studyDates: Iterable<string>,
@@ -134,11 +121,8 @@ export function newWordsStartedOn(
 }
 
 /**
- * Sums up the history.
- *
- * `reviews` must cover at least the last 31 days, so the month and the
- * retention window are whole. `studyDates` are every date with study, which
- * days of study can reach back through.
+ * `reviews` must cover at least the last 31 days so the month and retention
+ * window are whole. `studyDates` is every date with study, however old.
  */
 export function summarizeHistory({
   reviews,

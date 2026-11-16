@@ -5,8 +5,7 @@ import { timeZoneSchema } from "../locale/time-zone"
 
 /**
  * The query string of `GET /api/courses`. The time zone decides when the
- * viewer's day started, so words already begun today count against the
- * daily new-word limit.
+ * viewer's day started, for the daily new-word limit.
  */
 export const coursesQuerySchema = z.object({
   timeZone: timeZoneSchema.default("UTC"),
@@ -17,9 +16,8 @@ export type CoursesQuery = z.infer<typeof coursesQuerySchema>
 const count = z.int().nonnegative()
 
 /**
- * One course and where the viewer stands in it. The counts come from
- * `@workspace/core`'s `summarizeCourseProgress`, the same rules that pick a
- * session's cards, so a count always matches the session its button opens.
+ * One course and where the viewer stands in it, from core's
+ * `summarizeCourseProgress`, so a count matches the session its button opens.
  */
 export const courseSummarySchema = courseSchema.extend({
   /** Seen cards that are due now. What a `review` session holds. */

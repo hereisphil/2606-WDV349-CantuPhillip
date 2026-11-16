@@ -134,7 +134,6 @@ function PronounceButton({
   /** BCP 47 tag of `text`. */
   lang: string
 }): JSX.Element {
-  // One uncoupled boolean, so `useState` (docs/state-management.md).
   const [isStarting, setIsStarting] = useState(false)
 
   async function play(): Promise<void> {

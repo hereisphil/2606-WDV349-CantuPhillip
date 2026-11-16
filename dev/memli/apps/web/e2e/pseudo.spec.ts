@@ -1,9 +1,8 @@
 import { expect, test } from "./api"
 
 /**
- * Pseudo-localization (REDESIGN.md section 12): with stretched, CJK and
- * right-to-left text, no screen scrolls sideways, and the dashboard's main
- * button stays on the first screen.
+ * With long, CJK and RTL text, nothing scrolls sideways and the dashboard's
+ * main button stays on the first screen (REDESIGN.md section 12).
  */
 const modes = ["long", "cjk", "rtl"] as const
 const themes = ["light", "dark"] as const

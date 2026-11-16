@@ -67,4 +67,4 @@ Not checked by a machine, so check by eye: one amber button per screen, sentence
 
 - Quiet a floor with `eslint-disable`, an `allow` option or a `notChecked` entry without a reason a reviewer would accept.
 - Lower a threshold in a spec to make a screen pass. Fix the screen, or raise it with the student first.
-- Restyle a screen that already meets the floors "for polish". The student owns design decisions (`teach-first.mdc`).
+- Restyle a screen that already meets the floors "for polish". The student owns design decisions.

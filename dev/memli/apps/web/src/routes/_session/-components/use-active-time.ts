@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useRef } from "react"
 
 /**
- * Milliseconds since the component mounted, not counting time the tab was
- * hidden, so a learner who switches away doesn't look slow. Returns `null`
- * before the first effect runs. Feeds `elapsedMs` on SUBMIT and REVEAL;
- * `@workspace/core` caps it (`capElapsedMs`).
- *
- * Kept in refs, not state: nothing renders from it, it is only read when the
- * learner answers.
+ * Ms since mount minus hidden-tab time, so switching away doesn't look slow. `null` before the first effect.
+ * Feeds `elapsedMs` on SUBMIT and REVEAL, which core caps (`capElapsedMs`). Refs, since nothing renders from it.
  */
 export function useActiveTime(): () => number | null {
   const startedAt = useRef<number | null>(null)

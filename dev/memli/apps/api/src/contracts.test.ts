@@ -22,9 +22,8 @@ import {
 import { describe, expect, expectTypeOf, it } from "vitest"
 
 /**
- * The API is where the HTTP contracts (@workspace/schemas) meet the domain
- * (@workspace/core), so this is where the two must agree. The type checks
- * run in `bun run typecheck`; the rest in `bun run test`.
+ * The HTTP contracts (@workspace/schemas) must agree with @workspace/core.
+ * Type checks run in `bun run typecheck`; the rest in `bun run test`.
  */
 describe("schemas match @workspace/core", () => {
   it("has the same review outcomes", () => {

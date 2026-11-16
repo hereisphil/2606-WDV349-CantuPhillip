@@ -1,8 +1,6 @@
 /**
- * Navigation is a link, not a button. A Base UI Button that renders a Link
- * gets `role="button"` (or emits a `<button>`), so screen readers announce a
- * link as a button. Style the link instead: `<Link className={cn(buttonVariants(...))}>`.
- * `asChild` is Radix, not Base UI. See `.cursor/rules/memli-stack.mdc`.
+ * Navigation is a link styled with `buttonVariants`: a Button rendering a Link is announced
+ * as a button, and `asChild` is Radix. See ../README.md and `.cursor/rules/memli-stack.mdc`.
  */
 
 function isButtonElement(node) {

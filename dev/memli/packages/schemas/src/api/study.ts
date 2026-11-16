@@ -5,13 +5,7 @@ import { courseSchema } from "../content/course"
 import { timeZoneSchema } from "../locale/time-zone"
 import { cardProgressSchema } from "../srs/progress"
 
-/**
- * The kinds of study session: core's `StudyMode`.
- *
- * - `review`: cards that are due.
- * - `learn`: new cards, up to today's limit.
- * - `practice`: cards the viewer keeps forgetting.
- */
+/** Core's `StudyMode`: due cards, new cards, or ones often forgotten. */
 export const studyModeSchema = z.enum(["review", "learn", "practice"])
 
 export type StudyModeData = z.infer<typeof studyModeSchema>
@@ -41,9 +35,8 @@ export const studyCardSchema = cardSchema.extend({
 export type StudyCardData = z.infer<typeof studyCardSchema>
 
 /**
- * `GET /api/courses/:courseId/study`: one session's cards, in the order to
- * study them. The server picks them, so a client never decides what is due.
- * `cards` is empty when nothing is waiting for that kind of session.
+ * `GET /api/courses/:courseId/study`: one session's cards in study order. The
+ * server picks them, so a client never decides what is due. May be empty.
  */
 export const studySessionSchema = z.object({
   course: courseSchema,

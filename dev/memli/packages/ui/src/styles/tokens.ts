@@ -55,9 +55,8 @@ function blocksFor(css: string, selector: string): Declarations {
 }
 
 /**
- * The custom properties each theme sees on `<html>`. Dark starts from every
- * `:root` value and overrides it with `.dark`, as the cascade does. Blocks
- * nested inside `@media` are indented, so they are not read.
+ * Each theme's custom properties on `<html>`: dark is `:root` overridden by `.dark`, as in the
+ * cascade. Blocks nested in `@media` are indented, so they are not read.
  */
 export function readThemeTokens(css: string): ThemeTokens {
   const clean = stripComments(css)

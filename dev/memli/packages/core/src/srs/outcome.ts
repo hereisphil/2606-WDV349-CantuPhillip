@@ -8,13 +8,8 @@ import {
 } from "./progress"
 
 /**
- * How a card went, in Memli's terms. These are stable codes, not copy: apps
- * map them to localized labels ("Got it", "Just a typo — I knew it", …).
- *
- * - `missed`: didn't know it.
- * - `tough`: got there, but it was a struggle or a guess.
- * - `got_it`: knew it.
- * - `easy`: knew it instantly.
+ * How a card went, in Memli's terms. Stable codes, not copy: apps map them to
+ * localized labels. `tough` means got there, but it was a struggle or a guess.
  */
 export type ReviewOutcome = "missed" | "tough" | "got_it" | "easy"
 
@@ -42,16 +37,8 @@ export type OutcomeReview = {
 }
 
 /**
- * The outcomes a learner can choose between after answering, best default
- * first. The UI shows these and never asks a question the answer already
- * settled.
- *
- * - typed and `exact` → `got_it` (default) or `easy`
- * - typed and `near` → `got_it` ("just a typo, I knew it") or `tough`
- *   ("I wasn't sure"); the learner decides, so neither is pre-chosen by
- *   evaluation alone
- * - typed and `wrong` → `missed` only
- * - revealed without typing (`null`) → all four, for the learner to judge
+ * The outcomes a learner may pick, best default first. `null` means revealed
+ * without typing. On a near answer the learner says typo or struggle.
  */
 export function outcomeChoices(
   evaluation: Evaluation | null

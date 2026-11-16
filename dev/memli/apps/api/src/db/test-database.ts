@@ -4,11 +4,8 @@ import { join } from "node:path"
 import { DatabaseSync } from "node:sqlite"
 
 /**
- * The real migration and seed files on an in-memory SQLite database, the
- * engine under D1. Node's built-in `node:sqlite` needs no extra package and
- * no running Worker, so these tests are instant. For tests only.
- *
- * Tests that call a route need a real D1 binding instead: `test-d1.ts`.
+ * The real migrations and seed on in-memory `node:sqlite`, the engine under D1:
+ * instant, with no Worker. Route tests need a real D1 instead: `test-d1.ts`.
  */
 
 /** `apps/api`. */

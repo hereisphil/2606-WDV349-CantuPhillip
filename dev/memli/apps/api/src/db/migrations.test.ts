@@ -5,10 +5,8 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { countRows, migratedDatabase } from "./test-database"
 
 /**
- * Runs the real migrations on an in-memory SQLite database and checks the
- * rules a schema file alone cannot prove: keys, cascades and CHECK
- * constraints. The rows here are this file's own, so the tests do not depend
- * on what the seed holds (`seed.test.ts` covers that).
+ * The real migrations on in-memory SQLite: keys, cascades and CHECK constraints.
+ * The rows are this file's own; `seed.test.ts` covers the seed.
  */
 
 let db: DatabaseSync

@@ -1,4 +1,11 @@
-import { useEffect, useId, useMemo, useState, type JSX } from "react"
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useMemo,
+  useState,
+  type JSX,
+} from "react"
 import type { Evaluation } from "@workspace/core/answer/evaluate"
 import {
   outcomeChoices,
@@ -105,16 +112,8 @@ function copyOf(evaluation: Evaluation | null): DockCopy {
 }
 
 /**
- * The choice Enter confirms, shown as the amber button, or `null` when the
- * learner has to pick. The timing nudge wins when there is one. Otherwise a
- * correct answer defaults to "got it" (never "easy", which FSRS-7 puts about
- * 54 days out on a new word), and a wrong one to "missed".
- *
- * A reveal also defaults to "missed": revealing without typing usually means
- * the word did not come, and an honest miss brings it back this session
- * instead of weeks from now. The other three stay one tap away.
- *
- * A near miss has no default: only the learner knows if it was just a typo.
+ * Enter's choice (the amber button): the timing nudge, else "got it" when correct (never "easy", ~54 days out on FSRS-7),
+ * else "missed" when wrong or revealed, so it comes back this session. A near miss has none: only the learner knows.
  */
 function primaryOf(
   evaluation: Evaluation | null,
@@ -147,46 +146,48 @@ function useOutcomeKeys(
   primary: ReviewOutcome | null,
   onResolve: (outcome: ReviewOutcome) => void
 ): void {
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent): void {
-      if (
-        event.defaultPrevented ||
-        event.isComposing ||
-        // Holding Enter down after submitting must not also settle the card.
-        event.repeat ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.shiftKey
-      ) {
-        return
-      }
-      const target = event.target instanceof Element ? event.target : null
+  // Reads the latest choices and `onResolve`, so the listener is added once.
+  const onKeyDown = useEffectEvent((event: KeyboardEvent): void => {
+    if (
+      event.defaultPrevented ||
+      event.isComposing ||
+      // Holding Enter down after submitting must not also settle the card.
+      event.repeat ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      event.shiftKey
+    ) {
+      return
+    }
+    const target = event.target instanceof Element ? event.target : null
 
-      if (event.key === "Enter") {
-        if (primary === null || target?.closest(interactive)) {
-          return
-        }
-        event.preventDefault()
-        onResolve(primary)
-        return
-      }
-
-      const outcome = /^[1-9]$/.test(event.key)
-        ? choices[Number(event.key) - 1]
-        : undefined
-      if (outcome === undefined || target?.closest(typing)) {
+    if (event.key === "Enter") {
+      if (primary === null || target?.closest(interactive)) {
         return
       }
       event.preventDefault()
-      onResolve(outcome)
+      onResolve(primary)
+      return
     }
 
-    window.addEventListener("keydown", onKeyDown)
-    return () => {
-      window.removeEventListener("keydown", onKeyDown)
+    const outcome = /^[1-9]$/.test(event.key)
+      ? choices[Number(event.key) - 1]
+      : undefined
+    if (outcome === undefined || target?.closest(typing)) {
+      return
     }
-  }, [choices, primary, onResolve])
+    event.preventDefault()
+    onResolve(outcome)
+  })
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent): void => onKeyDown(event)
+    window.addEventListener("keydown", listener)
+    return () => {
+      window.removeEventListener("keydown", listener)
+    }
+  }, [])
 }
 
 type OutcomeDockProps = {
@@ -201,13 +202,8 @@ type OutcomeDockProps = {
 }
 
 /**
- * The Session Outcome Dock (#51): after the answer shows, the learner says
- * how it went in plain words, and the session moves on.
- *
- * It sticks to the bottom of the screen, like the header to the top, so the
- * next step is in reach without scrolling past the mnemonic. The choices come
- * from `@workspace/core` (`outcomeChoices`), which never asks a question the
- * answer already settled: a wrong answer has one button, a correct one two.
+ * Session Outcome Dock (#51), sticky so the next step is in reach without scrolling past the mnemonic.
+ * `outcomeChoices` never asks what the answer settled: a wrong answer gets one button, a correct one two.
  */
 export function OutcomeDock({
   evaluation,

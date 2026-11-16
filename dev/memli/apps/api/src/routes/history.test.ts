@@ -207,9 +207,8 @@ describe("GET /api/history", () => {
 
 describe("study days from quarter hours", () => {
   it("keep half-hour time zones on the right date", async () => {
-    // India is UTC+5:30. 18:40 UTC is 00:10 the next day there, and 18:20
-    // is 23:50 the same day. An hour-long bucket would put both at 18:00,
-    // 23:30 local, the same day.
+    // India is UTC+5:30: 18:40 UTC is 00:10 the next day, 18:20 is 23:50.
+    // An hour-long bucket would put both at 23:30 local, the same day.
     await addReviewLog(api.db, [
       { cardId: "spanish-1", at: "2026-11-14T18:40:00Z" },
       { cardId: "spanish-2", at: "2026-11-13T18:20:00Z" },

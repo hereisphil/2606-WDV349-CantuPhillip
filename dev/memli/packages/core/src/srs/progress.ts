@@ -10,14 +10,12 @@ export type FsrsRating = 1 | 2 | 3 | 4
 export type ProgressState = "new" | "learning" | "review" | "relearning"
 
 /**
- * One learner's memory of one card. Plain JSON, so the same value works in
- * React state, TanStack Query, an HTTP body, and a D1 row. Timestamps are UTC
- * ISO 8601 strings.
+ * One learner's memory of one card. Plain JSON with UTC ISO timestamps, so it
+ * works in React state, TanStack Query, HTTP and a D1 row.
  */
 export type CardProgress = {
   readonly cardId: string
   readonly state: ProgressState
-  /** When the card should next be reviewed. */
   readonly due: string
   /** `null` until the first review. */
   readonly lastReview: string | null
@@ -37,9 +35,8 @@ export type CardProgress = {
 }
 
 /**
- * One review, for the learner's review history. The card fields describe the
- * card as it was *before* the review, which is what undo and future FSRS
- * parameter training need.
+ * One review for the history. Card fields are from *before* the review, which
+ * undo and future FSRS parameter training need.
  */
 export type ReviewLog = {
   readonly cardId: string
@@ -90,11 +87,8 @@ export function createProgress(cardId: string, now: Date): CardProgress {
 }
 
 /**
- * Schedule a card after a review. Returns new progress and a log entry; the
- * input is never changed.
- *
- * A `now` earlier than the last review (another device's clock, a replayed
- * request) is treated as a review at the moment of the last one.
+ * Schedule a card after a review. A `now` before the last review (clock skew,
+ * a replayed request) counts as a review at the last one.
  */
 export function applyRating(
   progress: CardProgress,

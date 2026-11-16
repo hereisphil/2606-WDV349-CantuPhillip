@@ -1,31 +1,19 @@
 import { isDue, type CardProgress } from "../srs/progress"
 
-/**
- * Where a learner stands in a course, and which cards a study session holds.
- * One set of rules for both, so a count on the dashboard always matches the
- * session its button opens.
- *
- * Pure: the API (or a mobile app working offline) loads the progress and
- * passes it in with `now`.
- */
+// One set of rules for course progress and session cards, so a dashboard
+// count always matches the session its button opens.
 
 /** New words offered per course each day. Learning more is the learner's choice (`extra`). */
 export const DAILY_NEW_CARD_LIMIT = 10
 
-/**
- * A word counts as learned once FSRS expects it to be remembered for three
- * weeks. Stability is measured in days, so this is the usual flashcard line
- * between a "young" and a "mature" card.
- */
+/** Stability in days that counts as mastered: the usual "mature card" line. */
 export const MASTERED_STABILITY_DAYS = 21
 
 /** Forgotten this many times after being learned, a word is tricky. */
 export const TRICKY_LAPSES = 3
 
-/** The three kinds of session: what is due, new words, or tricky words. */
 export type StudyMode = "review" | "learn" | "practice"
 
-/** The learner has reviewed this card at least once. */
 export function isSeen(progress: CardProgress): boolean {
   return progress.state !== "new"
 }
@@ -69,12 +57,8 @@ function newWordsLeftToday(unseen: number, startedToday: number): number {
 }
 
 /**
- * Sums up one course for one learner.
- *
- * `cardCount` is every card in the course. `progress` is the learner's saved
- * progress on them: one entry per card they have studied, none for the rest.
- * `newStartedToday` is how many of its words they met for the first time
- * today (`newWordsStartedOn` in `history.ts`).
+ * Sums up one course for one learner. `progress` has entries only for studied
+ * cards; `newStartedToday` comes from `newWordsStartedOn` in history.ts.
  */
 export function summarizeCourseProgress(
   cardCount: number,
@@ -117,15 +101,8 @@ export type SessionCardsOptions = {
 }
 
 /**
- * The cards one session holds, in the order to study them.
- *
- * `cards` is the whole course in course order, each with the learner's
- * progress (`createProgress` for a card they have never seen).
- *
- * - `review`: seen cards that are due, most overdue first.
- * - `learn`: unseen cards in course order, up to what is left of today's
- *   limit, plus `extra`.
- * - `practice`: tricky cards, most forgotten first.
+ * One session's cards in study order. `cards` is the whole course in order,
+ * unseen ones with `createProgress`. Modes: packages/core/README.md.
  */
 export function sessionCards<T extends { readonly progress: CardProgress }>(
   cards: readonly T[],

@@ -19,22 +19,13 @@ import {
 } from "drizzle-orm/sqlite-core"
 
 /**
- * The Memli database: Cloudflare D1, which is SQLite. Column names are
- * snake_case in SQL and camelCase in TypeScript.
- *
- * Timestamps are integers of milliseconds since 1970 (UTC), which Drizzle
- * reads back as `Date`. Integers sort and compare as numbers, so "every card
- * due before now" is a plain range scan on an index. The API converts them to
- * the ISO strings `@workspace/schemas` uses.
+ * Timestamps are integer milliseconds (UTC), read as `Date`, so "due before
+ * now" is an index range scan. See apps/api/README.md, "Timestamps".
  */
 
 /*
- * Language columns (`ui_locale`, `learning_language`, `answer_language`,
- * `content_locale`) hold a canonical BCP 47 tag, as `languageTagSchema` in
- * `@workspace/schemas` defines it. The database enforces that with triggers
- * in drizzle/migrations/0002_language_tag_checks.sql, not CHECK constraints:
- * adding a CHECK means rebuilding the table, which on D1 deletes every row
- * that hangs off it. Read that migration before changing these columns.
+ * Language tags are checked by triggers in 0002_language_tag_checks.sql, not
+ * CHECK: adding one rebuilds the table, which on D1 deletes every child row.
  */
 
 const now = sql`(cast(unixepoch('subsecond') * 1000 as integer))`
@@ -69,9 +60,8 @@ const PROGRESS_STATES = enumValues(progressStateSchema)
 const OUTCOMES = enumValues(reviewOutcomeSchema)
 
 /**
- * `column IN ('a', 'b', …)`, from a Zod enum's options. The database refuses
- * a value the schemas would refuse, even from a hand-written SQL insert. The
- * values are our own constants, never user input, so `sql.raw` is safe here.
+ * `column IN ('a', 'b', …)` from a Zod enum, so SQL refuses what the schemas
+ * refuse. The values are our constants, never input, so `sql.raw` is safe.
  */
 function oneOf(column: AnySQLiteColumn, values: readonly string[]): SQL {
   const list = values.map((value) => `'${value}'`).join(", ")
@@ -79,18 +69,11 @@ function oneOf(column: AnySQLiteColumn, values: readonly string[]): SQL {
 }
 
 /**
- * A learner. Shaped like Better Auth's core `user` model (#108): id, name,
- * email, emailVerified, image, createdAt and updatedAt, with Better Auth
- * pointed at this table by `user: { modelName: "users" }`. Better Auth adds
- * its own `session`, `account` and `verification` tables next to it; nothing
- * here needs to change.
- *
- * `uiLocale` is the app's language for this learner, declared to Better Auth
- * as an additional field. It is never a course's language.
+ * A learner, shaped like Better Auth's `user` model (#108, apps/api/README.md).
+ * `uiLocale` is the app's language for this learner, never a course's.
  */
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
-  /** What the app calls the learner ("Phillip"). Better Auth's `name`. */
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" })
@@ -189,11 +172,7 @@ export const mnemonics = sqliteTable(
 )
 
 /**
- * One learner's memory of one card: `@workspace/core`'s `CardProgress`, one
- * column per field. All eleven are needed to schedule the next review, so
- * none may be dropped. `src/db/progress.ts` converts a row to and from
- * `CardProgress`.
- *
+ * Core's `CardProgress`, one column per field; FSRS-7 needs all eleven.
  * No row means the learner has never seen the card.
  */
 export const userProgress = sqliteTable(
@@ -230,23 +209,13 @@ export const userProgress = sqliteTable(
 )
 
 /**
- * Every review a learner has finished, one row each, never changed
- * afterwards. `user_progress` says where a card stands now; this says how it
- * got there. Days of study, retention, undo and FSRS parameter training all
- * read from here.
- *
- * It is `@workspace/core`'s review log. The `prior_` columns are the card as
- * it was *before* the review, which is what undo and training need: the
- * result of a review is the next row's `prior_` values, or `user_progress`.
+ * Core's review log: one row per review, never changed. `prior_*` is the card
+ * before it, for undo and FSRS training (apps/api/README.md, "Review log").
  */
 export const reviews = sqliteTable(
   "reviews",
   {
-    /**
-     * A UUID the client makes, one per review. A request sent twice (a retry
-     * after a dropped connection) names the same ids, so the server can tell
-     * and records each review once.
-     */
+    /** The client's UUID for the review, so a retried request records it once. */
     id: text("id").primaryKey(),
     userId: text("user_id")
       .notNull()

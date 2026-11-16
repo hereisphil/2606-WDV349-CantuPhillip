@@ -1,7 +1,6 @@
 import type { BatchItem } from "drizzle-orm/batch"
 import { drizzle, type DrizzleD1Database } from "drizzle-orm/d1"
 
-/** Drizzle around the Worker's D1 binding: typed queries, same database. */
 export type Database = DrizzleD1Database
 
 export function database(d1: D1Database): Database {
@@ -12,9 +11,8 @@ export function database(d1: D1Database): Database {
 export type Statement = BatchItem<"sqlite">
 
 /**
- * Runs statements as one D1 batch, which is a transaction: every one of them
- * takes effect or none does. So a failure half way never leaves, say, a
- * review logged without its card's progress saved.
+ * Runs statements as one D1 batch, which is a transaction: all or none.
+ * So a review is never logged without its card's progress saved.
  */
 export async function runTogether(
   db: Database,
@@ -27,9 +25,8 @@ export async function runTogether(
 }
 
 /**
- * D1 allows 100 bound values (`?`) in one statement. A query that lists ids
- * (`WHERE id IN (?, ?, …)`) has to be split into groups below that, with
- * room left for the query's other values.
+ * D1 allows 100 bound values per statement, so `IN (…)` id lists go in groups,
+ * with room left for the query's other values.
  */
 const MAX_IDS_PER_QUERY = 90
 

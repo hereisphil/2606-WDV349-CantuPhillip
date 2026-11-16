@@ -4,9 +4,8 @@ import { previewNames } from "../src/routes/_app/-components/dashboard-previews"
 import { studyPreviewNames } from "../src/routes/_session/-components/study-previews"
 
 /**
- * Design floors (.cursor/rules/ui-design.mdc) measured on the rendered page,
- * where lint cannot see them: text size, target size, wording and capitals.
- * Runs at desktop width and at 375 px, over every `?preview=` state.
+ * Design floors lint can't see (.cursor/rules/ui-design.mdc), measured on
+ * every `?preview=` state at desktop width and 375 px.
  */
 const study = "/study/spanish-core-1000?mode=learn"
 const paths = [

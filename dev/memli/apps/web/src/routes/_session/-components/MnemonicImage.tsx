@@ -16,11 +16,7 @@ type MnemonicImageProps = {
 }
 
 /**
- * The mnemonic's picture in a fixed 4:3 frame, so the story beside it
- * doesn't jump while it loads. Any picture fits by cropping, never by
- * stretching. With no picture, or one that fails to load, the frame shows
- * the term instead, so the layout stays the same.
- *
+ * A fixed 4:3 frame, so the story doesn't jump while it loads. No picture, or a failed one, shows the term.
  * Remount it with a `key` when the picture changes, so the status resets.
  */
 export function MnemonicImage({
