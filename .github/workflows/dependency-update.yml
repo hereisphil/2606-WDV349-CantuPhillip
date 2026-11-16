@@ -1,7 +1,8 @@
 name: Weekly Dependency Update
 
 # Every Monday, move each dependency to the newest release its range allows
-# (bun.lock only, via `bun run deps:update`) and open or refresh one PR into dev.
+# (bun.lock and the generated Worker types, via `bun run deps:update`) and open
+# or refresh one PR into dev.
 # Major versions and exact pins stay as they are; those are a person's call (#148).
 #
 # Needs "Allow GitHub Actions to create and approve pull requests" turned on in
@@ -77,14 +78,14 @@ jobs:
 
           # Rebuilt from the latest dev each week, so the PR never goes stale.
           git switch -C "$BRANCH"
-          git add bun.lock
-          git commit -m "[DX] Weekly in-range dependency update." -m "Lockfile only, from \`bun run deps:update\`."
+          git add bun.lock worker-configuration.d.ts apps/api/worker-configuration.d.ts
+          git commit -m "[DX] Weekly in-range dependency update." -m "Lockfile and generated Worker types only, from \`bun run deps:update\`."
           git push --force origin "$BRANCH"
 
           body="$RUNNER_TEMP/body.md"
           {
             echo "## Summary"
-            echo "- Weekly in-range update: \`bun.lock\` only, every \`package.json\` range unchanged."
+            echo "- Weekly in-range update: \`bun.lock\` and the generated \`worker-configuration.d.ts\` files only, every \`package.json\` range unchanged."
             echo "- Major versions and exact pins are left for a person to review."
             echo
             echo "### Direct dependencies bumped"

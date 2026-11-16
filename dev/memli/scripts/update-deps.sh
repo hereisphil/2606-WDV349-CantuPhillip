@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Moves every dependency to the newest release its package.json range allows,
-# changing only bun.lock. Prints a Markdown list of the direct bumps. (#148)
+# Moves every dependency to the newest release its range allows, changing bun.lock
+# and the generated Worker types. Prints a Markdown list of direct bumps. (#148)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -28,6 +28,9 @@ done
 # Put the ranges back; the lockfile keeps the new versions they allow.
 git checkout -- "${manifests[@]}"
 bun install >&2
+
+# A new wrangler means new runtime types; CI fails if these lag behind.
+bun run cf-typegen >&2
 
 # Compare lockfiles: `bun update` doesn't print every bump (zod, for one).
 names=$(node -e '
