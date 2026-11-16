@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
+    "deploy:staging": "wrangler deploy --env staging",
     "cf-typegen": "wrangler types",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply memli --local",
     "db:seed": "wrangler d1 execute memli --local --file=seed/prototype.sql",
     "db:setup": "bun run db:migrate && bun run db:seed",
+    "db:migrate:staging": "wrangler d1 migrations apply memli-staging --env staging --remote",
+    "db:seed:staging": "wrangler d1 execute memli-staging --env staging --remote --file=seed/prototype.sql",
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

@@ -5,8 +5,8 @@
   // The newest date the installed local runtime (workerd) accepts. `wrangler dev`
   // refuses to start on a later one, so raise this only alongside wrangler.
   "compatibility_date": "2026-06-24",
-  // Local D1 lives in .wrangler/state (gitignored). Nothing is created on
-  // Cloudflare until this Worker deploys, so there is no real database_id yet.
+  // Local D1 lives in .wrangler/state (gitignored), so this one has no real
+  // database_id. Staging's real database is under env.staging below.
   "d1_databases": [
     {
       "binding": "DB",
@@ -18,5 +18,21 @@
   // Local only for now. `apps/web` proxies /api/* here (apps/web/vite.config.ts).
   "dev": {
     "port": 8787
+  },
+  "env": {
+    // Deploys as memli-api-staging. Reachable only through the gate Worker's
+    // API binding, so no public workers.dev or preview URL skips its password (#165).
+    "staging": {
+      "workers_dev": false,
+      "preview_urls": false,
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "memli-staging",
+          "database_id": "46bb4b9f-c8a4-45df-aff4-ed1b58973dcd",
+          "migrations_dir": "drizzle/migrations"
+        }
+      ]
+    }
   }
 }

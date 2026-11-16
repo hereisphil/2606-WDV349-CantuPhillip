@@ -5,7 +5,9 @@
   "assets": {
     "directory": "./apps/web/dist",
     "not_found_handling": "single-page-application",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Otherwise the SPA fallback answers /api/* with index.html before the Worker runs.
+    "run_worker_first": ["/api/*"]
   },
   "env": {
     "staging": {
@@ -17,6 +19,8 @@
       "secrets": {
         "required": ["BASIC_AUTH_USER", "BASIC_AUTH_PASS"]
       },
+      // /api/* goes to apps/api after the gate, so the browser stays on one origin (#165).
+      "services": [{ "binding": "API", "service": "memli-api-staging" }],
       "assets": {
         "directory": "./apps/web/dist",
         "not_found_handling": "single-page-application",

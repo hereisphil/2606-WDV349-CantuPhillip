@@ -26,11 +26,25 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
   return mismatch === 0
 }
 
+// The API's own error shape (@workspace/schemas/api/error), so the web app shows its error state.
+function apiUnavailable(): Response {
+  return Response.json({ error: { code: "INTERNAL_ERROR" } }, { status: 503 })
+}
+
+// Without this, /api/* falls through to the SPA fallback and answers with index.html.
+function serve(request: Request, env: Env): Promise<Response> | Response {
+  const { pathname } = new URL(request.url)
+  if (pathname === "/api" || pathname.startsWith("/api/")) {
+    return env.API ? env.API.fetch(request) : apiUnavailable()
+  }
+  return env.ASSETS.fetch(request)
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    // Only gate staging. Production (and local) serve assets untouched.
+    // Only gate staging. Production and local skip the password check.
     if (env.ENVIRONMENT !== "staging") {
-      return env.ASSETS.fetch(request)
+      return serve(request, env)
     }
 
     // Fail closed: if the gate is enabled but secrets are missing, deny.
@@ -64,7 +78,7 @@ export default {
     const passOk = await timingSafeEqual(password, env.BASIC_AUTH_PASS)
 
     if (userOk && passOk) {
-      return env.ASSETS.fetch(request)
+      return serve(request, env)
     }
 
     // Re-issue 401 (not 403) so the browser re-prompts for credentials.
