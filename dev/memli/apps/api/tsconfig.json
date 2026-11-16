@@ -1,5 +1,5 @@
 {
   "extends": "@workspace/typescript-config/workers.json",
-  "include": ["src", "vitest.config.ts"],
+  "include": ["worker-configuration.d.ts", "src", "vitest.config.ts"],
   "exclude": ["node_modules"]
 }

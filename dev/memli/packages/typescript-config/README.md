@@ -10,7 +10,7 @@ Shared TypeScript `tsconfig` bases for the Memli monorepo.
 | `@workspace/typescript-config/react-library.json` | React packages (`packages/ui`) |
 | `@workspace/typescript-config/vite-app.json` | Vite React app source (`apps/web`) |
 | `@workspace/typescript-config/node.json` | Node/Vite config files (`vite.config.ts`) |
-| `@workspace/typescript-config/workers.json` | Cloudflare Workers entry (`src/` at monorepo root) |
+| `@workspace/typescript-config/workers.json` | Cloudflare Workers (root `src/`, `apps/api`). Each one includes its own `worker-configuration.d.ts` from `wrangler types` |
 
 ## Usage
 
