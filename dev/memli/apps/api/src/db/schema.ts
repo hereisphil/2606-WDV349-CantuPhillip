@@ -4,6 +4,7 @@ import {
 } from "@workspace/schemas/content/card"
 import type { MnemonicStoryPart } from "@workspace/schemas/content/mnemonic"
 import { progressStateSchema } from "@workspace/schemas/srs/progress"
+import { reviewOutcomeSchema } from "@workspace/schemas/srs/review"
 import { sql, type SQL } from "drizzle-orm"
 import {
   check,
@@ -25,6 +26,15 @@ import {
  * reads back as `Date`. Integers sort and compare as numbers, so "every card
  * due before now" is a plain range scan on an index. The API converts them to
  * the ISO strings `@workspace/schemas` uses.
+ */
+
+/*
+ * Language columns (`ui_locale`, `learning_language`, `answer_language`,
+ * `content_locale`) hold a canonical BCP 47 tag, as `languageTagSchema` in
+ * `@workspace/schemas` defines it. The database enforces that with triggers
+ * in drizzle/migrations/0002_language_tag_checks.sql, not CHECK constraints:
+ * adding a CHECK means rebuilding the table, which on D1 deletes every row
+ * that hangs off it. Read that migration before changing these columns.
  */
 
 const now = sql`(cast(unixepoch('subsecond') * 1000 as integer))`
@@ -56,6 +66,7 @@ function enumValues<T extends string>(schema: {
 const PARTS_OF_SPEECH = enumValues(partOfSpeechSchema)
 const GENDERS = enumValues(grammaticalGenderSchema)
 const PROGRESS_STATES = enumValues(progressStateSchema)
+const OUTCOMES = enumValues(reviewOutcomeSchema)
 
 /**
  * `column IN ('a', 'b', …)`, from a Zod enum's options. The database refuses
@@ -86,6 +97,7 @@ export const users = sqliteTable("users", {
     .notNull()
     .default(false),
   image: text("image"),
+  /** A language tag; checked by a trigger (see the note at the top). */
   uiLocale: text("ui_locale").notNull().default("en"),
   ...timestamps,
 })
@@ -96,9 +108,9 @@ export const courses = sqliteTable(
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
-    /** What the course teaches: the language of each card's term. */
+    /** What the course teaches: the language of each card's term. A language tag. */
     learningLanguage: text("learning_language").notNull(),
-    /** What the answers and example translations are written in. */
+    /** What the answers and example translations are written in. A language tag. */
     answerLanguage: text("answer_language").notNull(),
     ...timestamps,
   },
@@ -152,7 +164,7 @@ export const mnemonics = sqliteTable(
     authorId: text("author_id").references(() => users.id, {
       onDelete: "set null",
     }),
-    /** What the story and image description are written in. */
+    /** What the story and image description are written in. A language tag. */
     contentLocale: text("content_locale").notNull(),
     /** The story as data, a JSON array of parts, never markup. */
     story: text("story", { mode: "json" })
@@ -214,5 +226,61 @@ export const userProgress = sqliteTable(
       "user_progress_counts_check",
       sql`${t.reps} >= 0 and ${t.lapses} >= 0 and ${t.learningStep} >= 0`
     ),
+  ]
+)
+
+/**
+ * Every review a learner has finished, one row each, never changed
+ * afterwards. `user_progress` says where a card stands now; this says how it
+ * got there. Days of study, retention, undo and FSRS parameter training all
+ * read from here.
+ *
+ * It is `@workspace/core`'s review log. The `prior_` columns are the card as
+ * it was *before* the review, which is what undo and training need: the
+ * result of a review is the next row's `prior_` values, or `user_progress`.
+ */
+export const reviews = sqliteTable(
+  "reviews",
+  {
+    /**
+     * A UUID the client makes, one per review. A request sent twice (a retry
+     * after a dropped connection) names the same ids, so the server can tell
+     * and records each review once.
+     */
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    cardId: text("card_id")
+      .notNull()
+      .references(() => cards.id, { onDelete: "cascade" }),
+    /** How it went, in Memli's terms: what the learner chose. */
+    outcome: text("outcome", { enum: OUTCOMES }).notNull(),
+    /** The FSRS rating the outcome became, 1 (forgot) to 4 (effortless). */
+    rating: integer("rating").notNull(),
+    /** When it happened, by the server's clock. */
+    reviewedAt: integer("reviewed_at", { mode: "timestamp_ms" }).notNull(),
+    /** Response time, capped by core's `capElapsedMs`. `null` when unknown. */
+    durationMs: integer("duration_ms"),
+    priorState: text("prior_state", { enum: PROGRESS_STATES }).notNull(),
+    priorDue: integer("prior_due", { mode: "timestamp_ms" }).notNull(),
+    /** `null` on a card's first review. */
+    priorLastReview: integer("prior_last_review", { mode: "timestamp_ms" }),
+    priorStability: real("prior_stability").notNull(),
+    priorStabilityFast: real("prior_stability_fast").notNull(),
+    priorDifficulty: real("prior_difficulty").notNull(),
+    priorLearningStep: integer("prior_learning_step").notNull(),
+    priorScheduledDays: real("prior_scheduled_days").notNull(),
+  },
+  (t) => [
+    // "What did this learner study, and when?" in time order.
+    index("reviews_user_reviewed_at_idx").on(t.userId, t.reviewedAt),
+    check("reviews_outcome_check", oneOf(t.outcome, OUTCOMES)),
+    check("reviews_rating_check", sql`${t.rating} between 1 and 4`),
+    check(
+      "reviews_duration_check",
+      sql`${t.durationMs} is null or ${t.durationMs} >= 0`
+    ),
+    check("reviews_prior_state_check", oneOf(t.priorState, PROGRESS_STATES)),
   ]
 )

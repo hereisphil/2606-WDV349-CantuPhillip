@@ -1,35 +1,37 @@
 import { useCallback, useReducer, useRef, type JSX } from "react"
 import { flushSync } from "react-dom"
-import { Link, createFileRoute, notFound } from "@tanstack/react-router"
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+  type ErrorComponentProps,
+} from "@tanstack/react-router"
 import type { ReviewOutcome } from "@workspace/core/srs/outcome"
+import type { StudyMode } from "@workspace/core/study/course-progress"
 import {
   sessionReducer,
   startSession,
   type SessionState,
 } from "@workspace/core/study/session-reducer"
-import { buttonVariants } from "@workspace/ui/components/button"
+import type { Course } from "@workspace/schemas/content/course"
+import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
-import type { DashboardCourse } from "../_app/-components/dashboard-metrics"
+import { ApiError } from "@/lib/api"
+import { studySessionQuery } from "@/lib/queries"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
 import { MnemonicFrame } from "./-components/MnemonicFrame"
 import { OutcomeDock } from "./-components/OutcomeDock"
 import { AnswerVerdict } from "./-components/AnswerVerdict"
 import { PromptActions } from "./-components/PromptActions"
-import {
-  findCourse,
-  sessionQueueSize,
-  type StudyMode,
-} from "./-components/session-model"
 import { SessionHeader } from "./-components/SessionHeader"
 import { SessionSummary } from "./-components/SessionSummary"
 import { useActiveTime } from "./-components/use-active-time"
 import {
-  findCourseCards,
   withNewProgress,
-  type CourseCards,
   type SessionStudyCard,
 } from "./-components/study-cards"
 import {
@@ -40,6 +42,7 @@ import {
   type StudyPreviewName,
 } from "./-components/study-previews"
 import { StudyPreviewSwitcher } from "./-components/StudyPreviewSwitcher"
+import { useSaveReviews } from "./-components/use-save-reviews"
 
 type StudySearch = {
   mode: StudyMode
@@ -59,6 +62,12 @@ const messages = {
     body: "It may have been removed, or the link is out of date.",
   },
   back: "Back to dashboard",
+  loadError: {
+    heading: "We couldn't load this session",
+    body: "Check your connection, then try again.",
+  },
+  saveFailed: "Some answers didn't save yet.",
+  retry: "Try again",
 } as const
 
 function parseMode(value: unknown): StudyMode {
@@ -85,20 +94,30 @@ export const Route = createFileRoute("/_session/study/$courseId")({
           : undefined,
     }
   },
-  loader: ({ params }) => {
-    const course = findCourse(params.courseId)
-    const courseCards = findCourseCards(params.courseId)
-    if (course === null || courseCards === null) {
-      throw notFound()
+  loaderDeps: ({ search }) => ({ mode: search.mode, extra: search.extra }),
+  // A session is what was waiting when it started. Never show an old one
+  // again: its words may have been studied since.
+  staleTime: 0,
+  gcTime: 0,
+  loader: async ({ context, params, deps }) => {
+    try {
+      return await context.queryClient.fetchQuery(
+        studySessionQuery({ courseId: params.courseId, ...deps })
+      )
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "NOT_FOUND") {
+        throw notFound()
+      }
+      throw error
     }
-    return { course, courseCards }
   },
   component: StudySession,
   notFoundComponent: CourseNotFound,
+  errorComponent: SessionLoadError,
 })
 
 function StudySession(): JSX.Element {
-  const { course, courseCards } = Route.useLoaderData()
+  const { course, cards } = Route.useLoaderData()
   const { mode, extra, preview } = Route.useSearch()
 
   return (
@@ -106,20 +125,18 @@ function StudySession(): JSX.Element {
     <SessionWorkspace
       key={`${course.courseId}:${mode}:${String(extra)}:${preview ?? ""}`}
       course={course}
-      courseCards={courseCards}
+      cards={cards}
       mode={mode}
-      queueSize={sessionQueueSize(course, mode, extra)}
       preview={preview}
     />
   )
 }
 
 type SessionWorkspaceProps = {
-  course: DashboardCourse
-  courseCards: CourseCards
+  course: Course
+  /** The session's cards from the API, in order, each with its progress. */
+  cards: readonly SessionStudyCard[]
   mode: StudyMode
-  /** Cards this kind of session should hold, from the course's counts. */
-  queueSize: number
   preview: StudyPreviewName | undefined
 }
 
@@ -133,44 +150,47 @@ function previewOf(
 }
 
 /**
- * The first session state: the seeded cards, capped at what the course has
- * waiting. A preview may swap the cards and replay events through the reducer.
+ * The first session state: the cards the API picked, with their saved
+ * progress. A preview may swap in its own fixture cards, which start as new,
+ * and replay events through the reducer.
  */
 function initialSession({
-  courseCards,
-  queueSize,
+  cards,
   preview,
 }: Pick<
   SessionWorkspaceProps,
-  "courseCards" | "queueSize" | "preview"
+  "cards" | "preview"
 >): SessionState<SessionStudyCard> {
   const seeded = previewOf(preview)
-  const cards =
-    seeded?.cards?.(courseCards.cards) ?? courseCards.cards.slice(0, queueSize)
-  const events = seeded?.events?.(cards) ?? []
-  return events.reduce(
-    sessionReducer<SessionStudyCard>,
-    startSession(withNewProgress(cards, new Date()))
-  )
+  const previewCards = seeded?.cards?.(cards)
+  const start =
+    previewCards === undefined
+      ? cards
+      : withNewProgress(previewCards, new Date())
+  const events = seeded?.events?.(start) ?? []
+  return events.reduce(sessionReducer<SessionStudyCard>, startSession(start))
 }
 
 function SessionWorkspace({
   course,
-  courseCards,
+  cards,
   mode,
-  queueSize,
   preview,
 }: SessionWorkspaceProps): JSX.Element {
   // The study-session state machine from @workspace/core: prompt → answered → … → complete.
   const [session, dispatch] = useReducer(
     sessionReducer<SessionStudyCard>,
-    { courseCards, queueSize, preview },
+    { cards, preview },
     initialSession
   )
   const seeded = previewOf(preview)
+  // A preview's reviews are made up, so they are never saved.
+  const saving = useSaveReviews(session.reviews, {
+    enabled: seeded === undefined,
+  })
   const learningLanguage =
     seeded?.languages?.learning ?? course.learningLanguage
-  const answerLanguage = seeded?.languages?.answer ?? courseCards.answerLanguage
+  const answerLanguage = seeded?.languages?.answer ?? course.answerLanguage
 
   // Stable, so the reveal shortcut's key listener isn't re-added on every render.
   const onReveal = useCallback((elapsedMs: number | null) => {
@@ -234,6 +254,7 @@ function SessionWorkspace({
               current={preview}
             />
           ) : null}
+          {saving.failed ? <SaveFailedNotice onRetry={saving.retry} /> : null}
           {total === 0 ? (
             <EmptyState
               heading={messages.empty.heading}
@@ -326,6 +347,57 @@ function EmptyState({
         {messages.back}
       </Link>
     </div>
+  )
+}
+
+/** Reviews that could not be saved after retrying. They are kept and sent again. */
+function SaveFailedNotice({ onRetry }: { onRetry: () => void }): JSX.Element {
+  return (
+    <div
+      role="alert"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+    >
+      <Text>{messages.saveFailed}</Text>
+      <Button size="touch" variant="outline" onClick={onRetry}>
+        {messages.retry}
+      </Button>
+    </div>
+  )
+}
+
+function SessionLoadError({ reset }: ErrorComponentProps): JSX.Element {
+  const router = useRouter()
+  return (
+    <main className="flex flex-1 items-center justify-center px-4 py-16 sm:px-6">
+      <div
+        role="alert"
+        className="flex w-full max-w-xl flex-col items-center gap-4 rounded-xl border border-border bg-card p-8 text-center"
+      >
+        <Heading level={1} size="3">
+          {messages.loadError.heading}
+        </Heading>
+        <Text variant="muted">{messages.loadError.body}</Text>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button
+            size="touch"
+            onClick={() => {
+              reset()
+              void router.invalidate()
+            }}
+          >
+            {messages.retry}
+          </Button>
+          <Link
+            to="/dashboard"
+            className={cn(
+              buttonVariants({ size: "touch", variant: "outline" })
+            )}
+          >
+            {messages.back}
+          </Link>
+        </div>
+      </div>
+    </main>
   )
 }
 

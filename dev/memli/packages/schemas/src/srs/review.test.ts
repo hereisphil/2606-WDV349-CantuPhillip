@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { submitReviewsRequestSchema } from "./review"
 
 const review = {
+  reviewId: "0b7e2a52-6c1f-4d0e-9a57-3f8a1c2d4e5f",
   cardId: "es-gato",
   outcome: "got_it",
   reviewedAt: "2026-11-14T20:00:00.000Z",
@@ -51,6 +52,16 @@ describe("submitReviewsRequestSchema", () => {
         reviews: [{ ...review, reviewedAt: "2026-11-14T14:00:00-06:00" }],
       }).success
     ).toBe(false)
+  })
+
+  it("needs a review id that is a UUID", () => {
+    const { reviewId: _reviewId, ...noId } = review
+
+    for (const bad of [noId, { ...review, reviewId: "review-1" }]) {
+      expect(
+        submitReviewsRequestSchema.safeParse({ reviews: [bad] }).success
+      ).toBe(false)
+    }
   })
 
   it("rejects an empty batch", () => {

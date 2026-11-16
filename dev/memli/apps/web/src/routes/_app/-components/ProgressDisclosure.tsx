@@ -46,8 +46,9 @@ function Stat({ label, value }: { label: string; value: string }): JSX.Element {
 }
 
 /**
- * Reference numbers, closed by default: three numbers with their labels and
- * one table per course. No comparisons with other learners.
+ * Reference numbers, closed by default: up to three numbers with their
+ * labels and one table per course. No comparisons with other learners.
+ * "Reviews remembered" waits for the first review of a word already met.
  */
 export function ProgressDisclosure({
   retentionPercent,
@@ -79,14 +80,19 @@ export function ProgressDisclosure({
           <dl
             className={cn(
               cardClass,
-              "grid divide-y @[34rem]:grid-cols-3 @[34rem]:divide-x @[34rem]:divide-y-0"
+              "grid divide-y @[34rem]:divide-x @[34rem]:divide-y-0",
+              retentionPercent === null
+                ? "@[34rem]:grid-cols-2"
+                : "@[34rem]:grid-cols-3"
             )}
           >
             <Stat label={messages.stats.learned} value={number(wordsLearned)} />
-            <Stat
-              label={messages.stats.remembered}
-              value={percent(retentionPercent / 100)}
-            />
+            {retentionPercent === null ? null : (
+              <Stat
+                label={messages.stats.remembered}
+                value={percent(retentionPercent / 100)}
+              />
+            )}
             <Stat
               label={messages.stats.newThisMonth}
               value={number(newCardsThisMonth)}

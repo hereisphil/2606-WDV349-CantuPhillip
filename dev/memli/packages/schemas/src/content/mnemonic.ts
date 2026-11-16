@@ -27,9 +27,12 @@ export const mnemonicSchema = z.object({
    */
   contentLocale: languageTagSchema,
   story: z.array(mnemonicStoryPartSchema).nonempty(),
-  author: z.object({
-    displayName: z.string().min(1),
-  }),
+  /** Who wrote it. `null` once the author has deleted their account. */
+  author: z
+    .object({
+      displayName: z.string().min(1),
+    })
+    .nullable(),
   /** Learners who found it useful. A card lists its mnemonics by this, highest first. */
   upvotes: z.int().nonnegative(),
   /** Picture for the hook. Optional: a story works without one. */

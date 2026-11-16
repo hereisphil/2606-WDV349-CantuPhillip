@@ -5,7 +5,7 @@ import { Spinner } from "@workspace/ui/components/spinner"
 import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
 import { canPronounce, pronounce } from "./pronunciation"
-import type { StudyMode } from "./session-model"
+import type { StudyMode } from "@workspace/core/study/course-progress"
 import type { StudyCard } from "./study-cards"
 
 const messages = {

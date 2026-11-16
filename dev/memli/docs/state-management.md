@@ -132,6 +132,21 @@ Rules of thumb:
 - **No React in `packages/core`.** The reducer file imports nothing from `react`. The hook call lives in `apps/web`.
 - **Server cache stays in TanStack Query.** A session reducer holds the *in-flight session*; the persisted review history is a query. Persisting a grade is a mutation the component (or, later, a reducer effect) calls.
 
+### How the study session talks to the API (#112)
+
+| Data | Owner | Where |
+| --- | --- | --- |
+| The dashboard's courses | `useSuspenseQuery(coursesQuery)`, loaded first by the route's `loader` | `apps/web/src/lib/queries.ts`, `routes/_app/dashboard.tsx` |
+| A session's cards | `queryClient.fetchQuery(studySessionQuery(...))` in the route's `loader`, always fresh | `routes/_session/study.$courseId.tsx` |
+| The session itself | `useReducer(sessionReducer)` from `@workspace/core`, started from those cards | same |
+| Saving reviews | `useMutation` in `useSaveReviews`, which watches `session.reviews` | `routes/_session/-components/use-save-reviews.ts` |
+
+The reducer stays pure: it collects `reviews` and knows nothing about the network. `useSaveReviews` keeps the server in step with that list, sending each review once it is settled and remembering which are saved. Each review gets one `reviewId` for all its retries, so the API never counts it twice. After a save, the courses query is refreshed, so the dashboard is current by the time it opens.
+
+That is an effect that syncs a list, not a side effect of one transition, so it does not meet the bar for `use-effect-reducer` below. A sync is idempotent: running it again sends nothing new. Install the library when a transition needs a one-shot effect, such as playing audio on reveal.
+
+Every fetch goes through `src/lib/api.ts`, which checks the answer against its contract in `@workspace/schemas` and turns a failure into an `ApiError` with the API's code. Requests that fail with a network or server error are retried three times; a 4xx is not.
+
 ---
 
 ## When to install `use-effect-reducer`

@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ComponentType } from "react"
+import type { QueryClient } from "@tanstack/react-query"
 import {
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Link,
   Outlet,
@@ -27,7 +28,12 @@ const DevPreviewsMenu: ComponentType =
     ? () => null
     : lazy(() => import("@/components/dev-previews-menu"))
 
-export const Route = createRootRoute({
+/** What every route's loader gets, set in main.tsx. */
+type RouterContext = {
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
       {/* Renders each route's head(), such as the page title. */}

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
-import { expect, test, type Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
+import { expect, test } from "./api"
 import { previewNames } from "../src/routes/_app/-components/dashboard-previews"
 
 type Theme = "light" | "dark"

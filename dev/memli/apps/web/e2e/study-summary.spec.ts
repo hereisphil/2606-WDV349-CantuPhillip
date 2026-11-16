@@ -1,10 +1,11 @@
-import { expect, test, type Locator, type Page } from "@playwright/test"
+import type { Locator, Page } from "@playwright/test"
+import { expect, test } from "./api"
 
 /**
  * The session summary (#51): what a real session added up to, focus on the
  * result, the main action on a phone's first screen, and studying again.
  */
-const study = "/study/spanish-core-1000?mode=review"
+const study = "/study/spanish-core-1000?mode=learn"
 const WORDS = 5
 
 /** Space reveals the word on screen; a digit picks a dock choice by position. */
@@ -83,7 +84,7 @@ test.describe("study session summary", () => {
     await page.goto(`${study}&preview=complete`, { waitUntil: "networkidle" })
     await page.getByRole("button", { name: "Study these words again" }).click()
 
-    const prompt = page.getByRole("region", { name: "Review" })
+    const prompt = page.getByRole("region", { name: "Learn new words" })
     await expect(prompt).toBeFocused()
     await expect(prompt).toContainText("gato")
     await expect(page.getByText("5 words left")).toBeVisible()

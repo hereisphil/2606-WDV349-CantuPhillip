@@ -8,11 +8,7 @@ import {
 /** A seeded dashboard state for `?preview=` in development builds. */
 export type DashboardPreview = {
   metrics: DashboardMetrics
-  /** Overrides the viewer's streak, which lives on the session, not the dashboard. */
-  streakDays?: number
 }
-
-const noTrickyWords = { total: 0, words: [] }
 
 function withToday(cardsStudied: number): DashboardMetrics["dailyGoal"] {
   const days = base.dailyGoal.days
@@ -134,9 +130,8 @@ function buildPreviews(): Record<PreviewName, DashboardPreview> {
         ...base,
         courses: [],
         dailyGoal: { ...base.dailyGoal, days: [] },
-        trickyWords: noTrickyWords,
+        daysOfStudy: 0,
       },
-      streakDays: 0,
     },
     learn: {
       metrics: {
@@ -167,7 +162,6 @@ function buildPreviews(): Record<PreviewName, DashboardPreview> {
           }),
         ],
         dailyGoal: withToday(18),
-        trickyWords: noTrickyWords,
       },
     },
     "goal-met": {
@@ -181,26 +175,14 @@ function buildPreviews(): Record<PreviewName, DashboardPreview> {
       metrics: {
         ...base,
         courses: base.courses.slice(0, 1),
-        trickyWords: {
-          total: 4,
-          words: base.trickyWords.words.filter(
-            (word) => word.courseId === "spanish-core-1000"
-          ),
-        },
+        daysOfStudy: 1,
       },
-      streakDays: 1,
     },
     "many-courses": { metrics: { ...base, courses: buildManyCourses() } },
     "same-language": {
       metrics: {
         ...base,
         courses: buildSameLanguageCourses(),
-        trickyWords: {
-          total: 6,
-          words: base.trickyWords.words.filter(
-            (word) => word.learningLanguage === "es"
-          ),
-        },
       },
     },
     "long-titles": {
@@ -251,10 +233,9 @@ function buildPreviews(): Record<PreviewName, DashboardPreview> {
               index === days.length - 1 ? 318 : day.cardsStudied * 6,
           })),
         },
-        trickyWords: { ...base.trickyWords, total: 1532 },
         progressTrends: { ...base.progressTrends, newCardsThisMonth: 24318 },
+        daysOfStudy: 1000,
       },
-      streakDays: 1000,
     },
   }
 }

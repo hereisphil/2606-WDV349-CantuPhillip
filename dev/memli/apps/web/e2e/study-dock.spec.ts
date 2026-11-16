@@ -1,11 +1,12 @@
-import { expect, test, type Locator, type Page } from "@playwright/test"
+import type { Locator, Page } from "@playwright/test"
+import { expect, test } from "./api"
 
 /**
  * The Session Outcome Dock (#51): plain-word choices after the answer shows,
  * Enter for the default, 1 to 4 by position, and focus on the next word once
  * the learner chooses.
  */
-const study = "/study/spanish-core-1000?mode=review"
+const study = "/study/spanish-core-1000?mode=learn"
 
 function dock(page: Page, name: string | RegExp): Locator {
   return page.getByRole("group", { name })
@@ -30,7 +31,7 @@ async function expectChoices(group: Locator, names: string[]): Promise<void> {
 
 /** The prompt card, named by the session kind in its corner. */
 function prompt(page: Page): Locator {
-  return page.getByRole("region", { name: "Review" })
+  return page.getByRole("region", { name: "Learn new words" })
 }
 
 test.describe("study session outcome dock", () => {

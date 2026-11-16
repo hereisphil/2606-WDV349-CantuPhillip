@@ -62,7 +62,8 @@ export default function DevPreviewsMenu(): JSX.Element {
                 <Link
                   to="/study/$courseId"
                   params={{ courseId: studyCourseId }}
-                  search={{ mode: "review", preview: "default" }}
+                  // Learn: a freshly seeded database has nothing to review yet.
+                  search={{ mode: "learn", preview: "default" }}
                 />
               }
             >

@@ -21,15 +21,17 @@ const BASE_MS = 2_000
 const PER_CHARACTER_MS = 300
 
 /**
- * A response time worth keeping, or `null` if there is none.
+ * A response time worth keeping, in whole milliseconds, or `null` if there
+ * is none.
  *
  * Negative, `NaN` and infinite values (a broken timer) become `null`. Long
- * gaps are capped at `MAX_INFORMATIVE_MS`, which is also the value to store
- * as a review's `durationMs`.
+ * gaps are capped at `MAX_INFORMATIVE_MS`. The result is the value to store
+ * as a review's `durationMs`, so it is rounded: browser timers measure
+ * fractions of a millisecond, and the API takes whole ones.
  */
 export function capElapsedMs(elapsedMs: number): number | null {
   if (!Number.isFinite(elapsedMs) || elapsedMs < 0) return null
-  return Math.min(elapsedMs, MAX_INFORMATIVE_MS)
+  return Math.round(Math.min(elapsedMs, MAX_INFORMATIVE_MS))
 }
 
 export type SuggestOutcomeInput = {

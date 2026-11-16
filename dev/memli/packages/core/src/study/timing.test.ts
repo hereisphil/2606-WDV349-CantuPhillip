@@ -23,6 +23,12 @@ describe("capElapsedMs", () => {
     expect(capElapsedMs(10 * 60 * 1000)).toBe(MAX_INFORMATIVE_MS)
   })
 
+  it("rounds to whole milliseconds, as browser timers measure fractions", () => {
+    expect(capElapsedMs(1_234.5)).toBe(1_235)
+    expect(capElapsedMs(12_215.400_000_005_96)).toBe(12_215)
+    expect(Number.isInteger(capElapsedMs(0.4))).toBe(true)
+  })
+
   it("drops a broken measurement", () => {
     expect(capElapsedMs(-1)).toBeNull()
     expect(capElapsedMs(Number.NaN)).toBeNull()

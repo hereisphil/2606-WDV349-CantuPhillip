@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from "@playwright/test"
+import type { Locator, Page } from "@playwright/test"
+import { expect, test } from "./api"
 
 /**
  * The response timer (#51): time from showing a word to Submit, paused while
@@ -9,7 +10,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test"
  * "casa" means "house": a typo ("hous") is quick under 3.5 s and slow from 7 s
  * (`suggestOutcome`). The nudged choice is the one Enter confirms.
  */
-const study = "/study/spanish-core-1000?mode=review"
+const study = "/study/spanish-core-1000?mode=learn"
 
 /** Answers the first word (gato) so the casa prompt mounts, and its timer starts. */
 async function openCasa(page: Page): Promise<void> {
@@ -18,9 +19,9 @@ async function openCasa(page: Page): Promise<void> {
   await page.getByRole("textbox").fill("cat")
   await page.getByRole("button", { name: "Submit" }).click()
   await page.keyboard.press("Enter")
-  await expect(page.getByRole("region", { name: "Review" })).toContainText(
-    "casa"
-  )
+  await expect(
+    page.getByRole("region", { name: "Learn new words" })
+  ).toContainText("casa")
 }
 
 async function setTabHidden(page: Page, hidden: boolean): Promise<void> {

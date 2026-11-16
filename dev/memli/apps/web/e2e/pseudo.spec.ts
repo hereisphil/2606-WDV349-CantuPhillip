@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test } from "./api"
 
 /**
  * Pseudo-localization (REDESIGN.md section 12): with stretched, CJK and
@@ -20,7 +20,7 @@ const sizes = [
 ] as const
 
 /** Study screens with the most text: a prompt, a revealed answer, and a mnemonic with its arrows. */
-const study = "/study/spanish-core-1000?mode=review"
+const study = "/study/spanish-core-1000?mode=learn"
 const studyPaths = [
   study,
   `${study}&preview=long-revealed`,
