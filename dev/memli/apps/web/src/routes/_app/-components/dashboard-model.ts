@@ -48,9 +48,7 @@ export function sortCourses(
 }
 
 /** Each learning language once, in the order its first course appears. */
-export function learningLanguages(
-  courses: readonly DashboardCourse[]
-): string[] {
+function learningLanguages(courses: readonly DashboardCourse[]): string[] {
   return [...new Set(courses.map((course) => course.learningLanguage))]
 }
 
@@ -58,6 +56,29 @@ export function selectFocusCourse(
   courses: readonly DashboardCourse[]
 ): DashboardCourse | null {
   return sortCourses(courses)[0] ?? null
+}
+
+/** Every course but the hero's, most in need first. */
+export function otherCourses(
+  courses: readonly DashboardCourse[]
+): DashboardCourse[] {
+  const focus = selectFocusCourse(courses)
+  return sortCourses(courses).filter(
+    (course) => course.courseId !== focus?.courseId
+  )
+}
+
+/** Above this many other courses, the list offers the Studying menu. */
+const MAX_UNFILTERED_COURSES = 5
+
+/** The Studying menu's languages. Empty when every course is one tap away. */
+export function studyingLanguages(
+  others: readonly DashboardCourse[]
+): string[] {
+  const languages = learningLanguages(others)
+  return others.length > MAX_UNFILTERED_COURSES && languages.length >= 2
+    ? languages
+    : []
 }
 
 export function courseTotal(course: DashboardCourse): number {

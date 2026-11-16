@@ -273,7 +273,21 @@ export function spanishLearnSession(now = new Date()): StudySession {
   }
 }
 
+/** Seven courses in two learning languages, so the Studying menu shows. */
+export function manyCourses(): CourseSummary[] {
+  return ["es", "es", "es", "de", "de", "de", "de"].map(
+    (learningLanguage, index) => ({
+      ...courses[0],
+      courseId: `course-${index}`,
+      title: `Course ${index}`,
+      learningLanguage,
+    })
+  )
+}
+
 export type ApiStub = {
+  /** Replaces the courses `GET /api/courses` answers. */
+  courses?: CourseSummary[]
   /** Answers `GET /api/courses` with a server error. */
   coursesFail?: boolean
   /** Replaces what `GET /api/history` answers. */
@@ -302,7 +316,11 @@ async function stubApi(
     route.fulfill({ status: 404, json: { error: { code: "NOT_FOUND" } } })
   )
   await page.route(path(/^\/api\/courses$/), (route) =>
-    route.fulfill(stub.coursesFail ? serverError : { json: { courses } })
+    route.fulfill(
+      stub.coursesFail
+        ? serverError
+        : { json: { courses: stub.courses ?? courses } }
+    )
   )
   await page.route(path(/^\/api\/history$/), (route) =>
     route.fulfill({ json: { ...history(), ...stub.history } })

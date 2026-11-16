@@ -1,7 +1,8 @@
-import { useEffect, type JSX } from "react"
+import type { JSX } from "react"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import {
   createFileRoute,
+  redirect,
   useRouter,
   type ErrorComponentProps,
 } from "@tanstack/react-router"
@@ -17,9 +18,10 @@ import {
   type DashboardMetrics,
 } from "./-components/dashboard-metrics"
 import {
-  learningLanguages,
+  otherCourses,
   selectFocusCourse,
   sortCourses,
+  studyingLanguages,
   tipFor,
   todayState,
   totalMastered,
@@ -49,9 +51,6 @@ const messages = {
   },
 } as const
 
-/** Above this many other courses, the list offers the Studying menu. */
-const MAX_UNFILTERED_COURSES = 5
-
 type DashboardSearch = {
   preview?: PreviewName | undefined
   /** BCP 47 tag of the learning language to focus on. Absent means all. */
@@ -76,13 +75,24 @@ export const Route = createFileRoute("/_app/dashboard")({
   }),
   head: () => ({ meta: [{ title: messages.title }] }),
   // A preview is a fixed snapshot and never asks the API.
-  loaderDeps: ({ search }) => ({ preview: search.preview }),
+  loaderDeps: ({ search }) => ({
+    preview: search.preview,
+    studying: search.studying,
+  }),
   loader: async ({ context, deps }) => {
-    if (deps.preview === undefined) {
-      await Promise.all([
-        context.queryClient.ensureQueryData(coursesQuery),
-        context.queryClient.ensureQueryData(historyQuery),
-      ])
+    if (deps.preview !== undefined) {
+      return
+    }
+    const [courses] = await Promise.all([
+      context.queryClient.ensureQueryData(coursesQuery),
+      context.queryClient.ensureQueryData(historyQuery),
+    ])
+    // A ?studying= the menu can't show is stale: drop it before the page renders.
+    if (
+      deps.studying !== undefined &&
+      !studyingLanguages(otherCourses(courses)).includes(deps.studying)
+    ) {
+      throw redirect({ to: "/dashboard", search: {}, replace: true })
     }
   },
   component: Dashboard,
@@ -126,34 +136,17 @@ function DashboardView({
   // narrows only the list of other courses (REDESIGN.md 5.4).
   const today = todayState(allCourses)
   const focusCourse = selectFocusCourse(allCourses)
-  const otherCourses = sortCourses(allCourses).filter(
-    (course) => course.courseId !== focusCourse?.courseId
-  )
-  const languages = learningLanguages(otherCourses)
-  // With five or fewer other courses, every course is already one tap away.
-  const showFilter =
-    otherCourses.length > MAX_UNFILTERED_COURSES && languages.length >= 2
+  const others = otherCourses(allCourses)
+  const languages = studyingLanguages(others)
+  // Previews skip the loader, so a stale ?studying= is ignored here too.
   const studying =
-    showFilter &&
-    search.studying !== undefined &&
-    languages.includes(search.studying)
+    search.studying !== undefined && languages.includes(search.studying)
       ? search.studying
       : undefined
-  // A ?studying= value the menu cannot show is stale: drop it so the URL matches the page.
-  const staleStudying = search.studying !== undefined && studying === undefined
-  const navigate = Route.useNavigate()
-  useEffect(() => {
-    if (staleStudying) {
-      void navigate({
-        search: (prev) => ({ ...prev, studying: undefined }),
-        replace: true,
-      })
-    }
-  }, [staleStudying, navigate])
   const listedCourses =
     studying === undefined
-      ? otherCourses
-      : otherCourses.filter((course) => course.learningLanguage === studying)
+      ? others
+      : others.filter((course) => course.learningLanguage === studying)
   const tip = tipFor(allCourses, today)
   // The finished hero already links to "Find another course".
   const heroFindsAnother =
@@ -198,7 +191,7 @@ function DashboardView({
               <CourseList
                 courses={listedCourses}
                 filter={
-                  showFilter ? (
+                  languages.length > 0 ? (
                     <LanguageFilter languages={languages} current={studying} />
                   ) : null
                 }
