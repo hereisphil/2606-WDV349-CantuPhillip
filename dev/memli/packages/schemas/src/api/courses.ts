@@ -1,6 +1,18 @@
 import { z } from "zod"
 
 import { courseSchema } from "../content/course"
+import { timeZoneSchema } from "../locale/time-zone"
+
+/**
+ * The query string of `GET /api/courses`. The time zone decides when the
+ * viewer's day started, so words already begun today count against the
+ * daily new-word limit.
+ */
+export const coursesQuerySchema = z.object({
+  timeZone: timeZoneSchema.default("UTC"),
+})
+
+export type CoursesQuery = z.infer<typeof coursesQuerySchema>
 
 const count = z.int().nonnegative()
 
@@ -12,7 +24,10 @@ const count = z.int().nonnegative()
 export const courseSummarySchema = courseSchema.extend({
   /** Seen cards that are due now. What a `review` session holds. */
   dueCount: count,
-  /** New cards the viewer can start today. What a `learn` session holds. */
+  /**
+   * New cards the viewer can still start today: the daily limit, less words
+   * already begun today. What a `learn` session holds.
+   */
   newAvailable: count,
   masteredCount: count,
   /** Seen, but not mastered yet. */

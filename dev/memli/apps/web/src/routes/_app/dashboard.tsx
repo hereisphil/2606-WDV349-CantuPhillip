@@ -11,9 +11,9 @@ import { Section } from "@workspace/ui/components/section"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { Text } from "@workspace/ui/components/text"
 import { useViewer } from "@/components/session-provider"
-import { coursesQuery } from "@/lib/queries"
+import { coursesQuery, historyQuery } from "@/lib/queries"
 import {
-  prototypeDashboardMetrics,
+  metricsFromApi,
   type DashboardMetrics,
 } from "./-components/dashboard-metrics"
 import {
@@ -79,7 +79,11 @@ export const Route = createFileRoute("/_app/dashboard")({
   loaderDeps: ({ search }) => ({ preview: search.preview }),
   loader: async ({ context, deps }) => {
     if (deps.preview === undefined) {
-      await context.queryClient.ensureQueryData(coursesQuery)
+      // Both at once, so the page waits for the slower, not the sum.
+      await Promise.all([
+        context.queryClient.ensureQueryData(coursesQuery),
+        context.queryClient.ensureQueryData(historyQuery),
+      ])
     }
   },
   component: Dashboard,
@@ -88,46 +92,39 @@ export const Route = createFileRoute("/_app/dashboard")({
 })
 
 function Dashboard(): JSX.Element {
-  const viewer = useViewer()
   const { preview } = Route.useSearch()
   if (import.meta.env.DEV && preview !== undefined) {
     const seeded: DashboardPreview = dashboardPreviews[preview]
-    return (
-      <DashboardView
-        metrics={seeded.metrics}
-        streakDays={seeded.streakDays ?? viewer.streakDays}
-      />
-    )
+    return <DashboardView metrics={seeded.metrics} />
   }
-  return <LiveDashboard streakDays={viewer.streakDays} />
+  return <LiveDashboard />
 }
 
 /**
- * The viewer's courses from the API. The query stays subscribed, so the
- * counts refresh when the tab comes back into focus and after reviews are
+ * The viewer's dashboard from the API. Both queries stay subscribed, so the
+ * numbers refresh when the tab comes back into focus and after reviews are
  * saved (`use-save-reviews.ts`).
  */
-function LiveDashboard({ streakDays }: { streakDays: number }): JSX.Element {
+function LiveDashboard(): JSX.Element {
   const { data: courses } = useSuspenseQuery(coursesQuery)
-  return (
-    <DashboardView
-      metrics={{ ...prototypeDashboardMetrics, courses }}
-      streakDays={streakDays}
-    />
-  )
+  const { data: history } = useSuspenseQuery(historyQuery)
+  return <DashboardView metrics={metricsFromApi(courses, history)} />
 }
 
 function DashboardView({
   metrics,
-  streakDays,
 }: {
   metrics: DashboardMetrics
-  streakDays: number
 }): JSX.Element {
   const viewer = useViewer()
   const search = Route.useSearch()
   const preview = search.preview
-  const { courses: allCourses, dailyGoal, progressTrends } = metrics
+  const {
+    courses: allCourses,
+    dailyGoal,
+    daysOfStudy,
+    progressTrends,
+  } = metrics
   const now = new Date()
 
   // The hero, the week and the tip cover every course. The Studying menu
@@ -209,7 +206,7 @@ function DashboardView({
                   target={dailyGoal.target}
                   now={now}
                   clearedToday={today.status === "caught-up"}
-                  streakDays={streakDays}
+                  streakDays={daysOfStudy}
                 />
               </div>
               <CourseList

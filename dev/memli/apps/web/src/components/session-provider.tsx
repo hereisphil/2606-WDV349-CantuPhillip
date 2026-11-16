@@ -11,7 +11,6 @@ export type Viewer = {
   email: string
   plan: ViewerPlan
   uiLocale: string
-  streakDays: number
 }
 
 // Prototype stand-in. Better Auth (#108) replaces this value inside the provider.
@@ -22,7 +21,6 @@ const prototypeViewer = {
   email: "learner@prototype.memli.test",
   plan: "pro",
   uiLocale: "en",
-  streakDays: 12,
 } as const satisfies Viewer
 
 const SessionContext = createContext<Viewer | null>(null)

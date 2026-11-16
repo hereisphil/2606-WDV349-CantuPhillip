@@ -103,3 +103,33 @@ test.describe("when the courses cannot load", () => {
     await expect(error.getByRole("button", { name: "Try again" })).toBeVisible()
   })
 })
+
+test.describe("the dashboard's history", () => {
+  test.skip(({ isMobile }) => isMobile, "Runs once, in the desktop project.")
+
+  test("Shows what the history route answers", async ({ page }) => {
+    await page.goto("/dashboard", { waitUntil: "networkidle" })
+
+    await expect(page.getByText("12 days of study")).toBeVisible()
+    await page.getByText("Your progress", { exact: true }).last().click()
+    const stats = page.locator("dl").first()
+    await expect(stats).toContainText("84%")
+    await expect(stats).toContainText("142")
+  })
+
+  test.describe("before any review of a word already met", () => {
+    test.use({ api: { history: { retentionPercent: null, daysOfStudy: 0 } } })
+
+    test("Leaves out reviews remembered and days of study", async ({
+      page,
+    }) => {
+      await page.goto("/dashboard", { waitUntil: "networkidle" })
+
+      await expect(page.getByText(/days? of study/)).toHaveCount(0)
+      await page.getByText("Your progress", { exact: true }).last().click()
+      await expect(page.locator("dl").first()).not.toContainText(
+        "Reviews remembered"
+      )
+    })
+  })
+})

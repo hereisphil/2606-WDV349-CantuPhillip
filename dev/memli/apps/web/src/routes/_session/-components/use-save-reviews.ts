@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { SessionReview } from "@workspace/core/study/session-reducer"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
-import { coursesQuery, submitReviews } from "@/lib/queries"
+import { coursesQuery, historyQuery, submitReviews } from "@/lib/queries"
 
 type SaveReviews = {
   /** Some reviews could not be saved, even after retrying. */
@@ -35,14 +35,16 @@ export function useSaveReviews(
   const saved = useRef(new WeakSet<SessionReview>())
 
   const { mutate, isPending, isError, reset } = useMutation({
+    // The response is ignored: the dashboard refetches its own counts below.
     mutationFn: submitReviews,
     // Runs even if the learner has left the page, so the dashboard is fresh
     // by the time it opens.
     onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: coursesQuery.queryKey,
-        refetchType: "all",
-      }),
+      Promise.all(
+        [coursesQuery.queryKey, historyQuery.queryKey].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey, refetchType: "all" })
+        )
+      ),
   })
 
   useEffect(() => {

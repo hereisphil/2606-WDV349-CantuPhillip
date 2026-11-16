@@ -1,6 +1,7 @@
 import { test as base, type Page } from "@playwright/test"
 import { createProgress } from "@workspace/core/srs/progress"
 import type { CourseSummary } from "@workspace/schemas/api/courses"
+import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import type { StudySession } from "@workspace/schemas/api/study"
 import type { Card } from "@workspace/schemas/content/card"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
@@ -79,6 +80,30 @@ const courses: CourseSummary[] = [
     lastReviewedAt: hoursAgo(24 * 14),
   },
 ]
+
+/** A calendar date where the browser is, `daysAgo` days back, "YYYY-MM-DD". */
+function localDaysAgo(daysAgo: number): string {
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo)
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${String(date.getFullYear())}-${month}-${day}`
+}
+
+/** A week with a goal day, partial days and a day off, oldest first. */
+export function history(): StudyHistoryData {
+  const words = [12, 50, 64, 31, 0, 55, 24]
+  return {
+    dailyGoal: 50,
+    days: words.map((wordsStudied, index) => ({
+      date: localDaysAgo(words.length - 1 - index),
+      wordsStudied,
+    })),
+    daysOfStudy: 12,
+    retentionPercent: 84,
+    newWordsThisMonth: 142,
+  }
+}
 
 /**
  * The five Spanish words a learner meets first, as in apps/api/seed:
@@ -262,6 +287,8 @@ export function spanishLearnSession(now = new Date()): StudySession {
 export type ApiStub = {
   /** Answers `GET /api/courses` with a server error. */
   coursesFail?: boolean
+  /** Replaces what `GET /api/history` answers. */
+  history?: Partial<StudyHistoryData>
   /** Answers `POST /api/reviews` with a server error. */
   reviewsFail?: boolean
 }
@@ -287,6 +314,9 @@ async function stubApi(
   )
   await page.route(path(/^\/api\/courses$/), (route) =>
     route.fulfill(stub.coursesFail ? serverError : { json: { courses } })
+  )
+  await page.route(path(/^\/api\/history$/), (route) =>
+    route.fulfill({ json: { ...history(), ...stub.history } })
   )
   await page.route(path(/^\/api\/courses\/[^/]+\/study$/), (route) => {
     const url = new URL(route.request().url())

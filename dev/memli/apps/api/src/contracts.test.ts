@@ -5,7 +5,9 @@ import type {
   StudyMode,
 } from "@workspace/core/study/course-progress"
 import type { SessionReview } from "@workspace/core/study/session-reducer"
+import type { StudyHistory } from "@workspace/core/study/history"
 import type { CourseSummary } from "@workspace/schemas/api/courses"
+import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import type { StudyModeData } from "@workspace/schemas/api/study"
 import type { Course } from "@workspace/schemas/content/course"
 import {
@@ -42,6 +44,12 @@ describe("schemas match @workspace/core", () => {
     expectTypeOf<
       Readonly<Omit<CourseSummary, keyof Course>>
     >().toEqualTypeOf<CourseProgressSummary>()
+  })
+
+  it("has the same study history", () => {
+    // Each fits the other: the same fields, whatever is marked readonly.
+    expectTypeOf<StudyHistory>().toExtend<StudyHistoryData>()
+    expectTypeOf<StudyHistoryData>().toExtend<StudyHistory>()
   })
 
   it("accepts the progress core creates and schedules", () => {

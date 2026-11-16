@@ -3,7 +3,11 @@ import {
   sessionCards,
   summarizeCourseProgress,
 } from "@workspace/core/study/course-progress"
-import type { CoursesResponse } from "@workspace/schemas/api/courses"
+import { localDate, newWordsStartedOn } from "@workspace/core/study/history"
+import {
+  coursesQuerySchema,
+  type CoursesResponse,
+} from "@workspace/schemas/api/courses"
 import {
   studyQuerySchema,
   type StudySession,
@@ -19,6 +23,8 @@ import {
   listCourses,
 } from "../db/content"
 import { courseProgress, progressByCourse } from "../db/progress"
+import { reviewsSince, type CourseReview } from "../db/reviews"
+import type { Database } from "../db/client"
 import type { AppEnv } from "../env"
 import { errorResponse } from "../lib/errors"
 import { validate } from "../lib/validate"
@@ -27,15 +33,40 @@ import { viewerId } from "../lib/viewer"
 /** Mounted at `/api/courses`. */
 export const courseRoutes = new Hono<AppEnv>()
 
+// Today, wherever the viewer is, is never longer than this ago.
+const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000
+
+/**
+ * Words the viewer met for the first time today, where they are, by course.
+ * The daily new-word limit subtracts them.
+ */
+async function newWordsStartedToday(
+  db: Database,
+  userId: string,
+  now: Date,
+  timeZone: string
+): Promise<Map<string, number>> {
+  const firstSightings: CourseReview[] = await reviewsSince(
+    db,
+    userId,
+    new Date(now.getTime() - TWO_DAYS_MS),
+    { firstSightingsOnly: true }
+  )
+  return newWordsStartedOn(firstSightings, localDate(now, timeZone), timeZone)
+}
+
 // Every course, with where the viewer stands in each: what the dashboard shows.
-courseRoutes.get("/", async (c) => {
+courseRoutes.get("/", validate("query", coursesQuerySchema), async (c) => {
   const db = database(c.env.DB)
   const now = new Date()
+  const userId = viewerId(c)
+  const { timeZone } = c.req.valid("query")
 
-  const [courses, cardCounts, progress] = await Promise.all([
+  const [courses, cardCounts, progress, startedToday] = await Promise.all([
     listCourses(db),
     cardCountByCourse(db),
-    progressByCourse(db, viewerId(c)),
+    progressByCourse(db, userId),
+    newWordsStartedToday(db, userId, now, timeZone),
   ])
 
   const body: CoursesResponse = {
@@ -44,7 +75,8 @@ courseRoutes.get("/", async (c) => {
       ...summarizeCourseProgress(
         cardCounts.get(course.courseId) ?? 0,
         progress.get(course.courseId) ?? [],
-        now
+        now,
+        startedToday.get(course.courseId) ?? 0
       ),
     })),
   }
@@ -59,7 +91,8 @@ courseRoutes.get(
     const db = database(c.env.DB)
     const now = new Date()
     const courseId = c.req.param("courseId")
-    const { mode, extra } = c.req.valid("query")
+    const { mode, extra, timeZone } = c.req.valid("query")
+    const userId = viewerId(c)
 
     const course = await findCourse(db, courseId)
     if (course === null) return errorResponse(c, "NOT_FOUND")
@@ -67,9 +100,12 @@ courseRoutes.get(
     // Choose first, from ids and progress alone. Then load the full content
     // of the chosen cards only, so a 1,000-word course costs what a
     // 10-word session needs.
-    const [cardIds, saved] = await Promise.all([
+    const [cardIds, saved, startedToday] = await Promise.all([
       cardIdsInOrder(db, courseId),
-      courseProgress(db, viewerId(c), courseId),
+      courseProgress(db, userId, courseId),
+      mode === "learn"
+        ? newWordsStartedToday(db, userId, now, timeZone)
+        : new Map<string, number>(),
     ])
     const savedByCard = new Map(saved.map((card) => [card.cardId, card]))
     const chosen = sessionCards(
@@ -78,7 +114,7 @@ courseRoutes.get(
         progress: savedByCard.get(cardId) ?? createProgress(cardId, now),
       })),
       mode,
-      { now, extra }
+      { now, extra, newStartedToday: startedToday.get(courseId) ?? 0 }
     )
 
     const content = await cardsById(

@@ -39,6 +39,7 @@ The session reducer runs the whole loop for a queue of cards.
 | `@workspace/core/srs/progress` | `CardProgress`, `createProgress`, `isDue`, plus rating-level `applyRating` / `previewDue` |
 | `@workspace/core/study/timing` | `capElapsedMs`, `suggestOutcome`, `MAX_INFORMATIVE_MS` |
 | `@workspace/core/study/course-progress` | `summarizeCourseProgress`, `sessionCards`, `StudyMode`, `isSeen`, `isMastered`, `isTricky` and their thresholds |
+| `@workspace/core/study/history` | `summarizeHistory`, `daysOfStudy`, `newWordsStartedOn`, `localDate`, `shiftDate`, `DAILY_GOAL_WORDS` |
 | `@workspace/core/study/session-reducer` | `startSession`, `sessionReducer`, `SessionCard`, `SessionState`, `SessionEvent`, `SessionReview` |
 
 Apps should schedule through **outcomes** (`applyOutcome`), not ratings. The rating-level helpers stay exported for the API and tests.
@@ -136,7 +137,7 @@ Two questions, one set of rules: where does a learner stand in a course, and whi
 | due | Seen, and `due` has passed | |
 | mastered | In `review` with stability of 21 days or more | `MASTERED_STABILITY_DAYS` |
 | tricky | Forgotten 3 times or more, and not mastered | `TRICKY_LAPSES` |
-| new today | Unseen, up to 10 | `DAILY_NEW_CARD_LIMIT` |
+| new today | Unseen, up to 10 less the words first met today | `DAILY_NEW_CARD_LIMIT` |
 
 `summarizeCourseProgress(cardCount, progress, now)` returns the dashboard's counts: `dueCount`, `newAvailable`, `masteredCount`, `learningCount`, `unseenCount`, `trickyCount`, `lastReviewedAt`. Mastered, learning and unseen always add up to the course.
 
@@ -149,6 +150,18 @@ Two questions, one set of rules: where does a learner stand in a course, and whi
 | `practice` | Tricky | Most forgotten first |
 
 A test holds the two together: a session always has exactly as many cards as its count says. The three thresholds are product decisions in one place; change the constant and every client follows.
+
+Both take how many words the learner already met for the first time today in that course (`newStartedToday`), and give only what is left of the daily limit.
+
+### Study history — `study/history`
+
+What the dashboard shows about past study, from the review log. Days are calendar days in the learner's time zone, so every function that needs a day takes `timeZone` as well as `now`.
+
+- `localDate(instant, timeZone)` is the date there, `"YYYY-MM-DD"`. `shiftDate(date, days)` moves along the calendar.
+- `daysOfStudy(studyDates, today)` follows REDESIGN.md section 5.7: any study counts, one day off is forgiven and not counted, two in a row end the count, and today is never a miss before it ends.
+- `summarizeHistory({ reviews, studyDates, now, timeZone })` gives the last 7 days (different words per day), days of study, retention (reviews of words already met that were not missed, over 30 days; `null` before any) and new words this month.
+- `newWordsStartedOn(reviews, date, timeZone)` counts first sightings on a date, by course, for the daily limit.
+- `DAILY_GOAL_WORDS` is 50, one goal for everyone until learners can set their own.
 
 ## Development
 

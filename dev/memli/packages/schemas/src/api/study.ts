@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { cardSchema } from "../content/card"
 import { courseSchema } from "../content/course"
+import { timeZoneSchema } from "../locale/time-zone"
 import { cardProgressSchema } from "../srs/progress"
 
 /**
@@ -23,6 +24,8 @@ export const studyQuerySchema = z.object({
   mode: studyModeSchema.default("review"),
   /** New cards to add past today's limit. Only `learn` uses it. */
   extra: z.coerce.number().int().positive().max(100).optional(),
+  /** Where the viewer is, for "today" in the daily new-word limit. */
+  timeZone: timeZoneSchema.default("UTC"),
 })
 
 export type StudyQuery = z.infer<typeof studyQuerySchema>

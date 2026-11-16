@@ -4,6 +4,7 @@ import { Hono } from "hono"
 import type { AppEnv } from "./env"
 import { handleError, handleNotFound } from "./lib/errors"
 import { courseRoutes } from "./routes/courses"
+import { historyRoutes } from "./routes/history"
 import { reviewRoutes } from "./routes/reviews"
 
 /**
@@ -30,3 +31,4 @@ app.get("/health", (c) => {
 
 app.route("/courses", courseRoutes)
 app.route("/reviews", reviewRoutes)
+app.route("/history", historyRoutes)

@@ -211,3 +211,34 @@ describe("sessionCards", () => {
     expect(course.map(({ progress }) => progress.cardId)).toEqual(before)
   })
 })
+
+describe("words already started today", () => {
+  const unseen = Array.from({ length: 30 }, (_, index) => ({
+    progress: fresh(`new-${String(index)}`),
+  }))
+
+  it("leave less of the daily limit, in the count and the session alike", () => {
+    const summary = summarizeCourseProgress(30, [], start, 7)
+    const session = sessionCards(unseen, "learn", {
+      now: start,
+      newStartedToday: 7,
+    })
+
+    expect(summary.newAvailable).toBe(DAILY_NEW_CARD_LIMIT - 7)
+    expect(session).toHaveLength(summary.newAvailable)
+  })
+
+  it("leave none once the limit is used up, though the learner can ask for more", () => {
+    expect(summarizeCourseProgress(30, [], start, 12).newAvailable).toBe(0)
+    expect(
+      sessionCards(unseen, "learn", { now: start, newStartedToday: 12 })
+    ).toHaveLength(0)
+    expect(
+      sessionCards(unseen, "learn", {
+        now: start,
+        newStartedToday: 12,
+        extra: 5,
+      })
+    ).toHaveLength(5)
+  })
+})

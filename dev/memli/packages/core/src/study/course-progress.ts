@@ -61,15 +61,26 @@ export type CourseProgressSummary = {
 }
 
 /**
+ * New words the learner can still start today: the daily limit, less the
+ * ones already started today, and never more than are left.
+ */
+function newWordsLeftToday(unseen: number, startedToday: number): number {
+  return Math.min(unseen, Math.max(0, DAILY_NEW_CARD_LIMIT - startedToday))
+}
+
+/**
  * Sums up one course for one learner.
  *
  * `cardCount` is every card in the course. `progress` is the learner's saved
  * progress on them: one entry per card they have studied, none for the rest.
+ * `newStartedToday` is how many of its words they met for the first time
+ * today (`newWordsStartedOn` in `history.ts`).
  */
 export function summarizeCourseProgress(
   cardCount: number,
   progress: readonly CardProgress[],
-  now: Date
+  now: Date,
+  newStartedToday = 0
 ): CourseProgressSummary {
   const seen = progress.filter(isSeen)
   const masteredCount = seen.filter(isMastered).length
@@ -88,7 +99,7 @@ export function summarizeCourseProgress(
 
   return {
     dueCount: seen.filter((card) => isDue(card, now)).length,
-    newAvailable: Math.min(unseenCount, DAILY_NEW_CARD_LIMIT),
+    newAvailable: newWordsLeftToday(unseenCount, newStartedToday),
     masteredCount,
     learningCount: seen.length - masteredCount,
     unseenCount,
@@ -101,6 +112,8 @@ export type SessionCardsOptions = {
   readonly now: Date
   /** New cards past today's limit. Only `learn` uses it. */
   readonly extra?: number | undefined
+  /** Words in this course first met today. Only `learn` uses it. */
+  readonly newStartedToday?: number | undefined
 }
 
 /**
@@ -110,23 +123,27 @@ export type SessionCardsOptions = {
  * progress (`createProgress` for a card they have never seen).
  *
  * - `review`: seen cards that are due, most overdue first.
- * - `learn`: unseen cards in course order, up to today's limit plus `extra`.
+ * - `learn`: unseen cards in course order, up to what is left of today's
+ *   limit, plus `extra`.
  * - `practice`: tricky cards, most forgotten first.
  */
 export function sessionCards<T extends { readonly progress: CardProgress }>(
   cards: readonly T[],
   mode: StudyMode,
-  { now, extra }: SessionCardsOptions
+  { now, extra, newStartedToday }: SessionCardsOptions
 ): T[] {
   switch (mode) {
     case "review":
       return cards
         .filter(({ progress }) => isSeen(progress) && isDue(progress, now))
         .sort((a, b) => compareText(a.progress.due, b.progress.due))
-    case "learn":
-      return cards
-        .filter(({ progress }) => !isSeen(progress))
-        .slice(0, DAILY_NEW_CARD_LIMIT + Math.max(0, extra ?? 0))
+    case "learn": {
+      const unseen = cards.filter(({ progress }) => !isSeen(progress))
+      const allowed =
+        newWordsLeftToday(unseen.length, newStartedToday ?? 0) +
+        Math.max(0, extra ?? 0)
+      return unseen.slice(0, allowed)
+    }
     case "practice":
       return cards
         .filter(({ progress }) => isSeen(progress) && isTricky(progress))

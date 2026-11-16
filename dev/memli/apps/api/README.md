@@ -66,6 +66,7 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 | `GET /api/courses` | Every course, with the viewer's progress in each | `@workspace/schemas/api/courses` |
 | `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
 | `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
+| `GET /api/history` | The viewer's week, days of study, retention and new words this month | `@workspace/schemas/api/history` |
 
 `/api/health` is a liveness check: the Worker is up and routing. It does not touch the database.
 
@@ -107,7 +108,38 @@ The cards for one session, in the order to study them. `?mode=` picks the kind:
 | `learn` | Never seen, up to 10 a day | Course order |
 | `practice` | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
 
-`?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode` or `extra` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
+`?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode`, `extra` or `timeZone` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
+
+### Time zones and "today"
+
+`GET /api/courses`, `GET /api/courses/:courseId/study` and `GET /api/history` take `?timeZone=`, an IANA zone like `America/Mexico_City` (default `UTC`). The web app sends the browser's. "Today", "this week" and "this month" are the learner's calendar days, not the server's: a review at 9 pm in Mexico City is on that day, though it is already tomorrow in UTC.
+
+The daily limit of 10 new words subtracts the words already met for the first time today, there. So `newAvailable` and a `learn` session shrink as the learner learns, and the dashboard count still matches the session.
+
+### `GET /api/history`
+
+What the dashboard's "This week" and "Your progress" show, worked out by `summarizeHistory` in `@workspace/core/study/history` from the review log:
+
+```json
+{
+  "dailyGoal": 50,
+  "days": [{ "date": "2026-11-15", "wordsStudied": 3 }],
+  "daysOfStudy": 1,
+  "retentionPercent": 100,
+  "newWordsThisMonth": 3
+}
+```
+
+| Field | Rule |
+| --- | --- |
+| `days` | Today and the six days before it. Different words per day: a missed word answered again counts once |
+| `daysOfStudy` | REDESIGN.md section 5.7: any study counts, one day off is forgiven, today is never a miss yet |
+| `retentionPercent` | Reviews of words already met that were not missed, last 30 days. A first sighting is not a test of memory. `null` before any |
+| `newWordsThisMonth` | Different words met for the first time this calendar month |
+
+Days of study can reach back years, so the route never loads every review for it. It asks for the distinct **quarter hours** with any review (`studyQuarterHours`), and core turns each into a date in the learner's zone. Every zone's offset from UTC is a whole number of quarter hours (India is +5:30, Nepal +5:45), so a quarter hour never straddles anyone's midnight. That is at most 96 rows per study day. Everything else reads the last 33 days of reviews.
+
+The quarter-hour divisor is written into the SQL, not bound: D1 binds a JavaScript number as a float, and `integer / float` is not integer division, so nothing would be grouped. A test caught exactly that.
 
 Each card is a `Card` from `@workspace/schemas` with its mnemonics nested, most upvoted first, plus `progress`. A card the viewer has never seen arrives with fresh `new` progress, so the session reducer in `@workspace/core` can use every card as it comes.
 
@@ -250,7 +282,7 @@ Why keep the card from before the review, when `user_progress` has the result? B
 - **FSRS parameter training** learns from "the card looked like this, and the learner then remembered or forgot it".
 - **Days of study, retention and new words per day** on the dashboard are counts over these rows. The index on `(user_id, reviewed_at)` reads one learner's history in time order.
 
-Nothing reads the log yet except the duplicate check. It is written now so that history exists when those features arrive.
+`GET /api/history` and the daily new-word limit read it, besides the duplicate check. Undo and parameter training will.
 
 The log row and the progress update go in one D1 batch. Because the review id is the primary key, a second copy of the same review is refused by the database itself, and the batch takes its progress update down with it. That holds even when two copies of a request race each other past the route's own check.
 
@@ -350,6 +382,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/app.ts` | The Hono app. It mounts the routes. Tests import this. |
 | `src/routes/courses.ts` | `GET /api/courses` and `GET /api/courses/:courseId/study`. |
 | `src/routes/reviews.ts` | `POST /api/reviews`. |
+| `src/routes/history.ts` | `GET /api/history`. |
 | `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
 | `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
 | `src/lib/viewer.ts` | Who is asking. The prototype learner until #108. |
@@ -359,7 +392,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
 | `src/db/progress.ts` | Reads and saves `user_progress` as core's `CardProgress`. |
-| `src/db/reviews.ts` | Writes the review log together with progress; finds reviews already recorded. |
+| `src/db/reviews.ts` | Writes the review log with progress; reads it back for history and the daily limit. |
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
 | `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
 | `src/db/test-database.ts` | For tests: an in-memory SQLite database from the real migrations and seed. |
@@ -392,7 +425,8 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
 - **Deploying.** Nothing ships this Worker yet. Staging and production still deploy only the web assets from the root [`wrangler.jsonc`](../../wrangler.jsonc). The D1 `database_id` is a placeholder until a real database is created.
 - **Sign-in.** Every request is the prototype learner until Better Auth (#108). See "Who is asking".
-- **Reading the review log.** Every review is recorded, but no route reads the history yet: days of study, retention, undo.
-- **The daily new-word limit resets.** `newAvailable` is the unseen words, capped at 10. It does not yet subtract the new words already started today. The log now has what that needs (reviews whose `prior_state` is `new`), but "today" is the learner's day, so the app has to send its time zone first.
+- **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
+- **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
+- **A daily goal per learner.** Everyone's is 50 words (`DAILY_GOAL_WORDS` in core).
 - **Enrollment.** `GET /api/courses` lists every course. There is no "my courses" yet.
 - **Local secrets.** When the API needs them, they go in `apps/api/.dev.vars`, which is gitignored.

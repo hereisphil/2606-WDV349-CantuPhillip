@@ -19,6 +19,7 @@ import { users } from "../db/schema"
 import {
   AUTHOR_ID,
   addCourse,
+  addReviewLog,
   addMnemonic,
   addProgress,
   addUsers,
@@ -355,5 +356,39 @@ describe("with the seeded database", () => {
     expect(
       cards[0]?.mnemonics?.map((mnemonic) => mnemonic.author?.displayName)
     ).toEqual(["lucia_m", "kenji.k", "sam_studies"])
+  })
+})
+
+describe("the daily new-word limit", () => {
+  it("subtracts words already started today, where the learner is", async () => {
+    const cardIds = await addCourse(api.db, "spanish", 30)
+    // Four first sightings today in Mexico City, one late last night there.
+    await addReviewLog(api.db, [
+      ...cardIds.slice(0, 4).map((cardId) => ({
+        cardId,
+        at: "2026-11-14T19:00:00.000Z",
+        priorState: "new" as const,
+      })),
+      // 02:00 UTC on the 14th is 20:00 on the 13th in Mexico City.
+      {
+        cardId: String(cardIds[4]),
+        at: "2026-11-14T02:00:00.000Z",
+        priorState: "new",
+      },
+    ])
+    const tz = "timeZone=America/Mexico_City"
+
+    const res = await api.request(`/api/courses?${tz}`)
+    const [course] = coursesResponseSchema.parse(await res.json()).courses
+    const session = await getStudy(`spanish/study?mode=learn&${tz}`)
+
+    expect(course?.newAvailable).toBe(6)
+    expect(session.cards).toHaveLength(6)
+  })
+
+  it("answers INVALID_REQUEST for a time zone that does not exist", async () => {
+    const res = await api.request("/api/courses?timeZone=Mars/Olympus_Mons")
+
+    expect(res.status).toBe(400)
   })
 })

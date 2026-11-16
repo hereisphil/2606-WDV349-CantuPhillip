@@ -1,4 +1,5 @@
 import type { CourseSummary } from "@workspace/schemas/api/courses"
+import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import { addDays, localDateKey } from "@/lib/dates"
 
 /**
@@ -9,9 +10,9 @@ import { addDays, localDateKey } from "@/lib/dates"
  * dashboard reads every field but `answerLanguage`, which only a study
  * session needs, so previews can leave it out.
  *
- * The rest (the week, the streak, retention, new words this month) is still
- * {@link prototypeDashboardMetrics} until an API route reads it from the
- * review log.
+ * The week, days of study, retention and new words this month come from
+ * `GET /api/history`, worked out from the review log
+ * ({@link metricsFromApi}).
  */
 export type DashboardCourse = Omit<CourseSummary, "answerLanguage">
 
@@ -27,21 +28,9 @@ export type DailyStudy = {
   cleared: boolean
 }
 
-/** A card the learner keeps forgetting (FSRS calls these leeches). */
-type TrickyWord = {
-  cardId: string
-  courseId: string
-  term: string
-  /** BCP 47 tag of `term`, so screen readers pronounce it correctly. */
-  learningLanguage: string
-  lapses: number
-}
-
 export type ProgressTrendsData = {
-  consistencyPercent: number
-  consistencyWeeklyChangePercent: number
-  retentionPercent: number
-  retentionGlobalAveragePercent: number
+  /** Reviews remembered over the last 30 days. `null` before any. */
+  retentionPercent: number | null
   newCardsThisMonth: number
 }
 
@@ -53,11 +42,8 @@ export type DashboardMetrics = {
     /** The last 7 days including today, oldest first. Missing days had no study. */
     days: readonly DailyStudy[]
   }
-  trickyWords: {
-    total: number
-    /** The most-forgotten few, most lapses first. */
-    words: readonly TrickyWord[]
-  }
+  /** Days of study, REDESIGN.md section 5.7. */
+  daysOfStudy: number
   progressTrends: ProgressTrendsData
 }
 
@@ -81,9 +67,7 @@ function recentDays(
   }))
 }
 
-// Prototype stand-in for usr_prototype_01. The dashboard takes only
-// `dailyGoal` and `progressTrends` from here now; its courses come from the
-// API. Dev previews and their snapshots still use all of it.
+// The `?preview=` snapshots start from this. The live dashboard never reads it.
 export const prototypeDashboardMetrics = {
   courses: [
     {
@@ -139,51 +123,40 @@ export const prototypeDashboardMetrics = {
     target: 50,
     days: recentDays([12, 50, 64, 31, 0, 55, 24], [3]),
   },
-  trickyWords: {
-    total: 7,
-    words: [
-      {
-        cardId: "es-aprovechar",
-        courseId: "spanish-core-1000",
-        term: "aprovechar",
-        learningLanguage: "es",
-        lapses: 6,
-      },
-      {
-        cardId: "ja-nu",
-        courseId: "japanese-kana",
-        term: "ぬ",
-        learningLanguage: "ja",
-        lapses: 5,
-      },
-      {
-        cardId: "es-embarazada",
-        courseId: "spanish-core-1000",
-        term: "embarazada",
-        learningLanguage: "es",
-        lapses: 5,
-      },
-      {
-        cardId: "ja-re",
-        courseId: "japanese-kana",
-        term: "れ",
-        learningLanguage: "ja",
-        lapses: 4,
-      },
-      {
-        cardId: "es-desarrollar",
-        courseId: "spanish-core-1000",
-        term: "desarrollar",
-        learningLanguage: "es",
-        lapses: 4,
-      },
-    ],
-  },
+  daysOfStudy: 12,
   progressTrends: {
-    consistencyPercent: 98,
-    consistencyWeeklyChangePercent: 2,
     retentionPercent: 84,
-    retentionGlobalAveragePercent: 75,
     newCardsThisMonth: 142,
   },
 } as const satisfies DashboardMetrics
+
+/**
+ * The dashboard from the API: courses from `GET /api/courses`, everything
+ * else from `GET /api/history`.
+ *
+ * A past day is never marked cleared. "Cleared" means nothing was left due
+ * and the new-word limit was used up by the day's end, which the review log
+ * cannot tell yet, so a past day shows a check only when it reached the
+ * goal. Today still reads the live course counts (`todayState`).
+ */
+export function metricsFromApi(
+  courses: readonly DashboardCourse[],
+  history: StudyHistoryData
+): DashboardMetrics {
+  return {
+    courses,
+    dailyGoal: {
+      target: history.dailyGoal,
+      days: history.days.map((day) => ({
+        date: day.date,
+        cardsStudied: day.wordsStudied,
+        cleared: false,
+      })),
+    },
+    daysOfStudy: history.daysOfStudy,
+    progressTrends: {
+      retentionPercent: history.retentionPercent,
+      newCardsThisMonth: history.newWordsThisMonth,
+    },
+  }
+}

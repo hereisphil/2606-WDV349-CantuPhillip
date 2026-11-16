@@ -4,13 +4,17 @@ import { studyQuerySchema, studySessionSchema } from "./study"
 
 describe("studyQuerySchema", () => {
   it("defaults to a review session", () => {
-    expect(studyQuerySchema.parse({})).toEqual({ mode: "review" })
+    expect(studyQuerySchema.parse({})).toEqual({
+      mode: "review",
+      timeZone: "UTC",
+    })
   })
 
   it("reads `extra` from the text a query string carries", () => {
     expect(studyQuerySchema.parse({ mode: "learn", extra: "10" })).toEqual({
       mode: "learn",
       extra: 10,
+      timeZone: "UTC",
     })
   })
 
@@ -24,6 +28,19 @@ describe("studyQuerySchema", () => {
       expect(studyQuerySchema.safeParse({ extra }).success).toBe(false)
     }
   )
+})
+
+describe("timeZone", () => {
+  it.each(["America/Mexico_City", "Asia/Kolkata", "UTC"])(
+    "accepts %s",
+    (timeZone) => {
+      expect(studyQuerySchema.safeParse({ timeZone }).success).toBe(true)
+    }
+  )
+
+  it.each(["Mars/Olympus_Mons", "", "GMT+25"])("refuses %j", (timeZone) => {
+    expect(studyQuerySchema.safeParse({ timeZone }).success).toBe(false)
+  })
 })
 
 describe("studySessionSchema", () => {

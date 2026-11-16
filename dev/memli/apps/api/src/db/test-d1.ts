@@ -7,7 +7,7 @@ import { app } from "../app"
 import type { Env } from "../env"
 import { database, runTogether, type Database } from "./client"
 import { progressUpserts } from "./progress"
-import { cards, courses, mnemonics, users } from "./schema"
+import { cards, courses, mnemonics, reviews, users } from "./schema"
 import { apiRoot, migrationStatements, seedSql } from "./test-database"
 
 /**
@@ -159,4 +159,42 @@ export async function addProgress(
   userId: string = VIEWER_ID
 ): Promise<void> {
   await runTogether(db, progressUpserts(db, userId, progress, new Date()))
+}
+
+/**
+ * Review-log rows as if the viewer had reviewed these cards at these times.
+ * `new` marks a first sighting. Only for history tests: real reviews go
+ * through `POST /api/reviews`.
+ */
+export async function addReviewLog(
+  db: Database,
+  entries: readonly {
+    cardId: string
+    at: string
+    outcome?: "missed" | "tough" | "got_it" | "easy"
+    priorState?: "new" | "learning" | "review" | "relearning"
+  }[]
+): Promise<void> {
+  await runTogether(
+    db,
+    entries.map((entry) =>
+      db.insert(reviews).values({
+        id: crypto.randomUUID(),
+        userId: VIEWER_ID,
+        cardId: entry.cardId,
+        outcome: entry.outcome ?? "got_it",
+        rating: 3,
+        reviewedAt: new Date(entry.at),
+        durationMs: 2_000,
+        priorState: entry.priorState ?? "review",
+        priorDue: new Date(entry.at),
+        priorLastReview: null,
+        priorStability: 1,
+        priorStabilityFast: 1,
+        priorDifficulty: 5,
+        priorLearningStep: 0,
+        priorScheduledDays: 1,
+      })
+    )
+  )
 }
