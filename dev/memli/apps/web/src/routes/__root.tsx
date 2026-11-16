@@ -36,7 +36,6 @@ type RouterContext = {
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
-      {/* Renders each route's head(), such as the page title. */}
       <HeadContent />
       <Outlet />
       <Suspense>

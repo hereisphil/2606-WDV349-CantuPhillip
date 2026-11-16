@@ -1,14 +1,6 @@
 /**
- * The forms of an answer the Evaluator compares. Each step forgives
- * something a learner shouldn't lose a card over.
- */
-
-/**
- * Case, spacing and punctuation never count against a learner, so
- * "¿Qué tal?" and "  qué   TAL " are the same answer.
- *
- * Punctuation becomes a space rather than vanishing, so "arc-en-ciel" matches
- * "arc en ciel" exactly and "l'eau" is one edit from "leau".
+ * Ignores case, spacing and punctuation. Punctuation becomes a space, so
+ * "arc-en-ciel" matches "arc en ciel" exactly.
  */
 export function normalizeAnswer(value: string): string {
   return value

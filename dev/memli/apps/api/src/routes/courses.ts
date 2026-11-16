@@ -97,9 +97,8 @@ courseRoutes.get(
     const course = await findCourse(db, courseId)
     if (course === null) return errorResponse(c, "NOT_FOUND")
 
-    // Choose first, from ids and progress alone. Then load the full content
-    // of the chosen cards only, so a 1,000-word course costs what a
-    // 10-word session needs.
+    // Choose from ids and progress alone, then load only the chosen cards'
+    // content, so a 1,000-word course costs what a 10-word session needs.
     const [cardIds, saved, startedToday] = await Promise.all([
       cardIdsInOrder(db, courseId),
       courseProgress(db, userId, courseId),

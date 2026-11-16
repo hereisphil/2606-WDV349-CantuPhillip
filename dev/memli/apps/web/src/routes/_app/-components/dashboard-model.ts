@@ -146,9 +146,8 @@ export type Tip =
   | { kind: "study" }
 
 /**
- * The tricky words of one course: the one most in need, so the hero's course
- * comes first. A study tip when no course has tricky words. Hidden when the
- * all-done hero already offers to practice the same words.
+ * Tricky words of the course most in need (so the hero's comes first), else a study tip.
+ * Hidden when the all-done hero already offers to practice the same words.
  */
 export function tipFor(
   courses: readonly DashboardCourse[],
@@ -213,11 +212,8 @@ export type WeekDay = {
 }
 
 /**
- * The calendar week containing `now`, starting on `firstDayOfWeek`
- * (1 = Monday … 7 = Sunday). A day meets the goal by reaching the target
- * or by clearing everything scheduled. Otherwise, past days and today are
- * "partial" when some words were studied and "none" when none were.
- * Days without a record had no study.
+ * The calendar week containing `now`, starting on `firstDayOfWeek` (1 = Monday … 7 = Sunday).
+ * A day is "met" by reaching the target or clearing everything scheduled. Days without a record had no study.
  */
 export function weekDays(
   now: Date,

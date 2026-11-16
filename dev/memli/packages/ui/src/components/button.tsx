@@ -40,9 +40,8 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
-        // Touch sizes: minimum heights, not fixed ones, so a long translated
-        // label wraps onto a second line instead of overflowing the button.
-        // 44 px: row buttons and other controls.
+        // Touch sizes set min heights so a long translated label wraps instead of
+        // overflowing. 44 px: row buttons and other controls.
         touch:
           "h-auto min-h-11 max-w-full shrink gap-2 px-4 py-2 text-center text-base leading-snug text-balance whitespace-normal",
         // 44 px square: icon-only buttons.

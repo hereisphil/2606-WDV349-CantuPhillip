@@ -19,7 +19,6 @@ export function errorResponse(c: Context, code: ApiErrorCode): Response {
   return c.json(body, STATUS[code])
 }
 
-/** No route matched. */
 export const handleNotFound: NotFoundHandler = (c) =>
   errorResponse(c, "NOT_FOUND")
 

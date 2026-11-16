@@ -7,18 +7,8 @@ import type { Card } from "@workspace/schemas/content/card"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
 
 /**
- * A stand-in for `apps/api` in the end-to-end specs. Every request to
- * `/api/*` is answered here, in the browser, so the specs never need a
- * database or a Worker, run in parallel without sharing state, and always
- * start from the same data. The real API has its own tests on a real D1
- * (`apps/api/README.md`).
- *
- * The answers are typed with the contracts in `@workspace/schemas`, so a
- * contract change that the fixture misses fails typecheck here too.
- *
- * Specs import `test` and `expect` from this file instead of
- * `@playwright/test`. `test.use({ api: { ... } })` changes what the stand-in
- * answers for one spec.
+ * Stands in for `apps/api` in the browser: no D1, no Worker, no shared state.
+ * Specs import `test` from here; `test.use({ api })` changes its answers.
  */
 
 const hour = 60 * 60 * 1000
@@ -106,9 +96,8 @@ export function history(): StudyHistoryData {
 }
 
 /**
- * The five Spanish words a learner meets first, as in apps/api/seed:
- * gato (three mnemonics, one with a picture), casa (two), comer (one with no
- * picture), and rápido and ¿Qué tal? (none).
+ * The first five Spanish words, as in apps/api/seed, with 3, 2, 1, 0 and 0
+ * mnemonics so every mnemonic state shows.
  */
 const spanishCards: Card[] = [
   {
@@ -351,9 +340,8 @@ export const test = base.extend<{
   sentReviews: ReviewSubmission[]
 }>({
   api: [{}, { option: true }],
-  // Playwright reads a fixture's needs from its first parameter, which must
-  // be an object pattern, even an empty one. The second hands the value to
-  // the test; Playwright's docs call it `use`, a name React's lint reserves.
+  // Playwright needs an object pattern first, even an empty one. `provide` is
+  // Playwright's `use`, renamed because React's lint reserves that name.
   // eslint-disable-next-line no-empty-pattern
   sentReviews: async ({}, provide) => {
     await provide([])

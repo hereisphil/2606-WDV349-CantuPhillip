@@ -5,15 +5,13 @@ import { capElapsedMs } from "@workspace/core/study/timing"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
 
 /**
- * Turns the reviews a client reports into what the server saves: each card's
- * new progress, and one log entry per review. Pure: the route loads the
- * progress and passes in the server's `now`.
+ * Turns reported reviews into each card's new progress and one log entry per
+ * review. Pure: the route loads the progress and passes the server's `now`.
  */
 
 /**
- * One review, ready for the `reviews` table: core's log entry (the outcome,
- * the rating it became, and the card as it was before), plus the response
- * time and the client's id for it.
+ * One `reviews` row: core's log entry (outcome, rating, the card before it),
+ * plus the response time and the client's review id.
  */
 export type RecordedReview = SessionReview & { readonly reviewId: string }
 
@@ -28,16 +26,8 @@ export type AppliedReviews = {
 const MAX_GAP_MS = 24 * 60 * 60 * 1000
 
 /**
- * When each review happened, by the server's clock.
- *
- * Devices' clocks disagree, and FSRS measures memory by the time since the
- * last review, so a client's `reviewedAt` is never stored as it is. The last
- * review in the request happened now, by the server's clock. Earlier ones
- * keep their distance from it, because the gap between two reviews on one
- * device is real even when that device's clock is wrong.
- *
- * A request with one review, the usual case, is simply stamped `now`. Times
- * never run backwards and never reach further back than a day.
+ * Server-clock times: the last review is `now` and earlier ones keep their gaps,
+ * never backwards nor over a day. See apps/api/README.md, `POST /api/reviews`.
  */
 export function reviewTimes(reviewedAt: readonly string[], now: Date): Date[] {
   const last = reviewedAt.at(-1)
@@ -53,14 +43,8 @@ export function reviewTimes(reviewedAt: readonly string[], now: Date): Date[] {
 }
 
 /**
- * Applies reviews in order, oldest first.
- *
- * `saved` is the learner's progress on the reviewed cards; a card with none
- * is new. The schedule is computed here with `@workspace/core`, from what
- * the server has saved. A client reports an outcome, never a schedule.
- *
- * The response time is capped again here with core's `capElapsedMs`: the app
- * already does it, but the server never takes a client's word for a number.
+ * Applies reviews oldest first, scheduling from saved progress: a client reports
+ * outcomes, never a schedule. Response times are capped again, never trusted.
  */
 export function applyReviews(
   saved: readonly CardProgress[],

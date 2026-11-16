@@ -21,9 +21,8 @@ const messages = {
 
 // Same surface as the course list, so the page has one kind of card.
 const cardClass = "rounded-xl border bg-card shadow-xs dark:shadow-none"
-// 16 px at the card's edges, like the stats above. Each number column only
-// pads its start side: a phone keeps 10 px between columns so the table fits a
-// 360 px screen, and course names get the rest.
+// 16 px at the card's edges. Number columns pad only their start (10 px on phones),
+// so the table fits a 360 px screen and course names get the rest.
 const courseCellClass = "py-3 ps-4 pe-0"
 const numberCellPadding = "py-3 ps-2.5 pe-0 last:pe-4 @[34rem]:ps-4"
 // Numbers and their headings share the end edge, so every column lines up.
@@ -46,8 +45,7 @@ function Stat({ label, value }: { label: string; value: string }): JSX.Element {
 }
 
 /**
- * Reference numbers, closed by default: up to three numbers with their
- * labels and one table per course. No comparisons with other learners.
+ * Reference numbers, closed by default. No comparisons with other learners.
  * "Reviews remembered" waits for the first review of a word already met.
  */
 export function ProgressDisclosure({

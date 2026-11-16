@@ -31,11 +31,7 @@ function asTheme(value: unknown): Theme | undefined {
 }
 
 type ThemeMenuProps = {
-  /**
-   * "topBar": a short "Theme" button for the phone header.
-   * "sidebar": a full-width row at the foot of the desktop sidebar that also
-   * shows the current choice, so nobody has to open it to know the setting.
-   */
+  /** "topBar" is the phone header button; "sidebar" also shows the current choice. */
   placement: "topBar" | "sidebar"
 }
 

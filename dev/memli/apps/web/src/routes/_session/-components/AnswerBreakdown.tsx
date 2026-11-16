@@ -25,17 +25,8 @@ type AnswerBreakdownProps = {
 const MEANING_ROOM_PX = 160
 
 /**
- * Focuses the answer when it appears, so keyboard and screen-reader users
- * land on it instead of on the page body (the reveal button is gone). A
- * module-level function keeps the ref stable, so it runs once per mount.
- *
- * A plain `focus()` scrolls the tall answer to the top of the screen, under
- * the sticky header and past the meaning. Instead, the page stays put when
- * the word (the prompt card right above the answer) and the meaning are both
- * in view, and otherwise brings the prompt card's top just below the header
- * (the root's `scroll-padding-top`, set by SessionHeader). The outcome dock
- * covers the bottom of the screen (the root's `scroll-padding-bottom`, set by
- * OutcomeDock), so the meaning has to fit above it.
+ * Focuses the answer, since the reveal button is gone. A plain `focus()` would scroll past the meaning, so the page
+ * only scrolls when the prompt or meaning is hidden by the header or dock (root scroll padding, set by each).
  */
 function focusOnMount(element: HTMLElement | null): void {
   if (element === null) {

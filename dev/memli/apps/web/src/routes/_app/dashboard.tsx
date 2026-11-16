@@ -79,7 +79,6 @@ export const Route = createFileRoute("/_app/dashboard")({
   loaderDeps: ({ search }) => ({ preview: search.preview }),
   loader: async ({ context, deps }) => {
     if (deps.preview === undefined) {
-      // Both at once, so the page waits for the slower, not the sum.
       await Promise.all([
         context.queryClient.ensureQueryData(coursesQuery),
         context.queryClient.ensureQueryData(historyQuery),
@@ -100,11 +99,7 @@ function Dashboard(): JSX.Element {
   return <LiveDashboard />
 }
 
-/**
- * The viewer's dashboard from the API. Both queries stay subscribed, so the
- * numbers refresh when the tab comes back into focus and after reviews are
- * saved (`use-save-reviews.ts`).
- */
+/** Both queries stay subscribed, so numbers refresh on tab focus and after reviews save (`use-save-reviews.ts`). */
 function LiveDashboard(): JSX.Element {
   const { data: courses } = useSuspenseQuery(coursesQuery)
   const { data: history } = useSuspenseQuery(historyQuery)
@@ -184,17 +179,8 @@ function DashboardView({
         </div>
       ) : (
         <>
-          {/*
-            DOM order is reading order: hero, This week, courses, tip, progress.
-            From an 896 px content width the page has two columns: the hero,
-            the courses and progress on the left, This week with the tip right
-            under it on the right. No CSS order.
-
-            The hero spans the first two rows, and the second row is flexible.
-            Only items crossing a flexible row can grow it, so the first row is
-            exactly as tall as This week and the tip starts right under it,
-            while the courses start right under the hero.
-          */}
+          {/* DOM order is reading order, with no CSS order. The hero spans rows 1 and 2, and only row 2 is flexible,
+              so row 1 is exactly as tall as This week and the tip starts right under it. */}
           <div className="@container">
             <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem] @[56rem]:grid-rows-[auto_1fr_auto_auto]">
               <div className="@[56rem]:col-start-1 @[56rem]:row-span-2 @[56rem]:row-start-1">

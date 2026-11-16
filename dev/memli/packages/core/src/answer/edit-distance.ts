@@ -1,12 +1,6 @@
 /**
- * Damerau–Levenshtein distance: the fewest single-character insertions,
- * deletions, substitutions, or swaps of two neighbouring characters that turn
- * `a` into `b`. A swap counts as one edit, so the common typo "teh" is one
- * edit from "the" (plain Levenshtein would say two).
- *
- * This is the optimal string alignment form, the usual choice for typos: no
- * substring is edited twice. Works on Unicode code points, so a character
- * outside the Basic Multilingual Plane counts once.
+ * Damerau–Levenshtein (optimal string alignment) over code points: a swap of
+ * neighbours is one edit, so "teh" is one from "the".
  */
 export function damerauLevenshtein(a: string, b: string): number {
   const source = Array.from(a)

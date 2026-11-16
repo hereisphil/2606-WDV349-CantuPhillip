@@ -2,9 +2,8 @@ import type { Locator, Page } from "@playwright/test"
 import { expect, test } from "./api"
 
 /**
- * The Session Outcome Dock (#51): plain-word choices after the answer shows,
- * Enter for the default, 1 to 4 by position, and focus on the next word once
- * the learner chooses.
+ * The Session Outcome Dock (#51): Enter picks the default, 1 to 4 pick by
+ * position, and focus moves to the next word.
  */
 const study = "/study/spanish-core-1000?mode=learn"
 
@@ -13,10 +12,8 @@ function dock(page: Page, name: string | RegExp): Locator {
 }
 
 /**
- * The dock's buttons, in order. Each name starts with the choice, and may go
- * on with when the word comes back ("Got it, Back in 5 days"; Chrome may
- * add a space before the comma). The hover-only
- * key hints are hidden from it.
+ * Names may end with when the word comes back ("Got it, Back in 5 days");
+ * Chrome may add a space before the comma.
  */
 async function expectChoices(group: Locator, names: string[]): Promise<void> {
   const buttons = group.getByRole("button")

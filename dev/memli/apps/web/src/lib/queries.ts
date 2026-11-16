@@ -19,11 +19,8 @@ import {
 import { apiRequest, shouldRetry } from "./api"
 
 /**
- * Every API call the web app makes, as TanStack Query definitions. Routes
- * and components import these, never `fetch`.
- *
- * Query keys live here too, so code that refreshes data after a change
- * names the same key the query uses.
+ * Every API call as TanStack Query definitions; routes never `fetch`. Keys
+ * live here so code that invalidates names the same key the query uses.
  */
 
 export function createQueryClient(): QueryClient {
@@ -43,9 +40,8 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 const timeZoneParam = `timeZone=${encodeURIComponent(timeZone)}`
 
 /**
- * `GET /api/courses`: every course with the viewer's counts in it. Fresh for
- * 10 seconds. After that, coming back to the tab or the page fetches again,
- * because words come due as time passes.
+ * `GET /api/courses` with the viewer's counts. Fresh for 10 s, then refetched
+ * on return, because words come due as time passes.
  */
 export const coursesQuery = queryOptions({
   queryKey: ["courses", timeZone],
@@ -73,9 +69,8 @@ export type StudySessionParams = {
 }
 
 /**
- * `GET /api/courses/:courseId/study`: one session's cards, picked by the
- * server. Always stale, so starting a session always asks the server: the
- * words in an old answer may have been studied since.
+ * `GET /api/courses/:courseId/study`. Always stale: the words in an old
+ * answer may have been studied since.
  */
 type StudySessionKey = readonly [
   "study-session",

@@ -32,9 +32,8 @@ const richTags = {
 }
 
 /**
- * One warm aside: the tricky words in one course with a Practice link, or a
- * study tip when there are none. An even warm outline and fill set it apart
- * from the page; no side is heavier than the others.
+ * Tricky words in one course with a Practice link, or a study tip when there are none.
+ * An even warm outline and fill set it apart; no side is heavier than the others.
  */
 export function TipCard({ tip }: { tip: Tip }): JSX.Element {
   const { rich, plural } = useFormatters()

@@ -13,9 +13,8 @@ const messages = {
   youAnswered: "You answered <answer>{answer}</answer>",
 } as const
 
-// Each tone uses its container pair, a solid tint with a matching text color, instead of
-// an alpha tint whose contrast shifts with whatever sits behind it. Text is 9:1 or better
-// in both themes, and the border is 3:1 or better against the tint and the page.
+// Solid container tints, not alpha tints whose contrast shifts with what's behind them.
+// Text is 9:1 or better in both themes; borders are 3:1 or better against tint and page.
 const tones = {
   success: {
     box: "border-success bg-success-container",

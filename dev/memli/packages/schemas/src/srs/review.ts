@@ -11,17 +11,11 @@ export const reviewOutcomeSchema = z.enum(["missed", "tough", "got_it", "easy"])
 export type ReviewOutcomeData = z.infer<typeof reviewOutcomeSchema>
 
 /**
- * One review the learner finished. Only what happened, never the result:
- * the server loads its own saved progress and schedules with
- * `@workspace/core`'s `applyOutcome`. A client can report an outcome, but it
- * cannot hand the server a made-up stability or due date.
+ * One finished review: what happened, never the result. The server schedules
+ * with core's `applyOutcome`, so a client can't send a made-up due date.
  */
 export const reviewSubmissionSchema = z.object({
-  /**
-   * A UUID the client makes for this one review (`crypto.randomUUID()`). If a
-   * request is sent again, after a dropped connection say, the server sees an
-   * id it already has and does not count the review twice.
-   */
+  /** Made by the client, so a retried request isn't counted twice. */
   reviewId: z.uuid(),
   cardId: z.string().min(1),
   outcome: reviewOutcomeSchema,
@@ -41,9 +35,8 @@ export type ReviewSubmission = z.infer<typeof reviewSubmissionSchema>
 const MAX_REVIEWS_PER_REQUEST = 500
 
 /**
- * A batch of reviews, oldest first. A missed word comes back in the same
- * session, so one card can appear more than once; the server applies them in
- * order.
+ * A batch of reviews, oldest first, applied in order. A missed word comes back
+ * in the same session, so one card can appear more than once.
  */
 export const submitReviewsRequestSchema = z.object({
   reviews: z
@@ -55,9 +48,8 @@ export const submitReviewsRequestSchema = z.object({
 export type SubmitReviewsRequest = z.infer<typeof submitReviewsRequestSchema>
 
 /**
- * The progress of every card the request named, once per card, after its
- * reviews. A review the server had already recorded changes nothing, and its
- * card's progress still comes back.
+ * Each named card's progress after its reviews. An already-recorded review
+ * changes nothing, but its card's progress still comes back.
  */
 export const submitReviewsResponseSchema = z.object({
   progress: z.array(cardProgressSchema),

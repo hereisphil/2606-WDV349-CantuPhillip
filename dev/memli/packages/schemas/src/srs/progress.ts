@@ -11,17 +11,12 @@ export const progressStateSchema = z.enum([
 ])
 
 /**
- * One learner's memory of one card: the FSRS-7 state `@workspace/core`
- * schedules with. It must stay the same shape as core's `CardProgress`;
- * a type test in apps/api fails if the two drift apart.
- *
- * All eleven fields are needed to schedule the next review. Dropping one
- * (FSRS-7's `stabilityFast`, say) silently changes every future interval.
+ * Core's `CardProgress` (a type test in apps/api checks they match). Dropping
+ * any field, even `stabilityFast`, silently changes every future interval.
  */
 export const cardProgressSchema = z.object({
   cardId: z.string().min(1),
   state: progressStateSchema,
-  /** When the card should next be reviewed. */
   due: utcTimestamp,
   /** `null` until the first review. */
   lastReview: utcTimestamp.nullable(),

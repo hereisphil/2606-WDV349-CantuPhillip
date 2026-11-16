@@ -140,7 +140,6 @@ type SessionWorkspaceProps = {
   preview: StudyPreviewName | undefined
 }
 
-/** The development preview in use, if any. */
 function previewOf(
   name: StudyPreviewName | undefined
 ): StudyPreview | undefined {
@@ -149,11 +148,7 @@ function previewOf(
     : undefined
 }
 
-/**
- * The first session state: the cards the API picked, with their saved
- * progress. A preview may swap in its own fixture cards, which start as new,
- * and replay events through the reducer.
- */
+/** The API's cards with their saved progress. A preview may swap in fixture cards (as new) and replay events. */
 function initialSession({
   cards,
   preview,
@@ -177,7 +172,6 @@ function SessionWorkspace({
   mode,
   preview,
 }: SessionWorkspaceProps): JSX.Element {
-  // The study-session state machine from @workspace/core: prompt → answered → … → complete.
   const [session, dispatch] = useReducer(
     sessionReducer<SessionStudyCard>,
     { cards, preview },
@@ -199,9 +193,8 @@ function SessionWorkspace({
 
   // Time on screen this visit. Hidden-tab time is left out.
   const activeMs = useActiveTime()
-  // Like a stopwatch lap: where the clock stood when this round began (0 for
-  // the first), so a summary after "Study these words again" counts that
-  // round only. A ref, since nothing renders from it.
+  // Active time when this round began, like a stopwatch lap, so a summary
+  // after "Study these words again" counts that round only.
   const roundStartMs = useRef(0)
   const roundMs = useCallback((): number | null => {
     const now = activeMs()
@@ -221,9 +214,8 @@ function SessionWorkspace({
   }, [activeMs])
   // Stable, so the dock's key listener isn't re-added on every render.
   const onResolve = useCallback((outcome: ReviewOutcome) => {
-    // flushSync renders the next card right away, so focus can move to it in
-    // this same event. Otherwise focus is lost with the dock's button, and a
-    // keyboard or screen-reader user starts the next word from the page top.
+    // flushSync renders the next card now so focus can move to it. Otherwise focus
+    // is lost with the dock's button and keyboard users restart from the page top.
     flushSync(() => {
       dispatch({ type: "RESOLVE", outcome, now: new Date() })
     })

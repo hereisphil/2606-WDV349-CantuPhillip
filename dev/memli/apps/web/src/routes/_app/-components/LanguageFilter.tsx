@@ -22,8 +22,7 @@ const messages = {
 
 /**
  * Narrows the course list to one learning language through `?studying=`.
- * A menu of links, not radios: each choice changes the URL, and the menu stays
- * uncontrolled because its value lives there.
+ * Links, not radios: each choice changes the URL, so the menu stays uncontrolled.
  */
 export function LanguageFilter({
   languages,

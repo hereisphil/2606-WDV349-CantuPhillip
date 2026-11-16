@@ -9,17 +9,8 @@ type Schema<T> = {
 }
 
 /**
- * Middleware that checks a request's JSON body or query string against a
- * schema from `@workspace/schemas` before the route runs.
- *
- *   routes.post("/", validate("json", submitReviewsRequestSchema), (c) => {
- *     const { reviews } = c.req.valid("json") // typed, and already checked
- *   })
- *
- * Anything the schema refuses, a body that is not JSON included, answers
- * 400 INVALID_REQUEST, so a route never sees a request it cannot trust. The
- * route gets the parsed value: defaults are filled in and fields the schema
- * does not know are dropped.
+ * Checks the JSON body or query against a schema; a refusal answers 400
+ * INVALID_REQUEST. See apps/api/README.md, "Checking a request".
  */
 export function validate<Target extends "json" | "query", T extends object>(
   target: Target,

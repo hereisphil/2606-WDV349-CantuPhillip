@@ -6,17 +6,12 @@ export type SessionView = {
   title: string
   /** Cards in the session queue when it started. */
   total: number
-  /** Cards finished so far. */
   completed: number
 }
 
 /**
- * A seeded study session for `?preview=` in development builds.
- *
- * Previews are real sessions: the cards go through `startSession`, then
- * `events` replay through `@workspace/core`'s reducer and Evaluator. So a
- * preview can only show a state the app can actually reach, and a verdict
- * comes from the same code a learner's answer does.
+ * A seeded `?preview=` session for dev builds. Events replay through the real reducer and Evaluator,
+ * so a preview only shows states the app can reach.
  */
 export type StudyPreview = {
   group: StudyPreviewGroup
@@ -195,7 +190,6 @@ const brokenImage: StudyCard = {
   ],
 }
 
-// A mnemonic with no picture at all.
 const noImage: StudyCard = {
   ...casa,
   cardId: "preview-no-image",
@@ -240,7 +234,6 @@ function submit(answer: string): SessionEvent[] {
 }
 
 export const studyPreviews = {
-  // Progress: the header bar and session lifecycle, using the open course's cards.
   default: {
     group: "progress",
     description: "The real session for this course and mode",
@@ -303,7 +296,7 @@ export const studyPreviews = {
     view: (derived) => ({ ...derived, total: 1250, completed: 312 }),
   },
 
-  // Card: prompt content that the seeded courses don't cover.
+  // Prompt content the seeded courses don't cover.
   "long-text": {
     group: "card",
     description: "A long phrase, answer and example",
@@ -317,7 +310,6 @@ export const studyPreviews = {
     languages: { learning: "ja", answer: "en" },
   },
 
-  // Answer: every way a card can be answered, through the real Evaluator.
   revealed: {
     group: "answer",
     description: "Revealed without typing: no verdict",
@@ -373,7 +365,6 @@ export const studyPreviews = {
     events: () => submit("where is the nearest bathroom please"),
   },
 
-  // Mnemonic: the frame under the revealed answer.
   "mnemonic-image": {
     group: "mnemonic",
     description: "Three mnemonics to cycle through; the first has a picture",

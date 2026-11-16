@@ -2,15 +2,8 @@ import { damerauLevenshtein } from "./edit-distance"
 import { normalizeAnswer, stripAccents } from "./normalize"
 
 /**
- * How a typed answer compares with the expected one.
- *
- * - `exact`: the same, ignoring case, spacing and punctuation.
- * - `near`: right apart from accents (`reason: "accent"`) or a few typos
- *   (`reason: "typo"`, counted after accents are ignored).
- * - `wrong`: anything further off, or blank.
- *
- * `matched` is the accepted answer, as written on the card, that the learner
- * came closest to.
+ * How a typed answer compares with the expected one; `matched` is the closest
+ * accepted answer as written. Verdicts: Evaluator in packages/core/README.md.
  */
 export type Evaluation =
   | { readonly verdict: "exact"; readonly matched: string }

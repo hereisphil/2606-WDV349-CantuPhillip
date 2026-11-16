@@ -2,6 +2,7 @@ import js from "@eslint/js"
 import eslintConfigPrettier from "eslint-config-prettier"
 import tseslint from "typescript-eslint"
 import { defineConfig, globalIgnores } from "eslint/config"
+import memli from "./plugin.js"
 
 /**
  * Consumers set `languageOptions.parserOptions.tsconfigRootDir` in their
@@ -52,6 +53,14 @@ export default defineConfig([
           ],
         },
       ],
+    },
+  },
+  // Long explanations go in docs or a linked URL (#146).
+  {
+    files: ["**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"],
+    plugins: { memli },
+    rules: {
+      "memli/max-comment-lines": ["error", { max: 2 }],
     },
   },
   // Must be last so Prettier wins formatting conflicts

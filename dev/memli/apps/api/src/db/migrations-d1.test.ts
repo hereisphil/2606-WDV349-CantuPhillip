@@ -4,15 +4,8 @@ import { startD1 } from "./test-d1"
 import { migrations } from "./test-database"
 
 /**
- * Every migration keeps the rows already in the database, checked on a real
- * D1 the way `wrangler d1 migrations apply` runs it: each file as one batch,
- * which is a transaction.
- *
- * Plain SQLite cannot catch this. drizzle-kit rebuilds a table to change a
- * constraint, wrapped in `PRAGMA foreign_keys=OFF`. That pragma does nothing
- * inside a transaction, so on D1 dropping the old table fires every
- * `ON DELETE CASCADE`: rebuilding `courses` deletes every card, mnemonic,
- * progress row and review. A migration that does that fails here.
+ * Every migration keeps existing rows on a real D1, where a table rebuild
+ * cascades deletes. See apps/api/README.md, "Changing the schema".
  */
 
 const tables = [

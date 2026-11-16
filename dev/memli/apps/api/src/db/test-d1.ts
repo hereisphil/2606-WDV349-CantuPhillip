@@ -11,13 +11,8 @@ import { cards, courses, mnemonics, reviews, users } from "./schema"
 import { apiRoot, migrationStatements, seedSql } from "./test-database"
 
 /**
- * A real D1 database for route tests. For tests only.
- *
- * `getPlatformProxy` is wrangler's way to use a Worker's bindings from Node:
- * it reads wrangler.jsonc and starts `workerd`, the runtime `wrangler dev`
- * and Cloudflare use, so `env.DB` here behaves like the real one, limits
- * included. `persist: false` keeps it in memory: nothing touches the local
- * database in .wrangler/state.
+ * A real in-memory D1 for route tests, via wrangler's `getPlatformProxy` and
+ * `workerd`, limits included. See apps/api/README.md, "Tests".
  */
 export type TestApi = {
   /** Drizzle on the test database, to add rows and read them back. */
@@ -162,9 +157,8 @@ export async function addProgress(
 }
 
 /**
- * Review-log rows as if the viewer had reviewed these cards at these times.
- * `new` marks a first sighting. Only for history tests: real reviews go
- * through `POST /api/reviews`.
+ * Review-log rows for history tests; `new` marks a first sighting. Real
+ * reviews go through `POST /api/reviews`.
  */
 export async function addReviewLog(
   db: Database,

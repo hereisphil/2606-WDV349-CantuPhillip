@@ -1,13 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-/**
- * Guards docs/i18n.md across every contract in this package: a language is
- * never one unqualified `language` field, and every field that holds one
- * takes a canonical language tag.
- *
- * It walks every exported schema, so a new file or field is covered without
- * anyone remembering to add it here.
- */
+// Guards docs/i18n.md: no unqualified `language` field, and every language
+// field takes a canonical tag. Walks every exported schema, new ones included.
 
 // Vite (which runs Vitest) replaces this call with the modules it matches.
 declare global {

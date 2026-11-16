@@ -8,9 +8,8 @@ export type UserProgressRow = typeof userProgress.$inferSelect
 type NewUserProgressRow = typeof userProgress.$inferInsert
 
 /**
- * A `user_progress` row as core's `CardProgress`. Timestamps come out of D1
- * as `Date` (milliseconds) and go to core as ISO strings, so nothing is lost
- * either way: core writes ISO strings with milliseconds too.
+ * A `user_progress` row as core's `CardProgress`. D1's `Date` and core's ISO
+ * strings both keep milliseconds, so nothing is lost either way.
  */
 export function progressFromRow(row: UserProgressRow): CardProgress {
   return {
@@ -109,9 +108,8 @@ export async function progressForCards(
 }
 
 /**
- * One statement per card that saves its progress for a learner: a new row
- * the first time, the same row updated after that (an upsert on the
- * `(user_id, card_id)` key). Built here, run by `runTogether`.
+ * One upsert per card on the `(user_id, card_id)` key, saving a learner's
+ * progress. Built here, run by `runTogether`.
  */
 export function progressUpserts(
   db: Database,

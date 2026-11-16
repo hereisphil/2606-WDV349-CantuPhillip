@@ -101,7 +101,9 @@
         "zod": "^4.4.3",
       },
       "devDependencies": {
+        "@workspace/eslint-config": "workspace:*",
         "@workspace/typescript-config": "workspace:*",
+        "eslint": "^10",
         "typescript": "~6",
         "vitest": "^5.1.0",
       },

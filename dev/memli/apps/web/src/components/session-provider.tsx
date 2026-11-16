@@ -3,7 +3,6 @@ import { createContext, useContext, type JSX, type ReactNode } from "react"
 
 export type ViewerPlan = "free" | "pro"
 
-// Viewer/useViewer are temporary until Better Auth and a real user is created
 export type Viewer = {
   id: string
   username: string

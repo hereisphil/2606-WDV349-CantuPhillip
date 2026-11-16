@@ -105,16 +105,8 @@ function copyOf(evaluation: Evaluation | null): DockCopy {
 }
 
 /**
- * The choice Enter confirms, shown as the amber button, or `null` when the
- * learner has to pick. The timing nudge wins when there is one. Otherwise a
- * correct answer defaults to "got it" (never "easy", which FSRS-7 puts about
- * 54 days out on a new word), and a wrong one to "missed".
- *
- * A reveal also defaults to "missed": revealing without typing usually means
- * the word did not come, and an honest miss brings it back this session
- * instead of weeks from now. The other three stay one tap away.
- *
- * A near miss has no default: only the learner knows if it was just a typo.
+ * Enter's choice (the amber button): the timing nudge, else "got it" when correct (never "easy", ~54 days out on FSRS-7),
+ * else "missed" when wrong or revealed, so it comes back this session. A near miss has none: only the learner knows.
  */
 function primaryOf(
   evaluation: Evaluation | null,
@@ -201,13 +193,8 @@ type OutcomeDockProps = {
 }
 
 /**
- * The Session Outcome Dock (#51): after the answer shows, the learner says
- * how it went in plain words, and the session moves on.
- *
- * It sticks to the bottom of the screen, like the header to the top, so the
- * next step is in reach without scrolling past the mnemonic. The choices come
- * from `@workspace/core` (`outcomeChoices`), which never asks a question the
- * answer already settled: a wrong answer has one button, a correct one two.
+ * Session Outcome Dock (#51), sticky so the next step is in reach without scrolling past the mnemonic.
+ * `outcomeChoices` never asks what the answer settled: a wrong answer gets one button, a correct one two.
  */
 export function OutcomeDock({
   evaluation,

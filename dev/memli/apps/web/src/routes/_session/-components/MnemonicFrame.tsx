@@ -32,12 +32,7 @@ type MnemonicFrameProps = {
 }
 
 /**
- * The Mnemonic Caption Overlay Frame (#50): the card's memory hook, inside
- * the revealed answer under the meaning and example
- * (`05 - Study session answer page.png`). Opens on the most upvoted
- * mnemonic; arrows cycle through the rest, wrapping at either end. Shows
- * nothing when the card has no mnemonic yet.
- *
+ * Mnemonic Caption Overlay Frame (#50, `05 - Study session answer page.png`): opens on the most upvoted, arrows wrap.
  * The answer remounts for every card, so the position starts over each time.
  */
 export function MnemonicFrame({
@@ -47,7 +42,6 @@ export function MnemonicFrame({
 }: MnemonicFrameProps): JSX.Element | null {
   const headingId = useId()
   const { format, plural, rich, languageName } = useFormatters()
-  // Which mnemonic is showing. One uncoupled number, so `useState` (docs/state-management.md).
   const [index, setIndex] = useState(0)
   const mnemonics = card.mnemonics ?? []
   const total = mnemonics.length
@@ -100,7 +94,6 @@ export function MnemonicFrame({
           {messages.heading}
         </Heading>
         {total > 1 ? (
-          // In the header from sm up, as in the design.
           <MnemonicNav
             position={position}
             onStep={step}
@@ -109,7 +102,6 @@ export function MnemonicFrame({
           />
         ) : null}
       </div>
-      {/* Picture above the story on phones; picture and story share the width from sm up. */}
       <div className="grid gap-4 sm:grid-cols-2 sm:items-center sm:gap-6">
         <MnemonicImage
           // Keyed so a new picture starts loading from scratch.
@@ -170,9 +162,8 @@ export function MnemonicFrame({
 }
 
 /**
- * Previous / position / next. Rendered once per layout and hidden with CSS
- * in the other, so only one is ever in the accessibility tree. Each layout
- * writes its parts in the order they appear, so nothing is reordered with CSS.
+ * Rendered once per layout and hidden with CSS in the other, so only one is in the accessibility tree.
+ * Each layout writes its parts in visual order, so nothing is reordered with CSS.
  */
 function MnemonicNav({
   position,

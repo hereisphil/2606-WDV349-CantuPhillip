@@ -3,12 +3,8 @@ import { z } from "zod"
 import { languageTagSchema } from "../locale/language-tag"
 
 /**
- * One run of a mnemonic story. A story is data, not markup, so community
- * text is never parsed as HTML.
- *
- * - `plain`: story text, in the mnemonic's `contentLocale`.
- * - `term`: the word being learned, in the course's `learningLanguage`.
- * - `keyword`: the sound-alike hook that links the term to its meaning.
+ * One run of a mnemonic story: data, not markup, so community text is never
+ * parsed as HTML. `term` is in the course's `learningLanguage`.
  */
 export const mnemonicStoryPartSchema = z.object({
   kind: z.enum(["plain", "term", "keyword"]),
@@ -21,9 +17,8 @@ export type MnemonicStoryPart = z.infer<typeof mnemonicStoryPartSchema>
 export const mnemonicSchema = z.object({
   mnemonicId: z.string().min(1),
   /**
-   * What the story and image description are written in. Often the course's
-   * `answerLanguage`, but not always: a Spanish speaker can share a story in
-   * Spanish on an English-to-Japanese course.
+   * What the story and alt text are written in. Often, but not always, the
+   * course's `answerLanguage`.
    */
   contentLocale: languageTagSchema,
   story: z.array(mnemonicStoryPartSchema).nonempty(),

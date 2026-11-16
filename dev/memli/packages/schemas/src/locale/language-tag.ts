@@ -1,16 +1,8 @@
 import { z } from "zod"
 
 /**
- * A BCP 47 language tag in canonical form: `es`, `pt-BR`, `es-419`.
- *
- * Every language field uses this, whatever it means: `learningLanguage` (what
- * a course teaches), `answerLanguage` (what its meanings are written in),
- * `contentLocale` (what a mnemonic is written in) and `uiLocale` (the app's
- * own language). They are separate fields because they are separate facts
- * (docs/i18n.md); the shape of the value is the same.
- *
- * Canonical form only (`pt-BR`, not `pt-br`), so the same language is always
- * the same string and filtering by language is a plain equality check.
+ * A canonical BCP 47 tag (`pt-BR`, not `pt-br`) for every language field
+ * (docs/i18n.md), so filtering by language is a plain equality check.
  */
 export const languageTagSchema = z.string().refine(isCanonicalLanguageTag, {
   error: "Expected a canonical BCP 47 language tag, like es or pt-BR",
@@ -18,9 +10,8 @@ export const languageTagSchema = z.string().refine(isCanonicalLanguageTag, {
 
 export type LanguageTag = z.infer<typeof languageTagSchema>
 
-// Every registered language has a 2- or 3-letter code. BCP 47's grammar also
-// allows 5 to 8 letters, which is how "english" would sneak through, but none
-// are assigned.
+// Every registered language has a 2- or 3-letter code. BCP 47 also allows 5 to
+// 8 letters, none assigned, which is how "english" would sneak through.
 const PRIMARY_LANGUAGE = /^[a-z]{2,3}(?:-|$)/
 
 function isCanonicalLanguageTag(tag: string): boolean {

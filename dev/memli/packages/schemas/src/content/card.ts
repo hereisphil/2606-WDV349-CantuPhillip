@@ -33,9 +33,8 @@ export const cardSchema = z.object({
   /** Only for languages and words that have one. */
   gender: grammaticalGenderSchema.optional(),
   /**
-   * Accepted meanings in the course's `answerLanguage`; typing any one counts.
-   * The first is the one shown on reveal. Same field `@workspace/core`'s
-   * `SessionCard` uses, so a card can feed the session reducer as is.
+   * Accepted meanings in the course's `answerLanguage`; any one counts. The
+   * first is shown on reveal. Same field as core's `SessionCard`.
    */
   answers: z.array(z.string().min(1)).nonempty(),
   /** IPA, or a romanization for non-Latin scripts. Shown on reveal. */

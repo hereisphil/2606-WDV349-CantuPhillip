@@ -11,9 +11,8 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { apiRoot, countRows, migratedDatabase, seed } from "./test-database"
 
 /**
- * Runs `seed/prototype.sql` on the real migrations and reads the rows back
- * the way the API will send them. The seed is SQL written by hand, so this is
- * what catches a misspelled part of speech, broken JSON or a missing picture.
+ * Runs the hand-written `seed/prototype.sql` and parses the rows as the API
+ * sends them, to catch a bad part of speech, broken JSON or a missing picture.
  */
 
 type Row = Record<string, unknown>
