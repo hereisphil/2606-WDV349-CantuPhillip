@@ -186,10 +186,9 @@ function SessionWorkspace({
     seeded?.languages?.learning ?? course.learningLanguage
   const answerLanguage = seeded?.languages?.answer ?? course.answerLanguage
 
-  // Stable, so the reveal shortcut's key listener isn't re-added on every render.
-  const onReveal = useCallback((elapsedMs: number | null) => {
+  const onReveal = (elapsedMs: number | null): void => {
     dispatch({ type: "REVEAL", elapsedMs })
-  }, [])
+  }
 
   // Time on screen this visit. Hidden-tab time is left out.
   const activeMs = useActiveTime()
@@ -212,8 +211,7 @@ function SessionWorkspace({
     promptRef.current?.focus({ preventScroll: true })
     promptRef.current?.scrollIntoView({ block: "start" })
   }, [activeMs])
-  // Stable, so the dock's key listener isn't re-added on every render.
-  const onResolve = useCallback((outcome: ReviewOutcome) => {
+  const onResolve = (outcome: ReviewOutcome): void => {
     // flushSync renders the next card now so focus can move to it. Otherwise focus
     // is lost with the dock's button and keyboard users restart from the page top.
     flushSync(() => {
@@ -224,7 +222,7 @@ function SessionWorkspace({
       prompt.focus({ preventScroll: true })
       prompt.scrollIntoView({ block: "start" })
     }
-  }, [])
+  }
 
   // Derive, don't store (docs/state-management.md).
   const queued = session.status === "complete" ? 0 : session.queue.length

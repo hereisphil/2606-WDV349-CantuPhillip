@@ -1,4 +1,11 @@
-import { useEffect, useId, useMemo, useState, type JSX } from "react"
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useMemo,
+  useState,
+  type JSX,
+} from "react"
 import type { Evaluation } from "@workspace/core/answer/evaluate"
 import {
   outcomeChoices,
@@ -139,46 +146,48 @@ function useOutcomeKeys(
   primary: ReviewOutcome | null,
   onResolve: (outcome: ReviewOutcome) => void
 ): void {
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent): void {
-      if (
-        event.defaultPrevented ||
-        event.isComposing ||
-        // Holding Enter down after submitting must not also settle the card.
-        event.repeat ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.shiftKey
-      ) {
-        return
-      }
-      const target = event.target instanceof Element ? event.target : null
+  // Reads the latest choices and `onResolve`, so the listener is added once.
+  const onKeyDown = useEffectEvent((event: KeyboardEvent): void => {
+    if (
+      event.defaultPrevented ||
+      event.isComposing ||
+      // Holding Enter down after submitting must not also settle the card.
+      event.repeat ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      event.shiftKey
+    ) {
+      return
+    }
+    const target = event.target instanceof Element ? event.target : null
 
-      if (event.key === "Enter") {
-        if (primary === null || target?.closest(interactive)) {
-          return
-        }
-        event.preventDefault()
-        onResolve(primary)
-        return
-      }
-
-      const outcome = /^[1-9]$/.test(event.key)
-        ? choices[Number(event.key) - 1]
-        : undefined
-      if (outcome === undefined || target?.closest(typing)) {
+    if (event.key === "Enter") {
+      if (primary === null || target?.closest(interactive)) {
         return
       }
       event.preventDefault()
-      onResolve(outcome)
+      onResolve(primary)
+      return
     }
 
-    window.addEventListener("keydown", onKeyDown)
-    return () => {
-      window.removeEventListener("keydown", onKeyDown)
+    const outcome = /^[1-9]$/.test(event.key)
+      ? choices[Number(event.key) - 1]
+      : undefined
+    if (outcome === undefined || target?.closest(typing)) {
+      return
     }
-  }, [choices, primary, onResolve])
+    event.preventDefault()
+    onResolve(outcome)
+  })
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent): void => onKeyDown(event)
+    window.addEventListener("keydown", listener)
+    return () => {
+      window.removeEventListener("keydown", listener)
+    }
+  }, [])
 }
 
 type OutcomeDockProps = {

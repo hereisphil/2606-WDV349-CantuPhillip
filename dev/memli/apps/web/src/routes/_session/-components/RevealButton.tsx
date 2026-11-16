@@ -1,4 +1,4 @@
-import { useEffect, type JSX } from "react"
+import { useEffect, useEffectEvent, type JSX } from "react"
 import { Eye } from "lucide-react"
 import { Button } from "@workspace/ui/components/button"
 
@@ -16,37 +16,39 @@ const usesSpace =
  * card" key in flashcard apps. Enter is left for submitting a typed answer.
  */
 function useRevealOnSpace(onReveal: () => void): void {
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent): void {
-      if (
-        event.key !== " " ||
-        event.defaultPrevented ||
-        event.isComposing ||
-        // Holding the key down must not carry into the next card.
-        event.repeat ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.shiftKey
-      ) {
-        return
-      }
-      if (
-        event.target instanceof Element &&
-        event.target.closest(usesSpace) !== null
-      ) {
-        return
-      }
-      // Space would otherwise scroll the page.
-      event.preventDefault()
-      onReveal()
+  // An Effect Event reads the latest `onReveal`, so the listener is added once.
+  const onKeyDown = useEffectEvent((event: KeyboardEvent): void => {
+    if (
+      event.key !== " " ||
+      event.defaultPrevented ||
+      event.isComposing ||
+      // Holding the key down must not carry into the next card.
+      event.repeat ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey ||
+      event.shiftKey
+    ) {
+      return
     }
+    if (
+      event.target instanceof Element &&
+      event.target.closest(usesSpace) !== null
+    ) {
+      return
+    }
+    // Space would otherwise scroll the page.
+    event.preventDefault()
+    onReveal()
+  })
 
-    window.addEventListener("keydown", onKeyDown)
+  useEffect(() => {
+    const listener = (event: KeyboardEvent): void => onKeyDown(event)
+    window.addEventListener("keydown", listener)
     return () => {
-      window.removeEventListener("keydown", onKeyDown)
+      window.removeEventListener("keydown", listener)
     }
-  }, [onReveal])
+  }, [])
 }
 
 /**
