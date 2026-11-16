@@ -1,6 +1,6 @@
 # DX tooling
 
-**Related:** [roadmap.md](./roadmap.md) · [mobile.md](./mobile.md) · [architecture.md](./architecture.md)
+**Related:** [roadmap.md](./roadmap.md) · [mobile.md](./mobile.md) · [architecture.md](./architecture.md) · [dependencies.md](./dependencies.md)
 
 Developer experience tools should make debugging faster **without** changing learner UX or production performance.
 
