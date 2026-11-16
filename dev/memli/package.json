@@ -13,6 +13,7 @@
     "test": "turbo test",
     "knip": "knip",
     "deps:update": "bash scripts/update-deps.sh",
+    "cf-typegen": "wrangler types && bun run --cwd apps/api cf-typegen",
     "prepare": "lefthook install",
     "deploy:staging": "turbo build && bunx wrangler deploy --env staging",
     "deploy:prod": "turbo build && bunx wrangler deploy --env=\"\""

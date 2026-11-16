@@ -10,7 +10,14 @@ import memli from "./plugin.js"
  */
 export default defineConfig([
   // `.wrangler` holds the bundles `wrangler dev` writes while it runs.
-  globalIgnores(["dist", ".turbo", ".wrangler", "node_modules", "coverage"]),
+  globalIgnores([
+    "dist",
+    ".turbo",
+    ".wrangler",
+    "node_modules",
+    "coverage",
+    "worker-configuration.d.ts",
+  ]),
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     extends: [js.configs.recommended, tseslint.configs.recommended],

@@ -16,6 +16,8 @@ blob-report/
 apps/api/drizzle/
 bun.lock
 routeTree.gen.ts
+# `wrangler types` owns these; CI runs `wrangler types --check`
+worker-configuration.d.ts
 wrangler.jsonc
 
 # Editor / docs (optional to format later)
