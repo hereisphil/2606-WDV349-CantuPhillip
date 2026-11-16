@@ -23,6 +23,12 @@ alwaysApply: true
 - Desktop logo: BookOpen icon in a primary-colored rounded square + "Memli" text.
 - Role tokens only (`bg-card`, `text-muted-foreground`, `bg-cta`), never palette classes or hex values. Design floors for learner-facing screens (14 px text, 44 px targets, logical properties, copy): `ui-design.mdc`.
 
+## Code comments
+
+- A comment is at most two lines and says *why*, not *what*. Delete comments that restate the code.
+- For the long version, link a doc, an issue or a URL. Longer explanations go in chat or `docs/`, not in code.
+- Enforced by `memli/max-comment-lines` in every JS/TS file (#146). SQL files are exempt.
+
 ## Product & architecture docs
 
 - Long-lived decisions: `docs/` (start at `docs/roadmap.md`).

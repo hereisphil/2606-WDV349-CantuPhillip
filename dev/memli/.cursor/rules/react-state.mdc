@@ -53,6 +53,7 @@ const [session, dispatch] = useReducer(sessionReducer, cards, startSession)
 
 - `routes/_marketing/-components/Nav.tsx` — `mobileOpen` is a single toggle. **Correct as `useState`.** The `useEffect`s are DOM sync (focus trap, scroll lock), not state sync.
 - `components/theme-provider.tsx` — one `useState` for the learner's choice; the device setting comes from `useSyncExternalStore`, and the resolved theme is derived. Do not add a second `useState` for it.
+- `routes/_session/-components/use-save-reviews.ts` — an outbox that drains `session.reviews` to `POST /api/reviews`. **Reviewed for #146; kept as an effect.** It isn't the flag pattern in §4. Revisit if a transition needs its own side effect.
 - `routes/_auth/signin.tsx` — four coupled `useState` calls (`email`, `password`, `fieldErrors`, `formMessage`). **Exempt for now** (`_auth/**` is opted out in `apps/web/eslint.config.js`; the form is disabled in prototype mode, #110). **When Better Auth lands (#108):** remove the `_auth` exemption and move the form to a reducer with `status: "idle" | "submitting" | "error" | "success"` before adding `isSubmitting` / server error / redirect flags.
 
 ## 4. `use-effect-reducer` — not installed yet, here is when
@@ -69,10 +70,17 @@ Use `exec({ type: "playAudio", src })` inside the reducer and implement effects 
 
 Until then, if you find yourself writing `useEffect(() => { if (state.status === "revealed") playAudio() }, [state.status])`, that is the signal to install it.
 
+## 5. Effects
+
+- `useEffect` is for keeping something outside React in sync: window or document listeners, DOM writes, a scroll lock, `visibilitychange`.
+- A handler that a listener calls goes in `useEffectEvent`, so it reads the latest props and the listener is added once (`RevealButton`, `OutcomeDock`). No `useCallback` chain just to keep a listener stable.
+- A URL that's stale against loaded data is fixed in the route `loader` with `redirect`, before the page renders (`/dashboard`, `?studying=`). Never navigate from an effect after render.
+
 ## Do not
 
 - Write more than one `useState` per component/hook in `apps/web` outside the exempt zones (lint error).
 - Dodge the lint with `useState({ a, b })` — multi-key object literals are also an error.
 - `useEffect` that calls a setter to sync one piece of state with another (`react-hooks/set-state-in-effect` is an error).
+- `useCallback` only so an effect's listener isn't re-added. Use `useEffectEvent` (§5).
 - Re-implement loading/error/data for server state outside TanStack Query.
 - Put `exec`/React-specific code in `packages/core`.

@@ -2,7 +2,6 @@
 
 The rules for this project live in `.cursor/rules/` so Cursor and Claude Code share one source of truth. Edit the `.mdc` files there, not copies here. Each one is always-on: follow all of them.
 
-@.cursor/rules/teach-first.mdc
 @.cursor/rules/memli-stack.mdc
 @.cursor/rules/architecture-guardrails.mdc
 @.cursor/rules/product-ux.mdc
