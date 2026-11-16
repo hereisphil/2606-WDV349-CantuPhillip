@@ -8,6 +8,59 @@
 
 Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the app.
 
+## 16 November 2026
+
+### `FEATURE` Study session
+
+`/study/$courseId` is a full study loop. A learner sees a word, types the answer or reveals it, sees a mnemonic, says how it went, and moves on until the session ends.
+
+* **Session layout.** Study sessions drop the app sidebar. A sticky header holds Exit (and Escape), the course title, words left, a progress bar and the Theme menu. Refs [#48](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/48) via [PR #145](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/145)
+* **Study card.** The term with its part of speech and a pronunciation button, a typed answer checked for typos and missing accents (Correct, typo, accent, Not quite), and a Reveal answer path on Space. Response time pauses while the tab is hidden. Refs [#49](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/49) via [PR #150](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/150)
+* **Mnemonic frame.** Under the revealed answer: a 4:3 picture with a fallback, the story with the term and its sound-alike keyword highlighted, the author and upvotes, and arrows through each word's community mnemonics. Stories are stored as typed parts, never parsed markup. Refs [#50](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/50) via [PR #155](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/155)
+* **Outcome dock and summary.** Plain, first-person choices instead of Anki grade names, each saying when the word comes back ("Back in 5 days"). Enter confirms the default and 1 to 4 pick by position. The session ends with "All done!", words studied, the share remembered the first time, active minutes and the next review. Refs [#51](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/51) via [PR #159](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/159)
+
+### `FEATURE` FSRS scheduling in `@workspace/core`
+
+`packages/core` is back with the logic the study loop runs on, so the browser and the API grade and schedule the same way.
+
+* The Evaluator rates a typed answer exact, near or wrong. The Rating Mapper turns Memli's outcomes (missed, tough, got it, easy) into FSRS ratings. Scheduling is FSRS-7 through `ts-fsrs`, seeded so the same review always gives the same schedule. A pure session reducer sends a missed word to the back of the queue until it sticks.
+* Response time only ever nudges silently and never lowers a grade. A lint rule keeps `ts-fsrs` out of `apps/web`.
+* Node 26 LTS is pinned locally and in CI, because `ts-fsrs` v6 needs Node 24 or later.
+* See merged **[PR #149](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/149)** — Refs [#132](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/132)
+
+### `FEATURE` Hono API and saved reviews
+
+Progress now survives a refresh. `apps/api` is a Hono app on a Cloudflare Worker with a Drizzle schema on D1, and the web app reads and writes through it.
+
+* `GET /api/courses`, `GET /api/courses/:courseId/study`, `POST /api/reviews` and `GET /api/history` validate input and output with shared `@workspace/schemas` Zod contracts and answer errors as stable codes (`{ "error": { "code": "..." } }`). Vite proxies `/api/*`, so the browser stays same-origin.
+* D1 holds four seeded courses (16 words, 6 mnemonics) for `usr_prototype_01`, all eleven FSRS-7 fields per word, and a `reviews` log written in the same batch as the progress. The server's clock decides when a review happened, and a client-made `reviewId` makes a retry count once.
+* The dashboard's week, days of study, reviews remembered and new words this month come from real history in the learner's time zone. No prototype data is left on the live dashboard.
+* "Deck" is now "course" in code, schemas, tables and docs, matching the UI.
+* CI fails when the Drizzle schema changes without a migration, and a test guards against D1's cascade delete when a table is rebuilt.
+* See merged **[PR #160](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/160)** and **[PR #161](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/161)** — Refs [#106](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/106), [#112](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/112)
+
+### `ANNOUNCEMENT` Staging runs the API
+
+[memli-staging.thereisphil.workers.dev](https://memli-staging.thereisphil.workers.dev/) now serves the whole Week 3 build. The gate Worker checks basic auth, then sends `/api/*` to `memli-api-staging` through a service binding, so the API has no public URL. The staging deploy applies D1 migrations, deploys the API, then deploys the gate. Production has no API yet and answers `/api/*` with a JSON 503.
+
+* See merged **[PR #164](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/164)**, **[PR #166](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/166)** and **[PR #167](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/167)** — Refs [#165](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/165)
+
+### `DX` Guardrails and upkeep
+
+* **Accessibility and i18n in CI.** jsx-a11y rules, a ban on hard-coded UI strings and on formatting outside `Intl`, and Playwright + axe (WCAG 2.2 AA) on every preview in both themes. See merged **[PR #142](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/142)**
+* **Design floors.** Lint rules block text under 14 px, physical direction classes, CSS `order`, raw colors, buttons under 44 px and em dashes in UI copy. Specs check rendered sizes and retired words on every preview. See merged **[PR #157](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/157)** — Refs [#156](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/156)
+* **Typecheck that checks.** `bun run typecheck` in `apps/web` had been checking no files. It now checks both of its projects. See merged **[PR #154](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/154)** — Refs [#153](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/153)
+* **Shorter comments.** A lint rule caps comments at two lines, and every `useEffect` was reviewed. See merged **[PR #162](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/162)** — Refs [#146](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/146)
+* **Dependencies.** Everything in range is updated, Worker types come from `wrangler types` (CI fails when they're stale), and a weekly workflow opens one update PR into `dev`. See merged **[PR #163](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/163)** — Refs [#148](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/148)
+
+### `DOCUMENTATION` Week 3 milestone summary
+
+Replaced the `359 MS 3` plan with a summary of what landed. Both items that slipped from Week 2, the session layout (#48) and the study card (#49), shipped first. The mnemonic frame (#50), outcome dock (#51), FSRS core (#132), Hono API and D1 (#106) and saved reviews (#112) all shipped, and staging runs the API (#165). The Module 3 innovation research and the API compliance and security audit are still open under #111.
+
+* Refs [#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)
+
+***
+
 ## 14 November 2026
 
 ### `FEATURE` Dashboard redesign
@@ -19,7 +72,7 @@ Each week, and/or each major change, I will update this file by summarizing acti
 * **Plain words.** Course, words, to review, learned and Dashboard replace deck, cards, due, mastered and Decks. The greeting is one line. About 84 words in the main area, down from 217.
 * **Calmer page.** This week shows seven day marks (a check for a goal day, a ring for a partial day, an empty circle for no study) and "12 days of study", which forgives one day off ("never miss twice"). Other courses are compact rows with one status line and a 44 px Review or Learn link, five at a time; a Studying menu filters them when there are many. One warm tip card offers to practice the tricky words. "Your progress" is a closed disclosure with a table.
 * **Built for everyone.** Links are links, every target is 44 px, a skip link comes first, the page title is "Dashboard · Memli", the hero fits a phone's first screen, and a DEV-only `?pseudo=long|cjk|rtl` switch checks layouts for translation. axe runs on every preview state in both themes at desktop and 375 px.
-* Plan and research: [`docs/designs/REDESIGN.md`](./designs/REDESIGN.md) and [`docs/designs/redesign-research/`](./designs/redesign-research/README.md). Branch `151-web-dashboard_redesign`, not merged yet. Refs [#151](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/151)
+* Plan and research: [`docs/designs/REDESIGN.md`](./designs/REDESIGN.md) and [`docs/designs/redesign-research/`](./designs/redesign-research/README.md). See merged **[PR #152](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/152)** — Refs [#151](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/151)
 
 ***
 
