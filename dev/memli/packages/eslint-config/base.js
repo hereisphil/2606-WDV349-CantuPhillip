@@ -2,13 +2,22 @@ import js from "@eslint/js"
 import eslintConfigPrettier from "eslint-config-prettier"
 import tseslint from "typescript-eslint"
 import { defineConfig, globalIgnores } from "eslint/config"
+import memli from "./plugin.js"
 
 /**
  * Consumers set `languageOptions.parserOptions.tsconfigRootDir` in their
  * local eslint.config.js when they need project-aware parsing.
  */
 export default defineConfig([
-  globalIgnores(["dist", ".turbo", "node_modules", "coverage"]),
+  // `.wrangler` holds the bundles `wrangler dev` writes while it runs.
+  globalIgnores([
+    "dist",
+    ".turbo",
+    ".wrangler",
+    "node_modules",
+    "coverage",
+    "worker-configuration.d.ts",
+  ]),
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     extends: [js.configs.recommended, tseslint.configs.recommended],
@@ -38,6 +47,27 @@ export default defineConfig([
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-debugger": "error",
       eqeqeq: ["error", "always"],
+      // The shadcn registry imports `cn` from an unrelated npm package (.cursor/rules/shadcn-components.mdc).
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "cn",
+              message:
+                'The npm package `cn` is not our class-name helper; the shadcn registry adds it by mistake. Use `import { cn } from "@workspace/ui/lib/utils"`.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Long explanations go in docs or a linked URL (#146).
+  {
+    files: ["**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"],
+    plugins: { memli },
+    rules: {
+      "memli/max-comment-lines": ["error", { max: 2 }],
     },
   },
   // Must be last so Prettier wins formatting conflicts

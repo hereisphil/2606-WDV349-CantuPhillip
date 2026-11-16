@@ -21,6 +21,10 @@ dist-ssr
 # Local deploy notes. Staging basic-auth credentials live here and must stay untracked.
 dev/memli/.cf
 
+# Wrangler: local Worker state (and, later, the local D1 database) and local secrets
+.wrangler
+.dev.vars*
+
 # turbo
 .turbo
 

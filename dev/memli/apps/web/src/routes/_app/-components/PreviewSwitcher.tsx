@@ -12,6 +12,8 @@ export function PreviewSwitcher({
   return (
     <nav
       aria-label="Dashboard previews"
+      // Design-floor checks (e2e/floors.spec.ts) skip DEV-only tools.
+      data-dev-only=""
       className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 p-2 text-xs"
     >
       <span className="font-medium text-muted-foreground">Preview</span>
@@ -21,7 +23,7 @@ export function PreviewSwitcher({
           to="/dashboard"
           search={{ preview: name }}
           aria-current={name === current ? "page" : undefined}
-          className="touch-target inline-flex min-h-6 items-center rounded-md px-2 py-1 outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+          className="touch-target inline-flex min-h-6 items-center rounded-md px-2 py-1 hover:bg-muted aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
         >
           {name}
         </Link>

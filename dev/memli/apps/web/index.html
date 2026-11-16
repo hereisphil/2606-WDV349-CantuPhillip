@@ -4,7 +4,44 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Both themes are supported, so the browser can style scrollbars and form controls before the CSS loads. -->
+    <meta name="color-scheme" content="light dark" />
+    <!-- Browser toolbar color. data-light and data-dark are the page background (--background) in each theme. -->
+    <meta
+      name="theme-color"
+      content="#f1f3f9"
+      data-light="#f1f3f9"
+      data-dark="#0b1429"
+    />
     <title>Memli</title>
+    <!--
+      Sets the theme class before the first paint, so a dark-mode visitor never
+      sees a flash of the light page. Same storage key and rules as
+      src/components/theme-provider.tsx, which takes over once React loads.
+    -->
+    <script>
+      ;(function () {
+        var stored = null
+        try {
+          stored = localStorage.getItem("theme")
+        } catch (error) {
+          // Storage can be blocked. Fall back to the device setting.
+        }
+        var prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches
+        var theme =
+          stored === "dark" || (stored !== "light" && prefersDark)
+            ? "dark"
+            : "light"
+        var root = document.documentElement
+        root.classList.add(theme)
+        var meta = document.querySelector('meta[name="theme-color"]')
+        if (meta) {
+          meta.setAttribute("content", meta.getAttribute("data-" + theme))
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

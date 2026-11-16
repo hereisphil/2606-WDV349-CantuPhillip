@@ -15,7 +15,7 @@ Full detail: `docs/architecture.md`, `docs/roadmap.md`, `docs/mobile.md`, `docs/
 
 ## Sharing rules
 
-- Put pure domain logic in `packages/core` (no React, DOM, or RN imports). Wrap **`ts-fsrs`** there when MS 3 restores the package — do not hand-roll SM-2 or import `ts-fsrs` from apps (`packages/core/README.md`, #130).
+- Put pure domain logic in `packages/core` (no React, DOM, or RN imports). **`ts-fsrs`** is wrapped there — do not hand-roll SM-2 or import `ts-fsrs` from apps; schedule through `@workspace/core` outcomes (`packages/core/README.md`, #132).
 - Put shared contracts in `packages/schemas`.
 - `packages/ui` / shadcn is **web-only** — never assume it runs on iOS/Android.
 - New clients (API, mobile) should reuse `core` + `schemas`, not fork business rules.

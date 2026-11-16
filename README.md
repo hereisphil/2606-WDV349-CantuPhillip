@@ -60,7 +60,7 @@ Weekly research notes covering class assignments and independent study:
 └── dev/
     └── memli/                 # Memli Turborepo + Bun monorepo
         ├── apps/web/          # Vite + React frontend (TanStack Router)
-        ├── packages/core/     # Plan-only for now; FSRS (ts-fsrs) domain package in MS 3 (#130)
+        ├── packages/core/     # Pure domain: Evaluator, FSRS-7 (ts-fsrs), session reducer (#132)
         ├── packages/schemas/  # Shared Zod validation contracts & env schemas
         ├── packages/ui/       # Shared web component library (shadcn/ui + Base UI)
         └── docs/              # Product & architecture decision records (roadmap, UX, i18n)
@@ -72,7 +72,7 @@ Weekly research notes covering class assignments and independent study:
 
 The web app lives in [`dev/memli/`](./dev/memli/) — a Turborepo monorepo managed with Bun.
 
-**Prerequisites:** [Bun](https://bun.com/) 1.3+ and Node.js 20+
+**Prerequisites:** [Bun](https://bun.com/) 1.3+ and Node.js 26 LTS. CI reads the version from [`dev/memli/.nvmrc`](./dev/memli/.nvmrc); locally, Vite+ or nvm pick it up from that file or from `engines.node`.
 
 ```bash
 cd dev/memli

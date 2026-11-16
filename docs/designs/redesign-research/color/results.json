@@ -1,0 +1,2418 @@
+{
+  "thresholds": {
+    "body": [
+      7,
+      90
+    ],
+    "bodyTint": [
+      7,
+      75
+    ],
+    "muted": [
+      4.5,
+      75
+    ],
+    "muted2": [
+      4.5,
+      60
+    ],
+    "label": [
+      4.5,
+      75
+    ],
+    "label2": [
+      4.5,
+      60
+    ],
+    "colored": [
+      4.5,
+      60
+    ],
+    "large": [
+      3,
+      45
+    ],
+    "nontext": [
+      3,
+      30
+    ],
+    "deco": [
+      0,
+      0
+    ]
+  },
+  "themes": {
+    "light": [
+      {
+        "label": "Heading / numeral on page",
+        "fgRole": "foreground-strong",
+        "bgRole": "background",
+        "kind": "body",
+        "fg": "#0d1529",
+        "bg": "#f1f3f9",
+        "wcag": 16.37,
+        "lc": 97.7,
+        "ok": true
+      },
+      {
+        "label": "Heading / numeral on card",
+        "fgRole": "foreground-strong",
+        "bgRole": "card",
+        "kind": "body",
+        "fg": "#0d1529",
+        "bg": "#ffffff",
+        "wcag": 18.16,
+        "lc": 104.8,
+        "ok": true
+      },
+      {
+        "label": "Body text on page",
+        "fgRole": "foreground",
+        "bgRole": "background",
+        "kind": "body",
+        "fg": "#2a354d",
+        "bg": "#f1f3f9",
+        "wcag": 11.04,
+        "lc": 90.8,
+        "ok": true
+      },
+      {
+        "label": "Body text on card",
+        "fgRole": "foreground",
+        "bgRole": "card",
+        "kind": "body",
+        "fg": "#2a354d",
+        "bg": "#ffffff",
+        "wcag": 12.25,
+        "lc": 97.9,
+        "ok": true
+      },
+      {
+        "label": "Body text on sidebar",
+        "fgRole": "foreground",
+        "bgRole": "sidebar",
+        "kind": "body",
+        "fg": "#2a354d",
+        "bg": "#f9fafd",
+        "wcag": 11.73,
+        "lc": 94.9,
+        "ok": true
+      },
+      {
+        "label": "Body text on popover",
+        "fgRole": "foreground",
+        "bgRole": "popover",
+        "kind": "bodyTint",
+        "fg": "#2a354d",
+        "bg": "#ffffff",
+        "wcag": 12.25,
+        "lc": 97.9,
+        "ok": true
+      },
+      {
+        "label": "Body text on chip (muted)",
+        "fgRole": "foreground",
+        "bgRole": "muted",
+        "kind": "bodyTint",
+        "fg": "#2a354d",
+        "bg": "#e7ebf3",
+        "wcag": 10.25,
+        "lc": 85.9,
+        "ok": true
+      },
+      {
+        "label": "Muted text on page",
+        "fgRole": "muted-foreground",
+        "bgRole": "background",
+        "kind": "muted",
+        "fg": "#505b72",
+        "bg": "#f1f3f9",
+        "wcag": 6.14,
+        "lc": 76.4,
+        "ok": true
+      },
+      {
+        "label": "Muted text on card",
+        "fgRole": "muted-foreground",
+        "bgRole": "card",
+        "kind": "muted",
+        "fg": "#505b72",
+        "bg": "#ffffff",
+        "wcag": 6.82,
+        "lc": 83.5,
+        "ok": true
+      },
+      {
+        "label": "Muted text on sidebar",
+        "fgRole": "muted-foreground",
+        "bgRole": "sidebar",
+        "kind": "muted",
+        "fg": "#505b72",
+        "bg": "#f9fafd",
+        "wcag": 6.53,
+        "lc": 80.5,
+        "ok": true
+      },
+      {
+        "label": "Muted text on popover",
+        "fgRole": "muted-foreground",
+        "bgRole": "popover",
+        "kind": "muted2",
+        "fg": "#505b72",
+        "bg": "#ffffff",
+        "wcag": 6.82,
+        "lc": 83.5,
+        "ok": true
+      },
+      {
+        "label": "Muted text on chip (muted)",
+        "fgRole": "muted-foreground",
+        "bgRole": "muted",
+        "kind": "muted2",
+        "fg": "#505b72",
+        "bg": "#e7ebf3",
+        "wcag": 5.71,
+        "lc": 71.5,
+        "ok": true
+      },
+      {
+        "label": "Selected label on accent tint",
+        "fgRole": "accent-foreground",
+        "bgRole": "accent",
+        "kind": "label",
+        "fg": "#153bb7",
+        "bg": "#e1ecff",
+        "wcag": 7.54,
+        "lc": 77.9,
+        "ok": true
+      },
+      {
+        "label": "Selected border / brand icon vs card",
+        "fgRole": "brand",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#ffffff",
+        "wcag": 6.83,
+        "lc": 82.4,
+        "ok": true
+      },
+      {
+        "label": "Selected border / brand icon vs page",
+        "fgRole": "brand",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#f1f3f9",
+        "wcag": 6.16,
+        "lc": 75.3,
+        "ok": true
+      },
+      {
+        "label": "Link on page",
+        "fgRole": "link",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#1447e6",
+        "bg": "#f1f3f9",
+        "wcag": 6.16,
+        "lc": 75.3,
+        "ok": true
+      },
+      {
+        "label": "Link on card",
+        "fgRole": "link",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#1447e6",
+        "bg": "#ffffff",
+        "wcag": 6.83,
+        "lc": 82.4,
+        "ok": true
+      },
+      {
+        "label": "Hero text on hero",
+        "fgRole": "hero-foreground",
+        "bgRole": "hero",
+        "kind": "body",
+        "fg": "#f9fafd",
+        "bg": "#14255f",
+        "wcag": 13.78,
+        "lc": -100.5,
+        "ok": true
+      },
+      {
+        "label": "Hero secondary text on hero",
+        "fgRole": "hero-muted-foreground",
+        "bgRole": "hero",
+        "kind": "muted",
+        "fg": "#c8dcff",
+        "bg": "#14255f",
+        "wcag": 10.37,
+        "lc": -80.6,
+        "ok": true
+      },
+      {
+        "label": "Hero chip text on hero chip",
+        "fgRole": "hero-foreground",
+        "bgRole": "hero-chip",
+        "kind": "bodyTint",
+        "fg": "#f9fafd",
+        "bg": "#2e4175",
+        "wcag": 9.45,
+        "lc": -93.6,
+        "ok": true
+      },
+      {
+        "label": "Hero hairline vs hero",
+        "fgRole": "hero-border",
+        "bgRole": "hero",
+        "kind": "deco",
+        "fg": "#153bb7",
+        "bg": "#14255f",
+        "wcag": 1.6,
+        "lc": -8.5,
+        "ok": true
+      },
+      {
+        "label": "Primary (brand) button label on fill",
+        "fgRole": "primary-foreground",
+        "bgRole": "primary",
+        "kind": "label",
+        "fg": "#ffffff",
+        "bg": "#1447e6",
+        "wcag": 6.83,
+        "lc": -87.5,
+        "ok": true
+      },
+      {
+        "label": "Primary (brand) button label on hover fill",
+        "fgRole": "primary-foreground",
+        "bgRole": "primary-hover",
+        "kind": "label",
+        "fg": "#ffffff",
+        "bg": "#153bb7",
+        "wcag": 8.97,
+        "lc": -94.1,
+        "ok": true
+      },
+      {
+        "label": "text-primary on card (existing usages)",
+        "fgRole": "primary",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#1447e6",
+        "bg": "#ffffff",
+        "wcag": 6.83,
+        "lc": 82.4,
+        "ok": true
+      },
+      {
+        "label": "text-primary on page (existing usages)",
+        "fgRole": "primary",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#1447e6",
+        "bg": "#f1f3f9",
+        "wcag": 6.16,
+        "lc": 75.3,
+        "ok": true
+      },
+      {
+        "label": "B: CTA label on fill",
+        "fgRole": "cta-foreground",
+        "bgRole": "cta",
+        "kind": "label",
+        "fg": "#0d1529",
+        "bg": "#fec71d",
+        "wcag": 11.59,
+        "lc": 76.9,
+        "ok": true
+      },
+      {
+        "label": "B: CTA label on hover fill",
+        "fgRole": "cta-foreground",
+        "bgRole": "cta-hover",
+        "kind": "label",
+        "fg": "#0d1529",
+        "bg": "#fed756",
+        "wcag": 13.03,
+        "lc": 83.5,
+        "ok": true
+      },
+      {
+        "label": "B: CTA label on pressed fill",
+        "fgRole": "cta-foreground",
+        "bgRole": "cta-active",
+        "kind": "label2",
+        "fg": "#0d1529",
+        "bg": "#f5b005",
+        "wcag": 9.59,
+        "lc": 67,
+        "ok": true
+      },
+      {
+        "label": "B: CTA fill vs hero (stand-out)",
+        "fgRole": "cta",
+        "bgRole": "hero",
+        "kind": "nontext",
+        "fg": "#fec71d",
+        "bg": "#14255f",
+        "wcag": 9.18,
+        "lc": -73.3,
+        "ok": true
+      },
+      {
+        "label": "B: CTA hover fill vs hero",
+        "fgRole": "cta-hover",
+        "bgRole": "hero",
+        "kind": "nontext",
+        "fg": "#fed756",
+        "bg": "#14255f",
+        "wcag": 10.32,
+        "lc": -80.4,
+        "ok": true
+      },
+      {
+        "label": "B: CTA fill vs page (if placed on the page)",
+        "fgRole": "cta",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#fec71d",
+        "bg": "#f1f3f9",
+        "wcag": 1.41,
+        "lc": 18.5,
+        "ok": true
+      },
+      {
+        "label": "B: CTA fill vs card (if placed on a card)",
+        "fgRole": "cta",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#fec71d",
+        "bg": "#ffffff",
+        "wcag": 1.57,
+        "lc": 25.7,
+        "ok": true
+      },
+      {
+        "label": "B: CTA edge vs card (gives the 3:1 boundary)",
+        "fgRole": "cta-edge",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#b36300",
+        "bg": "#ffffff",
+        "wcag": 4.47,
+        "lc": 70.5,
+        "ok": true
+      },
+      {
+        "label": "B: CTA edge vs page",
+        "fgRole": "cta-edge",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#b36300",
+        "bg": "#f1f3f9",
+        "wcag": 4.03,
+        "lc": 63.4,
+        "ok": true
+      },
+      {
+        "label": "A: CTA label on fill",
+        "fgRole": "ctaA-foreground",
+        "bgRole": "ctaA",
+        "kind": "label",
+        "fg": "#ffffff",
+        "bg": "#1447e6",
+        "wcag": 6.83,
+        "lc": -87.5,
+        "ok": true
+      },
+      {
+        "label": "A: CTA label on hover fill",
+        "fgRole": "ctaA-foreground",
+        "bgRole": "ctaA-hover",
+        "kind": "label",
+        "fg": "#ffffff",
+        "bg": "#153bb7",
+        "wcag": 8.97,
+        "lc": -94.1,
+        "ok": true
+      },
+      {
+        "label": "A: CTA label on pressed fill",
+        "fgRole": "ctaA-foreground",
+        "bgRole": "ctaA-active",
+        "kind": "label2",
+        "fg": "#ffffff",
+        "bg": "#1d3478",
+        "wcag": 11.57,
+        "lc": -100,
+        "ok": true
+      },
+      {
+        "label": "A: CTA fill vs soft hero (stand-out)",
+        "fgRole": "ctaA",
+        "bgRole": "hero-soft",
+        "kind": "deco",
+        "fg": "#1447e6",
+        "bg": "#e1ecff",
+        "wcag": 5.74,
+        "lc": 70.6,
+        "ok": true
+      },
+      {
+        "label": "A: CTA fill vs card (stand-out)",
+        "fgRole": "ctaA",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#1447e6",
+        "bg": "#ffffff",
+        "wcag": 6.83,
+        "lc": 82.4,
+        "ok": true
+      },
+      {
+        "label": "A: CTA fill vs bold hero (fails in light, works in dark)",
+        "fgRole": "ctaA",
+        "bgRole": "hero",
+        "kind": "deco",
+        "fg": "#1447e6",
+        "bg": "#14255f",
+        "wcag": 2.11,
+        "lc": -15.4,
+        "ok": true
+      },
+      {
+        "label": "A: heading / numeral on soft hero",
+        "fgRole": "foreground-strong",
+        "bgRole": "hero-soft",
+        "kind": "body",
+        "fg": "#0d1529",
+        "bg": "#e1ecff",
+        "wcag": 15.26,
+        "lc": 93.1,
+        "ok": true
+      },
+      {
+        "label": "A: body text on soft hero",
+        "fgRole": "foreground",
+        "bgRole": "hero-soft",
+        "kind": "bodyTint",
+        "fg": "#2a354d",
+        "bg": "#e1ecff",
+        "wcag": 10.29,
+        "lc": 86.2,
+        "ok": true
+      },
+      {
+        "label": "A: muted text on soft hero",
+        "fgRole": "muted-foreground",
+        "bgRole": "hero-soft",
+        "kind": "muted2",
+        "fg": "#505b72",
+        "bg": "#e1ecff",
+        "wcag": 5.73,
+        "lc": 71.8,
+        "ok": true
+      },
+      {
+        "label": "Focus ring vs page",
+        "fgRole": "ring",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#f1f3f9",
+        "wcag": 6.16,
+        "lc": 75.3,
+        "ok": true
+      },
+      {
+        "label": "Focus ring vs card",
+        "fgRole": "ring",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#ffffff",
+        "wcag": 6.83,
+        "lc": 82.4,
+        "ok": true
+      },
+      {
+        "label": "Focus ring vs sidebar",
+        "fgRole": "ring",
+        "bgRole": "sidebar",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#f9fafd",
+        "wcag": 6.55,
+        "lc": 79.4,
+        "ok": true
+      },
+      {
+        "label": "Focus ring on hero vs hero",
+        "fgRole": "hero-ring",
+        "bgRole": "hero",
+        "kind": "nontext",
+        "fg": "#f9fafd",
+        "bg": "#14255f",
+        "wcag": 13.78,
+        "lc": -100.5,
+        "ok": true
+      },
+      {
+        "label": "A: focus ring vs soft hero",
+        "fgRole": "ring",
+        "bgRole": "hero-soft",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#e1ecff",
+        "wcag": 5.74,
+        "lc": 70.6,
+        "ok": true
+      },
+      {
+        "label": "Control border (border-strong) vs card",
+        "fgRole": "border-strong",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#7c869b",
+        "bg": "#ffffff",
+        "wcag": 3.66,
+        "lc": 64.2,
+        "ok": true
+      },
+      {
+        "label": "Control border (border-strong) vs page",
+        "fgRole": "border-strong",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#7c869b",
+        "bg": "#f1f3f9",
+        "wcag": 3.3,
+        "lc": 57,
+        "ok": true
+      },
+      {
+        "label": "Control border (border-strong) vs popover",
+        "fgRole": "border-strong",
+        "bgRole": "popover",
+        "kind": "nontext",
+        "fg": "#7c869b",
+        "bg": "#ffffff",
+        "wcag": 3.66,
+        "lc": 64.2,
+        "ok": true
+      },
+      {
+        "label": "Hairline (border) vs card",
+        "fgRole": "border",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#cdd4e3",
+        "bg": "#ffffff",
+        "wcag": 1.49,
+        "lc": 22.9,
+        "ok": true
+      },
+      {
+        "label": "Hairline (border) vs page",
+        "fgRole": "border",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#cdd4e3",
+        "bg": "#f1f3f9",
+        "wcag": 1.34,
+        "lc": 15.8,
+        "ok": true
+      },
+      {
+        "label": "Surface: card vs page",
+        "fgRole": "card",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#ffffff",
+        "bg": "#f1f3f9",
+        "wcag": 1.11,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Surface: sidebar vs page",
+        "fgRole": "sidebar",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#f9fafd",
+        "bg": "#f1f3f9",
+        "wcag": 1.06,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Surface: chip (muted) vs card",
+        "fgRole": "muted",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#e7ebf3",
+        "bg": "#ffffff",
+        "wcag": 1.19,
+        "lc": 9.5,
+        "ok": true
+      },
+      {
+        "label": "Surface: hero vs page",
+        "fgRole": "hero",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#14255f",
+        "bg": "#f1f3f9",
+        "wcag": 12.97,
+        "lc": 93.7,
+        "ok": true
+      },
+      {
+        "label": "Surface: soft hero vs page",
+        "fgRole": "hero-soft",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#e1ecff",
+        "bg": "#f1f3f9",
+        "wcag": 1.07,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Success text on card",
+        "fgRole": "success",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#037952",
+        "bg": "#ffffff",
+        "wcag": 5.44,
+        "lc": 76.6,
+        "ok": true
+      },
+      {
+        "label": "Success text on page",
+        "fgRole": "success",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#037952",
+        "bg": "#f1f3f9",
+        "wcag": 4.9,
+        "lc": 69.4,
+        "ok": true
+      },
+      {
+        "label": "Success container text",
+        "fgRole": "success-container-foreground",
+        "bgRole": "success-container",
+        "kind": "muted",
+        "fg": "#034932",
+        "bg": "#d7fae6",
+        "wcag": 9.34,
+        "lc": 86,
+        "ok": true
+      },
+      {
+        "label": "Warning text on card",
+        "fgRole": "warning",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#a94e00",
+        "bg": "#ffffff",
+        "wcag": 5.56,
+        "lc": 77.1,
+        "ok": true
+      },
+      {
+        "label": "Warning text on page",
+        "fgRole": "warning",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#a94e00",
+        "bg": "#f1f3f9",
+        "wcag": 5.01,
+        "lc": 70,
+        "ok": true
+      },
+      {
+        "label": "Warning container text",
+        "fgRole": "warning-container-foreground",
+        "bgRole": "warning-container",
+        "kind": "muted",
+        "fg": "#683110",
+        "bg": "#ffeddb",
+        "wcag": 9.03,
+        "lc": 84.5,
+        "ok": true
+      },
+      {
+        "label": "Danger text on card",
+        "fgRole": "destructive",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#bc1a18",
+        "bg": "#ffffff",
+        "wcag": 6.37,
+        "lc": 79.7,
+        "ok": true
+      },
+      {
+        "label": "Danger text on page",
+        "fgRole": "destructive",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#bc1a18",
+        "bg": "#f1f3f9",
+        "wcag": 5.74,
+        "lc": 72.5,
+        "ok": true
+      },
+      {
+        "label": "Danger button label on fill",
+        "fgRole": "destructive-foreground",
+        "bgRole": "destructive",
+        "kind": "label2",
+        "fg": "#ffffff",
+        "bg": "#bc1a18",
+        "wcag": 6.37,
+        "lc": -84.9,
+        "ok": true
+      },
+      {
+        "label": "Danger container text",
+        "fgRole": "destructive-container-foreground",
+        "bgRole": "destructive-container",
+        "kind": "muted",
+        "fg": "#741a15",
+        "bg": "#ffe6e5",
+        "wcag": 9.31,
+        "lc": 82.8,
+        "ok": true
+      },
+      {
+        "label": "Streak flame icon vs card",
+        "fgRole": "streak",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#d75b01",
+        "bg": "#ffffff",
+        "wcag": 3.9,
+        "lc": 65.6,
+        "ok": true
+      },
+      {
+        "label": "Streak flame icon vs page",
+        "fgRole": "streak",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#d75b01",
+        "bg": "#f1f3f9",
+        "wcag": 3.51,
+        "lc": 58.4,
+        "ok": true
+      },
+      {
+        "label": "Viz: mastered vs learning (adjacent)",
+        "fgRole": "viz-mastered",
+        "bgRole": "viz-learning",
+        "kind": "nontext",
+        "fg": "#14255f",
+        "bg": "#437bf3",
+        "wcag": 3.68,
+        "lc": 32.7,
+        "ok": true
+      },
+      {
+        "label": "Viz: learning vs not started (adjacent)",
+        "fgRole": "viz-learning",
+        "bgRole": "viz-new",
+        "kind": "nontext",
+        "fg": "#437bf3",
+        "bg": "#e7ebf3",
+        "wcag": 3.28,
+        "lc": 54.1,
+        "ok": true
+      },
+      {
+        "label": "Viz: mastered vs card",
+        "fgRole": "viz-mastered",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#14255f",
+        "bg": "#ffffff",
+        "wcag": 14.39,
+        "lc": 100.8,
+        "ok": true
+      },
+      {
+        "label": "Viz: learning vs card",
+        "fgRole": "viz-learning",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#437bf3",
+        "bg": "#ffffff",
+        "wcag": 3.91,
+        "lc": 66.1,
+        "ok": true
+      },
+      {
+        "label": "Viz: not started / track vs card",
+        "fgRole": "viz-new",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#e7ebf3",
+        "bg": "#ffffff",
+        "wcag": 1.19,
+        "lc": 9.5,
+        "ok": true
+      },
+      {
+        "label": "Viz: goal ring vs track",
+        "fgRole": "viz-progress",
+        "bgRole": "viz-track",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#e7ebf3",
+        "wcag": 5.72,
+        "lc": 70.4,
+        "ok": true
+      },
+      {
+        "label": "Viz: goal ring vs card",
+        "fgRole": "viz-progress",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#1447e6",
+        "bg": "#ffffff",
+        "wcag": 6.83,
+        "lc": 82.4,
+        "ok": true
+      },
+      {
+        "label": "Viz: check mark on filled day",
+        "fgRole": "viz-on-progress",
+        "bgRole": "viz-progress",
+        "kind": "nontext",
+        "fg": "#ffffff",
+        "bg": "#1447e6",
+        "wcag": 6.83,
+        "lc": -87.5,
+        "ok": true
+      },
+      {
+        "label": "Viz A: mastered vs learning (adjacent)",
+        "fgRole": "vizA-mastered",
+        "bgRole": "vizA-learning",
+        "kind": "nontext",
+        "fg": "#022f20",
+        "bg": "#019362",
+        "wcag": 3.74,
+        "lc": 33.3,
+        "ok": true
+      },
+      {
+        "label": "Viz A: learning vs not started (adjacent)",
+        "fgRole": "vizA-learning",
+        "bgRole": "viz-new",
+        "kind": "nontext",
+        "fg": "#019362",
+        "bg": "#e7ebf3",
+        "wcag": 3.28,
+        "lc": 54,
+        "ok": true
+      },
+      {
+        "label": "Viz A: goal ring vs track",
+        "fgRole": "vizA-progress",
+        "bgRole": "viz-track",
+        "kind": "nontext",
+        "fg": "#037952",
+        "bg": "#e7ebf3",
+        "wcag": 4.55,
+        "lc": 64.6,
+        "ok": true
+      }
+    ],
+    "dark": [
+      {
+        "label": "Heading / numeral on page",
+        "fgRole": "foreground-strong",
+        "bgRole": "background",
+        "kind": "body",
+        "fg": "#f9fafd",
+        "bg": "#0b1429",
+        "wcag": 17.55,
+        "lc": -103.7,
+        "ok": true
+      },
+      {
+        "label": "Heading / numeral on card",
+        "fgRole": "foreground-strong",
+        "bgRole": "card",
+        "kind": "body",
+        "fg": "#f9fafd",
+        "bg": "#16213a",
+        "wcag": 15.33,
+        "lc": -102.2,
+        "ok": true
+      },
+      {
+        "label": "Body text on page",
+        "fgRole": "foreground",
+        "bgRole": "background",
+        "kind": "body",
+        "fg": "#e7ebf3",
+        "bg": "#0b1429",
+        "wcag": 15.33,
+        "lc": -93.8,
+        "ok": true
+      },
+      {
+        "label": "Body text on card",
+        "fgRole": "foreground",
+        "bgRole": "card",
+        "kind": "body",
+        "fg": "#e7ebf3",
+        "bg": "#16213a",
+        "wcag": 13.39,
+        "lc": -92.3,
+        "ok": true
+      },
+      {
+        "label": "Body text on sidebar",
+        "fgRole": "foreground",
+        "bgRole": "sidebar",
+        "kind": "body",
+        "fg": "#e7ebf3",
+        "bg": "#060c1d",
+        "wcag": 16.3,
+        "lc": -94.4,
+        "ok": true
+      },
+      {
+        "label": "Body text on popover",
+        "fgRole": "foreground",
+        "bgRole": "popover",
+        "kind": "bodyTint",
+        "fg": "#e7ebf3",
+        "bg": "#202c47",
+        "wcag": 11.62,
+        "lc": -90.3,
+        "ok": true
+      },
+      {
+        "label": "Body text on chip (muted)",
+        "fgRole": "foreground",
+        "bgRole": "muted",
+        "kind": "bodyTint",
+        "fg": "#e7ebf3",
+        "bg": "#2a3755",
+        "wcag": 9.9,
+        "lc": -87.5,
+        "ok": true
+      },
+      {
+        "label": "Muted text on page",
+        "fgRole": "muted-foreground",
+        "bgRole": "background",
+        "kind": "muted",
+        "fg": "#cdd4e3",
+        "bg": "#0b1429",
+        "wcag": 12.32,
+        "lc": -79.4,
+        "ok": true
+      },
+      {
+        "label": "Muted text on card",
+        "fgRole": "muted-foreground",
+        "bgRole": "card",
+        "kind": "muted",
+        "fg": "#cdd4e3",
+        "bg": "#16213a",
+        "wcag": 10.76,
+        "lc": -77.9,
+        "ok": true
+      },
+      {
+        "label": "Muted text on sidebar",
+        "fgRole": "muted-foreground",
+        "bgRole": "sidebar",
+        "kind": "muted",
+        "fg": "#cdd4e3",
+        "bg": "#060c1d",
+        "wcag": 13.1,
+        "lc": -80,
+        "ok": true
+      },
+      {
+        "label": "Muted text on popover",
+        "fgRole": "muted-foreground",
+        "bgRole": "popover",
+        "kind": "muted2",
+        "fg": "#cdd4e3",
+        "bg": "#202c47",
+        "wcag": 9.34,
+        "lc": -75.9,
+        "ok": true
+      },
+      {
+        "label": "Muted text on chip (muted)",
+        "fgRole": "muted-foreground",
+        "bgRole": "muted",
+        "kind": "muted2",
+        "fg": "#cdd4e3",
+        "bg": "#2a3755",
+        "wcag": 7.95,
+        "lc": -73.1,
+        "ok": true
+      },
+      {
+        "label": "Selected label on accent tint",
+        "fgRole": "accent-foreground",
+        "bgRole": "accent",
+        "kind": "label",
+        "fg": "#c8dcff",
+        "bg": "#2a3755",
+        "wcag": 8.52,
+        "lc": -77.5,
+        "ok": true
+      },
+      {
+        "label": "Selected border / brand icon vs card",
+        "fgRole": "brand",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#a5c5ff",
+        "bg": "#16213a",
+        "wcag": 9.16,
+        "lc": -68.5,
+        "ok": true
+      },
+      {
+        "label": "Selected border / brand icon vs page",
+        "fgRole": "brand",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#a5c5ff",
+        "bg": "#0b1429",
+        "wcag": 10.49,
+        "lc": -70.1,
+        "ok": true
+      },
+      {
+        "label": "Link on page",
+        "fgRole": "link",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#c8dcff",
+        "bg": "#0b1429",
+        "wcag": 13.21,
+        "lc": -83.8,
+        "ok": true
+      },
+      {
+        "label": "Link on card",
+        "fgRole": "link",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#c8dcff",
+        "bg": "#16213a",
+        "wcag": 11.53,
+        "lc": -82.2,
+        "ok": true
+      },
+      {
+        "label": "Hero text on hero",
+        "fgRole": "hero-foreground",
+        "bgRole": "hero",
+        "kind": "body",
+        "fg": "#f9fafd",
+        "bg": "#1d3478",
+        "wcag": 11.09,
+        "lc": -96.7,
+        "ok": true
+      },
+      {
+        "label": "Hero secondary text on hero",
+        "fgRole": "hero-muted-foreground",
+        "bgRole": "hero",
+        "kind": "muted",
+        "fg": "#e1ecff",
+        "bg": "#1d3478",
+        "wcag": 9.72,
+        "lc": -87,
+        "ok": true
+      },
+      {
+        "label": "Hero chip text on hero chip",
+        "fgRole": "hero-foreground",
+        "bgRole": "hero-chip",
+        "kind": "bodyTint",
+        "fg": "#f9fafd",
+        "bg": "#374f8b",
+        "wcag": 7.58,
+        "lc": -88.7,
+        "ok": true
+      },
+      {
+        "label": "Hero hairline vs hero",
+        "fgRole": "hero-border",
+        "bgRole": "hero",
+        "kind": "deco",
+        "fg": "#153bb7",
+        "bg": "#1d3478",
+        "wcag": 1.29,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Primary (brand) button label on fill",
+        "fgRole": "primary-foreground",
+        "bgRole": "primary",
+        "kind": "label",
+        "fg": "#060c1d",
+        "bg": "#c8dcff",
+        "wcag": 14.04,
+        "lc": 84.4,
+        "ok": true
+      },
+      {
+        "label": "Primary (brand) button label on hover fill",
+        "fgRole": "primary-foreground",
+        "bgRole": "primary-hover",
+        "kind": "label",
+        "fg": "#060c1d",
+        "bg": "#e1ecff",
+        "wcag": 16.37,
+        "lc": 93.9,
+        "ok": true
+      },
+      {
+        "label": "text-primary on card (existing usages)",
+        "fgRole": "primary",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#c8dcff",
+        "bg": "#16213a",
+        "wcag": 11.53,
+        "lc": -82.2,
+        "ok": true
+      },
+      {
+        "label": "text-primary on page (existing usages)",
+        "fgRole": "primary",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#c8dcff",
+        "bg": "#0b1429",
+        "wcag": 13.21,
+        "lc": -83.8,
+        "ok": true
+      },
+      {
+        "label": "B: CTA label on fill",
+        "fgRole": "cta-foreground",
+        "bgRole": "cta",
+        "kind": "label",
+        "fg": "#060c1d",
+        "bg": "#fed756",
+        "wcag": 13.98,
+        "lc": 84.3,
+        "ok": true
+      },
+      {
+        "label": "B: CTA label on hover fill",
+        "fgRole": "cta-foreground",
+        "bgRole": "cta-hover",
+        "kind": "label",
+        "fg": "#060c1d",
+        "bg": "#fee58f",
+        "wcag": 15.6,
+        "lc": 90.9,
+        "ok": true
+      },
+      {
+        "label": "B: CTA label on pressed fill",
+        "fgRole": "cta-foreground",
+        "bgRole": "cta-active",
+        "kind": "label2",
+        "fg": "#060c1d",
+        "bg": "#fec71d",
+        "wcag": 12.43,
+        "lc": 77.7,
+        "ok": true
+      },
+      {
+        "label": "B: CTA fill vs hero (stand-out)",
+        "fgRole": "cta",
+        "bgRole": "hero",
+        "kind": "nontext",
+        "fg": "#fed756",
+        "bg": "#1d3478",
+        "wcag": 8.3,
+        "lc": -76.6,
+        "ok": true
+      },
+      {
+        "label": "B: CTA hover fill vs hero",
+        "fgRole": "cta-hover",
+        "bgRole": "hero",
+        "kind": "nontext",
+        "fg": "#fee58f",
+        "bg": "#1d3478",
+        "wcag": 9.27,
+        "lc": -83.8,
+        "ok": true
+      },
+      {
+        "label": "B: CTA fill vs page (if placed on the page)",
+        "fgRole": "cta",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#fed756",
+        "bg": "#0b1429",
+        "wcag": 13.15,
+        "lc": -83.7,
+        "ok": true
+      },
+      {
+        "label": "B: CTA fill vs card (if placed on a card)",
+        "fgRole": "cta",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#fed756",
+        "bg": "#16213a",
+        "wcag": 11.48,
+        "lc": -82.1,
+        "ok": true
+      },
+      {
+        "label": "B: CTA edge vs card (gives the 3:1 boundary)",
+        "fgRole": "cta-edge",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#db8903",
+        "bg": "#16213a",
+        "wcag": 5.78,
+        "lc": -46.5,
+        "ok": true
+      },
+      {
+        "label": "B: CTA edge vs page",
+        "fgRole": "cta-edge",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#db8903",
+        "bg": "#0b1429",
+        "wcag": 6.62,
+        "lc": -48,
+        "ok": true
+      },
+      {
+        "label": "A: CTA label on fill",
+        "fgRole": "ctaA-foreground",
+        "bgRole": "ctaA",
+        "kind": "label",
+        "fg": "#060c1d",
+        "bg": "#c8dcff",
+        "wcag": 14.04,
+        "lc": 84.4,
+        "ok": true
+      },
+      {
+        "label": "A: CTA label on hover fill",
+        "fgRole": "ctaA-foreground",
+        "bgRole": "ctaA-hover",
+        "kind": "label",
+        "fg": "#060c1d",
+        "bg": "#e1ecff",
+        "wcag": 16.37,
+        "lc": 93.9,
+        "ok": true
+      },
+      {
+        "label": "A: CTA label on pressed fill",
+        "fgRole": "ctaA-foreground",
+        "bgRole": "ctaA-active",
+        "kind": "label2",
+        "fg": "#060c1d",
+        "bg": "#a5c5ff",
+        "wcag": 11.16,
+        "lc": 71.7,
+        "ok": true
+      },
+      {
+        "label": "A: CTA fill vs soft hero (stand-out)",
+        "fgRole": "ctaA",
+        "bgRole": "hero-soft",
+        "kind": "deco",
+        "fg": "#c8dcff",
+        "bg": "#202c47",
+        "wcag": 10.01,
+        "lc": -80.3,
+        "ok": true
+      },
+      {
+        "label": "A: CTA fill vs card (stand-out)",
+        "fgRole": "ctaA",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#c8dcff",
+        "bg": "#16213a",
+        "wcag": 11.53,
+        "lc": -82.2,
+        "ok": true
+      },
+      {
+        "label": "A: CTA fill vs bold hero (fails in light, works in dark)",
+        "fgRole": "ctaA",
+        "bgRole": "hero",
+        "kind": "deco",
+        "fg": "#c8dcff",
+        "bg": "#1d3478",
+        "wcag": 8.34,
+        "lc": -76.7,
+        "ok": true
+      },
+      {
+        "label": "A: heading / numeral on soft hero",
+        "fgRole": "foreground-strong",
+        "bgRole": "hero-soft",
+        "kind": "body",
+        "fg": "#f9fafd",
+        "bg": "#202c47",
+        "wcag": 13.3,
+        "lc": -100.2,
+        "ok": true
+      },
+      {
+        "label": "A: body text on soft hero",
+        "fgRole": "foreground",
+        "bgRole": "hero-soft",
+        "kind": "bodyTint",
+        "fg": "#e7ebf3",
+        "bg": "#202c47",
+        "wcag": 11.62,
+        "lc": -90.3,
+        "ok": true
+      },
+      {
+        "label": "A: muted text on soft hero",
+        "fgRole": "muted-foreground",
+        "bgRole": "hero-soft",
+        "kind": "muted2",
+        "fg": "#cdd4e3",
+        "bg": "#202c47",
+        "wcag": 9.34,
+        "lc": -75.9,
+        "ok": true
+      },
+      {
+        "label": "Focus ring vs page",
+        "fgRole": "ring",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#a5c5ff",
+        "bg": "#0b1429",
+        "wcag": 10.49,
+        "lc": -70.1,
+        "ok": true
+      },
+      {
+        "label": "Focus ring vs card",
+        "fgRole": "ring",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#a5c5ff",
+        "bg": "#16213a",
+        "wcag": 9.16,
+        "lc": -68.5,
+        "ok": true
+      },
+      {
+        "label": "Focus ring vs sidebar",
+        "fgRole": "ring",
+        "bgRole": "sidebar",
+        "kind": "nontext",
+        "fg": "#a5c5ff",
+        "bg": "#060c1d",
+        "wcag": 11.16,
+        "lc": -70.7,
+        "ok": true
+      },
+      {
+        "label": "Focus ring on hero vs hero",
+        "fgRole": "hero-ring",
+        "bgRole": "hero",
+        "kind": "nontext",
+        "fg": "#f9fafd",
+        "bg": "#1d3478",
+        "wcag": 11.09,
+        "lc": -96.7,
+        "ok": true
+      },
+      {
+        "label": "A: focus ring vs soft hero",
+        "fgRole": "ring",
+        "bgRole": "hero-soft",
+        "kind": "nontext",
+        "fg": "#a5c5ff",
+        "bg": "#202c47",
+        "wcag": 7.95,
+        "lc": -66.6,
+        "ok": true
+      },
+      {
+        "label": "Control border (border-strong) vs card",
+        "fgRole": "border-strong",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#7c869b",
+        "bg": "#16213a",
+        "wcag": 4.37,
+        "lc": -35.1,
+        "ok": true
+      },
+      {
+        "label": "Control border (border-strong) vs page",
+        "fgRole": "border-strong",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#7c869b",
+        "bg": "#0b1429",
+        "wcag": 5.01,
+        "lc": -36.6,
+        "ok": true
+      },
+      {
+        "label": "Control border (border-strong) vs popover",
+        "fgRole": "border-strong",
+        "bgRole": "popover",
+        "kind": "nontext",
+        "fg": "#7c869b",
+        "bg": "#202c47",
+        "wcag": 3.79,
+        "lc": -33.1,
+        "ok": true
+      },
+      {
+        "label": "Hairline (border) vs card",
+        "fgRole": "border",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#394767",
+        "bg": "#16213a",
+        "wcag": 1.73,
+        "lc": -8.6,
+        "ok": true
+      },
+      {
+        "label": "Hairline (border) vs page",
+        "fgRole": "border",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#394767",
+        "bg": "#0b1429",
+        "wcag": 1.98,
+        "lc": -10.2,
+        "ok": true
+      },
+      {
+        "label": "Surface: card vs page",
+        "fgRole": "card",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#16213a",
+        "bg": "#0b1429",
+        "wcag": 1.15,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Surface: sidebar vs page",
+        "fgRole": "sidebar",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#060c1d",
+        "bg": "#0b1429",
+        "wcag": 1.06,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Surface: chip (muted) vs card",
+        "fgRole": "muted",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#2a3755",
+        "bg": "#16213a",
+        "wcag": 1.35,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Surface: hero vs page",
+        "fgRole": "hero",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#1d3478",
+        "bg": "#0b1429",
+        "wcag": 1.58,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Surface: soft hero vs page",
+        "fgRole": "hero-soft",
+        "bgRole": "background",
+        "kind": "deco",
+        "fg": "#202c47",
+        "bg": "#0b1429",
+        "wcag": 1.32,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Success text on card",
+        "fgRole": "success",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#85e9b6",
+        "bg": "#16213a",
+        "wcag": 10.91,
+        "lc": -79,
+        "ok": true
+      },
+      {
+        "label": "Success text on page",
+        "fgRole": "success",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#85e9b6",
+        "bg": "#0b1429",
+        "wcag": 12.5,
+        "lc": -80.5,
+        "ok": true
+      },
+      {
+        "label": "Success container text",
+        "fgRole": "success-container-foreground",
+        "bgRole": "success-container",
+        "kind": "muted",
+        "fg": "#b5f4d1",
+        "bg": "#022f20",
+        "wcag": 11.77,
+        "lc": -88,
+        "ok": true
+      },
+      {
+        "label": "Warning text on card",
+        "fgRole": "warning",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#ffbf87",
+        "bg": "#16213a",
+        "wcag": 9.94,
+        "lc": -73.3,
+        "ok": true
+      },
+      {
+        "label": "Warning text on page",
+        "fgRole": "warning",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#ffbf87",
+        "bg": "#0b1429",
+        "wcag": 11.39,
+        "lc": -74.9,
+        "ok": true
+      },
+      {
+        "label": "Warning container text",
+        "fgRole": "warning-container-foreground",
+        "bgRole": "warning-container",
+        "kind": "muted",
+        "fg": "#ffdab7",
+        "bg": "#421d09",
+        "wcag": 11.31,
+        "lc": -84.6,
+        "ok": true
+      },
+      {
+        "label": "Danger text on card",
+        "fgRole": "destructive",
+        "bgRole": "card",
+        "kind": "colored",
+        "fg": "#ffaaa8",
+        "bg": "#16213a",
+        "wcag": 8.81,
+        "lc": -66.5,
+        "ok": true
+      },
+      {
+        "label": "Danger text on page",
+        "fgRole": "destructive",
+        "bgRole": "background",
+        "kind": "colored",
+        "fg": "#ffaaa8",
+        "bg": "#0b1429",
+        "wcag": 10.09,
+        "lc": -68.1,
+        "ok": true
+      },
+      {
+        "label": "Danger button label on fill",
+        "fgRole": "destructive-foreground",
+        "bgRole": "destructive",
+        "kind": "label2",
+        "fg": "#060c1d",
+        "bg": "#ffaaa8",
+        "wcag": 10.73,
+        "lc": 69.8,
+        "ok": true
+      },
+      {
+        "label": "Danger container text",
+        "fgRole": "destructive-container-foreground",
+        "bgRole": "destructive-container",
+        "kind": "muted",
+        "fg": "#ffcfce",
+        "bg": "#48100d",
+        "wcag": 11.12,
+        "lc": -81.1,
+        "ok": true
+      },
+      {
+        "label": "Streak flame icon vs card",
+        "fgRole": "streak",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#ff9b4e",
+        "bg": "#16213a",
+        "wcag": 7.66,
+        "lc": -59.3,
+        "ok": true
+      },
+      {
+        "label": "Streak flame icon vs page",
+        "fgRole": "streak",
+        "bgRole": "background",
+        "kind": "nontext",
+        "fg": "#ff9b4e",
+        "bg": "#0b1429",
+        "wcag": 8.77,
+        "lc": -60.9,
+        "ok": true
+      },
+      {
+        "label": "Viz: mastered vs learning (adjacent)",
+        "fgRole": "viz-mastered",
+        "bgRole": "viz-learning",
+        "kind": "nontext",
+        "fg": "#e1ecff",
+        "bg": "#437bf3",
+        "wcag": 3.29,
+        "lc": -58.7,
+        "ok": true
+      },
+      {
+        "label": "Viz: learning vs not started (adjacent)",
+        "fgRole": "viz-learning",
+        "bgRole": "viz-new",
+        "kind": "nontext",
+        "fg": "#437bf3",
+        "bg": "#202c47",
+        "wcag": 3.55,
+        "lc": -31.1,
+        "ok": true
+      },
+      {
+        "label": "Viz: mastered vs card",
+        "fgRole": "viz-mastered",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#e1ecff",
+        "bg": "#16213a",
+        "wcag": 13.44,
+        "lc": -92.5,
+        "ok": true
+      },
+      {
+        "label": "Viz: learning vs card",
+        "fgRole": "viz-learning",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#437bf3",
+        "bg": "#16213a",
+        "wcag": 4.09,
+        "lc": -33.1,
+        "ok": true
+      },
+      {
+        "label": "Viz: not started / track vs card",
+        "fgRole": "viz-new",
+        "bgRole": "card",
+        "kind": "deco",
+        "fg": "#202c47",
+        "bg": "#16213a",
+        "wcag": 1.15,
+        "lc": 0,
+        "ok": true
+      },
+      {
+        "label": "Viz: goal ring vs track",
+        "fgRole": "viz-progress",
+        "bgRole": "viz-track",
+        "kind": "nontext",
+        "fg": "#77a6ff",
+        "bg": "#202c47",
+        "wcag": 5.74,
+        "lc": -50.2,
+        "ok": true
+      },
+      {
+        "label": "Viz: goal ring vs card",
+        "fgRole": "viz-progress",
+        "bgRole": "card",
+        "kind": "nontext",
+        "fg": "#77a6ff",
+        "bg": "#16213a",
+        "wcag": 6.61,
+        "lc": -52.1,
+        "ok": true
+      },
+      {
+        "label": "Viz: check mark on filled day",
+        "fgRole": "viz-on-progress",
+        "bgRole": "viz-progress",
+        "kind": "nontext",
+        "fg": "#060c1d",
+        "bg": "#77a6ff",
+        "wcag": 8.05,
+        "lc": 56.1,
+        "ok": true
+      },
+      {
+        "label": "Viz A: mastered vs learning (adjacent)",
+        "fgRole": "vizA-mastered",
+        "bgRole": "vizA-learning",
+        "kind": "nontext",
+        "fg": "#d7fae6",
+        "bg": "#019362",
+        "wcag": 3.5,
+        "lc": -62.8,
+        "ok": true
+      },
+      {
+        "label": "Viz A: learning vs not started (adjacent)",
+        "fgRole": "vizA-learning",
+        "bgRole": "viz-new",
+        "kind": "nontext",
+        "fg": "#019362",
+        "bg": "#202c47",
+        "wcag": 3.54,
+        "lc": -31.2,
+        "ok": true
+      },
+      {
+        "label": "Viz A: goal ring vs track",
+        "fgRole": "vizA-progress",
+        "bgRole": "viz-track",
+        "kind": "nontext",
+        "fg": "#4ed799",
+        "bg": "#202c47",
+        "wcag": 7.61,
+        "lc": -64.4,
+        "ok": true
+      }
+    ]
+  },
+  "gamut": [
+    {
+      "token": "neutral.0",
+      "css": "oklch(1 0 0)",
+      "hex": "#ffffff",
+      "inSrgb": true,
+      "requestedC": 0,
+      "finalC": 0
+    },
+    {
+      "token": "neutral.50",
+      "css": "oklch(0.985 0.004 264)",
+      "hex": "#f9fafd",
+      "inSrgb": true,
+      "requestedC": 0.004,
+      "finalC": 0.004
+    },
+    {
+      "token": "neutral.100",
+      "css": "oklch(0.965 0.008 264)",
+      "hex": "#f1f3f9",
+      "inSrgb": true,
+      "requestedC": 0.008,
+      "finalC": 0.008
+    },
+    {
+      "token": "neutral.200",
+      "css": "oklch(0.94 0.012 264)",
+      "hex": "#e7ebf3",
+      "inSrgb": true,
+      "requestedC": 0.012,
+      "finalC": 0.012
+    },
+    {
+      "token": "neutral.300",
+      "css": "oklch(0.87 0.022 264)",
+      "hex": "#cdd4e3",
+      "inSrgb": true,
+      "requestedC": 0.022,
+      "finalC": 0.022
+    },
+    {
+      "token": "neutral.400",
+      "css": "oklch(0.8 0.024 264)",
+      "hex": "#b6bece",
+      "inSrgb": true,
+      "requestedC": 0.024,
+      "finalC": 0.024
+    },
+    {
+      "token": "neutral.500",
+      "css": "oklch(0.7 0.03 264)",
+      "hex": "#959fb2",
+      "inSrgb": true,
+      "requestedC": 0.03,
+      "finalC": 0.03
+    },
+    {
+      "token": "neutral.600",
+      "css": "oklch(0.62 0.034 264)",
+      "hex": "#7c869b",
+      "inSrgb": true,
+      "requestedC": 0.034,
+      "finalC": 0.034
+    },
+    {
+      "token": "neutral.700",
+      "css": "oklch(0.47 0.04 265)",
+      "hex": "#505b72",
+      "inSrgb": true,
+      "requestedC": 0.04,
+      "finalC": 0.04
+    },
+    {
+      "token": "neutral.800",
+      "css": "oklch(0.33 0.045 266)",
+      "hex": "#2a354d",
+      "inSrgb": true,
+      "requestedC": 0.045,
+      "finalC": 0.045
+    },
+    {
+      "token": "neutral.900",
+      "css": "oklch(0.26 0.045 266)",
+      "hex": "#1a233a",
+      "inSrgb": true,
+      "requestedC": 0.045,
+      "finalC": 0.045
+    },
+    {
+      "token": "neutral.950",
+      "css": "oklch(0.2 0.042 266)",
+      "hex": "#0d1529",
+      "inSrgb": true,
+      "requestedC": 0.042,
+      "finalC": 0.042
+    },
+    {
+      "token": "navy.700",
+      "css": "oklch(0.4 0.058 266)",
+      "hex": "#394767",
+      "inSrgb": true,
+      "requestedC": 0.058,
+      "finalC": 0.058
+    },
+    {
+      "token": "navy.750",
+      "css": "oklch(0.34 0.055 266)",
+      "hex": "#2a3755",
+      "inSrgb": true,
+      "requestedC": 0.055,
+      "finalC": 0.055
+    },
+    {
+      "token": "navy.800",
+      "css": "oklch(0.295 0.053 266)",
+      "hex": "#202c47",
+      "inSrgb": true,
+      "requestedC": 0.053,
+      "finalC": 0.053
+    },
+    {
+      "token": "navy.850",
+      "css": "oklch(0.25 0.05 266)",
+      "hex": "#16213a",
+      "inSrgb": true,
+      "requestedC": 0.05,
+      "finalC": 0.05
+    },
+    {
+      "token": "navy.900",
+      "css": "oklch(0.195 0.045 266)",
+      "hex": "#0b1429",
+      "inSrgb": true,
+      "requestedC": 0.045,
+      "finalC": 0.045
+    },
+    {
+      "token": "navy.950",
+      "css": "oklch(0.16 0.038 266)",
+      "hex": "#060c1d",
+      "inSrgb": true,
+      "requestedC": 0.038,
+      "finalC": 0.038
+    },
+    {
+      "token": "blue.50",
+      "css": "oklch(0.972 0.013 262)",
+      "hex": "#f1f6ff",
+      "inSrgb": true,
+      "requestedC": 0.013,
+      "finalC": 0.013
+    },
+    {
+      "token": "blue.100",
+      "css": "oklch(0.94 0.028 262)",
+      "hex": "#e1ecff",
+      "inSrgb": true,
+      "requestedC": 0.028,
+      "finalC": 0.028
+    },
+    {
+      "token": "blue.200",
+      "css": "oklch(0.89 0.053 262)",
+      "hex": "#c8dcff",
+      "inSrgb": true,
+      "requestedC": 0.053,
+      "finalC": 0.053
+    },
+    {
+      "token": "blue.300",
+      "css": "oklch(0.82 0.089 262)",
+      "hex": "#a5c5ff",
+      "inSrgb": true,
+      "requestedC": 0.089,
+      "finalC": 0.089
+    },
+    {
+      "token": "blue.400",
+      "css": "oklch(0.73 0.139 262)",
+      "hex": "#77a6ff",
+      "inSrgb": true,
+      "requestedC": 0.139,
+      "finalC": 0.139
+    },
+    {
+      "token": "blue.500",
+      "css": "oklch(0.61 0.19 263)",
+      "hex": "#437bf3",
+      "inSrgb": true,
+      "requestedC": 0.19,
+      "finalC": 0.19
+    },
+    {
+      "token": "blue.600",
+      "css": "oklch(0.54 0.225 264)",
+      "hex": "#265eee",
+      "inSrgb": true,
+      "requestedC": 0.225,
+      "finalC": 0.225
+    },
+    {
+      "token": "blue.700",
+      "css": "oklch(0.488 0.243 264.376)",
+      "hex": "#1447e6",
+      "inSrgb": true,
+      "requestedC": 0.243,
+      "finalC": 0.243
+    },
+    {
+      "token": "blue.800",
+      "css": "oklch(0.42 0.2 265)",
+      "hex": "#153bb7",
+      "inSrgb": true,
+      "requestedC": 0.2,
+      "finalC": 0.2
+    },
+    {
+      "token": "blue.900",
+      "css": "oklch(0.35 0.12 266)",
+      "hex": "#1d3478",
+      "inSrgb": true,
+      "requestedC": 0.12,
+      "finalC": 0.12
+    },
+    {
+      "token": "blue.950",
+      "css": "oklch(0.29 0.105 267)",
+      "hex": "#14255f",
+      "inSrgb": true,
+      "requestedC": 0.105,
+      "finalC": 0.105
+    },
+    {
+      "token": "amber.50",
+      "css": "oklch(0.985 0.024 95)",
+      "hex": "#fffae8",
+      "inSrgb": true,
+      "requestedC": 0.024,
+      "finalC": 0.024
+    },
+    {
+      "token": "amber.100",
+      "css": "oklch(0.96 0.06 95)",
+      "hex": "#fef2c5",
+      "inSrgb": true,
+      "requestedC": 0.06,
+      "finalC": 0.06
+    },
+    {
+      "token": "amber.200",
+      "css": "oklch(0.925 0.11 94)",
+      "hex": "#fee58f",
+      "inSrgb": true,
+      "requestedC": 0.11,
+      "finalC": 0.11
+    },
+    {
+      "token": "amber.300",
+      "css": "oklch(0.89 0.15 92)",
+      "hex": "#fed756",
+      "inSrgb": true,
+      "requestedC": 0.15,
+      "finalC": 0.15
+    },
+    {
+      "token": "amber.400",
+      "css": "oklch(0.855 0.17 88)",
+      "hex": "#fec71d",
+      "inSrgb": true,
+      "requestedC": 0.17,
+      "finalC": 0.17
+    },
+    {
+      "token": "amber.500",
+      "css": "oklch(0.8 0.165 80)",
+      "hex": "#f5b005",
+      "inSrgb": true,
+      "requestedC": 0.165,
+      "finalC": 0.165
+    },
+    {
+      "token": "amber.600",
+      "css": "oklch(0.7 0.153 68)",
+      "hex": "#db8903",
+      "inSrgb": true,
+      "requestedC": 0.153,
+      "finalC": 0.153
+    },
+    {
+      "token": "amber.700",
+      "css": "oklch(0.58 0.136 60)",
+      "hex": "#b36300",
+      "inSrgb": true,
+      "requestedC": 0.136,
+      "finalC": 0.136
+    },
+    {
+      "token": "amber.800",
+      "css": "oklch(0.48 0.115 56)",
+      "hex": "#8d4905",
+      "inSrgb": true,
+      "requestedC": 0.115,
+      "finalC": 0.115
+    },
+    {
+      "token": "amber.900",
+      "css": "oklch(0.39 0.09 54)",
+      "hex": "#69350b",
+      "inSrgb": true,
+      "requestedC": 0.09,
+      "finalC": 0.09
+    },
+    {
+      "token": "amber.950",
+      "css": "oklch(0.29 0.065 52)",
+      "hex": "#442007",
+      "inSrgb": true,
+      "requestedC": 0.065,
+      "finalC": 0.065
+    },
+    {
+      "token": "orange.50",
+      "css": "oklch(0.98 0.014 70)",
+      "hex": "#fff7ef",
+      "inSrgb": true,
+      "requestedC": 0.014,
+      "finalC": 0.014
+    },
+    {
+      "token": "orange.100",
+      "css": "oklch(0.955 0.031 68)",
+      "hex": "#ffeddb",
+      "inSrgb": true,
+      "requestedC": 0.031,
+      "finalC": 0.031
+    },
+    {
+      "token": "orange.200",
+      "css": "oklch(0.91 0.062 65)",
+      "hex": "#ffdab7",
+      "inSrgb": true,
+      "requestedC": 0.062,
+      "finalC": 0.062
+    },
+    {
+      "token": "orange.300",
+      "css": "oklch(0.85 0.103 62)",
+      "hex": "#ffbf87",
+      "inSrgb": true,
+      "requestedC": 0.103,
+      "finalC": 0.103
+    },
+    {
+      "token": "orange.400",
+      "css": "oklch(0.78 0.15 56)",
+      "hex": "#ff9b4e",
+      "inSrgb": true,
+      "requestedC": 0.15,
+      "finalC": 0.15
+    },
+    {
+      "token": "orange.500",
+      "css": "oklch(0.7 0.18 50)",
+      "hex": "#f37513",
+      "inSrgb": true,
+      "requestedC": 0.18,
+      "finalC": 0.18
+    },
+    {
+      "token": "orange.600",
+      "css": "oklch(0.62 0.174 46)",
+      "hex": "#d75b01",
+      "inSrgb": true,
+      "requestedC": 0.174,
+      "finalC": 0.174
+    },
+    {
+      "token": "orange.700",
+      "css": "oklch(0.53 0.14 50)",
+      "hex": "#a94e00",
+      "inSrgb": true,
+      "requestedC": 0.14,
+      "finalC": 0.14
+    },
+    {
+      "token": "orange.800",
+      "css": "oklch(0.45 0.115 50)",
+      "hex": "#863e07",
+      "inSrgb": true,
+      "requestedC": 0.115,
+      "finalC": 0.115
+    },
+    {
+      "token": "orange.900",
+      "css": "oklch(0.38 0.09 48)",
+      "hex": "#683110",
+      "inSrgb": true,
+      "requestedC": 0.09,
+      "finalC": 0.09
+    },
+    {
+      "token": "orange.950",
+      "css": "oklch(0.28 0.065 46)",
+      "hex": "#421d09",
+      "inSrgb": true,
+      "requestedC": 0.065,
+      "finalC": 0.065
+    },
+    {
+      "token": "green.50",
+      "css": "oklch(0.98 0.02 160)",
+      "hex": "#eefdf4",
+      "inSrgb": true,
+      "requestedC": 0.02,
+      "finalC": 0.02
+    },
+    {
+      "token": "green.100",
+      "css": "oklch(0.955 0.045 160)",
+      "hex": "#d7fae6",
+      "inSrgb": true,
+      "requestedC": 0.045,
+      "finalC": 0.045
+    },
+    {
+      "token": "green.200",
+      "css": "oklch(0.915 0.08 160)",
+      "hex": "#b5f4d1",
+      "inSrgb": true,
+      "requestedC": 0.08,
+      "finalC": 0.08
+    },
+    {
+      "token": "green.300",
+      "css": "oklch(0.86 0.12 160)",
+      "hex": "#85e9b6",
+      "inSrgb": true,
+      "requestedC": 0.12,
+      "finalC": 0.12
+    },
+    {
+      "token": "green.400",
+      "css": "oklch(0.79 0.15 160)",
+      "hex": "#4ed799",
+      "inSrgb": true,
+      "requestedC": 0.15,
+      "finalC": 0.15
+    },
+    {
+      "token": "green.500",
+      "css": "oklch(0.7 0.15 160)",
+      "hex": "#23ba7d",
+      "inSrgb": true,
+      "requestedC": 0.15,
+      "finalC": 0.15
+    },
+    {
+      "token": "green.600",
+      "css": "oklch(0.585 0.13 161)",
+      "hex": "#019362",
+      "inSrgb": true,
+      "requestedC": 0.13,
+      "finalC": 0.13
+    },
+    {
+      "token": "green.700",
+      "css": "oklch(0.51 0.111 162)",
+      "hex": "#037952",
+      "inSrgb": true,
+      "requestedC": 0.111,
+      "finalC": 0.111
+    },
+    {
+      "token": "green.800",
+      "css": "oklch(0.43 0.092 163)",
+      "hex": "#025f41",
+      "inSrgb": true,
+      "requestedC": 0.092,
+      "finalC": 0.092
+    },
+    {
+      "token": "green.900",
+      "css": "oklch(0.36 0.075 164)",
+      "hex": "#034932",
+      "inSrgb": true,
+      "requestedC": 0.075,
+      "finalC": 0.075
+    },
+    {
+      "token": "green.950",
+      "css": "oklch(0.27 0.055 165)",
+      "hex": "#022f20",
+      "inSrgb": true,
+      "requestedC": 0.055,
+      "finalC": 0.055
+    },
+    {
+      "token": "red.50",
+      "css": "oklch(0.975 0.012 20)",
+      "hex": "#fff4f3",
+      "inSrgb": true,
+      "requestedC": 0.012,
+      "finalC": 0.012
+    },
+    {
+      "token": "red.100",
+      "css": "oklch(0.945 0.027 20)",
+      "hex": "#ffe6e5",
+      "inSrgb": true,
+      "requestedC": 0.027,
+      "finalC": 0.027
+    },
+    {
+      "token": "red.200",
+      "css": "oklch(0.895 0.054 20)",
+      "hex": "#ffcfce",
+      "inSrgb": true,
+      "requestedC": 0.054,
+      "finalC": 0.054
+    },
+    {
+      "token": "red.300",
+      "css": "oklch(0.82 0.1 21)",
+      "hex": "#ffaaa8",
+      "inSrgb": true,
+      "requestedC": 0.1,
+      "finalC": 0.1
+    },
+    {
+      "token": "red.400",
+      "css": "oklch(0.73 0.16 22)",
+      "hex": "#fc7a79",
+      "inSrgb": true,
+      "requestedC": 0.16,
+      "finalC": 0.16
+    },
+    {
+      "token": "red.500",
+      "css": "oklch(0.65 0.2 25)",
+      "hex": "#f14d4c",
+      "inSrgb": true,
+      "requestedC": 0.2,
+      "finalC": 0.2
+    },
+    {
+      "token": "red.600",
+      "css": "oklch(0.58 0.215 27)",
+      "hex": "#dd2729",
+      "inSrgb": true,
+      "requestedC": 0.215,
+      "finalC": 0.215
+    },
+    {
+      "token": "red.700",
+      "css": "oklch(0.51 0.195 28)",
+      "hex": "#bc1a18",
+      "inSrgb": true,
+      "requestedC": 0.195,
+      "finalC": 0.195
+    },
+    {
+      "token": "red.800",
+      "css": "oklch(0.44 0.16 28)",
+      "hex": "#971b17",
+      "inSrgb": true,
+      "requestedC": 0.16,
+      "finalC": 0.16
+    },
+    {
+      "token": "red.900",
+      "css": "oklch(0.37 0.125 28)",
+      "hex": "#741a15",
+      "inSrgb": true,
+      "requestedC": 0.125,
+      "finalC": 0.125
+    },
+    {
+      "token": "red.950",
+      "css": "oklch(0.27 0.085 27)",
+      "hex": "#48100d",
+      "inSrgb": true,
+      "requestedC": 0.085,
+      "finalC": 0.085
+    }
+  ]
+}

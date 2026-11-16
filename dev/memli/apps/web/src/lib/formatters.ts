@@ -19,10 +19,13 @@ export type Formatters = {
   languageName: (tag: string) => string
   /** "4 minutes", or whole hours from 60 minutes up ("3 hours"). */
   duration: (minutes: number) => string
-  /** "2 hours ago", "yesterday". Past and future both work. */
+  /**
+   * How far `date` is from `now`, in the largest unit that fits:
+   * "in 5 minutes", "in 14 hours", "in 5 days", "in 2 months", "in 1 year".
+   */
   relativeTime: (date: Date, now: Date) => string
-  /** "M" (narrow) or "Monday" (long). */
-  weekday: (date: Date, width: "narrow" | "long") => string
+  /** "M" (narrow), "Mon" (short) or "Monday" (long). */
+  weekday: (date: Date, width: "narrow" | "short" | "long") => string
   /** 1 = Monday … 7 = Sunday, from the UI locale's region. */
   firstDayOfWeek: number
   format: (template: string, values?: MessageValues) => string
@@ -43,15 +46,6 @@ export type Formatters = {
 }
 
 const tagPattern = /<(\w+)>(.*?)<\/\1>/g
-
-const relativeUnits = [
-  ["year", 60 * 60 * 24 * 365],
-  ["month", 60 * 60 * 24 * 30],
-  ["week", 60 * 60 * 24 * 7],
-  ["day", 60 * 60 * 24],
-  ["hour", 60 * 60],
-  ["minute", 60],
-] as const satisfies readonly (readonly [Intl.RelativeTimeFormatUnit, number])[]
 
 type WeekInfoLocale = Intl.Locale & {
   getWeekInfo?: () => { firstDay: number }
@@ -78,9 +72,6 @@ function createFormatters(locale: string): Formatters {
   })
   const pluralRules = new Intl.PluralRules(locale)
   const languageNames = new Intl.DisplayNames(locale, { type: "language" })
-  const relativeFormat = new Intl.RelativeTimeFormat(locale, {
-    numeric: "auto",
-  })
 
   const number = (value: number): string => numberFormat.format(value)
 
@@ -111,22 +102,42 @@ function createFormatters(locale: string): Formatters {
       ? minuteFormat.format(minutes)
       : hourFormat.format(Math.round(minutes / 60))
 
+  const relativeFormat = new Intl.RelativeTimeFormat(locale, {
+    numeric: "always",
+  })
+
   const relativeTime = (date: Date, now: Date): string => {
-    const seconds = (date.getTime() - now.getTime()) / 1000
-    for (const [unit, size] of relativeUnits) {
-      if (Math.abs(seconds) >= size) {
-        return relativeFormat.format(Math.round(seconds / size), unit)
-      }
+    const ms = date.getTime() - now.getTime()
+    const sign = ms < 0 ? -1 : 1
+    const abs = Math.abs(ms)
+    const minutes = abs / 60_000
+    const hours = minutes / 60
+    const days = hours / 24
+    if (hours < 1) {
+      return relativeFormat.format(
+        sign * Math.max(1, Math.round(minutes)),
+        "minute"
+      )
     }
-    return relativeFormat.format(0, "minute")
+    if (days < 1) {
+      return relativeFormat.format(sign * Math.round(hours), "hour")
+    }
+    if (days < 30) {
+      return relativeFormat.format(sign * Math.round(days), "day")
+    }
+    if (days < 365) {
+      return relativeFormat.format(sign * Math.round(days / 30), "month")
+    }
+    return relativeFormat.format(sign * Math.round(days / 365), "year")
   }
 
   const weekdayFormats = {
     narrow: new Intl.DateTimeFormat(locale, { weekday: "narrow" }),
+    short: new Intl.DateTimeFormat(locale, { weekday: "short" }),
     long: new Intl.DateTimeFormat(locale, { weekday: "long" }),
   }
 
-  const weekday = (date: Date, width: "narrow" | "long"): string =>
+  const weekday = (date: Date, width: "narrow" | "short" | "long"): string =>
     weekdayFormats[width].format(date)
 
   const firstDayOfWeek = localeFirstDay(locale)

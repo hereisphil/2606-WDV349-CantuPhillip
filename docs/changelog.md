@@ -8,6 +8,21 @@
 
 Each week, and/or each major change, I will update this file by summarizing activity and progress made. This changelog is the source of truth for all changes to the app.
 
+## 14 November 2026
+
+### `FEATURE` Dashboard redesign
+
+`/dashboard` now has one focal point. A navy study hero names the course, shows one large number ("16 words to review") and the time it takes, and holds the only amber button on the screen, "Start review". Its count always matches the session the button opens. Everything else got quieter and plainer.
+
+* **Dark mode is real.** The app follows the device setting with no flash of the wrong theme, and a visible Theme control (Match my device, Light, Dark) sits at the foot of the sidebar and in the phone top bar. The old hidden `d` key is gone.
+* **Color rebuilt.** Three-tier OKLCH tokens (primitives, light and dark roles, utilities) with a deep navy dark theme. A Vitest check measures every text and control pairing against WCAG 2.2 and APCA in both themes (216 checks). Focus is a solid 2 px outline everywhere.
+* **Plain words.** Course, words, to review, learned and Dashboard replace deck, cards, due, mastered and Decks. The greeting is one line. About 84 words in the main area, down from 217.
+* **Calmer page.** This week shows seven day marks (a check for a goal day, a ring for a partial day, an empty circle for no study) and "12 days of study", which forgives one day off ("never miss twice"). Other courses are compact rows with one status line and a 44 px Review or Learn link, five at a time; a Studying menu filters them when there are many. One warm tip card offers to practice the tricky words. "Your progress" is a closed disclosure with a table.
+* **Built for everyone.** Links are links, every target is 44 px, a skip link comes first, the page title is "Dashboard · Memli", the hero fits a phone's first screen, and a DEV-only `?pseudo=long|cjk|rtl` switch checks layouts for translation. axe runs on every preview state in both themes at desktop and 375 px.
+* Plan and research: [`docs/designs/REDESIGN.md`](./designs/REDESIGN.md) and [`docs/designs/redesign-research/`](./designs/redesign-research/README.md). Branch `151-web-dashboard_redesign`, not merged yet. Refs [#151](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/151)
+
+***
+
 ## 07 November 2026
 
 ### `FEATURE` Study dashboard

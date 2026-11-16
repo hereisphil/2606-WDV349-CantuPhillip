@@ -1,63 +1,88 @@
 import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
+import { Check, ChevronDown } from "lucide-react"
+import { Button } from "@workspace/ui/components/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu"
 import { useViewer } from "@/components/session-provider"
 import { useFormatters } from "@/lib/formatters"
 
 const messages = {
   label: "Studying",
+  // "Studying: French" on the button, so the current choice shows without opening it.
+  trigger: "Studying: {language}",
   all: "All languages",
 } as const
 
-const chipClass =
-  "inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-medium wrap-break-word transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:border-primary aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
-
-// The router marks the chip whose search matches the URL exactly with aria-current="page".
-const activeOptions = { exact: true } as const
-
-/** Narrows the study regions to one learning language through `?studying=`. */
+/**
+ * Narrows the course list to one learning language through `?studying=`.
+ * Links, not radios: each choice changes the URL, so the menu stays uncontrolled.
+ */
 export function LanguageFilter({
   languages,
+  current,
 }: {
-  /** BCP 47 tags. The filter assumes at least two. */
+  /** BCP 47 tags of the other courses. The menu assumes at least two. */
   languages: readonly string[]
+  current: string | undefined
 }): JSX.Element {
   const { uiLocale } = useViewer()
-  const { languageName } = useFormatters()
-  const options = languages
-    .map((tag) => ({ tag, name: languageName(tag) }))
-    .sort((a, b) => a.name.localeCompare(b.name, uiLocale))
+  const { languageName, format } = useFormatters()
+  const options = [
+    { tag: undefined, name: messages.all },
+    ...languages
+      .map((tag) => ({ tag, name: languageName(tag) }))
+      .sort((a, b) => a.name.localeCompare(b.name, uiLocale)),
+  ]
+  const currentName =
+    options.find((option) => option.tag === current)?.name ?? messages.all
 
   return (
-    <div
-      role="group"
-      aria-labelledby="studying-label"
-      className="flex flex-wrap items-center gap-2"
-    >
-      <span
-        id="studying-label"
-        className="me-1 text-sm font-medium text-muted-foreground"
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            size="touch"
+            className="data-popup-open:bg-muted"
+          />
+        }
       >
-        {messages.label}
-      </span>
-      <Link
-        to="/dashboard"
-        search={(prev) => ({ ...prev, studying: undefined })}
-        activeOptions={activeOptions}
-        className={chipClass}
-      >
-        {messages.all}
-      </Link>
-      {options.map(({ tag, name }) => (
-        <Link
-          key={tag}
-          to="/dashboard"
-          search={(prev) => ({ ...prev, studying: tag })}
-          activeOptions={activeOptions}
-          className={chipClass}
-        >
-          {name}
-        </Link>
-      ))}
-    </div>
+        {format(messages.trigger, { language: currentName })}
+        <ChevronDown aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{messages.label}</DropdownMenuLabel>
+          {options.map(({ tag, name }) => (
+            <DropdownMenuItem
+              key={tag ?? "all"}
+              className="min-h-11 justify-between text-base"
+              render={
+                <Link
+                  from="/dashboard"
+                  to="/dashboard"
+                  search={(prev) => ({ ...prev, studying: tag })}
+                  // Filtering keeps the learner where they are on the page.
+                  resetScroll={false}
+                  aria-current={tag === current ? "true" : undefined}
+                />
+              }
+            >
+              {name}
+              {tag === current ? (
+                <Check aria-hidden="true" className="size-5" />
+              ) : null}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

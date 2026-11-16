@@ -34,7 +34,10 @@ export function BrandMark({
       >
         <BookOpen className={mark.icon} aria-hidden="true" />
       </span>
-      <span className={wordClassName}>Memli</span>
+      {/* A product name: never translated (translate="no" also tells browser translators). */}
+      <span translate="no" className={wordClassName}>
+        Memli
+      </span>
     </span>
   )
 }

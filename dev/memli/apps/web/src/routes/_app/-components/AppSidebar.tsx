@@ -5,7 +5,7 @@ import {
   ChevronsUpDown,
   CreditCard,
   Image as ImageIcon,
-  Layers,
+  LayoutDashboard,
   LogOut,
   SlidersHorizontal,
   UserIcon,
@@ -15,6 +15,7 @@ import { Button } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
+import { ThemeMenu } from "@/components/theme-control"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   DropdownMenu,
@@ -34,8 +35,8 @@ const messages = {
   navigationMenu: "Navigation menu",
   accountMenu: "Account menu, @{username}",
   accountMenuPrefix: "Account menu, ",
-  decks: "Decks",
-  community: "Community Gallery",
+  dashboard: "Dashboard",
+  community: "Community",
   profile: "View Profile",
   settings: "Learning Settings",
   plan: "Subscription / Plan",
@@ -48,8 +49,8 @@ const railActiveClass =
 const railLinks = [
   {
     to: "/dashboard" as const,
-    label: messages.decks,
-    icon: Layers,
+    label: messages.dashboard,
+    icon: LayoutDashboard,
     exact: true,
   },
   {
@@ -68,7 +69,7 @@ function RailLink({
 }: {
   to: "/dashboard" | "/community"
   label: string
-  icon: typeof Layers
+  icon: typeof LayoutDashboard
   exact?: boolean
 }): JSX.Element {
   return (
@@ -76,12 +77,12 @@ function RailLink({
       to={to}
       activeOptions={{ exact }}
       className={cn(
-        "flex min-h-6 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-base font-medium text-foreground hover:bg-muted hover:text-foreground-strong",
         railActiveClass,
         "[&.active]:hover:bg-sidebar-accent [&.active]:hover:text-sidebar-accent-foreground"
       )}
     >
-      <Icon className="size-4" aria-hidden="true" />
+      <Icon className="size-5" aria-hidden="true" />
       {label}
     </Link>
   )
@@ -136,14 +137,15 @@ export function AppSidebar(): JSX.Element {
   return (
     <aside
       aria-label={messages.sidebar}
-      className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-64 md:border-r md:border-b-0"
+      className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar md:sticky md:top-0 md:h-dvh md:w-56 md:border-e md:border-b-0 lg:w-64"
     >
-      <div className="flex items-center justify-between px-4 py-3 md:pt-6 md:pb-4">
-        <Link to="/dashboard" className="flex">
+      <div className="flex items-center justify-between px-4 py-1.5 md:pt-6 md:pb-4">
+        <Link to="/dashboard" className="flex min-h-11 items-center">
           <BrandMark />
         </Link>
 
         <div className="flex items-center gap-1 md:hidden">
+          <ThemeMenu placement="topBar" />
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={format(messages.accountMenu, {
@@ -152,7 +154,8 @@ export function AppSidebar(): JSX.Element {
               render={
                 <Button
                   variant="ghost"
-                  className="size-11 rounded-full p-0 hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
+                  size="icon-touch"
+                  className="rounded-full hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
             >
@@ -180,7 +183,7 @@ export function AppSidebar(): JSX.Element {
               render={
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="icon-touch"
                   className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent"
                 />
               }
@@ -207,38 +210,42 @@ export function AppSidebar(): JSX.Element {
 
       <RailNav />
 
-      <div className="mt-auto hidden border-t border-sidebar-border p-3 md:block">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                className="h-auto w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
-              />
-            }
-          >
-            {/* Named by its content so the accessible name includes the visible text. */}
-            <span className="sr-only">{messages.accountMenuPrefix}</span>
-            <span className="flex min-w-0 items-center gap-2.5">
-              <Avatar>
-                <AvatarFallback />
-              </Avatar>
-              <span className="flex min-w-0 flex-col items-start gap-0.5">
-                <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
-                  @{viewer.username}
-                </span>{" "}
-                <PlanBadge plan={viewer.plan} />
+      <div className="mt-auto hidden flex-col gap-2 p-3 md:flex">
+        <ThemeMenu placement="sidebar" />
+        <div className="border-t border-sidebar-border pt-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="touch"
+                  className="w-full justify-between gap-3 rounded-xl px-2.5 py-2 text-start hover:bg-sidebar-border hover:text-sidebar-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-foreground"
+                />
+              }
+            >
+              {/* Named by its content so the accessible name includes the visible text. */}
+              <span className="sr-only">{messages.accountMenuPrefix}</span>
+              <span className="flex min-w-0 items-center gap-2.5">
+                <Avatar>
+                  <AvatarFallback />
+                </Avatar>
+                <span className="flex min-w-0 flex-col items-start gap-0.5">
+                  <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
+                    @{viewer.username}
+                  </span>{" "}
+                  <PlanBadge plan={viewer.plan} />
+                </span>
               </span>
-            </span>
-            <ChevronsUpDown
-              aria-hidden="true"
-              className="size-4 text-muted-foreground"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="min-w-56">
-            <AccountMenuItems />
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <ChevronsUpDown
+                aria-hidden="true"
+                className="size-4 text-muted-foreground"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="min-w-56">
+              <AccountMenuItems />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </aside>
   )

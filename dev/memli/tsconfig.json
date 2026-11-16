@@ -1,4 +1,4 @@
 {
   "extends": "@workspace/typescript-config/workers.json",
-  "include": ["src"]
+  "include": ["worker-configuration.d.ts", "src"]
 }

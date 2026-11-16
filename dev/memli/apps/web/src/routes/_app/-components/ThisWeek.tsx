@@ -2,7 +2,6 @@ import type { JSX } from "react"
 import { Check, Flame } from "lucide-react"
 import { Card } from "@workspace/ui/components/card"
 import { Heading } from "@workspace/ui/components/heading"
-import { Text } from "@workspace/ui/components/text"
 import { cn } from "@workspace/ui/lib/utils"
 import { useFormatters } from "@/lib/formatters"
 import type { DailyStudy } from "./dashboard-metrics"
@@ -15,129 +14,141 @@ import {
 
 const messages = {
   heading: "This week",
-  goalTitle: "Daily goal",
-  goalOf: "of {target}",
-  goalStudied: "studied",
-  goalRemaining: {
-    one: "{count} more card to reach today's goal.",
-    other: "{count} more cards to reach today's goal.",
+  weekLabel: "Days you reached your goal this week",
+  // Counts days with any study and forgives one day off ("never miss twice"),
+  // so it says "days of study", not "in a row". Rule: REDESIGN.md section 5.7.
+  daysOfStudy: {
+    one: "{count} day of study",
+    other: "{count} days of study",
   },
-  goalMet: "Today's goal is done. Extra study still counts.",
-  goalCleared:
-    "You finished everything scheduled today, so the goal counts as done.",
-  weekLabel: "Daily goal this week",
+  today: {
+    one: "<n>{count}</n> of {target} word today",
+    other: "<n>{count}</n> of {target} words today",
+  },
+  goalMet: "You reached today's goal.",
+  goalCleared: "You finished everything for today.",
   day: {
-    met: "{day}, goal met",
-    missed: "{day}, goal missed",
-    "in-progress": "{day}, today, in progress",
-    upcoming: "{day}, upcoming",
+    met: "{day}, goal reached",
+    partial: {
+      one: "{day}, {count} of {target} word",
+      other: "{day}, {count} of {target} words",
+    },
+    none: "{day}, no study",
+    upcoming: "{day}",
   },
-  todayMet: "{day}, today, goal met",
-  streak: "Streak",
-  streakDays: {
-    one: "{count} day",
-    other: "{count} days",
-  },
-  mastered: "Words mastered",
+  todayLabel: "{label}, today",
 } as const
 
-const RING_RADIUS = 42
+const richTags = {
+  n: (text: string) => (
+    <strong className="font-semibold text-foreground-strong">{text}</strong>
+  ),
+}
+
+const MARK_SIZE = 36
+const RING_STROKE = 4
+const RING_RADIUS = (MARK_SIZE - RING_STROKE) / 2
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
-function GoalRing({
-  completed,
-  target,
-  cleared,
-}: {
-  completed: number
-  target: number
-  /** Fills the ring below the target, because clearing the queue meets the goal. */
-  cleared: boolean
-}): JSX.Element {
-  const { number, format } = useFormatters()
-  const progress = cleared
-    ? 1
-    : target > 0
-      ? Math.min(1, completed / target)
-      : 0
+// Chart roles, not --primary, so the week stays quieter than the hero's button.
+// "No study" and "to come" differ by line style, so color is never the only cue.
+const markClasses = {
+  met: "bg-viz-progress text-viz-on-progress",
+  partial: "",
+  none: "border-2 border-border-strong",
+  upcoming: "border-2 border-dashed border-border-strong",
+} as const satisfies Record<WeekDayStatus, string>
 
+/** Some study, goal not reached: a ring filled by words studied over the goal. */
+function PartialRing({ progress }: { progress: number }): JSX.Element {
   return (
-    <div className="relative size-24 shrink-0">
-      <svg viewBox="0 0 100 100" aria-hidden="true" className="-rotate-90">
-        <circle
-          cx="50"
-          cy="50"
-          r={RING_RADIUS}
-          fill="none"
-          strokeWidth="8"
-          className="stroke-muted"
-        />
-        <circle
-          cx="50"
-          cy="50"
-          r={RING_RADIUS}
-          fill="none"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={RING_CIRCUMFERENCE}
-          strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
-          className="stroke-primary motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700"
-        />
-      </svg>
-      <p className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-heading text-2xl leading-none font-bold tabular-nums">
-          {number(completed)}
-        </span>{" "}
-        <span className="text-xs text-muted-foreground tabular-nums">
-          {cleared ? messages.goalStudied : format(messages.goalOf, { target })}
-        </span>
-      </p>
-    </div>
+    <svg
+      viewBox={`0 0 ${MARK_SIZE} ${MARK_SIZE}`}
+      aria-hidden="true"
+      className="size-7 -rotate-90 @[17rem]:size-9"
+    >
+      <circle
+        cx={MARK_SIZE / 2}
+        cy={MARK_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        strokeWidth={RING_STROKE}
+        className="stroke-border"
+      />
+      <circle
+        cx={MARK_SIZE / 2}
+        cy={MARK_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        strokeWidth={RING_STROKE}
+        strokeLinecap="round"
+        strokeDasharray={RING_CIRCUMFERENCE}
+        strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
+        className="stroke-viz-progress motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700"
+      />
+    </svg>
   )
 }
 
-const dotClasses = {
-  met: "bg-primary text-primary-foreground",
-  missed: "bg-muted",
-  "in-progress": "bg-background ring-2 ring-primary",
-  upcoming: "border border-dashed border-muted-foreground/40",
-} as const satisfies Record<WeekDayStatus, string>
-
-function WeekDots({ week }: { week: readonly WeekDay[] }): JSX.Element {
-  const { weekday, format } = useFormatters()
+function DayMarks({
+  week,
+  target,
+}: {
+  week: readonly WeekDay[]
+  target: number
+}): JSX.Element {
+  const { weekday, format, plural } = useFormatters()
 
   return (
-    <ol aria-label={messages.weekLabel} className="grid grid-cols-7 gap-1">
-      {week.map(({ date, isToday, status }) => {
+    <ol
+      aria-label={messages.weekLabel}
+      className="grid grid-cols-7 justify-items-center gap-1"
+    >
+      {week.map(({ date, isToday, status, studied }) => {
         const day = weekday(date, "long")
-        const label =
-          isToday && status === "met"
-            ? format(messages.todayMet, { day })
+        const dayLabel =
+          status === "partial"
+            ? plural(studied, messages.day.partial, { day, target })
             : format(messages.day[status], { day })
+        const label = isToday
+          ? format(messages.todayLabel, { label: dayLabel })
+          : dayLabel
 
         return (
           <li
             key={date.toISOString()}
-            className="flex flex-col items-center gap-1.5"
+            className="flex flex-col items-center gap-2"
           >
+            {/* Seven short names ("Mon") need about 272 px; narrower cards (a 320 px phone) fall back to "M". */}
             <span
               aria-hidden="true"
               className={cn(
-                "text-xs text-muted-foreground",
-                isToday && "font-semibold text-foreground"
+                "text-sm font-semibold text-foreground",
+                isToday && "text-foreground-strong"
               )}
             >
-              {weekday(date, "narrow")}
+              <span className="@[17rem]:hidden">{weekday(date, "narrow")}</span>
+              <span className="hidden @[17rem]:inline">
+                {weekday(date, "short")}
+              </span>
             </span>
-            <span
-              aria-hidden="true"
-              className={cn(
-                "flex size-7 items-center justify-center rounded-full",
-                dotClasses[status]
-              )}
-            >
-              {status === "met" ? <Check className="size-4" /> : null}
-            </span>
+            {status === "partial" ? (
+              <PartialRing
+                progress={target > 0 ? Math.min(1, studied / target) : 0}
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "flex size-7 items-center justify-center rounded-full @[17rem]:size-9",
+                  markClasses[status]
+                )}
+              >
+                {status === "met" ? (
+                  <Check className="size-4 @[17rem]:size-5" strokeWidth={2.5} />
+                ) : null}
+              </span>
+            )}
             <span className="sr-only">{label}</span>
           </li>
         )
@@ -152,75 +163,42 @@ export function ThisWeek({
   now,
   clearedToday,
   streakDays,
-  wordsMastered,
 }: {
   days: readonly DailyStudy[]
   target: number
   now: Date
-  /** True when nothing is due and today's new cards are used up. */
+  /** True when nothing is due and today's new words are used up. */
   clearedToday: boolean
   streakDays: number
-  wordsMastered: number
 }): JSX.Element {
-  const { number, plural, firstDayOfWeek } = useFormatters()
+  const { plural, rich, firstDayOfWeek } = useFormatters()
   const studiedToday = studiedOn(days, now)
-  const remaining = Math.max(0, target - studiedToday)
-  const clearedEarly = clearedToday && remaining > 0
   const week = weekDays(now, firstDayOfWeek, days, target, clearedToday)
+
+  const todayLine =
+    studiedToday >= target
+      ? messages.goalMet
+      : clearedToday
+        ? messages.goalCleared
+        : rich(messages.today, richTags, { count: studiedToday, target })
 
   return (
     <section aria-labelledby="week-heading" className="flex flex-col gap-4">
       <Heading id="week-heading" level={2} size="3">
         {messages.heading}
       </Heading>
-      <Card className="@container gap-6 p-5">
-        <div className="grid gap-6 @lg:grid-cols-2 @lg:items-center @lg:gap-8">
-          <div className="flex items-center gap-4">
-            <GoalRing
-              completed={studiedToday}
-              target={target}
-              cleared={clearedEarly}
-            />
-            <div className="flex min-w-0 flex-col gap-1">
-              <Heading
-                level={3}
-                size="4"
-                weight="semibold"
-                className="text-base"
-              >
-                {messages.goalTitle}
-              </Heading>
-              <Text variant="small">
-                {remaining === 0
-                  ? messages.goalMet
-                  : clearedToday
-                    ? messages.goalCleared
-                    : plural(remaining, messages.goalRemaining)}
-              </Text>
-            </div>
-          </div>
-          <WeekDots week={week} />
+      <Card className="@container gap-5 p-5">
+        <DayMarks week={week} target={target} />
+        <div className="flex flex-col gap-1 text-base">
+          {/* Hidden at zero: no "0 days", no red. */}
+          {streakDays > 0 ? (
+            <p className="flex items-center gap-2 font-semibold text-foreground-strong">
+              <Flame aria-hidden="true" className="size-5 text-streak" />
+              {plural(streakDays, messages.daysOfStudy)}
+            </p>
+          ) : null}
+          <p className="text-foreground">{todayLine}</p>
         </div>
-        <dl className="grid grid-cols-2 gap-4 border-t pt-4">
-          <div className="flex flex-col-reverse gap-1">
-            <dt className="text-xs text-muted-foreground">{messages.streak}</dt>
-            <dd className="flex items-center gap-1.5 font-heading text-lg font-semibold tabular-nums">
-              <Flame
-                aria-hidden="true"
-                className="size-4 text-streak-foreground"
-              />
-              {plural(streakDays, messages.streakDays)}
-            </dd>
-          </div>
-          <div className="flex flex-col-reverse gap-1">
-            <dt className="text-xs text-muted-foreground">
-              {messages.mastered}
-            </dt>
-            <dd className="font-heading text-lg font-semibold tabular-nums">
-              {number(wordsMastered)}
-            </dd>
-          </div>
-        </dl>
       </Card>
     </section>
   )

@@ -1,5 +1,5 @@
 ---
-description: Verify web UI in a headless browser — never Screen Recording or Computer Use
+description: Verify web UI in a headless browser with Playwright — never Screen Recording or Computer Use; a check worth repeating becomes a spec
 alwaysApply: true
 ---
 
@@ -10,7 +10,37 @@ Check web UI in a headless browser against the local dev server. Do not use macO
 ## Do
 
 - Start `bun run dev` in `dev/memli` when it is not already running (Vite at `http://localhost:5173`).
-- Launch headless Brave with its own profile and a DevTools port, then drive the page over the Chrome DevTools Protocol: navigate, wait for rendered text, click, and read `location` plus `innerText`.
+- Drive the page with Playwright, which `apps/web` already installs (`@playwright/test`). A one-off script run from `apps/web` can open a page, set the viewport and theme, click, read text and sizes, and take a screenshot.
+
+```js
+import { chromium } from "@playwright/test"
+
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 375, height: 667 } })
+await page.goto("http://localhost:5173/dashboard?preview=long-titles", {
+  waitUntil: "networkidle",
+})
+await page.screenshot({ path: "dashboard-375.png", fullPage: true })
+await browser.close()
+```
+
+- Look at every state the change touches: the `?preview=` states, 375 px and desktop, light and dark (`localStorage.theme`), and `?pseudo=long` for layout changes.
+- Confirm the behavior the change is supposed to produce, then delete the one-off script.
+
+## A check you would run twice becomes a spec
+
+One-off scripts are forgotten, and the next change breaks what they measured. If a check guards something that must stay true, add it to `apps/web/e2e/` so `bun run test:a11y` and the `validate` job run it on every pull request.
+
+- Sizes, wording and capitals: `floors.spec.ts`.
+- Overflow with long or right-to-left text: `pseudo.spec.ts`.
+- What is on screen after an action (scroll and focus after Reveal): `study-reveal.spec.ts`.
+- Accessibility: `dashboard.a11y.spec.ts`, `study.a11y.spec.ts`.
+
+Prove a new check can fail: break the screen on purpose, watch the spec go red, then undo it.
+
+## Fallback: headless Brave
+
+If Playwright's browser is not installed (`bunx playwright install chromium`), drive headless Brave over the Chrome DevTools Protocol instead.
 
 ```bash
 "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
@@ -20,10 +50,11 @@ Check web UI in a headless browser against the local dev server. Do not use macO
   about:blank
 ```
 
-- Confirm the behavior the change is supposed to produce. Stop the headless browser when the check is done.
+Stop the headless browser when the check is done.
 
 ## Do not
 
 - Call Computer Use (`computer_screenshot`, `computer_click`, `computer_start_control`, or any screen-scope action).
 - Ask the user to turn on Screen Recording or Accessibility for verification.
 - Treat `curl` or `--dump-dom` as proof. Vite's `#root` is empty until JavaScript runs.
+- Report a visual change as done from lint and types alone. Look at it.

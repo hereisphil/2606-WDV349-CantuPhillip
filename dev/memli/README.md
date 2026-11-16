@@ -1,6 +1,6 @@
 # Memli — community mnemonic language learning (monorepo)
 
-Vite + React web app (`apps/web`), planned pure TypeScript domain package (`packages/core` — FSRS via `ts-fsrs` when MS 3 needs it), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
+Vite + React web app (`apps/web`), Hono API on Cloudflare Workers (`apps/api`), pure TypeScript domain package (`packages/core` — answer checking, FSRS-7 scheduling via `ts-fsrs`, and the study-session reducer), shared Zod schemas (`packages/schemas`), and shared web UI (`packages/ui`), managed with Turborepo + Bun.
 
 **Planned public brand:** FluentVine (see docs). Product and architecture decisions live in [`docs/`](./docs/README.md) — start with the [roadmap](./docs/roadmap.md).
 
@@ -17,17 +17,19 @@ bun install
 
 | Script | Purpose |
 |--------|---------|
-| `bun run dev` | Start web (Turbo) |
+| `bun run dev` | Start web (`:5173`) and API (`:8787`) with Turbo. Web proxies `/api/*` to the API ([`apps/api/README.md`](./apps/api/README.md)). First run `bun run db:setup` in `apps/api` for the local D1 database |
 | `bun run lint` | ESLint via Turbo |
 | `bun run format` / `format:check` | Prettier write / check |
 | `bun run typecheck` | TypeScript via Turbo |
 | `bun run test` | Turbo tests (today: `@workspace/eslint-config`; Vitest returns with `@workspace/core` in MS 3) |
 | `bun run knip` | Unused deps, exports, and files |
 | `bun run build` | Production build |
+| `bun run deps:update` | Move every dependency to the newest release its range allows (lockfile and Worker types only). Runs weekly as a PR; see [docs/dependencies.md](./docs/dependencies.md) |
+| `bun run cf-typegen` | Regenerate both `worker-configuration.d.ts` files with `wrangler types` after editing a `wrangler.jsonc` or upgrading wrangler |
 
 ## Git hooks (Lefthook)
 
-Config lives at the **repository root** ([`lefthook.yml`](../../lefthook.yml)) because Git hooks are always repo-scoped; commands are limited to `dev/memli/` (and ESLint runs from `apps/web` / `packages/ui` so each flat config resolves).
+Config lives at the **repository root** ([`lefthook.yml`](../../lefthook.yml)) because Git hooks are always repo-scoped; commands are limited to `dev/memli/` (and ESLint runs from `apps/web`, `apps/api`, `packages/ui` and `packages/core` so each flat config resolves).
 
 | Hook | What runs |
 |------|-----------|
@@ -68,7 +70,7 @@ cd dev/memli
 bun run test
 ```
 
-[`packages/core`](./packages/core) is currently a **plan-only** stub (FSRS / `ts-fsrs` wrapper documented in its README; #130). When MS 3 restores the package, domain logic and session reducers will be covered with Vitest there. We intentionally skip marketing UI and route components.
+[`packages/core`](./packages/core) covers its domain logic and session reducer with Vitest (#132). [`apps/api`](./apps/api) tests its routes with Vitest and Hono's `app.request()`, with no server running, and checks that `@workspace/schemas` and `@workspace/core` agree. [`packages/schemas`](./packages/schemas) tests its validation rules (#106). We intentionally skip marketing UI and route components.
 
 ## Adding shadcn/ui components
 

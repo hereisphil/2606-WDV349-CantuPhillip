@@ -12,10 +12,16 @@
         "!src/routeTree.gen.ts"
       ]
     },
+    "apps/api": {
+      "project": ["src/**/*.ts"]
+    },
     "packages/ui": {
       "project": ["src/**/*.{ts,tsx}"]
     },
     "packages/schemas": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/core": {
       "project": ["src/**/*.ts"]
     },
     "packages/eslint-config": {
@@ -26,8 +32,5 @@
       "entry": [],
       "project": []
     }
-  },
-  "ignoreIssues": {
-    "apps/web/src/components/theme-provider.tsx": ["exports"]
   }
 }

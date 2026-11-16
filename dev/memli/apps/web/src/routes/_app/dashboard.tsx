@@ -1,17 +1,29 @@
-import { useEffect, type JSX } from "react"
-import { createFileRoute } from "@tanstack/react-router"
-import { Section } from "@workspace/ui/components/section"
-import { useViewer } from "@/components/session-provider"
-import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
+import type { JSX } from "react"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import {
-  deckAction,
-  isSameAction,
-  learningLanguages,
-  selectFocusDeck,
-  sortDecks,
-  todayPrimaryAction,
+  createFileRoute,
+  redirect,
+  useRouter,
+  type ErrorComponentProps,
+} from "@tanstack/react-router"
+import { Button } from "@workspace/ui/components/button"
+import { Heading } from "@workspace/ui/components/heading"
+import { Section } from "@workspace/ui/components/section"
+import { Spinner } from "@workspace/ui/components/spinner"
+import { Text } from "@workspace/ui/components/text"
+import { useViewer } from "@/components/session-provider"
+import { coursesQuery, historyQuery } from "@/lib/queries"
+import {
+  metricsFromApi,
+  type DashboardMetrics,
+} from "./-components/dashboard-metrics"
+import {
+  otherCourses,
+  selectFocusCourse,
+  sortCourses,
+  studyingLanguages,
+  tipFor,
   todayState,
-  totalDue,
   totalMastered,
 } from "./-components/dashboard-model"
 import {
@@ -21,17 +33,22 @@ import {
   type PreviewName,
 } from "./-components/dashboard-previews"
 import { DashboardGreeting } from "./-components/DashboardGreeting"
-import { DeckList } from "./-components/DeckList"
-import { FocusDeckCard } from "./-components/FocusDeckCard"
+import { CourseList } from "./-components/CourseList"
 import { LanguageFilter } from "./-components/LanguageFilter"
-import { MemoryCallout } from "./-components/MemoryCallout"
 import { PreviewSwitcher } from "./-components/PreviewSwitcher"
-import { ProgressTrends } from "./-components/ProgressTrends"
+import { ProgressDisclosure } from "./-components/ProgressDisclosure"
+import { StudyHero } from "./-components/StudyHero"
 import { ThisWeek } from "./-components/ThisWeek"
-import { TodayPanel } from "./-components/TodayPanel"
+import { TipCard } from "./-components/TipCard"
 
 const messages = {
-  aside: "Your progress",
+  title: "Dashboard · Memli",
+  loading: "Loading your courses",
+  error: {
+    heading: "We couldn't load your courses",
+    body: "Check your connection, then try again.",
+    retry: "Try again",
+  },
 } as const
 
 type DashboardSearch = {
@@ -56,116 +73,190 @@ export const Route = createFileRoute("/_app/dashboard")({
         ? search.studying
         : undefined,
   }),
+  head: () => ({ meta: [{ title: messages.title }] }),
+  // A preview is a fixed snapshot and never asks the API.
+  loaderDeps: ({ search }) => ({
+    preview: search.preview,
+    studying: search.studying,
+  }),
+  loader: async ({ context, deps }) => {
+    if (deps.preview !== undefined) {
+      return
+    }
+    const [courses] = await Promise.all([
+      context.queryClient.ensureQueryData(coursesQuery),
+      context.queryClient.ensureQueryData(historyQuery),
+    ])
+    // A ?studying= the menu can't show is stale: drop it before the page renders.
+    if (
+      deps.studying !== undefined &&
+      !studyingLanguages(otherCourses(courses)).includes(deps.studying)
+    ) {
+      throw redirect({ to: "/dashboard", search: {}, replace: true })
+    }
+  },
   component: Dashboard,
+  pendingComponent: DashboardPending,
+  errorComponent: DashboardError,
 })
 
 function Dashboard(): JSX.Element {
+  const { preview } = Route.useSearch()
+  if (import.meta.env.DEV && preview !== undefined) {
+    const seeded: DashboardPreview = dashboardPreviews[preview]
+    return <DashboardView metrics={seeded.metrics} />
+  }
+  return <LiveDashboard />
+}
+
+/** Both queries stay subscribed, so numbers refresh on tab focus and after reviews save (`use-save-reviews.ts`). */
+function LiveDashboard(): JSX.Element {
+  const { data: courses } = useSuspenseQuery(coursesQuery)
+  const { data: history } = useSuspenseQuery(historyQuery)
+  return <DashboardView metrics={metricsFromApi(courses, history)} />
+}
+
+function DashboardView({
+  metrics,
+}: {
+  metrics: DashboardMetrics
+}): JSX.Element {
   const viewer = useViewer()
   const search = Route.useSearch()
   const preview = search.preview
-  const seeded: DashboardPreview =
-    import.meta.env.DEV && preview !== undefined
-      ? dashboardPreviews[preview]
-      : { metrics: prototypeDashboardMetrics }
   const {
-    decks: allDecks,
+    courses: allCourses,
     dailyGoal,
-    trickyWords,
+    daysOfStudy,
     progressTrends,
-  } = seeded.metrics
-  const streakDays = seeded.streakDays ?? viewer.streakDays
+  } = metrics
   const now = new Date()
 
-  // The filter narrows what to study. The streak and goal count every language.
-  const languages = learningLanguages(allDecks)
+  // The hero, the week and the tip cover every course. The Studying menu
+  // narrows only the list of other courses (REDESIGN.md 5.4).
+  const today = todayState(allCourses)
+  const focusCourse = selectFocusCourse(allCourses)
+  const others = otherCourses(allCourses)
+  const languages = studyingLanguages(others)
+  // Previews skip the loader, so a stale ?studying= is ignored here too.
   const studying =
-    languages.length > 1 &&
-    search.studying !== undefined &&
-    languages.includes(search.studying)
+    search.studying !== undefined && languages.includes(search.studying)
       ? search.studying
       : undefined
-  const staleStudying = search.studying !== undefined && studying === undefined
-  const navigate = Route.useNavigate()
-  useEffect(() => {
-    if (staleStudying) {
-      void navigate({
-        search: (prev) => ({ ...prev, studying: undefined }),
-        replace: true,
-      })
-    }
-  }, [staleStudying, navigate])
-  const decks =
+  const listedCourses =
     studying === undefined
-      ? allDecks
-      : allDecks.filter((deck) => deck.learningLanguage === studying)
-  const today = todayState(decks)
-  const focusDeck = selectFocusDeck(decks)
-  const tricky =
-    studying === undefined
-      ? trickyWords
-      : {
-          total: decks.reduce((sum, deck) => sum + deck.trickyCount, 0),
-          words: trickyWords.words.filter(
-            (word) => word.learningLanguage === studying
-          ),
-        }
+      ? others
+      : others.filter((course) => course.learningLanguage === studying)
+  const tip = tipFor(allCourses, today)
+  // The finished hero already links to "Find another course".
+  const heroFindsAnother =
+    today.status === "caught-up" && today.keepGoing === null
 
   return (
-    <Section width="wide" padding="compact" className="flex flex-col gap-8">
+    <Section
+      padding="compact"
+      // Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
+      className="flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
+    >
       {import.meta.env.DEV && preview !== undefined ? (
         <PreviewSwitcher current={preview} />
       ) : null}
       <DashboardGreeting
         name={viewer.displayName}
-        hasDecks={allDecks.length > 0}
-        dueCount={totalDue(allDecks)}
-        streakDays={streakDays}
+        hasCourses={allCourses.length > 0}
         now={now}
       />
-      {focusDeck === null ? (
+      {focusCourse === null ? (
         <div className="max-w-2xl">
-          <TodayPanel state={today} />
+          <StudyHero state={today} />
         </div>
       ) : (
         <>
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
-            <div className="flex min-w-0 flex-col gap-8">
-              {languages.length > 1 ? (
-                <LanguageFilter languages={languages} />
-              ) : null}
-              <TodayPanel state={today} />
-              <FocusDeckCard
-                deck={focusDeck}
-                now={now}
-                showAction={
-                  !isSameAction(
-                    deckAction(focusDeck),
-                    todayPrimaryAction(today)
-                  )
+          {/* DOM order is reading order, with no CSS order. The hero spans rows 1 and 2, and only row 2 is flexible,
+              so row 1 is exactly as tall as This week and the tip starts right under it. */}
+          <div className="@container">
+            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem] @[56rem]:grid-rows-[auto_1fr_auto_auto]">
+              <div className="@[56rem]:col-start-1 @[56rem]:row-span-2 @[56rem]:row-start-1">
+                <StudyHero state={today} />
+              </div>
+              <div className="@[56rem]:col-start-2 @[56rem]:row-start-1">
+                <ThisWeek
+                  days={dailyGoal.days}
+                  target={dailyGoal.target}
+                  now={now}
+                  clearedToday={today.status === "caught-up"}
+                  streakDays={daysOfStudy}
+                />
+              </div>
+              <CourseList
+                courses={listedCourses}
+                filter={
+                  languages.length > 0 ? (
+                    <LanguageFilter languages={languages} current={studying} />
+                  ) : null
                 }
+                showFindAnother={!heroFindsAnother}
+                className="@[56rem]:col-start-1 @[56rem]:row-start-3"
               />
-              <DeckList
-                decks={sortDecks(decks).filter(
-                  (deck) => deck.courseId !== focusDeck.courseId
-                )}
-                now={now}
-              />
+              {tip === null ? null : (
+                // Spans the courses' row too, so a tall tip never pushes the courses down.
+                <div className="@[56rem]:col-start-2 @[56rem]:row-span-2 @[56rem]:row-start-2">
+                  <TipCard tip={tip} />
+                </div>
+              )}
+              <div className="@[56rem]:col-start-1 @[56rem]:row-start-4">
+                <ProgressDisclosure
+                  retentionPercent={progressTrends.retentionPercent}
+                  newCardsThisMonth={progressTrends.newCardsThisMonth}
+                  wordsLearned={totalMastered(allCourses)}
+                  courses={sortCourses(allCourses)}
+                />
+              </div>
             </div>
-            <aside aria-label={messages.aside} className="flex flex-col gap-6">
-              <ThisWeek
-                days={dailyGoal.days}
-                target={dailyGoal.target}
-                now={now}
-                clearedToday={todayState(allDecks).status === "caught-up"}
-                streakDays={streakDays}
-                wordsMastered={totalMastered(allDecks)}
-              />
-              <MemoryCallout total={tricky.total} words={tricky.words} />
-            </aside>
           </div>
-          <ProgressTrends {...progressTrends} />
         </>
       )}
+    </Section>
+  )
+}
+
+/** Shown only if the courses take more than a second to arrive. */
+function DashboardPending(): JSX.Element {
+  return (
+    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+      <div
+        role="status"
+        className="flex items-center gap-3 text-muted-foreground"
+      >
+        <Spinner />
+        <Text variant="muted">{messages.loading}</Text>
+      </div>
+    </Section>
+  )
+}
+
+function DashboardError({ reset }: ErrorComponentProps): JSX.Element {
+  const router = useRouter()
+  return (
+    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+      <div
+        role="alert"
+        className="flex max-w-xl flex-col items-start gap-4 rounded-xl border border-border bg-card p-6"
+      >
+        <Heading level={1} size="3">
+          {messages.error.heading}
+        </Heading>
+        <Text variant="muted">{messages.error.body}</Text>
+        <Button
+          size="touch"
+          onClick={() => {
+            reset()
+            void router.invalidate()
+          }}
+        >
+          {messages.error.retry}
+        </Button>
+      </div>
     </Section>
   )
 }

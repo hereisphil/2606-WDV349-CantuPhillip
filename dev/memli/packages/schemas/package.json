@@ -4,17 +4,34 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "lint": "eslint",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "typescript": "~6"
+    "eslint": "^10",
+    "typescript": "~6",
+    "vitest": "^5.1.0"
   },
   "exports": {
+    "./api/courses": "./src/api/courses.ts",
+    "./api/error": "./src/api/error.ts",
+    "./api/health": "./src/api/health.ts",
+    "./api/history": "./src/api/history.ts",
+    "./api/study": "./src/api/study.ts",
     "./auth/sign-in": "./src/auth/sign-in.ts",
-    "./env/web": "./src/env/web.ts"
+    "./content/card": "./src/content/card.ts",
+    "./content/course": "./src/content/course.ts",
+    "./content/mnemonic": "./src/content/mnemonic.ts",
+    "./env/web": "./src/env/web.ts",
+    "./locale/language-tag": "./src/locale/language-tag.ts",
+    "./locale/time-zone": "./src/locale/time-zone.ts",
+    "./srs/progress": "./src/srs/progress.ts",
+    "./srs/review": "./src/srs/review.ts"
   }
 }

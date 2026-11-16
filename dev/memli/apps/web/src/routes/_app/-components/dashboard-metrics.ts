@@ -1,25 +1,9 @@
+import type { CourseSummary } from "@workspace/schemas/api/courses"
+import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import { addDays, localDateKey } from "@/lib/dates"
 
-/**
- * Dashboard contract. #112 replaces {@link prototypeDashboardMetrics}
- * with Hono/D1 data of this same shape. Component markup stays put.
- */
-export type DashboardDeck = {
-  courseId: string
-  title: string
-  /** BCP 47 tag for the deck's content. Never the viewer's `uiLocale`. */
-  learningLanguage: string
-  dueCount: number
-  /** New cards the learner can start today, after the daily new-card limit. */
-  newAvailable: number
-  masteredCount: number
-  learningCount: number
-  unseenCount: number
-  /** Cards in this deck the learner keeps forgetting. */
-  trickyCount: number
-  /** ISO 8601 UTC, or null when the deck has never been studied. */
-  lastReviewedAt: string | null
-}
+/** A course from `GET /api/courses` (#112). Only a study session needs `answerLanguage`, so previews leave it out. */
+export type DashboardCourse = Omit<CourseSummary, "answerLanguage">
 
 export type DailyStudy = {
   /** Calendar date in the learner's time zone, "YYYY-MM-DD". */
@@ -28,42 +12,27 @@ export type DailyStudy = {
   cardsStudied: number
   /**
    * Nothing was left due and the new-card limit was used up by the end of
-   * the day. Counts as meeting the goal. Today reads the live deck counts.
+   * the day. Counts as meeting the goal. Today reads the live course counts.
    */
   cleared: boolean
 }
 
-/** A card the learner keeps forgetting (FSRS calls these leeches). */
-export type TrickyWord = {
-  cardId: string
-  courseId: string
-  term: string
-  /** BCP 47 tag of `term`, so screen readers pronounce it correctly. */
-  learningLanguage: string
-  lapses: number
-}
-
 export type ProgressTrendsData = {
-  consistencyPercent: number
-  consistencyWeeklyChangePercent: number
-  retentionPercent: number
-  retentionGlobalAveragePercent: number
+  /** Reviews remembered over the last 30 days. `null` before any. */
+  retentionPercent: number | null
   newCardsThisMonth: number
 }
 
 export type DashboardMetrics = {
-  decks: readonly DashboardDeck[]
+  courses: readonly DashboardCourse[]
   dailyGoal: {
     /** Cards studied per day, reviews and new cards together. */
     target: number
     /** The last 7 days including today, oldest first. Missing days had no study. */
     days: readonly DailyStudy[]
   }
-  trickyWords: {
-    total: number
-    /** The most-forgotten few, most lapses first. */
-    words: readonly TrickyWord[]
-  }
+  /** Days of study, REDESIGN.md section 5.7. */
+  daysOfStudy: number
   progressTrends: ProgressTrendsData
 }
 
@@ -87,9 +56,9 @@ function recentDays(
   }))
 }
 
-// Prototype stand-in for usr_prototype_01. #112 replaces this value.
+// The `?preview=` snapshots start from this. The live dashboard never reads it.
 export const prototypeDashboardMetrics = {
-  decks: [
+  courses: [
     {
       courseId: "spanish-core-1000",
       title: "Spanish Core 1000",
@@ -141,53 +110,37 @@ export const prototypeDashboardMetrics = {
   ],
   dailyGoal: {
     target: 50,
-    days: recentDays([12, 50, 64, 31, 50, 55, 24], [3]),
+    days: recentDays([12, 50, 64, 31, 0, 55, 24], [3]),
   },
-  trickyWords: {
-    total: 7,
-    words: [
-      {
-        cardId: "es-aprovechar",
-        courseId: "spanish-core-1000",
-        term: "aprovechar",
-        learningLanguage: "es",
-        lapses: 6,
-      },
-      {
-        cardId: "ja-nu",
-        courseId: "japanese-kana",
-        term: "ぬ",
-        learningLanguage: "ja",
-        lapses: 5,
-      },
-      {
-        cardId: "es-embarazada",
-        courseId: "spanish-core-1000",
-        term: "embarazada",
-        learningLanguage: "es",
-        lapses: 5,
-      },
-      {
-        cardId: "ja-re",
-        courseId: "japanese-kana",
-        term: "れ",
-        learningLanguage: "ja",
-        lapses: 4,
-      },
-      {
-        cardId: "es-desarrollar",
-        courseId: "spanish-core-1000",
-        term: "desarrollar",
-        learningLanguage: "es",
-        lapses: 4,
-      },
-    ],
-  },
+  daysOfStudy: 12,
   progressTrends: {
-    consistencyPercent: 98,
-    consistencyWeeklyChangePercent: 2,
     retentionPercent: 84,
-    retentionGlobalAveragePercent: 75,
     newCardsThisMonth: 142,
   },
 } as const satisfies DashboardMetrics
+
+/**
+ * Courses from `GET /api/courses`, the rest from `GET /api/history` (the review log).
+ * Past days are never `cleared`: the log can't tell yet. Today reads live course counts (`todayState`).
+ */
+export function metricsFromApi(
+  courses: readonly DashboardCourse[],
+  history: StudyHistoryData
+): DashboardMetrics {
+  return {
+    courses,
+    dailyGoal: {
+      target: history.dailyGoal,
+      days: history.days.map((day) => ({
+        date: day.date,
+        cardsStudied: day.wordsStudied,
+        cleared: false,
+      })),
+    },
+    daysOfStudy: history.daysOfStudy,
+    progressTrends: {
+      retentionPercent: history.retentionPercent,
+      newCardsThisMonth: history.newWordsThisMonth,
+    },
+  }
+}

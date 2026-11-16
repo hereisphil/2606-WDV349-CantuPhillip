@@ -39,6 +39,12 @@ jobs:
       - name: Checkout Repository Code
         uses: actions/checkout@v4
 
+      # Same Node as verify.yml, so the build that deploys matches the one that was checked.
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: dev/memli/.nvmrc
+
       - name: Install Bun Toolchain
         uses: oven-sh/setup-bun@v2
         with:

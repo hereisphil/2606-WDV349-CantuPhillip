@@ -8,6 +8,9 @@ on:
       - main
   # Lets staging.yml / production.yml reuse this exact gate before deploying.
   workflow_call:
+  # dependency-update.yml starts this on its own PR branch (GITHUB_TOKEN PRs
+  # don't fire pull_request).
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -32,6 +35,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Bun installs and runs scripts, but Vitest, tsc, ESLint, and Wrangler
+      # execute on Node. Without this the runner's preinstalled Node decides.
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: dev/memli/.nvmrc
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -42,6 +52,18 @@ jobs:
 
       - name: Format Check
         run: bun run format:check
+
+      # Both worker-configuration.d.ts files are committed output of
+      # `wrangler types`. Regenerating must change nothing: editing
+      # wrangler.jsonc or bumping wrangler without `bun run cf-typegen` fails
+      # here. A diff, not `wrangler types --check`, which only compares hashes.
+      - name: Worker Types Match Config
+        run: |
+          bun run cf-typegen
+          git diff --exit-code -- worker-configuration.d.ts apps/api/worker-configuration.d.ts || {
+            echo "::error::Worker types are stale. Run 'bun run cf-typegen' in dev/memli and commit both worker-configuration.d.ts files."
+            exit 1
+          }
 
       - name: Type Check
         run: bun run typecheck
@@ -56,6 +78,19 @@ jobs:
 
       - name: Test
         run: bun run test
+
+      # apps/api/src/db/schema.ts and the committed migrations must agree.
+      # Regenerating must change nothing: a schema edit without
+      # `bun run db:generate` writes a new migration here and fails the job.
+      - name: Migrations Match Schema
+        working-directory: dev/memli/apps/api
+        run: |
+          bun run db:generate
+          git diff --exit-code -- drizzle
+          test -z "$(git ls-files --others --exclude-standard -- drizzle)" || {
+            echo "::error::src/db/schema.ts changed without a migration. Run 'bun run db:generate' in apps/api and commit drizzle/."
+            exit 1
+          }
 
       - name: Unused Code (Knip)
         run: bun run knip

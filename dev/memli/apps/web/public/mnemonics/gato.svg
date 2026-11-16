@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Prototype artwork for the "gato" mnemonic: a cat in a giant sombrero at a gala. -->
+  <rect width="400" height="300" fill="#1b2a4a"/>
+  <g fill="#f5b942">
+    <circle cx="48" cy="52" r="3"/>
+    <circle cx="350" cy="40" r="4"/>
+    <circle cx="320" cy="250" r="3"/>
+    <circle cx="70" cy="230" r="4"/>
+    <circle cx="96" cy="120" r="2"/>
+    <circle cx="300" cy="140" r="2"/>
+  </g>
+  <rect x="0" y="262" width="400" height="38" fill="#14203a"/>
+  <!-- Body -->
+  <ellipse cx="200" cy="248" rx="70" ry="40" fill="#d9822b"/>
+  <!-- Bow tie -->
+  <path d="M200 206 l-24 -12 v24 z M200 206 l24 -12 v24 z" fill="#f5b942"/>
+  <circle cx="200" cy="206" r="6" fill="#e0a12e"/>
+  <!-- Head -->
+  <path d="M146 142 l10 -46 l30 30 z" fill="#d9822b"/>
+  <path d="M254 142 l-10 -46 l-30 30 z" fill="#d9822b"/>
+  <circle cx="200" cy="158" r="54" fill="#e8913a"/>
+  <path d="M200 106 v22 M184 108 l4 18 M216 108 l-4 18" stroke="#c46f20" stroke-width="5" stroke-linecap="round"/>
+  <ellipse cx="180" cy="154" rx="9" ry="12" fill="#1b2a4a"/>
+  <ellipse cx="220" cy="154" rx="9" ry="12" fill="#1b2a4a"/>
+  <circle cx="183" cy="150" r="3" fill="#fff"/>
+  <circle cx="223" cy="150" r="3" fill="#fff"/>
+  <path d="M194 174 h12 l-6 7 z" fill="#f2a7a7"/>
+  <path d="M200 181 q-8 9 -16 3 M200 181 q8 9 16 3" fill="none" stroke="#1b2a4a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M150 172 h-34 M150 180 l-32 8 M250 172 h34 M250 180 l32 8" stroke="#fbe3c4" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Giant sombrero -->
+  <ellipse cx="200" cy="104" rx="150" ry="26" fill="#f5b942"/>
+  <ellipse cx="200" cy="100" rx="150" ry="22" fill="#f8cd6b"/>
+  <path d="M152 100 q6 -76 48 -76 q42 0 48 76 z" fill="#f5b942"/>
+  <path d="M156 84 q44 12 88 0" fill="none" stroke="#c0392b" stroke-width="9"/>
+  <g fill="#2e86c1">
+    <circle cx="70" cy="102" r="5"/>
+    <circle cx="110" cy="112" r="5"/>
+    <circle cx="290" cy="112" r="5"/>
+    <circle cx="330" cy="102" r="5"/>
+  </g>
+</svg>

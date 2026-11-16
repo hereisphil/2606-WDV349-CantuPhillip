@@ -12,7 +12,7 @@ Language learning is a **phone-native habit** (commutes, short review sessions).
 - Competitors learners already know (Duolingo-class apps) set a mobile expectation
 - Push notifications (later) and on-the-go review are harder to match on desktop-only
 
-Mobile is **not** a substitute for a good web app: marketing, account management, and deck editing may remain web-strong. Review/study should be excellent on phones.
+Mobile is **not** a substitute for a good web app: marketing, account management, and course editing may remain web-strong. Review/study should be excellent on phones.
 
 ---
 
@@ -20,7 +20,7 @@ Mobile is **not** a substitute for a good web app: marketing, account management
 
 Start `apps/mobile` when:
 
-1. Hono API auth + deck/review endpoints are stable enough to version
+1. Hono API auth + course/review endpoints are stable enough to version
 2. FSRS behavior in `packages/core` (`ts-fsrs` wrapper) is tested and used by the API/web
 3. You can dedicate focus without abandoning web quality
 
@@ -53,7 +53,7 @@ Exact UI library is an implementation decision; record it here when chosen:
 | Asset | Package / location | Notes |
 | --- | --- | --- |
 | SRS / domain logic | `packages/core` | No React imports |
-| Zod contracts & DTO shapes | `packages/schemas` | Auth, decks, review payloads |
+| Zod contracts & DTO shapes | `packages/schemas` | Auth, courses, review payloads |
 | Error codes | schemas + API | Map to localized strings on device |
 | Design tokens | future shared tokens module | Color, spacing, type scale values |
 | i18n message keys | shared catalogs if practical | See [i18n.md](./i18n.md) |
@@ -90,7 +90,7 @@ The auth design chosen in Phase 1 should be written with this section in mind ([
 Mirror the learner mental model from web:
 
 - Home / dashboard
-- Decks
+- Courses
 - Review session
 - Settings (UI locale vs learning language)
 
@@ -131,7 +131,7 @@ A later iteration may queue review grades offline — domain logic in `packages/
 
 1. Expo app boots in monorepo; talks to staging API health endpoint  
 2. Sign-in + session persistence  
-3. List decks + start review session using shared schemas/core  
+3. List courses + start review session using shared schemas/core  
 4. Settings: UI locale + learning preferences  
 5. Polish, store listings, push notifications (later)
 
