@@ -12,12 +12,13 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "knip": "knip",
+    "deps:update": "bash scripts/update-deps.sh",
+    "cf-typegen": "wrangler types && bun run --cwd apps/api cf-typegen",
     "prepare": "lefthook install",
     "deploy:staging": "turbo build && bunx wrangler deploy --env staging",
     "deploy:prod": "turbo build && bunx wrangler deploy --env=\"\""
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260626.1",
     "@workspace/typescript-config": "workspace:*",
     "knip": "^6.29.0",
     "lefthook": "^2.1.10",

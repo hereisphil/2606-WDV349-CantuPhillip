@@ -163,8 +163,7 @@ export function todayState(courses: readonly DashboardCourse[]): TodayState {
 
 /** What the tip card shows. `null` hides it. */
 export type Tip =
-  | { kind: "tricky"; course: DashboardCourse }
-  | { kind: "study" }
+  { kind: "tricky"; course: DashboardCourse } | { kind: "study" }
 
 /**
  * Tricky words of the course most in need (so the hero's comes first), else a study tip.

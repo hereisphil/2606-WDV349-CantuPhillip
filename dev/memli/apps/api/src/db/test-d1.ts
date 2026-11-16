@@ -4,7 +4,6 @@ import type { CardProgress } from "@workspace/core/srs/progress"
 import { getPlatformProxy, unstable_splitSqlQuery } from "wrangler"
 
 import { app } from "../app"
-import type { Env } from "../env"
 import { database, runTogether, type Database } from "./client"
 import { progressUpserts } from "./progress"
 import { cards, courses, mnemonics, reviews, users } from "./schema"

@@ -24,6 +24,8 @@ bun install
 | `bun run test` | Turbo tests (today: `@workspace/eslint-config`; Vitest returns with `@workspace/core` in MS 3) |
 | `bun run knip` | Unused deps, exports, and files |
 | `bun run build` | Production build |
+| `bun run deps:update` | Move every dependency to the newest release its range allows (lockfile and Worker types only). Runs weekly as a PR; see [docs/dependencies.md](./docs/dependencies.md) |
+| `bun run cf-typegen` | Regenerate both `worker-configuration.d.ts` files with `wrangler types` after editing a `wrangler.jsonc` or upgrading wrangler |
 
 ## Git hooks (Lefthook)
 

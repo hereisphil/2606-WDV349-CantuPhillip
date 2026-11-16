@@ -1,10 +1,3 @@
-export interface Env {
-  ENVIRONMENT?: string
-  BASIC_AUTH_USER?: string
-  BASIC_AUTH_PASS?: string
-  ASSETS: Fetcher
-}
-
 const REALM = "Memli Staging"
 
 function unauthorized(message: string): Response {

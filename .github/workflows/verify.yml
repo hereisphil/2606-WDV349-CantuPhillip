@@ -8,6 +8,9 @@ on:
       - main
   # Lets staging.yml / production.yml reuse this exact gate before deploying.
   workflow_call:
+  # dependency-update.yml starts this on its own PR branch (GITHUB_TOKEN PRs
+  # don't fire pull_request).
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -49,6 +52,18 @@ jobs:
 
       - name: Format Check
         run: bun run format:check
+
+      # Both worker-configuration.d.ts files are committed output of
+      # `wrangler types`. Regenerating must change nothing: editing
+      # wrangler.jsonc or bumping wrangler without `bun run cf-typegen` fails
+      # here. A diff, not `wrangler types --check`, which only compares hashes.
+      - name: Worker Types Match Config
+        run: |
+          bun run cf-typegen
+          git diff --exit-code -- worker-configuration.d.ts apps/api/worker-configuration.d.ts || {
+            echo "::error::Worker types are stale. Run 'bun run cf-typegen' in dev/memli and commit both worker-configuration.d.ts files."
+            exit 1
+          }
 
       - name: Type Check
         run: bun run typecheck
