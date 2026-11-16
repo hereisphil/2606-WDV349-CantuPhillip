@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
+import { expect, test } from "./api"
 
 /**
  * After Reveal or Submit, the word and its meaning are both on screen, not
@@ -6,7 +7,7 @@ import { expect, test, type Page } from "@playwright/test"
  * plain `focus()` once scrolled phones to the middle of the answer, past the
  * meaning.
  */
-const path = "/study/spanish-core-1000?mode=review"
+const path = "/study/spanish-core-1000?mode=learn"
 
 async function expectWordAndMeaningInView(page: Page): Promise<void> {
   const answer = page.getByRole("region", { name: "Answer" })

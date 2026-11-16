@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
-import { expect, test, type Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
+import { expect, test } from "./api"
 import { studyPreviewNames } from "../src/routes/_session/-components/study-previews"
 
 type Theme = "light" | "dark"
@@ -7,7 +8,7 @@ type Theme = "light" | "dark"
 const themes: Theme[] = ["light", "dark"]
 
 /** A study session plus every `?preview=` snapshot from #49: prompts, verdicts, and the session lifecycle. */
-const base = "/study/spanish-core-1000?mode=review"
+const base = "/study/spanish-core-1000?mode=learn"
 const paths = [
   base,
   ...studyPreviewNames.map((name) => `${base}&preview=${name}`),

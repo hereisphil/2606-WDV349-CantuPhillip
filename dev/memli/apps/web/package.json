@@ -14,6 +14,7 @@
     "test:a11y": "playwright test"
   },
   "dependencies": {
+    "@tanstack/react-query": "5.104.5",
     "@tanstack/react-router": "^1.170.16",
     "@workspace/core": "workspace:*",
     "@workspace/schemas": "workspace:*",

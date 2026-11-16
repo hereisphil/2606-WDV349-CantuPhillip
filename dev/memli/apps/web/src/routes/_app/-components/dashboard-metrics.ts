@@ -1,25 +1,19 @@
+import type { CourseSummary } from "@workspace/schemas/api/courses"
 import { addDays, localDateKey } from "@/lib/dates"
 
 /**
- * Dashboard contract. #112 replaces {@link prototypeDashboardMetrics}
- * with Hono/D1 data of this same shape. Component markup stays put.
+ * Dashboard contract.
+ *
+ * Courses come from `GET /api/courses` (#112): a `CourseSummary` from
+ * `@workspace/schemas`, whose counts `@workspace/core` works out. The
+ * dashboard reads every field but `answerLanguage`, which only a study
+ * session needs, so previews can leave it out.
+ *
+ * The rest (the week, the streak, retention, new words this month) is still
+ * {@link prototypeDashboardMetrics} until an API route reads it from the
+ * review log.
  */
-export type DashboardCourse = {
-  courseId: string
-  title: string
-  /** BCP 47 tag for the course's content. Never the viewer's `uiLocale`. */
-  learningLanguage: string
-  dueCount: number
-  /** New cards the learner can start today, after the daily new-card limit. */
-  newAvailable: number
-  masteredCount: number
-  learningCount: number
-  unseenCount: number
-  /** Cards in this course the learner keeps forgetting. */
-  trickyCount: number
-  /** ISO 8601 UTC, or null when the course has never been studied. */
-  lastReviewedAt: string | null
-}
+export type DashboardCourse = Omit<CourseSummary, "answerLanguage">
 
 export type DailyStudy = {
   /** Calendar date in the learner's time zone, "YYYY-MM-DD". */
@@ -87,7 +81,9 @@ function recentDays(
   }))
 }
 
-// Prototype stand-in for usr_prototype_01. #112 replaces this value.
+// Prototype stand-in for usr_prototype_01. The dashboard takes only
+// `dailyGoal` and `progressTrends` from here now; its courses come from the
+// API. Dev previews and their snapshots still use all of it.
 export const prototypeDashboardMetrics = {
   courses: [
     {

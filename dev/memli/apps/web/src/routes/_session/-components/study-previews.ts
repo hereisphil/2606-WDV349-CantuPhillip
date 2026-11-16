@@ -1,5 +1,5 @@
 import type { SessionEvent } from "@workspace/core/study/session-reducer"
-import { findCourseCards, type Mnemonic, type StudyCard } from "./study-cards"
+import type { Mnemonic, StudyCard } from "./study-cards"
 
 /** What the session header renders. `view` overrides replace the derived values. */
 export type SessionView = {
@@ -101,8 +101,69 @@ const kana: StudyCard = {
   },
 }
 
-// The seeded gato card, whose mnemonic has a picture, so the preview works on any course.
-const gato: StudyCard = findCourseCards("spanish-core-1000")?.cards[0] ?? casa
+// A copy of the seeded gato card (apps/api/seed/prototype.sql), whose
+// mnemonic has a picture, so the preview works on any course.
+const gato: StudyCard = {
+  cardId: "preview-gato",
+  term: "gato",
+  partOfSpeech: "noun",
+  gender: "masculine",
+  answers: ["cat"],
+  phonetic: "/ˈɡato/",
+  example: {
+    text: "El gato está durmiendo en el sofá.",
+    translation: "The cat is sleeping on the sofa.",
+  },
+  mnemonics: [
+    {
+      mnemonicId: "mn-es-gato-1",
+      contentLocale: "en",
+      story: [
+        {
+          kind: "plain",
+          text: "A cat in a giant sombrero crashes a fancy ",
+        },
+        { kind: "keyword", text: "gala" },
+        // U+2011, a non-breaking hyphen, keeps "Gala‑cat" on one line.
+        { kind: "plain", text: ". Gala\u2011cat, " },
+        { kind: "term", text: "gato" },
+        { kind: "plain", text: "!" },
+      ],
+      author: { displayName: "lucia_m" },
+      upvotes: 1240,
+      image: {
+        src: "/mnemonics/gato.svg",
+        alt: "A ginger cat in a bow tie, wearing a giant sombrero at a gala.",
+      },
+    },
+    {
+      mnemonicId: "mn-es-gato-2",
+      contentLocale: "en",
+      story: [
+        { kind: "plain", text: "A cat knocks over your " },
+        { kind: "keyword", text: "gateau" },
+        { kind: "plain", text: " and licks the frosting. Bad " },
+        { kind: "term", text: "gato" },
+        { kind: "plain", text: "!" },
+      ],
+      author: { displayName: "kenji.k" },
+      upvotes: 312,
+    },
+    {
+      mnemonicId: "mn-es-gato-3",
+      contentLocale: "en",
+      story: [
+        { kind: "plain", text: "The cat is the " },
+        { kind: "keyword", text: "gatekeeper" },
+        { kind: "plain", text: ": no one gets past the " },
+        { kind: "term", text: "gato" },
+        { kind: "plain", text: "." },
+      ],
+      author: { displayName: "sam_studies" },
+      upvotes: 1,
+    },
+  ],
+}
 
 // The story every fixture mnemonic tells, so each preview only changes what it tests.
 const casaStory: Omit<Mnemonic, "mnemonicId"> = {

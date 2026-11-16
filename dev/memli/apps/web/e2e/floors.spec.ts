@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
+import { expect, test } from "./api"
 import { previewNames } from "../src/routes/_app/-components/dashboard-previews"
 import { studyPreviewNames } from "../src/routes/_session/-components/study-previews"
 
@@ -7,7 +8,7 @@ import { studyPreviewNames } from "../src/routes/_session/-components/study-prev
  * where lint cannot see them: text size, target size, wording and capitals.
  * Runs at desktop width and at 375 px, over every `?preview=` state.
  */
-const study = "/study/spanish-core-1000?mode=review"
+const study = "/study/spanish-core-1000?mode=learn"
 const paths = [
   "/dashboard",
   ...previewNames.map((name) => `/dashboard?preview=${name}`),

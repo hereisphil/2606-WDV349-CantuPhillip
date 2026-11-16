@@ -1,8 +1,21 @@
 import { useEffect, type JSX } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import {
+  createFileRoute,
+  useRouter,
+  type ErrorComponentProps,
+} from "@tanstack/react-router"
+import { Button } from "@workspace/ui/components/button"
+import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
+import { Spinner } from "@workspace/ui/components/spinner"
+import { Text } from "@workspace/ui/components/text"
 import { useViewer } from "@/components/session-provider"
-import { prototypeDashboardMetrics } from "./-components/dashboard-metrics"
+import { coursesQuery } from "@/lib/queries"
+import {
+  prototypeDashboardMetrics,
+  type DashboardMetrics,
+} from "./-components/dashboard-metrics"
 import {
   learningLanguages,
   selectFocusCourse,
@@ -28,6 +41,12 @@ import { TipCard } from "./-components/TipCard"
 
 const messages = {
   title: "Dashboard · Memli",
+  loading: "Loading your courses",
+  error: {
+    heading: "We couldn't load your courses",
+    body: "Check your connection, then try again.",
+    retry: "Try again",
+  },
 } as const
 
 /** Above this many other courses, the list offers the Studying menu. */
@@ -56,19 +75,59 @@ export const Route = createFileRoute("/_app/dashboard")({
         : undefined,
   }),
   head: () => ({ meta: [{ title: messages.title }] }),
+  // A preview is a fixed snapshot and never asks the API.
+  loaderDeps: ({ search }) => ({ preview: search.preview }),
+  loader: async ({ context, deps }) => {
+    if (deps.preview === undefined) {
+      await context.queryClient.ensureQueryData(coursesQuery)
+    }
+  },
   component: Dashboard,
+  pendingComponent: DashboardPending,
+  errorComponent: DashboardError,
 })
 
 function Dashboard(): JSX.Element {
   const viewer = useViewer()
+  const { preview } = Route.useSearch()
+  if (import.meta.env.DEV && preview !== undefined) {
+    const seeded: DashboardPreview = dashboardPreviews[preview]
+    return (
+      <DashboardView
+        metrics={seeded.metrics}
+        streakDays={seeded.streakDays ?? viewer.streakDays}
+      />
+    )
+  }
+  return <LiveDashboard streakDays={viewer.streakDays} />
+}
+
+/**
+ * The viewer's courses from the API. The query stays subscribed, so the
+ * counts refresh when the tab comes back into focus and after reviews are
+ * saved (`use-save-reviews.ts`).
+ */
+function LiveDashboard({ streakDays }: { streakDays: number }): JSX.Element {
+  const { data: courses } = useSuspenseQuery(coursesQuery)
+  return (
+    <DashboardView
+      metrics={{ ...prototypeDashboardMetrics, courses }}
+      streakDays={streakDays}
+    />
+  )
+}
+
+function DashboardView({
+  metrics,
+  streakDays,
+}: {
+  metrics: DashboardMetrics
+  streakDays: number
+}): JSX.Element {
+  const viewer = useViewer()
   const search = Route.useSearch()
   const preview = search.preview
-  const seeded: DashboardPreview =
-    import.meta.env.DEV && preview !== undefined
-      ? dashboardPreviews[preview]
-      : { metrics: prototypeDashboardMetrics }
-  const { courses: allCourses, dailyGoal, progressTrends } = seeded.metrics
-  const streakDays = seeded.streakDays ?? viewer.streakDays
+  const { courses: allCourses, dailyGoal, progressTrends } = metrics
   const now = new Date()
 
   // The hero, the week and the tip cover every course. The Studying menu
@@ -181,6 +240,47 @@ function Dashboard(): JSX.Element {
           </div>
         </>
       )}
+    </Section>
+  )
+}
+
+/** Shown only if the courses take more than a second to arrive. */
+function DashboardPending(): JSX.Element {
+  return (
+    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+      <div
+        role="status"
+        className="flex items-center gap-3 text-muted-foreground"
+      >
+        <Spinner />
+        <Text variant="muted">{messages.loading}</Text>
+      </div>
+    </Section>
+  )
+}
+
+function DashboardError({ reset }: ErrorComponentProps): JSX.Element {
+  const router = useRouter()
+  return (
+    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+      <div
+        role="alert"
+        className="flex max-w-xl flex-col items-start gap-4 rounded-xl border border-border bg-card p-6"
+      >
+        <Heading level={1} size="3">
+          {messages.error.heading}
+        </Heading>
+        <Text variant="muted">{messages.error.body}</Text>
+        <Button
+          size="touch"
+          onClick={() => {
+            reset()
+            void router.invalidate()
+          }}
+        >
+          {messages.error.retry}
+        </Button>
+      </div>
     </Section>
   )
 }
