@@ -12,6 +12,7 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "knip": "knip",
+    "deps:update": "bash scripts/update-deps.sh",
     "prepare": "lefthook install",
     "deploy:staging": "turbo build && bunx wrangler deploy --env staging",
     "deploy:prod": "turbo build && bunx wrangler deploy --env=\"\""

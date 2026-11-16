@@ -8,6 +8,9 @@ on:
       - main
   # Lets staging.yml / production.yml reuse this exact gate before deploying.
   workflow_call:
+  # dependency-update.yml starts this on its own PR branch (GITHUB_TOKEN PRs
+  # don't fire pull_request).
+  workflow_dispatch:
 
 permissions:
   contents: read

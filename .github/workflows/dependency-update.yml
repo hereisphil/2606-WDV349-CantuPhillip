@@ -1,0 +1,117 @@
+name: Weekly Dependency Update
+
+# Every Monday, move each dependency to the newest release its range allows
+# (bun.lock only, via `bun run deps:update`) and open or refresh one PR into dev.
+# Major versions and exact pins stay as they are; those are a person's call (#148).
+#
+# Needs "Allow GitHub Actions to create and approve pull requests" turned on in
+# Settings → Actions → General, or the PR step fails with a 403.
+# GitHub runs schedules (and `gh workflow run`) from the default branch, main,
+# so this starts once it is promoted there.
+on:
+  schedule:
+    - cron: "0 13 * * 1" # Mondays 13:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  # Lets this job start verify.yml on the update branch (see the last step).
+  actions: write
+
+concurrency:
+  group: dependency-update
+  cancel-in-progress: false
+
+env:
+  BRANCH: dx-weekly_dependency_update
+
+jobs:
+  update:
+    name: update
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dev/memli
+
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: dev/memli/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # bunfig.toml's minimumReleaseAge (3 days) still applies here.
+      - name: Update In-Range Dependencies
+        id: update
+        run: |
+          bun run --silent deps:update > "$RUNNER_TEMP/bumps.md"
+          if git diff --quiet -- bun.lock; then
+            echo "Everything is already current."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or Refresh the Pull Request
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898289+github-actions[bot]@users.noreply.github.com"
+
+          # Rebuilt from the latest dev each week, so the PR never goes stale.
+          git switch -C "$BRANCH"
+          git add bun.lock
+          git commit -m "[DX] Weekly in-range dependency update." -m "Lockfile only, from \`bun run deps:update\`."
+          git push --force origin "$BRANCH"
+
+          body="$RUNNER_TEMP/body.md"
+          {
+            echo "## Summary"
+            echo "- Weekly in-range update: \`bun.lock\` only, every \`package.json\` range unchanged."
+            echo "- Major versions and exact pins are left for a person to review."
+            echo
+            echo "### Direct dependencies bumped"
+            if [ -s "$RUNNER_TEMP/bumps.md" ]; then
+              cat "$RUNNER_TEMP/bumps.md"
+            else
+              echo "- None. Only transitive dependencies moved."
+            fi
+            echo
+            echo "## Test plan"
+            echo "- [ ] \`validate\` passes (started by this workflow)"
+            echo "- [ ] Skim release notes for anything above that touches study, saving or the API"
+            echo "- [ ] If Prettier or the router plugin changed output, run \`bun run format\` / \`bun run build\` locally and commit the result"
+          } > "$body"
+
+          pr=$(gh pr list --head "$BRANCH" --base dev --state open --json number --jq '.[0].number // empty')
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --body-file "$body"
+          else
+            gh pr create --base dev --head "$BRANCH" \
+              --title "[DX] Weekly dependency update" --body-file "$body"
+          fi
+
+      # Pushes and PRs made with GITHUB_TOKEN don't fire pull_request workflows,
+      # but workflow_dispatch does, and its `validate` run lands on the PR's head.
+      - name: Start CI on the Update Branch
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run verify.yml --ref "$BRANCH"
