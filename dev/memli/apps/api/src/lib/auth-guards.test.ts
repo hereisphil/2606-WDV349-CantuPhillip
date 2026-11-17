@@ -21,7 +21,7 @@ const STAGING_ORIGIN = "https://memli-staging.thereisphil.workers.dev"
 const learner = {
   name: "Ana",
   email: "ana@memli.test",
-  password: "correct horse battery",
+  password: "Correct-horse-battery",
 }
 const wrong = { email: learner.email, password: "not the password" }
 

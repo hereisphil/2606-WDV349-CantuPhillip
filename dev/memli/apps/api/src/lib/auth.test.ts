@@ -9,7 +9,7 @@ import { TEST_ORIGIN, startTestApi, type TestApi } from "../db/test-d1"
 const learner = {
   name: "Ana",
   email: "ana@memli.test",
-  password: "correct horse battery",
+  password: "Correct-horse-battery",
 }
 
 let api: TestApi
@@ -115,12 +115,16 @@ describe("POST /api/auth/sign-up/email", () => {
   })
 
   it.each([
-    ["shorter than 8 characters", "short"],
-    ["longer than 128 characters", "x".repeat(129)],
-  ])("refuses a password %s", async (_label, password) => {
+    ["shorter than 8 characters", "Sh-ort", "PASSWORD_TOO_SHORT"],
+    ["over 128 characters", `A-${"x".repeat(127)}`, "PASSWORD_TOO_LONG"],
+    ["with no capital letter", "correct-horse", "PASSWORD_TOO_WEAK"],
+    ["with no lowercase letter", "CORRECT-HORSE", "PASSWORD_TOO_WEAK"],
+    ["with no symbol", "CorrectHorse1", "PASSWORD_TOO_WEAK"],
+  ])("refuses a password %s", async (_label, password, code) => {
     const res = await post("/sign-up/email", { ...learner, password })
 
     expect(res.status).toBe(400)
+    expect(await codeOf(res)).toBe(code)
     expect(await api.db.select().from(users)).toHaveLength(0)
   })
 })
@@ -164,6 +168,47 @@ describe("POST /api/auth/sign-in/email", () => {
     const res = await api.request("/api/auth/get-session")
 
     expect(await res.json()).toBeNull()
+  })
+})
+
+describe("a signed-in learner changing their account", () => {
+  let cookie: string
+
+  beforeEach(async () => {
+    cookie = cookiesOf(await post("/sign-up/email", learner))
+  })
+
+  it("can't change to a password that breaks the rules", async () => {
+    const res = await post(
+      "/change-password",
+      { currentPassword: learner.password, newPassword: "correct-horse" },
+      { Cookie: cookie }
+    )
+
+    expect(res.status).toBe(400)
+    expect(await codeOf(res)).toBe("PASSWORD_TOO_WEAK")
+  })
+
+  it("can change to one that follows them", async () => {
+    const res = await post(
+      "/change-password",
+      { currentPassword: learner.password, newPassword: "Another-horse" },
+      { Cookie: cookie }
+    )
+
+    expect(res.status).toBe(200)
+  })
+
+  it("gets a new name trimmed and cut at 64 characters too", async () => {
+    const res = await post(
+      "/update-user",
+      { name: ` ${"M".repeat(500)}` },
+      { Cookie: cookie }
+    )
+    expect(res.status).toBe(200)
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe("M".repeat(64))
   })
 })
 

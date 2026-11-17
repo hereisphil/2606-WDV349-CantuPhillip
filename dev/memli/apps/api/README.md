@@ -196,8 +196,8 @@ Each review saves two things together: the card's new state in `user_progress`, 
 The web app will call these through Better Auth's client, not by hand.
 
 - **A session is a cookie.** `HttpOnly`, `SameSite=Lax`, and `Secure` whenever `BETTER_AUTH_URL` is `https`. It lasts 7 days and renews after a day of use.
-- **Passwords** are 8 to 128 characters with no other rules, the limits in `@workspace/schemas/auth/sign-up`. Better Auth stores a scrypt hash in `accounts.password`. On Workers it hashes with `node:crypto`, which is why `wrangler.jsonc` turns on `nodejs_compat`.
-- **A name** is trimmed and cut at 64 characters, because it is shown under the learner's mnemonics. A blank name is refused.
+- **Passwords** are 8 to 128 characters with a capital letter, a lowercase letter and a symbol, the rules in `@workspace/schemas/auth/sign-up`. Better Auth checks the length (`PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG`). A hook in `auth.ts` checks the rest on sign-up, password change and password reset, and answers `400` with `PASSWORD_TOO_WEAK`. Sign-in never checks them, so no one is locked out by a rule change. Better Auth stores a scrypt hash in `accounts.password`. On Workers it hashes with `node:crypto`, which is why `wrangler.jsonc` turns on `nodejs_compat`.
+- **A name** is trimmed and cut at 64 characters, at sign-up and on a later rename, because it is shown under the learner's mnemonics. A blank name is refused.
 - **`uiLocale` starts as `en`** and a sign-up body cannot set it. Neither can it set `emailVerified`.
 - **A wrong password and an unknown email answer the same**: `401` with `INVALID_EMAIL_OR_PASSWORD`.
 - **Tries are limited per address**, counted in the `rate_limits` table so every Worker instance sees the same count. Sign-in allows 3 tries in 10 seconds, and sign-up 5 new accounts a minute. A refusal is `429` with `X-Retry-After` in seconds. The address is Cloudflare's `cf-connecting-ip` header, never `X-Forwarded-For`, which any client can set. Locally there is no such header, so every request shares one count.

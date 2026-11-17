@@ -104,7 +104,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 ### Passwords and accounts (#108)
 
 - [x] Keep Better Auth's password hashing (scrypt). Never write our own. A test checks that `accounts.password` is a hash.
-- [x] `signUpSchema` sets a minimum and maximum password length (8 and 128), with no "must contain a symbol" rules, and Better Auth is given the same two numbers. Still open: Better Auth's breached-password check (`haveibeenpwned`), which sends part of a password's hash to a third party on every sign-up.
+- [x] `signUpSchema` sets a minimum and maximum password length (8 and 128), and Better Auth is given the same two numbers. A password also needs a capital letter, a lowercase letter and a symbol (decided 2026-11-17, replacing the earlier "no must-contain rules" line). `meetsPasswordRules` in `@workspace/schemas/auth/sign-up` is the one definition: the form uses it, and the API runs it on sign-up, password change and password reset, answering `PASSWORD_TOO_WEAK`. Still open: Better Auth's breached-password check (`haveibeenpwned`).
 - [ ] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong.
 - [ ] Decide on email verification. With `requireEmailVerification` on (or `autoSignIn` off), sign-up answers the same way whether or not an email is already registered, so nobody can use the form to check who has an account. It needs an email provider, so it may land after the beta. Write the decision down either way.
 
