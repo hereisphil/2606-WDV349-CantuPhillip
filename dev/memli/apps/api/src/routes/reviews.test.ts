@@ -191,6 +191,10 @@ describe("POST /api/reviews", () => {
       { reviews: [{ ...review("a"), reviewId: "1" }] },
     ],
     ["no review id", { reviews: [{ ...review("a"), reviewId: undefined }] }],
+    [
+      "a card id longer than any real one",
+      { reviews: [{ ...review("a"), cardId: "c".repeat(65) }] },
+    ],
   ])("answers INVALID_REQUEST for %s", async (_name, body) => {
     const res = await post(body)
 
@@ -199,6 +203,41 @@ describe("POST /api/reviews", () => {
       error: { code: "INVALID_REQUEST" },
     })
     expect(await savedRows()).toEqual([])
+  })
+
+  it.each([
+    ["no content type", undefined],
+    ["plain text, as a cross-site form can send", "text/plain"],
+    ["a form", "application/x-www-form-urlencoded"],
+  ])(
+    "answers INVALID_REQUEST for a JSON body sent as %s",
+    async (_name, type) => {
+      const [cardId = ""] = await addCourse(api.db, "spanish", 1)
+
+      const res = await api.request("/api/reviews", {
+        method: "POST",
+        headers: type === undefined ? {} : { "Content-Type": type },
+        body: JSON.stringify({ reviews: [review(cardId)] }),
+      })
+
+      expect(res.status).toBe(400)
+      expect(apiErrorSchema.parse(await res.json())).toEqual({
+        error: { code: "INVALID_REQUEST" },
+      })
+      expect(await savedRows()).toEqual([])
+    }
+  )
+
+  it("accepts a JSON content type with a charset", async () => {
+    const [cardId = ""] = await addCourse(api.db, "spanish", 1)
+
+    const res = await api.request("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ reviews: [review(cardId)] }),
+    })
+
+    expect(res.status).toBe(200)
   })
 
   it("saves a request larger than D1 lets one query list", async () => {
