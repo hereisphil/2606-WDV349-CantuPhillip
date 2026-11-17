@@ -107,7 +107,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] `signUpSchema` sets a minimum and maximum password length (8 and 128), and Better Auth is given the same two numbers. A password also needs a capital letter, a lowercase letter and a symbol (decided 2026-11-17, replacing the earlier "no must-contain rules" line). `meetsPasswordRules` in `@workspace/schemas/auth/sign-up` is the one definition: the form uses it, and the API runs it on sign-up, password change and password reset, answering `PASSWORD_TOO_WEAK`.
 - [x] A new password found in a known breach is refused with `PASSWORD_COMPROMISED` (Better Auth's `haveibeenpwned` plugin, turned on 2026-11-17). It runs on sign-up, password change and password reset, never on sign-in. Only the first five characters of the password's SHA-1 hash go to `api.pwnedpasswords.com`, which answers with every hash ending that shares them, so the service never learns the password or whether it matched. If the service is down, the request fails with a 500 and no account is made: it fails closed. The Privacy Policy (#170) names this service.
 - [ ] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong.
-- [ ] Decide on email verification. With `requireEmailVerification` on (or `autoSignIn` off), sign-up answers the same way whether or not an email is already registered, so nobody can use the form to check who has an account. It needs an email provider, so it may land after the beta. Write the decision down either way.
+- [x] Decide on email verification. Decided 2026-11-17: not for the beta, because it needs an email service and a domain. Until #175, sign-up answers `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` for a registered email, so the form can reveal who has an account. The beta is invite-only, which limits who can try. #175 adds the email service, `requireEmailVerification` (sign-up then answers the same either way) and password reset.
 
 ### Google OAuth (#107)
 
@@ -134,4 +134,6 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 | #168 | Security headers and a Content Security Policy on the Worker and the API |
 | #169 | Rate limiting, an `Origin` check, and cookie and OAuth rules before real sign-in (#108, #107) |
 | #170 | Terms of Service, Privacy Policy and a Community Code of Conduct |
+| #175 | Email verification and password reset, so sign-up stops revealing existing accounts |
+| #176 | Measure password hashing against the Workers CPU limit on staging |
 | #171 | Pin GitHub Actions to commit SHAs |
