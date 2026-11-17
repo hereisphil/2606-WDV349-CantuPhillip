@@ -74,8 +74,8 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 - [ ] `BETTER_AUTH_SECRET` is a long random value, set with `wrangler secret put` for staging and production, and in `.dev.vars` locally (git-ignored). Never in the repo.
 - [ ] The Google client secret (#107) is a secret the same way. The client ID can live in `wrangler.jsonc`.
-- [ ] The API's environment is checked by a schema in `@workspace/schemas`, like `env/web.ts`, so a missing secret fails at startup, not on a learner's first sign-in.
-- [ ] `baseURL` is set per environment and is `https` outside local development, which is what makes Better Auth mark cookies `Secure`.
+- [x] The API's environment is checked by a schema in `@workspace/schemas` (`env/api.ts`). A Worker has no startup step, so a missing or short secret fails every `/api/auth/*` request with `INTERNAL_ERROR`, from the first one after a deploy. Tested in `apps/api/src/lib/auth.test.ts`.
+- [x] `baseURL` is set per environment (`BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`) and is `https` outside local development, which is what makes Better Auth mark cookies `Secure`. `apiEnvSchema` refuses plain `http` on any host but `localhost`. Production gets its value with its API environment (#114).
 - [ ] `trustedOrigins` lists exactly the app's origin for each environment. No wildcards, and no `localhost` on staging or production.
 
 ### Cookies and sessions
@@ -103,8 +103,8 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 ### Passwords and accounts (#108)
 
-- [ ] Keep Better Auth's password hashing (scrypt). Never write our own.
-- [ ] `signUpSchema` sets a minimum and maximum password length, with no "must contain a symbol" rules. Consider Better Auth's breached-password check.
+- [x] Keep Better Auth's password hashing (scrypt). Never write our own. A test checks that `accounts.password` is a hash.
+- [x] `signUpSchema` sets a minimum and maximum password length (8 and 128), with no "must contain a symbol" rules, and Better Auth is given the same two numbers. Still open: Better Auth's breached-password check (`haveibeenpwned`), which sends part of a password's hash to a third party on every sign-up.
 - [ ] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong.
 - [ ] Decide on email verification. With `requireEmailVerification` on (or `autoSignIn` off), sign-up answers the same way whether or not an email is already registered, so nobody can use the form to check who has an account. It needs an email provider, so it may land after the beta. Write the decision down either way.
 

@@ -5,6 +5,16 @@
   // The newest date the installed local runtime (workerd) accepts. `wrangler dev`
   // refuses to start on a later one, so raise this only alongside wrangler.
   "compatibility_date": "2026-06-24",
+  // Better Auth hashes passwords with node:crypto's scrypt (#108).
+  "compatibility_flags": ["nodejs_compat"],
+  // Local values. The origin learners see is the web app's: Vite proxies /api/*.
+  "vars": {
+    "BETTER_AUTH_URL": "http://localhost:5173"
+  },
+  // Locally in .dev.vars (see .dev.vars.example). Listed so `wrangler types` types it.
+  "secrets": {
+    "required": ["BETTER_AUTH_SECRET"]
+  },
   // Local D1 lives in .wrangler/state (gitignored), so this one has no real
   // database_id. Staging's real database is under env.staging below.
   "d1_databases": [
@@ -25,6 +35,13 @@
     "staging": {
       "workers_dev": false,
       "preview_urls": false,
+      "vars": {
+        "BETTER_AUTH_URL": "https://memli-staging.thereisphil.workers.dev"
+      },
+      // Set with `wrangler secret put BETTER_AUTH_SECRET --env staging`.
+      "secrets": {
+        "required": ["BETTER_AUTH_SECRET"]
+      },
       "d1_databases": [
         {
           "binding": "DB",

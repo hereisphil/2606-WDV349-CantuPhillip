@@ -2,6 +2,7 @@ import type { HealthResponse } from "@workspace/schemas/api/health"
 import { Hono } from "hono"
 
 import type { AppEnv } from "./env"
+import { auth } from "./lib/auth"
 import { handleError, handleNotFound } from "./lib/errors"
 import { courseRoutes } from "./routes/courses"
 import { historyRoutes } from "./routes/history"
@@ -28,6 +29,9 @@ app.get("/health", (c) => {
   const body: HealthResponse = { status: "ok" }
   return c.json(body)
 })
+
+// Better Auth owns everything under /api/auth: sign-up, sign-in, sign out.
+app.on(["GET", "POST"], "/auth/*", (c) => auth(c.env).handler(c.req.raw))
 
 app.route("/courses", courseRoutes)
 app.route("/reviews", reviewRoutes)

@@ -16,6 +16,8 @@ import { apiRoot, migrationStatements, seedSql } from "./test-database"
 export type TestApi = {
   /** Drizzle on the test database, to add rows and read them back. */
   db: Database
+  /** What `request` hands the app. Spread it to try another environment. */
+  env: Env
   /** Calls a route the way a client would, with the test database bound. */
   request: (path: string, init?: RequestInit) => Promise<Response>
   /** Empties every table. */
@@ -54,12 +56,24 @@ export async function startTestApi(): Promise<TestApi> {
 
   await run(migrationStatements())
 
+  // Set here, never read from a developer's .dev.vars, so CI runs the same.
+  const testEnv: Env = {
+    ...env,
+    BETTER_AUTH_SECRET: TEST_AUTH_SECRET,
+    BETTER_AUTH_URL: TEST_ORIGIN,
+  }
+
   return {
     db: database(env.DB),
-    request: async (path, init) => app.request(path, init, env),
+    env: testEnv,
+    request: async (path, init) => app.request(path, init, testEnv),
     // Deleting a course or a user takes everything that hangs off it along.
     reset: async () => {
-      await run(["DELETE FROM courses", "DELETE FROM users"])
+      await run([
+        "DELETE FROM courses",
+        "DELETE FROM users",
+        "DELETE FROM verifications",
+      ])
     },
     seed: async () => {
       await seed()
@@ -67,6 +81,10 @@ export async function startTestApi(): Promise<TestApi> {
     stop,
   }
 }
+
+/** The web app's local origin: what a browser sends as `Origin`. */
+export const TEST_ORIGIN = "http://localhost:5173"
+const TEST_AUTH_SECRET = "test-only-secret-never-used-outside-vitest"
 
 export const VIEWER_ID = "usr_prototype_01"
 export const AUTHOR_ID = "usr_author"
