@@ -99,6 +99,48 @@ describe("mnemonicSchema", () => {
       }).success
     ).toBe(false)
   })
+
+  it.each([
+    ["another host", "https://tracker.example/pixel.png"],
+    ["a protocol-relative host", "//tracker.example/pixel.png"],
+    ["a backslash host", "/\\tracker.example/pixel.png"],
+    ["a script URL", "javascript:alert(1)"],
+    ["a data URL", "data:image/svg+xml,<svg onload=alert(1)>"],
+    ["a relative path", "mnemonics/gato.svg"],
+    ["a path with spaces", "/mnemonics/gato cat.svg"],
+  ])("only takes a picture from Memli's own origin, not %s", (_name, src) => {
+    expect(
+      mnemonicSchema.safeParse({
+        ...mnemonic,
+        image: { src, alt: "A cat at a gala." },
+      }).success
+    ).toBe(false)
+  })
+
+  it("caps how long a story part can be", () => {
+    expect(
+      mnemonicSchema.safeParse({
+        ...mnemonic,
+        story: [{ kind: "plain", text: "a".repeat(281) }],
+      }).success
+    ).toBe(false)
+  })
+
+  it("caps how many parts a story can have", () => {
+    const part = { kind: "plain", text: "Gala-cat! " }
+
+    expect(
+      mnemonicSchema.safeParse({ ...mnemonic, story: Array(25).fill(part) })
+        .success
+    ).toBe(false)
+  })
+
+  it("caps how long an id can be", () => {
+    expect(
+      mnemonicSchema.safeParse({ ...mnemonic, mnemonicId: "m".repeat(65) })
+        .success
+    ).toBe(false)
+  })
 })
 
 describe("courseCardsSchema", () => {

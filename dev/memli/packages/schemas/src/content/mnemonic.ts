@@ -1,6 +1,23 @@
 import { z } from "zod"
 
 import { languageTagSchema } from "../locale/language-tag"
+import { idSchema } from "./id"
+
+// Room for a good story, with a ceiling that community posting (#170) can't
+// stretch. A story is a handful of short parts, never an essay.
+const MAX_STORY_PARTS = 24
+const MAX_STORY_PART_LENGTH = 280
+const MAX_ALT_LENGTH = 250
+const MAX_DISPLAY_NAME_LENGTH = 64
+
+/**
+ * A path on Memli's own origin, like `/mnemonics/gato.svg`. No other host: a
+ * picture from anywhere else could track who views it. `//` and `/\` are hosts.
+ */
+export const mnemonicImageSrcSchema = z
+  .string()
+  .max(512)
+  .regex(/^\/(?![/\\])[^\s\\]*$/)
 
 /**
  * One run of a mnemonic story: data, not markup, so community text is never
@@ -8,24 +25,24 @@ import { languageTagSchema } from "../locale/language-tag"
  */
 export const mnemonicStoryPartSchema = z.object({
   kind: z.enum(["plain", "term", "keyword"]),
-  text: z.string().min(1),
+  text: z.string().min(1).max(MAX_STORY_PART_LENGTH),
 })
 
 export type MnemonicStoryPart = z.infer<typeof mnemonicStoryPartSchema>
 
 /** A memory hook for one card, written by the community (#50). */
 export const mnemonicSchema = z.object({
-  mnemonicId: z.string().min(1),
+  mnemonicId: idSchema,
   /**
    * What the story and alt text are written in. Often, but not always, the
    * course's `answerLanguage`.
    */
   contentLocale: languageTagSchema,
-  story: z.array(mnemonicStoryPartSchema).nonempty(),
+  story: z.array(mnemonicStoryPartSchema).nonempty().max(MAX_STORY_PARTS),
   /** Who wrote it. `null` once the author has deleted their account. */
   author: z
     .object({
-      displayName: z.string().min(1),
+      displayName: z.string().min(1).max(MAX_DISPLAY_NAME_LENGTH),
     })
     .nullable(),
   /** Learners who found it useful. A card lists its mnemonics by this, highest first. */
@@ -33,9 +50,9 @@ export const mnemonicSchema = z.object({
   /** Picture for the hook. Optional: a story works without one. */
   image: z
     .object({
-      src: z.string().min(1),
+      src: mnemonicImageSrcSchema,
       /** Describes the picture, in `contentLocale`. */
-      alt: z.string().min(1),
+      alt: z.string().min(1).max(MAX_ALT_LENGTH),
     })
     .optional(),
 })

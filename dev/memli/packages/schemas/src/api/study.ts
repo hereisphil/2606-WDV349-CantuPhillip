@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { cardSchema } from "../content/card"
 import { courseSchema } from "../content/course"
+import { idSchema } from "../content/id"
 import { timeZoneSchema } from "../locale/time-zone"
 import { cardProgressSchema } from "../srs/progress"
 
@@ -9,6 +10,13 @@ import { cardProgressSchema } from "../srs/progress"
 export const studyModeSchema = z.enum(["review", "learn", "practice"])
 
 export type StudyModeData = z.infer<typeof studyModeSchema>
+
+/** The path params of `GET /api/courses/:courseId/study`. */
+export const studyParamsSchema = z.object({
+  courseId: idSchema,
+})
+
+export type StudyParams = z.infer<typeof studyParamsSchema>
 
 /**
  * The query string of `GET /api/courses/:courseId/study`. A query string is

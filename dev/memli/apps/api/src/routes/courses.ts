@@ -9,6 +9,7 @@ import {
   type CoursesResponse,
 } from "@workspace/schemas/api/courses"
 import {
+  studyParamsSchema,
   studyQuerySchema,
   type StudySession,
 } from "@workspace/schemas/api/study"
@@ -86,11 +87,12 @@ courseRoutes.get("/", validate("query", coursesQuerySchema), async (c) => {
 // One session's cards for a course: ?mode=review (default), learn or practice.
 courseRoutes.get(
   "/:courseId/study",
+  validate("param", studyParamsSchema),
   validate("query", studyQuerySchema),
   async (c) => {
     const db = database(c.env.DB)
     const now = new Date()
-    const courseId = c.req.param("courseId")
+    const { courseId } = c.req.valid("param")
     const { mode, extra, timeZone } = c.req.valid("query")
     const userId = viewerId(c)
 

@@ -2,13 +2,14 @@ import { z } from "zod"
 
 import { languageTagSchema } from "../locale/language-tag"
 import { cardSchema } from "./card"
+import { idSchema } from "./id"
 
 /**
  * Words in one language, explained in another; neither is the `uiLocale`
  * (docs/i18n.md). Never "deck": see .cursor/rules/ui-design.mdc.
  */
 export const courseSchema = z.object({
-  courseId: z.string().min(1),
+  courseId: idSchema,
   title: z.string().min(1),
   /** What the course teaches: the language of each card's `term`. */
   learningLanguage: languageTagSchema,

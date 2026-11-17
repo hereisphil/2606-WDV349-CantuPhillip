@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { idSchema } from "./id"
 import { mnemonicSchema } from "./mnemonic"
 
 /** Grammar fields are stable codes; the UI maps them to labels in the UI locale. */
@@ -26,7 +27,7 @@ export type GrammaticalGender = z.infer<typeof grammaticalGenderSchema>
  * it. That is `CardProgress` (`@workspace/schemas/srs/progress`).
  */
 export const cardSchema = z.object({
-  cardId: z.string().min(1),
+  cardId: idSchema,
   /** The word or phrase being learned, in the course's `learningLanguage`. */
   term: z.string().min(1),
   partOfSpeech: partOfSpeechSchema,
