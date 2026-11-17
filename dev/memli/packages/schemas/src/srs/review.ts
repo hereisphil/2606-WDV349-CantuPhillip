@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { idSchema } from "../content/id"
 import { cardProgressSchema } from "./progress"
 
 /**
@@ -17,7 +18,7 @@ export type ReviewOutcomeData = z.infer<typeof reviewOutcomeSchema>
 export const reviewSubmissionSchema = z.object({
   /** Made by the client, so a retried request isn't counted twice. */
   reviewId: z.uuid(),
-  cardId: z.string().min(1),
+  cardId: idSchema,
   outcome: reviewOutcomeSchema,
   /** When the learner settled the outcome, UTC ISO 8601. */
   reviewedAt: z.iso.datetime(),

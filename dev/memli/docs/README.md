@@ -20,6 +20,7 @@ GitHub milestones and issues track *when* and *what* to build next. These docs t
 | [mobile.md](./mobile.md) | React Native / Expo plan and what to share from the monorepo |
 | [state-management.md](./state-management.md) | Who owns each kind of React state; `useReducer`-first, lint-enforced; when to add `use-effect-reducer` |
 | [dx-tooling.md](./dx-tooling.md) | Dev-only tools (e.g. Reactotron), when to introduce them |
+| [security.md](./security.md) | What the API and Worker enforce today (validation, errors, origin, content), compliance plans, and the open security issues |
 | [dependencies.md](./dependencies.md) | Weekly dependency update PR, manual and major upgrades, and the holds with their reasons |
 
 ## How to use these docs

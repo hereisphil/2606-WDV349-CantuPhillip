@@ -176,6 +176,15 @@ describe("GET /api/courses/:courseId/study", () => {
     })
   })
 
+  it("answers INVALID_REQUEST for a course id longer than any real one", async () => {
+    const res = await api.request(`/api/courses/${"c".repeat(65)}/study`)
+
+    expect(res.status).toBe(400)
+    expect(apiErrorSchema.parse(await res.json())).toEqual({
+      error: { code: "INVALID_REQUEST" },
+    })
+  })
+
   it.each(["mode=cram", "mode=learn&extra=0", "mode=learn&extra=lots"])(
     "answers INVALID_REQUEST for ?%s",
     async (query: string) => {

@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { idSchema } from "../content/id"
+
 /** A UTC ISO 8601 timestamp, as `Date.prototype.toISOString` writes it. */
 const utcTimestamp = z.iso.datetime()
 
@@ -15,7 +17,7 @@ export const progressStateSchema = z.enum([
  * any field, even `stabilityFast`, silently changes every future interval.
  */
 export const cardProgressSchema = z.object({
-  cardId: z.string().min(1),
+  cardId: idSchema,
   state: progressStateSchema,
   due: utcTimestamp,
   /** `null` until the first review. */

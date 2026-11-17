@@ -1,5 +1,7 @@
 # Dashboard redesign plan
 
+> See the prompt I used with Claude Code to start this re-design here: [PROMPT.md](PROMPT.md)
+
 A plan to redesign the Memli dashboard (`/dashboard`) so that one thing leads the eye, the page says less, colors separate clearly, and dark mode is a real, visible choice.
 
 This document replaces the layout and visual decisions in [dashboards/PLAN.md](./dashboards/PLAN.md) (issue #47). The data contract, the model functions and the preview states from that plan stay.
