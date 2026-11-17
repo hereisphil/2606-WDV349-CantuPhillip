@@ -150,6 +150,19 @@ export const verifications = sqliteTable(
   (t) => [index("verifications_identifier_idx").on(t.identifier)]
 )
 
+/**
+ * Better Auth's `rateLimit` model: tries per client and path. In D1 because a
+ * count kept in memory is not shared across Worker instances (#169).
+ */
+export const rateLimits = sqliteTable("rate_limits", {
+  id: text("id").primaryKey(),
+  /** The client's IP address and the path, joined by Better Auth. */
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  /** Milliseconds since 1970, as a number: Better Auth compares it itself. */
+  lastRequest: integer("last_request").notNull(),
+})
+
 /** What learners study. Never called a deck (`.cursor/rules/ui-design.mdc`). */
 export const courses = sqliteTable(
   "courses",

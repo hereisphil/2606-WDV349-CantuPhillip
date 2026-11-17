@@ -10,9 +10,18 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { betterAuth } from "better-auth/minimal"
 
 import { database } from "../db/client"
-import { accounts, sessions, users, verifications } from "../db/schema"
+import {
+  accounts,
+  rateLimits,
+  sessions,
+  users,
+  verifications,
+} from "../db/schema"
 
 type Auth = ReturnType<typeof betterAuth<BetterAuthOptions>>
+
+// New accounts from one address: room for a household, not for a script.
+const SIGN_UP_LIMIT = { window: 60, max: 5 }
 
 /**
  * Sign-in, on Better Auth's defaults. The reason for each setting, and what
@@ -30,7 +39,7 @@ function authOptions(env: Env): BetterAuthOptions {
       provider: "sqlite",
       // Memli's tables are plural: `users`, `sessions`, `accounts`.
       usePlural: true,
-      schema: { users, sessions, accounts, verifications },
+      schema: { users, sessions, accounts, verifications, rateLimits },
     }),
     emailAndPassword: {
       enabled: true,
@@ -59,6 +68,23 @@ function authOptions(env: Env): BetterAuthOptions {
           },
         },
       },
+    },
+    rateLimit: {
+      // Said out loud: the default only turns on when it detects production,
+      // and that detection is Node's, not a Worker's.
+      enabled: true,
+      // Memory is not shared across Worker instances, so the counts go in D1.
+      storage: "database",
+      // Sign-in keeps Better Auth's own rule: 3 tries in 10 seconds.
+      customRules: { "/sign-up/email": SIGN_UP_LIMIT },
+    },
+    advanced: {
+      // Cloudflare sets this header itself. Any client can send the default,
+      // `X-Forwarded-For`, and so pretend to be a new address on every try.
+      ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] },
+      // Both default to off under a test runner. Never turn either on.
+      disableOriginCheck: false,
+      disableCSRFCheck: false,
     },
     telemetry: { enabled: false },
   }

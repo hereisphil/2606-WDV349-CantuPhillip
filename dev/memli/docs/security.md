@@ -76,30 +76,30 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [ ] The Google client secret (#107) is a secret the same way. The client ID can live in `wrangler.jsonc`.
 - [x] The API's environment is checked by a schema in `@workspace/schemas` (`env/api.ts`). A Worker has no startup step, so a missing or short secret fails every `/api/auth/*` request with `INTERNAL_ERROR`, from the first one after a deploy. Tested in `apps/api/src/lib/auth.test.ts`.
 - [x] `baseURL` is set per environment (`BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`) and is `https` outside local development, which is what makes Better Auth mark cookies `Secure`. `apiEnvSchema` refuses plain `http` on any host but `localhost`. Production gets its value with its API environment (#114).
-- [ ] `trustedOrigins` lists exactly the app's origin for each environment. No wildcards, and no `localhost` on staging or production.
+- [x] `trustedOrigins` lists exactly the app's origin for each environment. No wildcards, and no `localhost` on staging or production. The list is left empty on purpose: Better Auth then trusts only `baseURL`'s origin, so there is one value to get right.
 
 ### Cookies and sessions
 
-- [ ] Session cookies are `HttpOnly`, `Secure` and `SameSite=Lax`. These are Better Auth's defaults: don't loosen them, and never use `SameSite=None`.
-- [ ] A test reads the `Set-Cookie` header after sign-in and checks all three attributes.
+- [x] Session cookies are `HttpOnly`, `Secure` and `SameSite=Lax`. These are Better Auth's defaults: don't loosen them, and never use `SameSite=None`.
+- [x] A test reads the `Set-Cookie` header after sign-up on the staging origin and checks all three attributes (`apps/api/src/lib/auth-guards.test.ts`).
 - [ ] Decide the session length. Better Auth's default is 7 days, renewed after a day of use. Sign out (#45) deletes the session on the server, not just the cookie.
 - [ ] `viewerId()` in `apps/api/src/lib/viewer.ts` reads the session. With no session, a route answers a new `UNAUTHORIZED` code (401), added to `apiErrorCodeSchema` and mapped to copy in the web app.
 - [ ] Every query stays filtered by the viewer's id. A test signs in as one learner and proves they can't read or write another learner's progress or reviews.
 
 ### CSRF and origin
 
-- [ ] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck`.
+- [x] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck` to `true`. Both are set to `false` by name, because Better Auth skips the origin check by itself under a test runner. Tests refuse a write from another origin, with no origin, and from another site's page.
 - [x] Memli's own routes accept only `application/json` bodies (done in #111).
 - [ ] Memli's own write routes check the `Origin` header too (#169).
 
 ### Rate limiting
 
-- [ ] Turn Better Auth's rate limiter on explicitly for staging and production. It's only on by default when it detects production, and that detection is Node-style, so don't count on it inside a Worker.
-- [ ] Store its counts in D1 (`rateLimit.storage: "database"`, with a migration). The default is memory, and memory isn't shared across Worker instances, so the limit would barely apply.
-- [ ] Read the client IP from Cloudflare's header: `advanced.ipAddress.ipAddressHeaders: ["cf-connecting-ip"]`. The default, `X-Forwarded-For`, can be set by any client, so an attacker could pretend to be a new IP on every try.
-- [ ] Keep the strict default on email sign-in (3 tries per 10 seconds), and add `rateLimit.customRules` for sign-up and passkey sign-in.
+- [x] Turn Better Auth's rate limiter on explicitly. It's only on by default when it detects production, and that detection is Node-style, so don't count on it inside a Worker. It is on everywhere, local development included, so there is no environment check to get wrong.
+- [x] Store its counts in D1 (`rateLimit.storage: "database"`, the `rate_limits` table in migration `0004`). The default is memory, and memory isn't shared across Worker instances, so the limit would barely apply.
+- [x] Read the client IP from Cloudflare's header: `advanced.ipAddress.ipAddressHeaders: ["cf-connecting-ip"]`. The default, `X-Forwarded-For`, can be set by any client, so an attacker could pretend to be a new IP on every try. A test sends a new `X-Forwarded-For` on every try and is still refused.
+- [x] Keep the strict default on email sign-in (3 tries per 10 seconds), and add `rateLimit.customRules` for sign-up (5 new accounts a minute from one address). The passkey sign-in rule lands with passkeys (#107).
 - [ ] Rate limit Memli's own `POST /api/reviews` (#169).
-- [ ] A test proves a burst of sign-in attempts gets refused.
+- [x] A test proves a burst of sign-in attempts gets refused, and that the learner can try again once the window ends.
 
 ### Passwords and accounts (#108)
 

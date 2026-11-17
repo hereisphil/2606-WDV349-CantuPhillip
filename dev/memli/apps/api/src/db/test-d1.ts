@@ -73,6 +73,7 @@ export async function startTestApi(): Promise<TestApi> {
         "DELETE FROM courses",
         "DELETE FROM users",
         "DELETE FROM verifications",
+        "DELETE FROM rate_limits",
       ])
     },
     seed: async () => {
