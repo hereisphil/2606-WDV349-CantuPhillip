@@ -181,7 +181,7 @@ There is no sign-in until Better Auth (#108), so every request is the prototype 
 
 ### Checking a request
 
-Routes never read a raw body or query string. `validate` in [`src/lib/validate.ts`](./src/lib/validate.ts) runs a schema from `@workspace/schemas` first:
+Routes never read a raw body, query string or path param. `validate` in [`src/lib/validate.ts`](./src/lib/validate.ts) runs a schema from `@workspace/schemas` first:
 
 ```ts
 routes.post("/", validate("json", submitReviewsRequestSchema), async (c) => {
@@ -189,7 +189,9 @@ routes.post("/", validate("json", submitReviewsRequestSchema), async (c) => {
 })
 ```
 
-Use `"json"` for a body and `"query"` for a query string.
+Use `"json"` for a body, `"query"` for a query string and `"param"` for path params like `:courseId`.
+
+A `"json"` body must be sent as `Content-Type: application/json` (a charset is fine), or the route answers `INVALID_REQUEST`. A cross-site form can only send form or plain-text bodies, so this also refuses a forged write. Ids are capped at 64 characters by `idSchema` in `@workspace/schemas`, so no request can make the Worker read an unbounded string. The full list of what the API enforces, and what is still open, is in [`docs/security.md`](../../docs/security.md).
 
 ### D1's limit of 100 values per statement
 

@@ -53,9 +53,18 @@ Progress now survives a refresh. `apps/api` is a Hono app on a Cloudflare Worker
 * **Shorter comments.** A lint rule caps comments at two lines, and every `useEffect` was reviewed. See merged **[PR #162](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/162)** — Refs [#146](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/146)
 * **Dependencies.** Everything in range is updated, Worker types come from `wrangler types` (CI fails when they're stale), and a weekly workflow opens one update PR into `dev`. See merged **[PR #163](https://github.com/hereisphil/2606-WDV349-CantuPhillip/pull/163)** — Refs [#148](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/148)
 
+### `SECURITY` Module 3 compliance and security audit
+
+Audited the API against the OWASP Top 10 and wrote down what it enforces in [`dev/memli/docs/security.md`](../dev/memli/docs/security.md). Research notes: [`docs/research/R9-Notes.md`](./research/R9-Notes.md).
+
+* **Tighter input checks.** JSON bodies must be sent as `application/json`, which a cross-site form can't do. The `:courseId` path param goes through a schema too, and every id is capped at 64 characters.
+* **Safer mnemonics.** Story parts, alt text and names have max lengths, and a picture must be a path on Memli's own origin, so `javascript:`, `data:` and other hosts are refused.
+* **Filed what's left:** security headers and a CSP ([#168](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/168)), rate limiting and CSRF guards before sign-in ([#169](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/169)), Terms, Privacy and a Code of Conduct ([#170](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/170)), and pinned GitHub Actions ([#171](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/171)).
+* Refs [#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)
+
 ### `DOCUMENTATION` Week 3 milestone summary
 
-Replaced the `359 MS 3` plan with a summary of what landed. Both items that slipped from Week 2, the session layout (#48) and the study card (#49), shipped first. The mnemonic frame (#50), outcome dock (#51), FSRS core (#132), Hono API and D1 (#106) and saved reviews (#112) all shipped, and staging runs the API (#165). The Module 3 innovation research and the API compliance and security audit are still open under #111.
+Replaced the `359 MS 3` plan with a summary of what landed. Both items that slipped from Week 2, the session layout (#48) and the study card (#49), shipped first. The mnemonic frame (#50), outcome dock (#51), FSRS core (#132), Hono API and D1 (#106) and saved reviews (#112) all shipped, and staging runs the API (#165). The Module 3 innovation research and the API compliance and security audit are done (below). The security checklist for Week 4's sign-in is still open under #111.
 
 * Refs [#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)
 

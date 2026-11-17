@@ -48,8 +48,8 @@ I went through the code and here's what's already in decent shape:
 * **There's no real login.** `viewerId()` always returns `usr_prototype_01`. That's on purpose, and Better Auth is Week 4 (#108, #107). But it means OWASP's #1, **Broken Access Control**, is the big one to get right next. Every route already asks `viewerId()` for the user instead of trusting an id from the request, so the fix should happen in one place.
 * **No rate limiting.** Anyone past the staging gate could hammer `POST /api/reviews`. That's not a big deal with one prototype user. It's a very big deal with a sign-in form.
 * **No security headers.** There's no Content Security Policy, no `X-Frame-Options` or `frame-ancestors`, no `Referrer-Policy`. OWASP files this under **Security Misconfiguration**, and it's cheap to fix in the Worker.
-* **Mnemonic fields aren't tight enough for strangers yet.** Story text has no max length, and an image `src` is any non-empty string. That's fine while I'm the only one writing seeded mems. It's not fine once the community can post.
-* **CSRF, once cookies exist.** Right now there are no cookies, so there's nothing to forge. Once Better Auth sets a session cookie, the API should check the `Origin` header and only accept real JSON. `SameSite=Lax` helps a lot, but I don't want it to be the only thing standing there.
+* **Mnemonic fields weren't tight enough for strangers.** Story text had no max length, and an image `src` could be any non-empty string. That's fine while I'm the only one writing seeded mems, but not once the community can post. _Update: fixed during the audit._ Story parts, alt text and names now have max lengths, and an image has to come from Memli's own site, so `javascript:`, `data:` and other hosts are refused.
+* **CSRF, once cookies exist.** Right now there are no cookies, so there's nothing to forge. Once Better Auth sets a session cookie, the API should check the `Origin` header and only accept real JSON. `SameSite=Lax` helps a lot, but I don't want it to be the only thing standing there. _Update: the JSON part is done._ The API now refuses any body that isn't sent as `application/json`, which a cross-site form can't do. The `Origin` check waits for #169.
 
 #### Compliance (The Non-Code Stuff)
 
@@ -173,7 +173,7 @@ Node is pinned to 26 LTS in `.nvmrc`, in `engines`, and in every workflow (`acti
 
 ### What I'd Tighten Next
 
-Being honest again: I pin my GitHub Actions by major version tag (`actions/checkout@v4`), not by commit SHA. GitHub's own hardening guide recommends SHAs for third-party actions, since a tag can be moved to point at different code. That's a small change, and it's next on my list after #168 to #170.
+Being honest again: I pin my GitHub Actions by major version tag (`actions/checkout@v4`), not by commit SHA. GitHub's own hardening guide recommends SHAs for third-party actions, since a tag can be moved to point at different code. That's a small change, so I filed it as [#171](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/171).
 
 ### Reference Links
 
