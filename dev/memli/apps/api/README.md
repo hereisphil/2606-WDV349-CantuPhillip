@@ -197,6 +197,7 @@ The web app will call these through Better Auth's client, not by hand.
 
 - **A session is a cookie.** `HttpOnly`, `SameSite=Lax`, and `Secure` whenever `BETTER_AUTH_URL` is `https`. It lasts 7 days and renews after a day of use.
 - **Passwords** are 8 to 128 characters with a capital letter, a lowercase letter and a symbol, the rules in `@workspace/schemas/auth/sign-up`. Better Auth checks the length (`PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG`). A hook in `auth.ts` checks the rest on sign-up, password change and password reset, and answers `400` with `PASSWORD_TOO_WEAK`. Sign-in never checks them, so no one is locked out by a rule change. Better Auth stores a scrypt hash in `accounts.password`. On Workers it hashes with `node:crypto`, which is why `wrangler.jsonc` turns on `nodejs_compat`.
+- **A breached password is refused.** Better Auth's `haveibeenpwned` plugin asks `api.pwnedpasswords.com` about every new password and answers `400` with `PASSWORD_COMPROMISED` on a match. It sends the first five characters of the password's SHA-1 hash, never the password. If that service is down, sign-up answers `500` and makes no account. Tests never call it: `src/test-setup.ts` swaps in a stand-in from [`src/lib/test-breach-list.ts`](./src/lib/test-breach-list.ts).
 - **A name** is trimmed and cut at 64 characters, at sign-up and on a later rename, because it is shown under the learner's mnemonics. A blank name is refused.
 - **`uiLocale` starts as `en`** and a sign-up body cannot set it. Neither can it set `emailVerified`.
 - **A wrong password and an unknown email answer the same**: `401` with `INVALID_EMAIL_OR_PASSWORD`.
@@ -429,6 +430,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
 | `src/lib/viewer.ts` | Who is asking. The prototype learner until #108. |
 | `src/lib/auth.ts` | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`. |
+| `src/test-setup.ts` | Runs before every test. Stands in for the breached-password service. |
 | `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |
 | `src/env.ts` | What Cloudflare passes the Worker: the `DB` binding, `BETTER_AUTH_URL` and `BETTER_AUTH_SECRET`. |
 | `src/db/client.ts` | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`. |

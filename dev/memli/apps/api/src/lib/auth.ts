@@ -10,6 +10,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { APIError, createAuthMiddleware } from "better-auth/api"
 // `minimal` leaves out Kysely, which the Drizzle adapter never uses.
 import { betterAuth } from "better-auth/minimal"
+import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned"
 
 import { database } from "../db/client"
 import {
@@ -131,6 +132,9 @@ function authOptions(env: Env): BetterAuthOptions {
       disableOriginCheck: false,
       disableCSRFCheck: false,
     },
+    // Refuses a new password found in a known breach. Only the first five
+    // characters of its SHA-1 hash leave the Worker (docs/security.md).
+    plugins: [haveIBeenPwned()],
     telemetry: { enabled: false },
   }
 }

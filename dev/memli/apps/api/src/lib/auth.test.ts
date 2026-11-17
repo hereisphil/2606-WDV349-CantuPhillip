@@ -5,6 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { app } from "../app"
 import { accounts, sessions, users } from "../db/schema"
 import { TEST_ORIGIN, startTestApi, type TestApi } from "../db/test-d1"
+import { stubBreachedPasswords, stubBreachListOutage } from "./test-breach-list"
 
 const learner = {
   name: "Ana",
@@ -168,6 +169,55 @@ describe("POST /api/auth/sign-in/email", () => {
     const res = await api.request("/api/auth/get-session")
 
     expect(await res.json()).toBeNull()
+  })
+})
+
+describe("passwords found in a breach", () => {
+  const breached = "Password-123"
+
+  it("refuses to sign up with one", async () => {
+    stubBreachedPasswords([breached])
+
+    const res = await post("/sign-up/email", { ...learner, password: breached })
+
+    expect(res.status).toBe(400)
+    expect(await codeOf(res)).toBe("PASSWORD_COMPROMISED")
+    expect(await api.db.select().from(users)).toHaveLength(0)
+  })
+
+  it("refuses to change to one", async () => {
+    const cookie = cookiesOf(await post("/sign-up/email", learner))
+    stubBreachedPasswords([breached])
+
+    const res = await post(
+      "/change-password",
+      { currentPassword: learner.password, newPassword: breached },
+      { Cookie: cookie }
+    )
+
+    expect(res.status).toBe(400)
+    expect(await codeOf(res)).toBe("PASSWORD_COMPROMISED")
+  })
+
+  it("still lets a learner sign in with one they already have", async () => {
+    await post("/sign-up/email", learner)
+    stubBreachedPasswords([learner.password])
+
+    const res = await post("/sign-in/email", {
+      email: learner.email,
+      password: learner.password,
+    })
+
+    expect(res.status).toBe(200)
+  })
+
+  it("creates no account while the breach list is down", async () => {
+    stubBreachListOutage()
+
+    const res = await post("/sign-up/email", learner)
+
+    expect(res.status).toBe(500)
+    expect(await api.db.select().from(users)).toHaveLength(0)
   })
 })
 
