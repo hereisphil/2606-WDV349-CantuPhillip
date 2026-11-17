@@ -59,12 +59,13 @@ Audited the API against the OWASP Top 10 and wrote down what it enforces in [`de
 
 * **Tighter input checks.** JSON bodies must be sent as `application/json`, which a cross-site form can't do. The `:courseId` path param goes through a schema too, and every id is capped at 64 characters.
 * **Safer mnemonics.** Story parts, alt text and names have max lengths, and a picture must be a path on Memli's own origin, so `javascript:`, `data:` and other hosts are refused.
+* **Sign-in checklist for Week 4.** Secrets, cookie and session rules, CSRF, rate limiting tuned for Workers (D1 storage, Cloudflare's client IP header), passwords, Google OAuth and passkeys, each to be proved by a test in #108 and #107.
 * **Filed what's left:** security headers and a CSP ([#168](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/168)), rate limiting and CSRF guards before sign-in ([#169](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/169)), Terms, Privacy and a Code of Conduct ([#170](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/170)), and pinned GitHub Actions ([#171](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/171)).
 * Refs [#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)
 
 ### `DOCUMENTATION` Week 3 milestone summary
 
-Replaced the `359 MS 3` plan with a summary of what landed. Both items that slipped from Week 2, the session layout (#48) and the study card (#49), shipped first. The mnemonic frame (#50), outcome dock (#51), FSRS core (#132), Hono API and D1 (#106) and saved reviews (#112) all shipped, and staging runs the API (#165). The Module 3 innovation research and the API compliance and security audit are done (below). The security checklist for Week 4's sign-in is still open under #111.
+Replaced the `359 MS 3` plan with a summary of what landed. Both items that slipped from Week 2, the session layout (#48) and the study card (#49), shipped first. The mnemonic frame (#50), outcome dock (#51), FSRS core (#132), Hono API and D1 (#106) and saved reviews (#112) all shipped, and staging runs the API (#165). The Module 3 innovation research, the API compliance and security audit, and the security checklist for Week 4's sign-in are all done (below), which completes #111.
 
 * Refs [#111](https://github.com/hereisphil/2606-WDV349-CantuPhillip/issues/111)
 
