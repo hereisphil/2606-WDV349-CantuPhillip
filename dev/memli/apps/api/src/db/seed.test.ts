@@ -92,6 +92,15 @@ describe("the seeded prototype learner", () => {
   it("starts with no progress, so every seeded card is new", () => {
     expect(countRows(db, "user_progress")).toBe(0)
   })
+
+  it("has added every seeded course, so the dashboard lists them all", () => {
+    const enrolled = all(
+      "SELECT course_id FROM enrollments WHERE user_id = ? ORDER BY course_id",
+      "usr_prototype_01"
+    ).map((row) => row.course_id)
+
+    expect(enrolled).toEqual(seededCourses().map((course) => course.courseId))
+  })
 })
 
 describe("the seeded courses", () => {
@@ -163,7 +172,7 @@ describe("the seeded mnemonics", () => {
 })
 
 describe("seeding again", () => {
-  const tables = ["users", "courses", "cards", "mnemonics"]
+  const tables = ["users", "courses", "cards", "mnemonics", "enrollments"]
   const counts = (): number[] => tables.map((table) => countRows(db, table))
 
   it("adds no duplicate rows", () => {

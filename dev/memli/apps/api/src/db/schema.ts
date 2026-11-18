@@ -178,6 +178,30 @@ export const courses = sqliteTable(
   (t) => [index("courses_learning_language_idx").on(t.learningLanguage)]
 )
 
+/**
+ * A course a learner added to their dashboard (#174). Removing one deletes
+ * only this row: their `user_progress` stays, so adding it back resumes.
+ */
+export const enrollments = sqliteTable(
+  "enrollments",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    courseId: text("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    addedAt: integer("added_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(now),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.courseId] }),
+    // The key starts with the learner, so deleting a course needs its own index.
+    index("enrollments_course_idx").on(t.courseId),
+  ]
+)
+
 /** One word to learn. What the course teaches, never how well anyone knows it. */
 export const cards = sqliteTable(
   "cards",

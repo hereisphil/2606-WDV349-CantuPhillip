@@ -226,3 +226,18 @@ ON CONFLICT (id) DO UPDATE SET
   image_src = excluded.image_src,
   image_alt = excluded.image_alt,
   updated_at = cast(unixepoch('subsecond') * 1000 as integer);
+
+-- ---------------------------------------------------------------------------
+-- Enrollments
+-- ---------------------------------------------------------------------------
+-- The courses on usr_prototype_01's dashboard (#174). It starts with all four
+-- seeded courses. Reseeding never removes one, but it adds back a course the
+-- learner removed.
+
+INSERT INTO enrollments (user_id, course_id)
+VALUES
+  ('usr_prototype_01', 'spanish-core-1000'),
+  ('usr_prototype_01', 'japanese-kana'),
+  ('usr_prototype_01', 'french-travel-phrases'),
+  ('usr_prototype_01', 'portuguese-essentials')
+ON CONFLICT (user_id, course_id) DO NOTHING;

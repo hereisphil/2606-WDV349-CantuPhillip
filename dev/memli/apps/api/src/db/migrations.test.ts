@@ -123,6 +123,54 @@ describe("courses, cards and mnemonics", () => {
   })
 })
 
+describe("enrollments", () => {
+  const enrollmentRow = `
+    INSERT INTO enrollments (user_id, course_id)
+    VALUES ('usr_prototype_01', 'spanish-core-1000')`
+
+  it("adds a course to a learner's dashboard once", () => {
+    db.exec(enrollmentRow)
+
+    expect(() => db.exec(enrollmentRow)).toThrow(
+      /UNIQUE constraint failed: enrollments.user_id, enrollments.course_id/
+    )
+  })
+
+  it("records when the course was added", () => {
+    db.exec(enrollmentRow)
+
+    const row = db.prepare("SELECT added_at FROM enrollments").get()
+    expect(Number(row?.added_at)).toBeGreaterThan(Date.UTC(2026, 0, 1))
+  })
+
+  it("refuses a course that does not exist", () => {
+    expect(() =>
+      db.exec(enrollmentRow.replace("'spanish-core-1000'", "'klingon'"))
+    ).toThrow(/FOREIGN KEY constraint failed/)
+  })
+
+  it("removing a course from the dashboard keeps the learner's progress", () => {
+    db.exec(enrollmentRow)
+    db.exec(progressRow)
+    db.exec("DELETE FROM enrollments")
+
+    expect(count("user_progress")).toBe(1)
+  })
+
+  it("goes away with the learner, and with the course", () => {
+    db.exec(enrollmentRow)
+    db.exec("DELETE FROM users WHERE id = 'usr_prototype_01'")
+    expect(count("enrollments")).toBe(0)
+
+    db.exec(`
+      INSERT INTO users (id, name, email)
+        VALUES ('usr_prototype_01', 'Phillip', 'learner@prototype.memli.test')`)
+    db.exec(enrollmentRow)
+    db.exec("DELETE FROM courses WHERE id = 'spanish-core-1000'")
+    expect(count("enrollments")).toBe(0)
+  })
+})
+
 describe("reviews", () => {
   const reviewRow = `
     INSERT INTO reviews (id, user_id, card_id, outcome, rating, reviewed_at,
