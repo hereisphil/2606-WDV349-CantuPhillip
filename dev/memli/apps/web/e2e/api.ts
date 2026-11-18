@@ -1,7 +1,9 @@
 import { test as base, type Page } from "@playwright/test"
+import type { CatalogCourse } from "@workspace/schemas/api/catalog"
 import type { CourseSummary } from "@workspace/schemas/api/courses"
 import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
+import { catalogPreviews } from "../src/routes/_catalog/-components/catalog-previews"
 import { spanishLearnSession } from "../src/routes/_session/-components/study-fixture"
 
 /**
@@ -106,6 +108,10 @@ export function manyCourses(): CourseSummary[] {
 }
 
 export type ApiStub = {
+  /** Replaces the published courses `GET /api/catalog` answers. */
+  catalog?: CatalogCourse[]
+  /** Answers `GET /api/catalog` with a server error. */
+  catalogFail?: boolean
   /** Replaces the courses `GET /api/courses` answers. */
   courses?: CourseSummary[]
   /** Answers `GET /api/courses` with a server error. */
@@ -206,6 +212,19 @@ async function stubApi(
         ? serverError
         : { json: { courses: stub.courses ?? courses } }
     )
+  })
+  // Public, like the real route: a visitor gets the same courses, none added.
+  await page.route(path(/^\/api\/catalog$/), (route) => {
+    if (stub.catalogFail) return route.fulfill(serverError)
+    const published = stub.catalog ?? catalogPreviews.default.courses
+    return route.fulfill({
+      json: {
+        courses: published.map((course) => ({
+          ...course,
+          added: signedInNow && course.added,
+        })),
+      },
+    })
   })
   await page.route(path(/^\/api\/history$/), (route) =>
     route.fulfill({ json: { ...history(), ...stub.history } })

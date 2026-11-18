@@ -6,6 +6,7 @@ import {
   type FetchQueryOptions,
 } from "@tanstack/react-query"
 import type { StudyMode } from "@workspace/core/study/course-progress"
+import { catalogResponseSchema } from "@workspace/schemas/api/catalog"
 import { coursesResponseSchema } from "@workspace/schemas/api/courses"
 import { studyHistorySchema } from "@workspace/schemas/api/history"
 import { sessionResponseSchema } from "@workspace/schemas/auth/session"
@@ -98,6 +99,17 @@ export const coursesQuery = queryOptions({
     (await apiRequest(`/api/courses?${timeZoneParam}`, coursesResponseSchema))
       .courses,
   staleTime: 10_000,
+})
+
+/**
+ * `GET /api/catalog`: every published course. Public: a visitor gets it too,
+ * with nothing added. Signing in or out clears it (`src/lib/session.ts`).
+ */
+export const catalogQuery = queryOptions({
+  queryKey: ["catalog"],
+  queryFn: async () =>
+    (await apiRequest("/api/catalog", catalogResponseSchema)).courses,
+  staleTime: 60_000,
 })
 
 /**

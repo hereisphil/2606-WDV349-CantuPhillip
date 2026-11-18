@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as CatalogRouteImport } from './routes/_catalog'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as SessionRouteImport } from './routes/_session'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -25,6 +26,7 @@ import { Route as MarketingContactRouteImport } from './routes/_marketing/contac
 import { Route as MarketingPricingRouteImport } from './routes/_marketing/pricing'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { Route as MarketingTermsRouteImport } from './routes/_marketing/terms'
+import { Route as CatalogCoursesIndexRouteImport } from './routes/_catalog/courses/index'
 import { Route as SessionStudyCourseIdRouteImport } from './routes/_session/study.$courseId'
 
 const AppRoute = AppRouteImport.update({
@@ -33,6 +35,10 @@ const AppRoute = AppRouteImport.update({
 } as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/_catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingRoute = MarketingRouteImport.update({
@@ -103,6 +109,11 @@ const MarketingTermsRoute = MarketingTermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => MarketingRoute,
 } as any)
+const CatalogCoursesIndexRoute = CatalogCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => CatalogRoute,
+} as any)
 const SessionStudyCourseIdRoute = SessionStudyCourseIdRouteImport.update({
   id: '/study/$courseId',
   path: '/study/$courseId',
@@ -123,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
   '/study/$courseId': typeof SessionStudyCourseIdRoute
+  '/courses/': typeof CatalogCoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
@@ -138,11 +150,13 @@ export interface FileRoutesByTo {
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
   '/study/$courseId': typeof SessionStudyCourseIdRoute
+  '/courses': typeof CatalogCoursesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
+  '/_catalog': typeof CatalogRouteWithChildren
   '/_marketing': typeof MarketingRouteWithChildren
   '/_session': typeof SessionRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
@@ -158,6 +172,7 @@ export interface FileRoutesById {
   '/_marketing/terms': typeof MarketingTermsRoute
   '/_marketing/': typeof MarketingIndexRoute
   '/_session/study/$courseId': typeof SessionStudyCourseIdRoute
+  '/_catalog/courses/': typeof CatalogCoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,6 +190,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/study/$courseId'
+    | '/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -190,10 +206,12 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/study/$courseId'
+    | '/courses'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
+    | '/_catalog'
     | '/_marketing'
     | '/_session'
     | '/_app/dashboard'
@@ -209,11 +227,13 @@ export interface FileRouteTypes {
     | '/_marketing/terms'
     | '/_marketing/'
     | '/_session/study/$courseId'
+    | '/_catalog/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  CatalogRoute: typeof CatalogRouteWithChildren
   MarketingRoute: typeof MarketingRouteWithChildren
   SessionRoute: typeof SessionRouteWithChildren
 }
@@ -232,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_catalog': {
+      id: '/_catalog'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing': {
@@ -332,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingTermsRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_catalog/courses/': {
+      id: '/_catalog/courses/'
+      path: '/courses'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CatalogCoursesIndexRouteImport
+      parentRoute: typeof CatalogRoute
+    }
     '/_session/study/$courseId': {
       id: '/_session/study/$courseId'
       path: '/study/$courseId'
@@ -365,6 +399,17 @@ const AuthRouteChildren: AuthRouteChildren = {
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface CatalogRouteChildren {
+  CatalogCoursesIndexRoute: typeof CatalogCoursesIndexRoute
+}
+
+const CatalogRouteChildren: CatalogRouteChildren = {
+  CatalogCoursesIndexRoute: CatalogCoursesIndexRoute,
+}
+
+const CatalogRouteWithChildren =
+  CatalogRoute._addFileChildren(CatalogRouteChildren)
 
 interface MarketingRouteChildren {
   MarketingAboutRoute: typeof MarketingAboutRoute
@@ -406,6 +451,7 @@ const SessionRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  CatalogRoute: CatalogRouteWithChildren,
   MarketingRoute: MarketingRouteWithChildren,
   SessionRoute: SessionRouteWithChildren,
 }

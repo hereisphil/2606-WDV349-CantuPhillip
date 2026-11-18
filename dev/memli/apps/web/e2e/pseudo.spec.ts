@@ -94,3 +94,33 @@ test.describe("dashboard pseudo-localization", () => {
     }
   }
 })
+
+test.describe("catalog pseudo-localization", () => {
+  test.skip(({ isMobile }) => isMobile, "Runs once, in the desktop project.")
+
+  // Signed out and in: the marketing frame and the app's around the same list.
+  for (const signedOut of [true, false]) {
+    test.describe(signedOut ? "visitor" : "learner", () => {
+      test.use({ api: { signedOut } })
+
+      for (const mode of modes) {
+        for (const { width, height } of sizes) {
+          test(`${mode} ${width}x${height}`, async ({ page }) => {
+            await page.setViewportSize({ width, height })
+            await page.goto(`/courses?preview=long-text&pseudo=${mode}`, {
+              waitUntil: "networkidle",
+            })
+            await expect(page.locator("main h1")).toBeVisible()
+
+            const pageWidth = await page.evaluate(
+              () => document.documentElement.scrollWidth
+            )
+            expect(pageWidth, "the page scrolls sideways").toBeLessThanOrEqual(
+              width
+            )
+          })
+        }
+      }
+    })
+  }
+})

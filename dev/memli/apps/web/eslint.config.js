@@ -37,9 +37,13 @@ export default defineConfig([
       "react-refresh/only-export-components": "off",
     },
   },
-  // Signed-in app copy goes through `messages` objects (docs/i18n.md). Marketing and auth copy come later.
+  // App and catalog copy goes through `messages` objects (docs/i18n.md). Marketing and auth copy come later.
   {
-    files: ["src/routes/_app/**/*.tsx", "src/routes/_session/**/*.tsx"],
+    files: [
+      "src/routes/_app/**/*.tsx",
+      "src/routes/_session/**/*.tsx",
+      "src/routes/_catalog/**/*.tsx",
+    ],
     rules: {
       "memli/no-literal-ui-strings": "error",
     },
@@ -75,6 +79,7 @@ export default defineConfig([
     files: [
       "src/routes/_app/**/*.{ts,tsx}",
       "src/routes/_session/**/*.{ts,tsx}",
+      "src/routes/_catalog/**/*.{ts,tsx}",
       "src/components/**/*.{ts,tsx}",
     ],
     // Marketing chrome keeps its own look until it gets a design pass.
@@ -90,6 +95,7 @@ export default defineConfig([
       "src/components/dev-previews-menu.tsx",
       "src/routes/_app/-components/PreviewSwitcher.tsx",
       "src/routes/_session/-components/StudyPreviewSwitcher.tsx",
+      "src/routes/_catalog/-components/CatalogPreviewSwitcher.tsx",
     ],
     rules: {
       "memli/no-restricted-classes": "off",

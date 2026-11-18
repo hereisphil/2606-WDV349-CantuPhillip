@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 import { previewNames } from "../src/routes/_app/-components/dashboard-previews"
+import { catalogPreviewNames } from "../src/routes/_catalog/-components/catalog-previews"
 import { studyPreviewNames } from "../src/routes/_session/-components/study-previews"
 
 /**
@@ -13,6 +14,10 @@ const paths = [
   ...previewNames.map((name) => `/dashboard?preview=${name}`),
   study,
   ...studyPreviewNames.map((name) => `${study}&preview=${name}`),
+  // Signed in, so the app's frame: the marketing frame has not had its design pass.
+  "/courses",
+  "/courses?language=ja",
+  ...catalogPreviewNames.map((name) => `/courses?preview=${name}`),
 ]
 
 const MIN_TEXT_PX = 14

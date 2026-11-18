@@ -220,6 +220,8 @@ export function Nav(): JSX.Element {
             type="button"
             variant="ghost"
             size="icon"
+            // Named like the app's own phone menu; the glyph alone says nothing to a screen reader.
+            aria-label="Navigation menu"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((open) => !open)}
