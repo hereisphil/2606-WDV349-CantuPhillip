@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { useState } from "react"
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   ChevronsUpDown,
   CreditCard,
@@ -28,6 +29,8 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 import { useViewer } from "@/components/session-provider"
 import { useFormatters } from "@/lib/formatters"
+import { signOut } from "@/lib/auth"
+import { endSession } from "@/lib/session"
 
 const messages = {
   sidebar: "Application sidebar",
@@ -40,7 +43,7 @@ const messages = {
   profile: "View Profile",
   settings: "Learning Settings",
   plan: "Subscription / Plan",
-  signOut: "Sign Out",
+  signOut: "Sign out",
 } as const
 
 const railActiveClass =
@@ -102,6 +105,19 @@ function RailNav(): JSX.Element {
 }
 
 function AccountMenuItems(): JSX.Element {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  // Forget the learner only once the server has ended the session, so a
+  // failed request never shows "signed out" over a cookie that still works.
+  const handleSignOut = async (): Promise<void> => {
+    const result = await signOut()
+    if (!result.ok) return
+    // Leave the app first: its pages need a learner while they are mounted.
+    await navigate({ to: "/" })
+    endSession(queryClient)
+  }
+
   return (
     <>
       <DropdownMenuGroup>
@@ -120,7 +136,11 @@ function AccountMenuItems(): JSX.Element {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem render={<Link to="/" />}>
+        <DropdownMenuItem
+          onClick={() => {
+            void handleSignOut()
+          }}
+        >
           <LogOut aria-hidden="true" />
           {messages.signOut}
         </DropdownMenuItem>

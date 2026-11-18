@@ -59,3 +59,11 @@ export async function startSession(queryClient: QueryClient): Promise<void> {
   })
   await queryClient.fetchQuery({ ...sessionQuery, staleTime: 0 })
 }
+
+/** After sign out: forget the learner and everything cached for them. */
+export function endSession(queryClient: QueryClient): void {
+  queryClient.setQueryData(sessionQuery.queryKey, null)
+  queryClient.removeQueries({
+    predicate: (query) => query.queryKey[0] !== sessionQuery.queryKey[0],
+  })
+}

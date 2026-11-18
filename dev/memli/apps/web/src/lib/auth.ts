@@ -36,3 +36,8 @@ export function signIn(fields: SignInInput): Promise<AuthResult> {
 export function signUp(fields: SignUpInput): Promise<AuthResult> {
   return resultOf(client.signUp.email(fields))
 }
+
+/** `POST /api/auth/sign-out`. Deletes the session on the server and clears the cookie. */
+export function signOut(): Promise<AuthResult> {
+  return resultOf(client.signOut())
+}

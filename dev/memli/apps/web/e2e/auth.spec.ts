@@ -319,3 +319,29 @@ test.describe("a session that ends while the learner is in the app", () => {
     await expect(page.getByRole("heading", { name: "Welcome!" })).toBeVisible()
   })
 })
+
+test.describe("signing out", () => {
+  test.use({ api: { signedOut: false } })
+
+  test("ends the session, lands on the homepage, and locks the app", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard", { waitUntil: "networkidle" })
+    const signOut = page.waitForRequest("**/api/auth/sign-out")
+
+    await page
+      .getByRole("button", { name: /^Account menu, Ana/ })
+      .filter({ visible: true })
+      .click()
+    await page.getByRole("menuitem", { name: "Sign out" }).click()
+
+    expect((await signOut).method()).toBe("POST")
+    await expect(page).toHaveURL(/\/$/)
+    await expect(
+      page.getByRole("banner").getByRole("link", { name: "Sign in" }).first()
+    ).toBeVisible()
+
+    await page.goto("/dashboard", { waitUntil: "networkidle" })
+    await expect(page).toHaveURL(/\/signin\?redirect=%2Fdashboard/)
+  })
+})

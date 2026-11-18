@@ -418,6 +418,10 @@ async function stubApi(
     signedInNow = true
     return route.fulfill(signedIn)
   })
+  await page.route(path(/^\/api\/auth\/sign-out$/), (route) => {
+    signedInNow = false
+    return route.fulfill({ json: { success: true } })
+  })
   await page.route(path(/^\/api\/reviews$/), async (route) => {
     const body = route.request().postDataJSON() as {
       reviews: ReviewSubmission[]
