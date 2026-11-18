@@ -296,6 +296,37 @@ export type ApiStub = {
   history?: Partial<StudyHistoryData>
   /** Answers `POST /api/reviews` with a server error. */
   reviewsFail?: boolean
+  /** Refuses `POST /api/auth/sign-in/email` the way Better Auth does. */
+  signInRefusal?: AuthRefusal
+}
+
+/** A Better Auth refusal: its status and, when it sends one, its code. */
+export type AuthRefusal = { status: number; code?: string }
+
+/** Better Auth's body for a refusal. Its 429 carries a message and no code. */
+function refusal({ status, code }: AuthRefusal): {
+  status: number
+  json: { message: string; code?: string }
+} {
+  return {
+    status,
+    json: { message: "Not shown to learners", ...(code && { code }) },
+  }
+}
+
+/** What Better Auth answers when it signs a learner in or up. */
+const signedIn = {
+  json: {
+    token: "e2e-session-token",
+    user: {
+      id: "usr_e2e_01",
+      name: "Ana",
+      email: "ana@memli.test",
+      emailVerified: false,
+      image: null,
+      uiLocale: "en",
+    },
+  },
 }
 
 /** Answers every `/api/*` request the app makes. */
@@ -348,6 +379,9 @@ async function stubApi(
       json: mode === "learn" ? session : { ...session, mode, cards: [] },
     })
   })
+  await page.route(path(/^\/api\/auth\/sign-in\/email$/), (route) =>
+    route.fulfill(stub.signInRefusal ? refusal(stub.signInRefusal) : signedIn)
+  )
   await page.route(path(/^\/api\/reviews$/), async (route) => {
     const body = route.request().postDataJSON() as {
       reviews: ReviewSubmission[]

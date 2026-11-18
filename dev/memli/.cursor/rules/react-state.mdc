@@ -54,7 +54,7 @@ const [session, dispatch] = useReducer(sessionReducer, cards, startSession)
 - `routes/_marketing/-components/Nav.tsx` — `mobileOpen` is a single toggle. **Correct as `useState`.** The `useEffect`s are DOM sync (focus trap, scroll lock), not state sync.
 - `components/theme-provider.tsx` — one `useState` for the learner's choice; the device setting comes from `useSyncExternalStore`, and the resolved theme is derived. Do not add a second `useState` for it.
 - `routes/_session/-components/use-save-reviews.ts` — an outbox that drains `session.reviews` to `POST /api/reviews`. **Reviewed for #146; kept as an effect.** It isn't the flag pattern in §4. Revisit if a transition needs its own side effect.
-- `routes/_auth/signin.tsx` — four coupled `useState` calls (`email`, `password`, `fieldErrors`, `formMessage`). **Exempt for now** (`_auth/**` is opted out in `apps/web/eslint.config.js`; the form is disabled in prototype mode, #110). **When Better Auth lands (#108):** remove the `_auth` exemption and move the form to a reducer with `status: "idle" | "submitting" | "error" | "success"` before adding `isSubmitting` / server error / redirect flags.
+- `routes/_auth/*` — forms use `useAuthForm`, a thin wrapper over `createFormReducer` in `@workspace/core/form/form-reducer` (#108). The request starts in the submit handler, which asks the pure reducer what the submit does. Copy this for the next form; do not add `useState` per field.
 
 ## 4. `use-effect-reducer` — not installed yet, here is when
 
