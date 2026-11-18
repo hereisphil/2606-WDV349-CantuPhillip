@@ -11,6 +11,7 @@ import {
   TEST_ORIGIN,
   VIEWER_ID,
   addCourse,
+  addEnrollment,
   addUsers,
   startTestApi,
   type TestApi,
@@ -142,9 +143,8 @@ describe("with a real sign-in", () => {
     })
 
     expect(res.status).toBe(200)
-    expect(coursesResponseSchema.parse(await res.json()).courses).toHaveLength(
-      1
-    )
+    // A new learner has added nothing yet, so the dashboard starts empty.
+    expect(coursesResponseSchema.parse(await res.json()).courses).toEqual([])
   })
 })
 
@@ -161,6 +161,7 @@ describe("one learner never reaches another's data", () => {
   })
 
   it("counts only the viewer's own progress in GET /api/courses", async () => {
+    await addEnrollment(api.db, "spanish")
     const res = await api.request("/api/courses")
     const [course] = coursesResponseSchema.parse(await res.json()).courses
 

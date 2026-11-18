@@ -19,6 +19,7 @@ import { users } from "../db/schema"
 import {
   AUTHOR_ID,
   addCourse,
+  addEnrollment,
   addReviewLog,
   addMnemonic,
   addProgress,
@@ -45,6 +46,16 @@ function reviewed(
 }
 
 let api: TestApi
+
+/** A course on the viewer's dashboard: what `GET /api/courses` lists. */
+async function addAddedCourse(
+  courseId: string,
+  cardCount: number
+): Promise<string[]> {
+  const cardIds = await addCourse(api.db, courseId, cardCount)
+  await addEnrollment(api.db, courseId)
+  return cardIds
+}
 
 beforeAll(async () => {
   api = await startTestApi()
@@ -87,7 +98,7 @@ describe("GET /api/courses", () => {
   })
 
   it("shows a course nobody has studied as all new", async () => {
-    await addCourse(api.db, "spanish", 3)
+    await addAddedCourse("spanish", 3)
 
     expect(await getCourses()).toEqual([
       {
@@ -107,7 +118,7 @@ describe("GET /api/courses", () => {
   })
 
   it("counts a course with no cards as zeros", async () => {
-    await addCourse(api.db, "empty", 0)
+    await addAddedCourse("empty", 0)
 
     expect(await getCourses()).toMatchObject([
       { courseId: "empty", newAvailable: 0, unseenCount: 0 },
@@ -115,8 +126,8 @@ describe("GET /api/courses", () => {
   })
 
   it("counts the viewer's progress, course by course", async () => {
-    const [first, second] = await addCourse(api.db, "spanish", 4)
-    await addCourse(api.db, "french", 2)
+    const [first, second] = await addAddedCourse("spanish", 4)
+    await addAddedCourse("french", 2)
     // One reviewed long ago and due again, one reviewed just now and not due.
     const due = reviewed(String(first), 30)
     const fresh = reviewed(String(second), 0)
@@ -141,7 +152,7 @@ describe("GET /api/courses", () => {
   })
 
   it("makes a card due once its time comes", async () => {
-    const [cardId] = await addCourse(api.db, "spanish", 1)
+    const [cardId] = await addAddedCourse("spanish", 1)
     const progress = reviewed(String(cardId), 0)
     await addProgress(api.db, [progress])
 
@@ -153,10 +164,37 @@ describe("GET /api/courses", () => {
   })
 
   it("ignores everyone else's progress", async () => {
-    const [cardId] = await addCourse(api.db, "spanish", 2)
+    const [cardId] = await addAddedCourse("spanish", 2)
     await addProgress(api.db, [reviewed(String(cardId), 30)], AUTHOR_ID)
 
     expect(await getCourses()).toMatchObject([{ dueCount: 0, unseenCount: 2 }])
+  })
+
+  it("lists only the courses the viewer added", async () => {
+    await addAddedCourse("spanish", 1)
+    await addCourse(api.db, "french", 1)
+    // Another learner's dashboard says nothing about the viewer's.
+    await addCourse(api.db, "japanese", 1)
+    await addEnrollment(api.db, "japanese", AUTHOR_ID)
+
+    expect((await getCourses()).map((course) => course.courseId)).toEqual([
+      "spanish",
+    ])
+  })
+
+  it("leaves a removed course off, though its progress stays", async () => {
+    const [cardId] = await addCourse(api.db, "spanish", 2)
+    await addProgress(api.db, [reviewed(String(cardId), 1)])
+
+    expect(await getCourses()).toEqual([])
+  })
+
+  it("lists a course the viewer added that became a draft later", async () => {
+    await addAddedCourse("retired", 1)
+
+    expect((await getCourses()).map((course) => course.courseId)).toEqual([
+      "retired",
+    ])
   })
 
   it("tells caches to keep nothing", async () => {
@@ -370,7 +408,7 @@ describe("with the seeded database", () => {
 
 describe("the daily new-word limit", () => {
   it("subtracts words already started today, where the learner is", async () => {
-    const cardIds = await addCourse(api.db, "spanish", 30)
+    const cardIds = await addAddedCourse("spanish", 30)
     // Four first sightings today in Mexico City, one late last night there.
     await addReviewLog(api.db, [
       ...cardIds.slice(0, 4).map((cardId) => ({

@@ -26,9 +26,9 @@ bun run dev
 
 Turbo starts both apps:
 
-| App | Command | Address |
-| --- | --- | --- |
-| `apps/web` | `vite` | `http://localhost:5173` |
+| App        | Command        | Address                 |
+| ---------- | -------------- | ----------------------- |
+| `apps/web` | `vite`         | `http://localhost:5173` |
 | `apps/api` | `wrangler dev` | `http://localhost:8787` |
 
 `wrangler dev` runs the Worker in `workerd`, the same runtime Cloudflare runs in production, so local behavior matches the deploy. The port is pinned in [`wrangler.jsonc`](./wrangler.jsonc).
@@ -66,18 +66,18 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 
 ## Routes
 
-| Route | Answers | Contract |
-| --- | --- | --- |
-| `GET /api/health` | `200 {"status":"ok"}` | `@workspace/schemas/api/health` |
-| `GET /api/courses` | Every course, with the viewer's progress in each | `@workspace/schemas/api/courses` |
-| `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
-| `PUT /api/courses/:courseId/enrollment` | Adds a published course to the viewer's dashboard. Safe to repeat | `@workspace/schemas/api/enrollment` |
-| `DELETE /api/courses/:courseId/enrollment` | Takes a course off the dashboard and keeps the viewer's progress. Safe to repeat | `@workspace/schemas/api/enrollment` |
-| `GET /api/catalog` | Every published course, and whether the viewer added it. Public | `@workspace/schemas/api/catalog` |
-| `GET /api/catalog/:courseId` | One published course's overview, with a few sample words. Public | `@workspace/schemas/api/catalog` |
-| `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
-| `GET /api/history` | The viewer's week, days of study, retention and new words this month | `@workspace/schemas/api/history` |
-| `GET`, `POST /api/auth/*` | Sign-up, sign-in, the session and sign out, by Better Auth | `@workspace/schemas/auth/sign-up`, `auth/sign-in` |
+| Route                                      | Answers                                                                          | Contract                                          |
+| ------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `GET /api/health`                          | `200 {"status":"ok"}`                                                            | `@workspace/schemas/api/health`                   |
+| `GET /api/courses`                         | The courses the viewer added, with their progress in each                        | `@workspace/schemas/api/courses`                  |
+| `GET /api/courses/:courseId/study`         | One session's cards, each with the viewer's progress                             | `@workspace/schemas/api/study`                    |
+| `PUT /api/courses/:courseId/enrollment`    | Adds a published course to the viewer's dashboard. Safe to repeat                | `@workspace/schemas/api/enrollment`               |
+| `DELETE /api/courses/:courseId/enrollment` | Takes a course off the dashboard and keeps the viewer's progress. Safe to repeat | `@workspace/schemas/api/enrollment`               |
+| `GET /api/catalog`                         | Every published course, and whether the viewer added it. Public                  | `@workspace/schemas/api/catalog`                  |
+| `GET /api/catalog/:courseId`               | One published course's overview, with a few sample words. Public                 | `@workspace/schemas/api/catalog`                  |
+| `POST /api/reviews`                        | Saves reviews; answers each card's new progress                                  | `@workspace/schemas/srs/review`                   |
+| `GET /api/history`                         | The viewer's week, days of study, retention and new words this month             | `@workspace/schemas/api/history`                  |
+| `GET`, `POST /api/auth/*`                  | Sign-up, sign-in, the session and sign out, by Better Auth                       | `@workspace/schemas/auth/sign-up`, `auth/sign-in` |
 
 `/api/health` is a liveness check: the Worker is up and routing. It does not touch the database.
 
@@ -85,7 +85,7 @@ Every answer carries `Cache-Control: no-store`. The data is one learner's and ch
 
 ### `GET /api/courses`
 
-What the dashboard shows: each course, plus seven numbers for the viewer.
+What the dashboard shows: each course the viewer added (#174), plus seven numbers for the viewer. A course they removed is left off, though its progress stays. A new learner has added nothing, so the list starts empty.
 
 ```json
 {
@@ -113,11 +113,11 @@ The route only loads rows. `summarizeCourseProgress` in `@workspace/core/study/c
 
 The cards for one session, in the order to study them. `?mode=` picks the kind:
 
-| `mode` | Cards | Order |
-| --- | --- | --- |
-| `review` (default) | Seen and due now | Most overdue first |
-| `learn` | Never seen, up to 10 a day | Course order |
-| `practice` | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
+| `mode`             | Cards                                               | Order                |
+| ------------------ | --------------------------------------------------- | -------------------- |
+| `review` (default) | Seen and due now                                    | Most overdue first   |
+| `learn`            | Never seen, up to 10 a day                          | Course order         |
+| `practice`         | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
 
 `?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode`, `extra` or `timeZone` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
 
@@ -126,7 +126,11 @@ The cards for one session, in the order to study them. `?mode=` picks the kind:
 Adds a course to the viewer's dashboard, or takes it off (#174). Both answer where the course stands now:
 
 ```json
-{ "courseId": "spanish-core-1000", "added": true, "addedAt": "2026-11-18T12:00:00.000Z" }
+{
+  "courseId": "spanish-core-1000",
+  "added": true,
+  "addedAt": "2026-11-18T12:00:00.000Z"
+}
 ```
 
 - **Safe to repeat.** Adding a course already added changes nothing and keeps the first `addedAt`. Removing one that is not there answers `added: false` all the same. So a retried tap never shows an error.
@@ -212,12 +216,12 @@ What the dashboard's "This week" and "Your progress" show, worked out by `summar
 }
 ```
 
-| Field | Rule |
-| --- | --- |
-| `days` | Today and the six days before it. Different words per day: a missed word answered again counts once |
-| `daysOfStudy` | REDESIGN.md section 5.7: any study counts, one day off is forgiven, today is never a miss yet |
-| `retentionPercent` | Reviews of words already met that were not missed, last 30 days. A first sighting is not a test of memory. `null` before any |
-| `newWordsThisMonth` | Different words met for the first time this calendar month |
+| Field               | Rule                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `days`              | Today and the six days before it. Different words per day: a missed word answered again counts once                          |
+| `daysOfStudy`       | REDESIGN.md section 5.7: any study counts, one day off is forgiven, today is never a miss yet                                |
+| `retentionPercent`  | Reviews of words already met that were not missed, last 30 days. A first sighting is not a test of memory. `null` before any |
+| `newWordsThisMonth` | Different words met for the first time this calendar month                                                                   |
 
 Days of study can reach back years, so the route never loads every review for it. It asks for the distinct **quarter hours** with any review (`studyQuarterHours`), and core turns each into a date in the learner's zone. Every zone's offset from UTC is a whole number of quarter hours (India is +5:30, Nepal +5:45), so a quarter hour never straddles anyone's midnight. That is at most 96 rows per study day. Everything else reads the last 33 days of reviews.
 
@@ -247,12 +251,13 @@ It chooses first, from card ids and progress alone, then loads the full content 
 
 It answers the progress of every card the request named, once per card: `{ "progress": [ ... ] }`.
 
-Each review saves two things together: the card's new state in `user_progress`, and one row in `reviews` (the review log, below).
+Each review saves three things together: the card's new state in `user_progress`, one row in `reviews` (the review log, below), and the card's course on the viewer's dashboard (`enrollments`, #174).
 
 - **A client reports what happened, never the result.** The route loads its own saved progress and schedules with core's `applyOutcome`. Extra fields in the body (a made-up `stability`, say) are dropped by the schema.
 - **The server's clock decides when.** Devices' clocks disagree, and FSRS measures memory by the time since the last review. The last review in a request happened now, by the server's clock. Earlier ones in the same request keep their distance from it, because the gap between two reviews on one device is real even when its clock is wrong. One review per request, the usual case, is simply stamped now. See [`src/lib/review-batch.ts`](./src/lib/review-batch.ts).
 - **In order, oldest first.** A missed word comes back in the same session, so one card can appear twice.
 - **All or nothing.** One unknown card answers `NOT_FOUND` and saves nothing. The writes go in one D1 batch, which is a transaction.
+- **Studying a course adds it.** The batch adds each reviewed card's course to the dashboard, so progress never exists for a course the dashboard leaves off. A course already added keeps the date it was first added. Only new reviews count, so a retried old request never brings back a course the learner removed. This happens on the first saved review, not when a session opens: opening a session is a `GET`, and a `GET` never changes anything.
 - **Safe to send twice.** `reviewId` is a UUID the client makes for each review (`crypto.randomUUID()`). If a request is sent again, after a dropped connection say, the server sees ids it already has, skips those reviews, and answers the same progress. Without it, a retry would count the review twice and push the card's next date out.
 - **The response time is capped again.** `durationMs` goes through core's `capElapsedMs` (30 seconds at most) on the server too. The app already caps it, but the server never takes a client's word for a number.
 - A body that is not JSON, or that the schema refuses, answers `INVALID_REQUEST`.
@@ -261,12 +266,12 @@ Each review saves two things together: the card's new state in `user_progress`, 
 
 [Better Auth](https://www.better-auth.com/) owns every route under `/api/auth`. [`src/lib/auth.ts`](./src/lib/auth.ts) configures it, and `app.ts` hands it the request.
 
-| Route | Does |
-| --- | --- |
+| Route                          | Does                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------ |
 | `POST /api/auth/sign-up/email` | Creates a learner from `name`, `email` and `password`, and signs them in |
-| `POST /api/auth/sign-in/email` | Signs in with `email` and `password` |
-| `GET /api/auth/get-session` | The signed-in learner and their session, or `null` |
-| `POST /api/auth/sign-out` | Deletes the session on the server and clears the cookie |
+| `POST /api/auth/sign-in/email` | Signs in with `email` and `password`                                     |
+| `GET /api/auth/get-session`    | The signed-in learner and their session, or `null`                       |
+| `POST /api/auth/sign-out`      | Deletes the session on the server and clears the cookie                  |
 
 The web app will call these through Better Auth's client, not by hand.
 
@@ -283,10 +288,10 @@ The web app will call these through Better Auth's client, not by hand.
 
 Two settings come from the environment, checked by `apiEnvSchema` in `@workspace/schemas/env/api`:
 
-| Name | What | Where it is set |
-| --- | --- | --- |
-| `BETTER_AUTH_SECRET` | Signs session cookies. At least 32 characters | `.dev.vars` locally; `wrangler secret put BETTER_AUTH_SECRET --env staging` on Cloudflare. Never in the repo |
-| `BETTER_AUTH_URL` | The origin learners see, with no path. The only origin sign-in trusts | `vars` in [`wrangler.jsonc`](./wrangler.jsonc), one per environment |
+| Name                 | What                                                                  | Where it is set                                                                                              |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `BETTER_AUTH_SECRET` | Signs session cookies. At least 32 characters                         | `.dev.vars` locally; `wrangler secret put BETTER_AUTH_SECRET --env staging` on Cloudflare. Never in the repo |
+| `BETTER_AUTH_URL`    | The origin learners see, with no path. The only origin sign-in trusts | `vars` in [`wrangler.jsonc`](./wrangler.jsonc), one per environment                                          |
 
 Locally `BETTER_AUTH_URL` is the web app's `http://localhost:5173`, not this Worker's port, because the browser reaches the API through the Vite proxy. With a missing or short secret, every `/api/auth/*` request answers `INTERNAL_ERROR` and the reason is in the log.
 
@@ -334,14 +339,14 @@ Every response that is not a success has the same body:
 
 The server never writes the sentence a learner reads. The web app maps the code to copy in the learner's UI language, so adding Spanish later touches no API code ([`docs/i18n.md`](../../docs/i18n.md)).
 
-| Code | Status | When |
-| --- | --- | --- |
-| `INVALID_REQUEST` | 400 | The body or query string is not what the route accepts |
-| `NOT_FOUND` | 404 | No route matched, or the thing asked for does not exist |
-| `UNAUTHORIZED` | 401 | No session, or one that has ended. The learner signs in again |
-| `FORBIDDEN` | 403 | A write whose `Origin` isn't the app's own. See "Where a write comes from" |
-| `RATE_LIMITED` | 429 | Too many requests in a short time. `Retry-After` says how many seconds to wait |
-| `INTERNAL_ERROR` | 500 | A route threw. The details go to the log, never the response |
+| Code              | Status | When                                                                           |
+| ----------------- | ------ | ------------------------------------------------------------------------------ |
+| `INVALID_REQUEST` | 400    | The body or query string is not what the route accepts                         |
+| `NOT_FOUND`       | 404    | No route matched, or the thing asked for does not exist                        |
+| `UNAUTHORIZED`    | 401    | No session, or one that has ended. The learner signs in again                  |
+| `FORBIDDEN`       | 403    | A write whose `Origin` isn't the app's own. See "Where a write comes from"     |
+| `RATE_LIMITED`    | 429    | Too many requests in a short time. `Retry-After` says how many seconds to wait |
+| `INTERNAL_ERROR`  | 500    | A route threw. The details go to the log, never the response                   |
 
 In a route, send an error with the helper from [`src/lib/errors.ts`](./src/lib/errors.ts):
 
@@ -375,19 +380,19 @@ src/db/schema.ts ──(bun run db:generate)──► drizzle/migrations/*.sql �
 
 ### Tables
 
-| Table | One row per | Notes |
-| --- | --- | --- |
-| `users` | learner | Better Auth's core `user` fields, plus `ui_locale`. See below |
-| `sessions` | signed-in browser | Better Auth's `session`. `token` is what the cookie carries; sign out deletes the row |
-| `accounts` | way a learner signs in | Better Auth's `account`. For email sign-in, `provider_id` is `credential` and `password` is a scrypt hash |
-| `verifications` | short-lived token | Better Auth's `verification`, for things like a password reset |
-| `rate_limits` | client address and path | Better Auth's `rateLimit`: how many tries, and when the last one was (#169). Memli's own limits share it, with keys that start `memli\|` |
-| `courses` | course | `learning_language` and `answer_language`, never one `language`. Catalog details below |
-| `enrollments` | learner and course they added | What their dashboard lists, and `added_at` (#174). Removing a course deletes this row only, so progress stays |
-| `cards` | word in a course | `position` orders new words; `answers` is a JSON array |
-| `mnemonics` | memory hook on a card | `story` is JSON parts, never markup; `content_locale`; `author_id` goes `null` if the author leaves |
-| `user_progress` | learner and card | Core's `CardProgress`, one column per field. No row means never seen |
-| `reviews` | review | The review log: outcome, rating, response time, and the card before the review. Never changed |
+| Table           | One row per                   | Notes                                                                                                                                    |
+| --------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `users`         | learner                       | Better Auth's core `user` fields, plus `ui_locale`. See below                                                                            |
+| `sessions`      | signed-in browser             | Better Auth's `session`. `token` is what the cookie carries; sign out deletes the row                                                    |
+| `accounts`      | way a learner signs in        | Better Auth's `account`. For email sign-in, `provider_id` is `credential` and `password` is a scrypt hash                                |
+| `verifications` | short-lived token             | Better Auth's `verification`, for things like a password reset                                                                           |
+| `rate_limits`   | client address and path       | Better Auth's `rateLimit`: how many tries, and when the last one was (#169). Memli's own limits share it, with keys that start `memli\|` |
+| `courses`       | course                        | `learning_language` and `answer_language`, never one `language`. Catalog details below                                                   |
+| `enrollments`   | learner and course they added | What their dashboard lists, and `added_at` (#174). Removing a course deletes this row only, so progress stays                            |
+| `cards`         | word in a course              | `position` orders new words; `answers` is a JSON array                                                                                   |
+| `mnemonics`     | memory hook on a card         | `story` is JSON parts, never markup; `content_locale`; `author_id` goes `null` if the author leaves                                      |
+| `user_progress` | learner and card              | Core's `CardProgress`, one column per field. No row means never seen                                                                     |
+| `reviews`       | review                        | The review log: outcome, rating, response time, and the card before the review. Never changed                                            |
 
 Deleting a course removes its cards, their mnemonics, its enrollments, and everyone's progress and reviews on them. Deleting a learner removes their sessions, accounts, enrollments, progress and reviews, and keeps their mnemonics without an author.
 
@@ -395,13 +400,13 @@ Migration `0006` enrolled every learner who already had progress in a course in 
 
 ### Course catalog details (#174)
 
-| Column | Holds |
-| --- | --- |
-| `description` | A sentence or two for the catalog, in the course's `answer_language` |
-| `published_at` | When the catalog started listing it. `NULL` is a draft, which the catalog hides |
-| `source` | Where the words came from: who wrote them, or the dataset's URL |
-| `license` | The license the content is under, as learners see it: `CC BY-SA 4.0`, `All rights reserved` |
-| `attribution` | The credit line the license asks for, when it asks for one. Optional |
+| Column         | Holds                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| `description`  | A sentence or two for the catalog, in the course's `answer_language`                        |
+| `published_at` | When the catalog started listing it. `NULL` is a draft, which the catalog hides             |
+| `source`       | Where the words came from: who wrote them, or the dataset's URL                             |
+| `license`      | The license the content is under, as learners see it: `CC BY-SA 4.0`, `All rights reserved` |
+| `attribution`  | The credit line the license asks for, when it asks for one. Optional                        |
 
 All five are nullable, so `0007` added them in place with no table rebuild. A published course must have a description, a source and a license, none blank. Triggers in [`0008_published_courses.sql`](./drizzle/migrations/0008_published_courses.sql) refuse a published course without them, on insert and on update, the same way the language triggers work. A draft may leave them empty.
 
@@ -415,15 +420,15 @@ The index on `(user_id, due)` answers the question every session starts with: wh
 
 `user_progress` says where a card stands now. `reviews` says how it got there: one row per review, written once and never changed.
 
-| Column | Holds |
-| --- | --- |
-| `id` | The client's `reviewId`, a UUID. The primary key, so one review is one row |
-| `user_id`, `card_id` | Who reviewed what |
-| `outcome` | What the learner chose: `missed`, `tough`, `got_it` or `easy` |
-| `rating` | The FSRS rating the outcome became, 1 to 4 |
-| `reviewed_at` | When, by the server's clock |
-| `duration_ms` | Response time, capped at 30 seconds. `NULL` when unknown |
-| `prior_*` | The card as it was *before* the review: state, due, last review, stability, fast stability, difficulty, learning step, scheduled days |
+| Column               | Holds                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | The client's `reviewId`, a UUID. The primary key, so one review is one row                                                            |
+| `user_id`, `card_id` | Who reviewed what                                                                                                                     |
+| `outcome`            | What the learner chose: `missed`, `tough`, `got_it` or `easy`                                                                         |
+| `rating`             | The FSRS rating the outcome became, 1 to 4                                                                                            |
+| `reviewed_at`        | When, by the server's clock                                                                                                           |
+| `duration_ms`        | Response time, capped at 30 seconds. `NULL` when unknown                                                                              |
+| `prior_*`            | The card as it was _before_ the review: state, due, last review, stability, fast stability, difficulty, learning step, scheduled days |
 
 It is core's review log (`applyOutcome(...).log`), one column per field; [`src/db/reviews.ts`](./src/db/reviews.ts) converts it.
 
@@ -449,12 +454,12 @@ Enum columns (`part_of_speech`, `gender`, `state`) take their values from the Zo
 
 Four columns hold a language, and each says which one ([`docs/i18n.md`](../../docs/i18n.md)). No table has a plain `language` column.
 
-| Column | Means |
-| --- | --- |
-| `users.ui_locale` | The app's own language for this learner |
-| `courses.learning_language` | What the course teaches |
-| `courses.answer_language` | What its answers and translations are written in |
-| `mnemonics.content_locale` | What the story and picture description are written in |
+| Column                      | Means                                                 |
+| --------------------------- | ----------------------------------------------------- |
+| `users.ui_locale`           | The app's own language for this learner               |
+| `courses.learning_language` | What the course teaches                               |
+| `courses.answer_language`   | What its answers and translations are written in      |
+| `mnemonics.content_locale`  | What the story and picture description are written in |
 
 All four are `NOT NULL` and hold a canonical BCP 47 tag (`es`, `pt-BR`, `es-419`), the rule `languageTagSchema` uses. SQL has no `Intl`, so the database checks the shape: it refuses `''`, `English`, `ES`, `pt-br` and `pt_BR`, and a test proves it agrees with `languageTagSchema` on every sample.
 
@@ -474,14 +479,14 @@ When a Better Auth plugin needs a new table or column (passkeys in #107, say), a
 
 [`seed/prototype.sql`](./seed/prototype.sql) fills the local database. It is local data only, never a migration, so it can never reach a real database.
 
-| Table | Seeded rows |
-| --- | --- |
-| `users` | `usr_prototype_01`, the learner `useViewer()` has stood in for since MS 1, plus five mnemonic authors (`usr_seed_*`) |
-| `courses` | Spanish Core 1000, Japanese Hiragana & Katakana, French Travel Phrases, Portuguese Essentials. All published, with `Written for Memli` as the source |
-| `cards` | 16 words: 5 Spanish, 4 Japanese, 4 French, 3 Portuguese |
-| `mnemonics` | 6 stories on three Spanish cards, two with a picture |
-| `enrollments` | `usr_prototype_01` in all four courses |
-| `user_progress` | None. Every card starts new; reviews fill it in |
+| Table           | Seeded rows                                                                                                                                          |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users`         | `usr_prototype_01`, the learner `useViewer()` has stood in for since MS 1, plus five mnemonic authors (`usr_seed_*`)                                 |
+| `courses`       | Spanish Core 1000, Japanese Hiragana & Katakana, French Travel Phrases, Portuguese Essentials. All published, with `Written for Memli` as the source |
+| `cards`         | 16 words: 5 Spanish, 4 Japanese, 4 French, 3 Portuguese                                                                                              |
+| `mnemonics`     | 6 stories on three Spanish cards, two with a picture                                                                                                 |
+| `enrollments`   | `usr_prototype_01` in all four courses                                                                                                               |
+| `user_progress` | None. Every card starts new; reviews fill it in                                                                                                      |
 
 Things worth knowing:
 
@@ -527,55 +532,55 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 
 ## Layout
 
-| File | Purpose |
-| --- | --- |
-| `src/app.ts` | The Hono app. It mounts the routes. Tests import this. |
-| `src/routes/catalog.ts` | `GET /api/catalog` and `GET /api/catalog/:courseId`. |
-| `src/routes/courses.ts` | `GET /api/courses`, `GET /api/courses/:courseId/study`, and adding or removing a course (`/enrollment`). |
-| `src/routes/reviews.ts` | `POST /api/reviews`. |
-| `src/routes/history.ts` | `GET /api/history`. |
-| `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
-| `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
-| `src/lib/viewer.ts` | `requireViewer`, which needs a session, and `viewerId`, who is asking. |
-| `src/lib/same-origin.ts` | `requireSameOrigin`: a write must come from the app's own origin. |
-| `src/lib/rate-limit.ts` | `limitRequests` and `consume`: Memli's own rate limits, counted in D1. |
-| `src/lib/auth.ts` | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`. |
-| `src/test-setup.ts` | Runs before every test. Stands in for the breached-password service. |
-| `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |
-| `src/env.ts` | What Cloudflare passes the Worker (`DB`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`), and what middleware passes a route (`viewerId`). |
-| `src/db/client.ts` | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`. |
-| `src/db/schema.ts` | The tables, in Drizzle. |
-| `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
-| `src/db/progress.ts` | Reads and saves `user_progress` as core's `CardProgress`. |
-| `src/db/enrollments.ts` | Which courses a learner added to their dashboard: read, add and remove. |
-| `src/db/reviews.ts` | Writes the review log with progress; reads it back for history and the daily limit. |
-| `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
-| `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
-| `src/db/test-database.ts` | For tests: an in-memory SQLite database from the real migrations and seed. |
-| `src/db/test-d1.ts` | For route and migration tests: a real in-memory D1, plus rows to fill it. |
-| `src/index.ts` | The Worker entry. It only exports the app. |
-| `src/**/*.test.ts` | Vitest. `app.request("/api/...")` calls a route with no server running. |
-| `wrangler.jsonc` | Worker name, entry, compatibility date and flags, D1 binding, `BETTER_AUTH_URL`, required secrets, dev port. |
-| `.dev.vars.example` | The local secrets to copy into `.dev.vars`. |
+| File                        | Purpose                                                                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app.ts`                | The Hono app. It mounts the routes. Tests import this.                                                                                       |
+| `src/routes/catalog.ts`     | `GET /api/catalog` and `GET /api/catalog/:courseId`.                                                                                         |
+| `src/routes/courses.ts`     | `GET /api/courses`, `GET /api/courses/:courseId/study`, and adding or removing a course (`/enrollment`).                                     |
+| `src/routes/reviews.ts`     | `POST /api/reviews`.                                                                                                                         |
+| `src/routes/history.ts`     | `GET /api/history`.                                                                                                                          |
+| `src/lib/errors.ts`         | `errorResponse`, plus the app-wide not-found and error handlers.                                                                             |
+| `src/lib/validate.ts`       | `validate`: checks a body or query string against a schema.                                                                                  |
+| `src/lib/viewer.ts`         | `requireViewer`, which needs a session, and `viewerId`, who is asking.                                                                       |
+| `src/lib/same-origin.ts`    | `requireSameOrigin`: a write must come from the app's own origin.                                                                            |
+| `src/lib/rate-limit.ts`     | `limitRequests` and `consume`: Memli's own rate limits, counted in D1.                                                                       |
+| `src/lib/auth.ts`           | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`.                                                              |
+| `src/test-setup.ts`         | Runs before every test. Stands in for the breached-password service.                                                                         |
+| `src/lib/review-batch.ts`   | Pure: reported reviews to new progress, on the server's clock.                                                                               |
+| `src/env.ts`                | What Cloudflare passes the Worker (`DB`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`), and what middleware passes a route (`viewerId`).          |
+| `src/db/client.ts`          | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`.                                                               |
+| `src/db/schema.ts`          | The tables, in Drizzle.                                                                                                                      |
+| `src/db/content.ts`         | Reads courses, cards and mnemonics as `@workspace/schemas` shapes.                                                                           |
+| `src/db/progress.ts`        | Reads and saves `user_progress` as core's `CardProgress`.                                                                                    |
+| `src/db/enrollments.ts`     | Which courses a learner added to their dashboard: read, add and remove.                                                                      |
+| `src/db/reviews.ts`         | Writes the review log with progress; reads it back for history and the daily limit.                                                          |
+| `drizzle/migrations/`       | Generated SQL migrations. Never edited by hand.                                                                                              |
+| `seed/prototype.sql`        | Local data: the prototype learner, starter courses, cards and mnemonics.                                                                     |
+| `src/db/test-database.ts`   | For tests: an in-memory SQLite database from the real migrations and seed.                                                                   |
+| `src/db/test-d1.ts`         | For route and migration tests: a real in-memory D1, plus rows to fill it.                                                                    |
+| `src/index.ts`              | The Worker entry. It only exports the app.                                                                                                   |
+| `src/**/*.test.ts`          | Vitest. `app.request("/api/...")` calls a route with no server running.                                                                      |
+| `wrangler.jsonc`            | Worker name, entry, compatibility date and flags, D1 binding, `BETTER_AUTH_URL`, required secrets, dev port.                                 |
+| `.dev.vars.example`         | The local secrets to copy into `.dev.vars`.                                                                                                  |
 | `worker-configuration.d.ts` | Generated by `bun run cf-typegen`. Workers runtime types for this compatibility date, plus the global `Env` with `DB`. Never edited by hand. |
 
 ## Scripts
 
-| Script | Purpose |
-| --- | --- |
-| `bun run dev` | `wrangler dev` on port 8787 |
-| `bun run db:setup` | Apply migrations and seed the local database. Safe to run again |
-| `bun run db:generate` | Write a migration from `src/db/schema.ts` |
-| `bun run db:migrate` | Apply new migrations to the local database |
-| `bun run db:seed` | Create or update the seeded learner, courses, cards and mnemonics |
-| `bun run test` | Vitest |
-| `bun run cf-typegen` | `wrangler types`: regenerate `worker-configuration.d.ts`. Run it after changing `wrangler.jsonc` or upgrading wrangler |
-| `bun run typecheck` | `tsc --noEmit` with the generated Workers types |
-| `bun run lint` | ESLint |
-| `bun run build` | `wrangler deploy --dry-run`: bundles the Worker and uploads nothing. It fails if an import cannot run on Workers. |
-| `bun run db:migrate:staging` | Apply new migrations to `memli-staging`. The staging deploy runs it first |
-| `bun run db:seed:staging` | Seed `memli-staging`. Run by hand after changing the seed; deploys don't |
-| `bun run deploy:staging` | Deploy `memli-api-staging`. The staging deploy runs it before the gate Worker |
+| Script                       | Purpose                                                                                                                |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `bun run dev`                | `wrangler dev` on port 8787                                                                                            |
+| `bun run db:setup`           | Apply migrations and seed the local database. Safe to run again                                                        |
+| `bun run db:generate`        | Write a migration from `src/db/schema.ts`                                                                              |
+| `bun run db:migrate`         | Apply new migrations to the local database                                                                             |
+| `bun run db:seed`            | Create or update the seeded learner, courses, cards and mnemonics                                                      |
+| `bun run test`               | Vitest                                                                                                                 |
+| `bun run cf-typegen`         | `wrangler types`: regenerate `worker-configuration.d.ts`. Run it after changing `wrangler.jsonc` or upgrading wrangler |
+| `bun run typecheck`          | `tsc --noEmit` with the generated Workers types                                                                        |
+| `bun run lint`               | ESLint                                                                                                                 |
+| `bun run build`              | `wrangler deploy --dry-run`: bundles the Worker and uploads nothing. It fails if an import cannot run on Workers.      |
+| `bun run db:migrate:staging` | Apply new migrations to `memli-staging`. The staging deploy runs it first                                              |
+| `bun run db:seed:staging`    | Seed `memli-staging`. Run by hand after changing the seed; deploys don't                                               |
+| `bun run deploy:staging`     | Deploy `memli-api-staging`. The staging deploy runs it before the gate Worker                                          |
 
 ## Rules
 
@@ -589,4 +594,3 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 - **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
 - **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
 - **A daily goal per learner.** Everyone's is 50 words (`DAILY_GOAL_WORDS` in core).
-- **"My courses" on the dashboard.** Learners can add and remove courses, but `GET /api/courses` still lists every course, and starting a session doesn't add one yet (#174).

@@ -5,7 +5,7 @@ import type { Mnemonic } from "@workspace/schemas/content/mnemonic"
 import { and, asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm"
 
 import { idGroups, type Database } from "./client"
-import { cards, courses, mnemonics, users } from "./schema"
+import { cards, courses, enrollments, mnemonics, users } from "./schema"
 
 /**
  * Reads courses, cards and mnemonics as `@workspace/schemas` shapes, each card
@@ -38,9 +38,18 @@ function cardFromRow(row: CardRow, cardMnemonics: Mnemonic[]): Card {
   }
 }
 
-export async function listCourses(db: Database): Promise<Course[]> {
-  const rows = await db.select().from(courses).orderBy(asc(courses.id))
-  return rows.map(courseFromRow)
+/** The courses on a learner's dashboard: the ones they added (#174). */
+export async function listAddedCourses(
+  db: Database,
+  userId: string
+): Promise<Course[]> {
+  const rows = await db
+    .select({ course: courses })
+    .from(courses)
+    .innerJoin(enrollments, eq(enrollments.courseId, courses.id))
+    .where(eq(enrollments.userId, userId))
+    .orderBy(asc(courses.id))
+  return rows.map((row) => courseFromRow(row.course))
 }
 
 /** A course the catalog lists, with the details a published course must have. */
@@ -174,16 +183,20 @@ export async function cardIdsInOrder(
   return rows.map((row) => row.id)
 }
 
-export async function existingCardIds(
+/** Each card's course, by card id. Ids that do not exist are absent. */
+export async function courseIdsByCard(
   db: Database,
   cardIds: readonly string[]
-): Promise<Set<string>> {
+): Promise<Map<string, string>> {
   const groups = await Promise.all(
     idGroups(cardIds).map((ids) =>
-      db.select({ id: cards.id }).from(cards).where(inArray(cards.id, ids))
+      db
+        .select({ id: cards.id, courseId: cards.courseId })
+        .from(cards)
+        .where(inArray(cards.id, ids))
     )
   )
-  return new Set(groups.flat().map((row) => row.id))
+  return new Map(groups.flat().map((row) => [row.id, row.courseId]))
 }
 
 /**

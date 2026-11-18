@@ -26,7 +26,7 @@ import {
   cardsById,
   findCourse,
   findPublishedCourse,
-  listCourses,
+  listAddedCourses,
 } from "../db/content"
 import { addToDashboard, removeFromDashboard } from "../db/enrollments"
 import { courseProgress, progressByCourse } from "../db/progress"
@@ -66,7 +66,7 @@ async function newWordsStartedToday(
   return newWordsStartedOn(firstSightings, localDate(now, timeZone), timeZone)
 }
 
-// Every course, with where the viewer stands in each: what the dashboard shows.
+// The courses the viewer added, with where they stand in each: the dashboard.
 courseRoutes.get("/", validate("query", coursesQuerySchema), async (c) => {
   const db = database(c.env.DB)
   const now = new Date()
@@ -74,7 +74,7 @@ courseRoutes.get("/", validate("query", coursesQuerySchema), async (c) => {
   const { timeZone } = c.req.valid("query")
 
   const [courses, cardCounts, progress, startedToday] = await Promise.all([
-    listCourses(db),
+    listAddedCourses(db, userId),
     cardCountByCourse(db),
     progressByCourse(db, userId),
     newWordsStartedToday(db, userId, now, timeZone),

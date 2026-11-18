@@ -5,7 +5,7 @@ import { and, eq, gte, inArray, sql } from "drizzle-orm"
 import type { RecordedReview } from "../lib/review-batch"
 import { idGroups, runTogether, type Database } from "./client"
 import { progressUpserts } from "./progress"
-import { cards, reviews } from "./schema"
+import { cards, enrollments, reviews } from "./schema"
 
 type NewReviewRow = typeof reviews.$inferInsert
 
@@ -56,13 +56,22 @@ export async function saveReviews(
   userId: string,
   recorded: readonly RecordedReview[],
   progress: readonly CardProgress[],
-  now: Date
+  now: Date,
+  courseIds: readonly string[]
 ): Promise<void> {
   await runTogether(db, [
     ...recorded.map((review) =>
       db.insert(reviews).values(reviewToRow(userId, review))
     ),
     ...progressUpserts(db, userId, progress, now),
+    // In the same batch, so progress never exists for a course missing from
+    // the dashboard (#174). A course already added keeps its first date.
+    ...courseIds.map((courseId) =>
+      db
+        .insert(enrollments)
+        .values({ userId, courseId, addedAt: now })
+        .onConflictDoNothing()
+    ),
   ])
 }
 

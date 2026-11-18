@@ -7,7 +7,7 @@ import {
   submitReviewsResponseSchema,
   type ReviewSubmission,
 } from "@workspace/schemas/srs/review"
-import { asc } from "drizzle-orm"
+import { asc, eq } from "drizzle-orm"
 import {
   afterAll,
   afterEach,
@@ -21,11 +21,13 @@ import {
 
 import { progressFromRow } from "../db/progress"
 import { saveReviews } from "../db/reviews"
-import { reviews as reviewLog, userProgress } from "../db/schema"
+import { enrollments, reviews as reviewLog, userProgress } from "../db/schema"
 import { applyReviews } from "../lib/review-batch"
 import {
+  AUTHOR_ID,
   VIEWER_ID,
   addCourse,
+  addEnrollment,
   addUsers,
   startTestApi,
   type TestApi,
@@ -360,7 +362,9 @@ describe("a request sent twice", () => {
     const copy = applyReviews([saved], [sent], now)
 
     await expect(
-      saveReviews(api.db, VIEWER_ID, copy.recorded, copy.progress, now)
+      saveReviews(api.db, VIEWER_ID, copy.recorded, copy.progress, now, [
+        "spanish",
+      ])
     ).rejects.toThrow()
 
     expect((await savedRows()).map(progressFromRow)).toEqual([saved])
@@ -390,6 +394,7 @@ describe("after a review", () => {
 
   it("the course list shows the progress, and the card comes due later", async () => {
     await addCourse(api.db, "spanish", 3)
+    await addEnrollment(api.db, "spanish")
     expect(await spanish()).toMatchObject({ unseenCount: 3, learningCount: 0 })
 
     const [progress] = await submit([review("spanish-1")])
@@ -423,5 +428,78 @@ describe("after a review", () => {
     vi.setSystemTime(new Date(String(progress?.due)))
 
     expect(await cardIds("review")).toEqual(["spanish-1"])
+  })
+})
+
+describe("studying a course adds it to the dashboard", () => {
+  async function dashboard(userId: string = VIEWER_ID): Promise<string[]> {
+    const rows = await api.db
+      .select({ courseId: enrollments.courseId, addedAt: enrollments.addedAt })
+      .from(enrollments)
+      .where(eq(enrollments.userId, userId))
+    return rows.map((row) => `${row.courseId} ${row.addedAt.toISOString()}`)
+  }
+
+  it("adds the course with the first saved review, stamped by the server", async () => {
+    await addCourse(api.db, "spanish", 2)
+
+    await submit([review("spanish-1")])
+
+    expect(await dashboard()).toEqual([`spanish ${now.toISOString()}`])
+  })
+
+  it("keeps the day a course was first added", async () => {
+    await addCourse(api.db, "spanish", 2)
+    await addEnrollment(api.db, "spanish")
+    const [added] = await dashboard()
+
+    vi.setSystemTime(now.getTime() + 2 * 24 * 60 * minute)
+    await submit([review("spanish-1")])
+
+    expect(await dashboard()).toEqual([added])
+  })
+
+  it("adds each course a request reviews, once", async () => {
+    await addCourse(api.db, "spanish", 2)
+    await addCourse(api.db, "french", 1)
+
+    await submit([review("spanish-1"), review("spanish-2"), review("french-1")])
+
+    expect((await dashboard()).map((row) => row.split(" ")[0]).sort()).toEqual([
+      "french",
+      "spanish",
+    ])
+  })
+
+  it("never brings back a removed course for a retried old review", async () => {
+    await addCourse(api.db, "spanish", 1)
+    const sent = review("spanish-1")
+    await submit([sent])
+    await api.db.delete(enrollments)
+
+    await submit([sent])
+
+    expect(await dashboard()).toEqual([])
+  })
+
+  it("adds nothing when the request is refused", async () => {
+    await addCourse(api.db, "spanish", 1)
+
+    const res = await api.request("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviews: [review("spanish-1"), review("nope")] }),
+    })
+
+    expect(res.status).toBe(404)
+    expect(await dashboard()).toEqual([])
+  })
+
+  it("touches only the reviewer's dashboard", async () => {
+    await addCourse(api.db, "spanish", 1)
+
+    await submit([review("spanish-1")])
+
+    expect(await dashboard(AUTHOR_ID)).toEqual([])
   })
 })
