@@ -1,10 +1,31 @@
 import { apiErrorSchema } from "@workspace/schemas/api/error"
 import { eq } from "drizzle-orm"
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest"
 
 import { app } from "../app"
-import { accounts, sessions, users } from "../db/schema"
-import { TEST_ORIGIN, startTestApi, type TestApi } from "../db/test-d1"
+import {
+  accounts,
+  mnemonics,
+  reviews,
+  sessions,
+  userProgress,
+  users,
+} from "../db/schema"
+import {
+  TEST_ORIGIN,
+  addCourse,
+  addMnemonic,
+  startTestApi,
+  type TestApi,
+} from "../db/test-d1"
 import { stubBreachedPasswords, stubBreachListOutage } from "./test-breach-list"
 
 const learner = {
@@ -281,6 +302,111 @@ describe("POST /api/auth/sign-out", () => {
       headers: { Cookie: cookie },
     })
     expect(await session.json()).toBeNull()
+  })
+})
+
+describe("the logs", () => {
+  it("never hold a password, a session token or a cookie", async () => {
+    const logged: unknown[][] = []
+    for (const method of ["log", "info", "warn", "error", "debug"] as const) {
+      vi.spyOn(console, method).mockImplementation((...args: unknown[]) => {
+        logged.push(args)
+      })
+    }
+    const weak = "weakpassword"
+    const breached = "Breached-password-1"
+    const wrong = "Wrong-password-1"
+    stubBreachedPasswords([breached])
+
+    try {
+      const signUp = await post("/sign-up/email", learner)
+      await post("/sign-up/email", { ...learner, password: weak })
+      await post("/sign-up/email", { ...learner, password: breached })
+      await post("/sign-in/email", { email: learner.email, password: wrong })
+      const signIn = await post("/sign-in/email", {
+        email: learner.email,
+        password: learner.password,
+      })
+      const cookie = cookiesOf(signIn)
+      await api.request("/api/auth/get-session", {
+        headers: { Cookie: cookie },
+      })
+      // A cross-origin write and a burst of tries both make Better Auth log.
+      await post(
+        "/sign-out",
+        {},
+        { Cookie: cookie, Origin: "https://x.example" }
+      )
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        await post("/sign-in/email", { email: learner.email, password: wrong })
+      }
+      await post("/sign-out", {}, { Cookie: cookiesOf(signUp) })
+
+      const text = JSON.stringify(logged)
+      const tokens = [cookiesOf(signUp), cookie]
+        .flatMap((value) => value.split("; "))
+        .map((pair) => decodeURIComponent(pair.split("=")[1] ?? ""))
+        .map((value) => value.split(".")[0] ?? "")
+      for (const secret of [
+        learner.password,
+        weak,
+        breached,
+        wrong,
+        ...tokens,
+      ]) {
+        expect(secret.length).toBeGreaterThan(8)
+        expect(text).not.toContain(secret)
+      }
+      expect(text).not.toContain("session_token")
+      // Something was logged, so the check above looked at real output.
+      expect(logged.length).toBeGreaterThan(0)
+    } finally {
+      vi.restoreAllMocks()
+    }
+  })
+})
+
+describe("deleting a learner", () => {
+  it("removes their sessions, accounts, progress and reviews, and keeps their mnemonics", async () => {
+    const signUp = await post("/sign-up/email", learner)
+    const [user] = await api.db.select().from(users)
+    if (user === undefined) throw new Error("sign-up made no learner")
+    const [cardId] = await addCourse(api.db, "spanish", 1)
+    if (cardId === undefined) throw new Error("no card")
+    await addMnemonic(api.db, {
+      id: "mn-1",
+      cardId,
+      upvotes: 0,
+      authorId: user.id,
+    })
+    const review = await api.request("/api/reviews", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookiesOf(signUp),
+      },
+      body: JSON.stringify({
+        reviews: [
+          {
+            reviewId: crypto.randomUUID(),
+            cardId,
+            outcome: "got_it",
+            reviewedAt: new Date().toISOString(),
+            durationMs: 2_000,
+          },
+        ],
+      }),
+    })
+    expect(review.status).toBe(200)
+
+    await api.db.delete(users).where(eq(users.id, user.id))
+
+    expect(await api.db.select().from(sessions)).toHaveLength(0)
+    expect(await api.db.select().from(accounts)).toHaveLength(0)
+    expect(await api.db.select().from(userProgress)).toHaveLength(0)
+    expect(await api.db.select().from(reviews)).toHaveLength(0)
+    const [kept] = await api.db.select().from(mnemonics)
+    expect(kept?.authorId).toBeNull()
   })
 })
 

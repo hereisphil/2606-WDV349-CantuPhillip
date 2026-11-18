@@ -74,8 +74,8 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 ### Secrets and config
 
-- [ ] `BETTER_AUTH_SECRET` is a long random value, set with `wrangler secret put` for staging and production, and in `.dev.vars` locally (git-ignored). Never in the repo.
-- [ ] The Google client secret (#107) is a secret the same way. The client ID can live in `wrangler.jsonc`.
+- [x] `BETTER_AUTH_SECRET` is a long random value, set with `wrangler secret put` for staging and production, and in `.dev.vars` locally (git-ignored). Never in the repo. Staging's is set on `memli-api-staging` (2026-11-17). Production has no API Worker yet: #114 sets its secret when it creates one. `apiEnvSchema` refuses one under 32 characters, and the repo holds only the `.dev.vars.example` placeholder.
+- [ ] The Google client secret (#107) is a secret the same way. The client ID can live in `wrangler.jsonc`. Not in the beta: Google sign-in (#107) moved to Going Beyond, and this stays open for it.
 - [x] The API's environment is checked by a schema in `@workspace/schemas` (`env/api.ts`). A Worker has no startup step, so a missing or short secret fails every `/api/auth/*` request with `INTERNAL_ERROR`, from the first one after a deploy. Tested in `apps/api/src/lib/auth.test.ts`.
 - [x] `baseURL` is set per environment (`BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`) and is `https` outside local development, which is what makes Better Auth mark cookies `Secure`. `apiEnvSchema` refuses plain `http` on any host but `localhost`. Production gets its value with its API environment (#114).
 - [x] `trustedOrigins` lists exactly the app's origin for each environment. No wildcards, and no `localhost` on staging or production. The list is left empty on purpose: Better Auth then trusts only `baseURL`'s origin, so there is one value to get right.
@@ -113,6 +113,8 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 ### Google OAuth (#107)
 
+Not in the beta. #107 moved to Going Beyond on 2026-11-17, so these stay open for it.
+
 - [ ] Keep Better Auth's OAuth `state` and PKCE. Both are on by default.
 - [ ] Register the exact redirect URI for each environment in Google Cloud. No wildcards.
 - [ ] A `callbackURL` after sign-in is a path in the app, or a `trustedOrigins` origin. Never an address from a query string, so the sign-in page can't be used to send learners to another site.
@@ -120,14 +122,16 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 ### Passkeys (#107)
 
+Not in the beta, for the same reason as Google sign-in.
+
 - [ ] Set the relying party ID and origin per environment. Staging and production have different domains, so a passkey made on one won't work on the other, and that's expected.
 - [ ] Only a signed-in learner can add a passkey.
 
 ### Logs and privacy
 
-- [ ] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error.
-- [ ] Better Auth's session rows can keep an IP address and user agent. The Privacy Policy (#170) lists them, along with how long they're kept.
-- [ ] Deleting an account removes sessions, accounts and progress, and keeps mnemonics with `author: null`.
+- [x] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error, and Memli logs nothing else. A test runs sign-up, refused sign-ups, wrong and right sign-ins, a cross-origin write, a rate-limited burst and sign-out, and proves no log line holds a password, a session token or a cookie name (`apps/api/src/lib/auth.test.ts`, "the logs").
+- [ ] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days). The Privacy Policy lists them: that is #170, whose Privacy Policy task now names them.
+- [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. Until #170 says how, a learner asks and the account is deleted by hand.
 
 ## Open issues
 
