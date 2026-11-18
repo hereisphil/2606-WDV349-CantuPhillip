@@ -69,6 +69,18 @@ export default function DevPreviewsMenu(): JSX.Element {
             >
               Study session
             </DropdownMenuItem>
+            <DropdownMenuItem
+              render={
+                <Link to="/signin" search={{ preview: "wrong-password" }} />
+              }
+            >
+              Sign in
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              render={<Link to="/signup" search={{ preview: "email-taken" }} />}
+            >
+              Sign up
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           {inPreview ? (
             <>

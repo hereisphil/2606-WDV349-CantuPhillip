@@ -104,6 +104,16 @@ function Dashboard(): JSX.Element {
   const { preview } = Route.useSearch()
   if (import.meta.env.DEV && preview !== undefined) {
     const seeded: DashboardPreview = dashboardPreviews[preview]
+    if (seeded.loadFailed === true) {
+      return (
+        <>
+          <div className="px-4 pt-4 sm:px-6 sm:pt-8">
+            <PreviewSwitcher current={preview} />
+          </div>
+          <DashboardError error={new Error("preview")} reset={() => {}} />
+        </>
+      )
+    }
     return <DashboardView metrics={seeded.metrics} />
   }
   return <LiveDashboard />

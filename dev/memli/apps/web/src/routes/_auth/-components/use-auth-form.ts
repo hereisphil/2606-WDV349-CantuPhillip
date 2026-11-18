@@ -49,16 +49,17 @@ type AuthForm<Field extends string> = {
 }
 
 /**
- * One auth form: the reducer from `@workspace/core`, plus the request.
- * `onSuccess` runs once the server has set the session cookie.
+ * One auth form: the core reducer plus the request. `onSuccess` runs once the
+ * session cookie is set; `seed` opens the form in a `?preview=` state.
  */
 export function useAuthForm<Field extends string>(
   reducer: Reducer<Field>,
   initial: Readonly<Record<Field, string>>,
   send: (fields: Readonly<Record<Field, string>>) => Promise<AuthResult>,
-  onSuccess: () => Promise<void>
+  onSuccess: () => Promise<void>,
+  seed?: FormState<Field>
 ): AuthForm<Field> {
-  const [state, dispatch] = useReducer(reducer, initial, startForm)
+  const [state, dispatch] = useReducer(reducer, seed ?? startForm(initial))
 
   const submit = (event: SubmitEvent<HTMLFormElement>): void => {
     event.preventDefault()

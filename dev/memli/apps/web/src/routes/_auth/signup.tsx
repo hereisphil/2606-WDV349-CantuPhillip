@@ -12,6 +12,14 @@ import {
   startSession,
 } from "@/lib/session"
 import { AuthCard, authLinkClass } from "./-components/AuthCard"
+import { AuthPreviewSwitcher } from "./-components/AuthPreviewSwitcher"
+import {
+  isSignUpPreviewName,
+  neverAnswers,
+  previewState,
+  signUpPreviews,
+  type SignUpPreviewName,
+} from "./-components/auth-previews"
 import { FormField } from "./-components/FormField"
 import { refusalMessage } from "./-components/auth-messages"
 import { useAuthForm, validateWith } from "./-components/use-auth-form"
@@ -19,13 +27,23 @@ import { useAuthForm, validateWith } from "./-components/use-auth-form"
 type AuthSearch = {
   /** Where to go once signed in: a path on this site, checked by `safeReturnPath`. */
   redirect?: string | undefined
+  /** A development-only snapshot of the form (`auth-previews.ts`). */
+  preview?: SignUpPreviewName | undefined
 }
 
 export const Route = createFileRoute("/_auth/signup")({
   validateSearch: (search: Record<string, unknown>): AuthSearch => ({
     redirect: safeReturnPath(search.redirect),
+    preview:
+      import.meta.env.DEV && isSignUpPreviewName(search.preview)
+        ? search.preview
+        : undefined,
   }),
-  beforeLoad: (args) => redirectViewer(args, args.search.redirect),
+  // A preview opens even when signed in, so it can be checked any time.
+  beforeLoad: (args) =>
+    import.meta.env.DEV && args.search.preview !== undefined
+      ? undefined
+      : redirectViewer(args, args.search.redirect),
   component: SignUp,
 })
 
@@ -57,17 +75,47 @@ const reducer = createFormReducer<Field>(validateWith(signUpSchema))
 const emptyForm = { name: "", email: "", password: "" }
 
 function SignUp(): JSX.Element {
+  const { preview } = Route.useSearch()
+  if (import.meta.env.DEV && preview !== undefined) {
+    return (
+      <div className="flex w-full max-w-md flex-col items-center">
+        <AuthPreviewSwitcher
+          previews={signUpPreviews}
+          current={preview}
+          renderLink={(name, props) => (
+            <Link
+              from={Route.fullPath}
+              to="."
+              search={(search) => ({ ...search, preview: name })}
+              {...props}
+            />
+          )}
+        />
+        {/* Keyed, so switching previews starts the form over. */}
+        <SignUpForm key={preview} preview={preview} />
+      </div>
+    )
+  }
+  return <SignUpForm />
+}
+
+function SignUpForm({ preview }: { preview?: SignUpPreviewName }): JSX.Element {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { redirect } = Route.useSearch()
+  const seeded =
+    import.meta.env.DEV && preview !== undefined
+      ? signUpPreviews[preview]
+      : undefined
   const { state, dispatch, submit } = useAuthForm(
     reducer,
     emptyForm,
-    signUp,
+    seeded === undefined ? signUp : neverAnswers,
     async () => {
       await startSession(queryClient)
       await navigate({ href: redirect ?? HOME_PATH, replace: true })
-    }
+    },
+    seeded === undefined ? undefined : previewState(reducer, emptyForm, seeded)
   )
 
   // The fields stay locked after success, while the dashboard loads.
