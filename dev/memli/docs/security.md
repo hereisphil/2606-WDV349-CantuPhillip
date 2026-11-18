@@ -100,7 +100,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] Store its counts in D1 (`rateLimit.storage: "database"`, the `rate_limits` table in migration `0004`). The default is memory, and memory isn't shared across Worker instances, so the limit would barely apply.
 - [x] Read the client IP from Cloudflare's header: `advanced.ipAddress.ipAddressHeaders: ["cf-connecting-ip"]`. The default, `X-Forwarded-For`, can be set by any client, so an attacker could pretend to be a new IP on every try. A test sends a new `X-Forwarded-For` on every try and is still refused.
 - [x] Keep the strict default on email sign-in (3 tries per 10 seconds), and add `rateLimit.customRules` for sign-up (5 new accounts a minute from one address). The passkey sign-in rule lands with passkeys (#107).
-- [ ] Rate limit Memli's own `POST /api/reviews` (#169).
+- [x] Rate limit Memli's own `POST /api/reviews` (#169): 60 requests a minute per learner and 1,200 per address, so a classroom behind one network still fits. A refusal is `429 RATE_LIMITED` with `Retry-After`. The counts live in the same D1 `rate_limits` table as sign-in's (`limitRequests` in `apps/api/src/lib/rate-limit.ts`), counted in one statement so simultaneous requests can't slip past. Cloudflare's rate limiting binding was considered and not used: its docs don't say whether it is free, and it counts per location, not globally.
 - [x] A test proves a burst of sign-in attempts gets refused, and that the learner can try again once the window ends.
 
 ### Passwords and accounts (#108)

@@ -202,6 +202,7 @@ The web app will call these through Better Auth's client, not by hand.
 - **`uiLocale` starts as `en`** and a sign-up body cannot set it. Neither can it set `emailVerified`.
 - **A wrong password and an unknown email answer the same**: `401` with `INVALID_EMAIL_OR_PASSWORD`.
 - **Tries are limited per address**, counted in the `rate_limits` table so every Worker instance sees the same count. Sign-in allows 3 tries in 10 seconds, and sign-up 5 new accounts a minute. A refusal is `429` with `X-Retry-After` in seconds. The address is Cloudflare's `cf-connecting-ip` header, never `X-Forwarded-For`, which any client can set. Locally there is no such header, so every request shares one count.
+- **Saving reviews is limited too.** `POST /api/reviews` allows 60 requests a minute per learner and 1,200 per address (`REVIEW_LIMITS` in `src/routes/reviews.ts`), counted in the same `rate_limits` table with keys that start `memli|`. A refusal is `429` with `RATE_LIMITED` and `Retry-After`. `limitRequests` in [`src/lib/rate-limit.ts`](./src/lib/rate-limit.ts) can limit any other route the same way, after `requireViewer`.
 - **Writes must come from the app's own origin.** A `POST` carrying a cookie, or sent by a page on another site, answers `403` unless its `Origin` is `BETTER_AUTH_URL`. Better Auth turns this check off by itself under a test runner, so `auth.ts` sets it on by name and the tests run against the real thing.
 - **Errors here are Better Auth's shape**, `{ "code": "…", "message": "…" }`, not the `{ "error": { "code" } }` of Memli's own routes. The web app maps the `code` to copy and never shows the English `message`.
 
@@ -303,7 +304,7 @@ src/db/schema.ts ──(bun run db:generate)──► drizzle/migrations/*.sql �
 | `sessions` | signed-in browser | Better Auth's `session`. `token` is what the cookie carries; sign out deletes the row |
 | `accounts` | way a learner signs in | Better Auth's `account`. For email sign-in, `provider_id` is `credential` and `password` is a scrypt hash |
 | `verifications` | short-lived token | Better Auth's `verification`, for things like a password reset |
-| `rate_limits` | client address and path | Better Auth's `rateLimit`: how many tries, and when the last one was (#169) |
+| `rate_limits` | client address and path | Better Auth's `rateLimit`: how many tries, and when the last one was (#169). Memli's own limits share it, with keys that start `memli\|` |
 | `courses` | course | `learning_language` and `answer_language`, never one `language` |
 | `cards` | word in a course | `position` orders new words; `answers` is a JSON array |
 | `mnemonics` | memory hook on a card | `story` is JSON parts, never markup; `content_locale`; `author_id` goes `null` if the author leaves |
@@ -443,6 +444,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
 | `src/lib/viewer.ts` | `requireViewer`, which needs a session, and `viewerId`, who is asking. |
 | `src/lib/same-origin.ts` | `requireSameOrigin`: a write must come from the app's own origin. |
+| `src/lib/rate-limit.ts` | `limitRequests` and `consume`: Memli's own rate limits, counted in D1. |
 | `src/lib/auth.ts` | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`. |
 | `src/test-setup.ts` | Runs before every test. Stands in for the breached-password service. |
 | `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |

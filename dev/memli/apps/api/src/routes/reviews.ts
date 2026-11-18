@@ -10,6 +10,7 @@ import { progressForCards } from "../db/progress"
 import { recordedReviewIds, saveReviews } from "../db/reviews"
 import type { AppEnv } from "../env"
 import { errorResponse } from "../lib/errors"
+import { limitRequests } from "../lib/rate-limit"
 import { applyReviews } from "../lib/review-batch"
 import { validate } from "../lib/validate"
 import { requireViewer, viewerId } from "../lib/viewer"
@@ -19,6 +20,17 @@ export const reviewRoutes = new Hono<AppEnv>()
 
 // Every route here is one learner's data, so each needs a session.
 reviewRoutes.use(requireViewer)
+
+/**
+ * The app sends one request per word, so a fast learner sends about 30 a
+ * minute. An address allows a classroom of them behind one network.
+ */
+export const REVIEW_LIMITS = {
+  perLearner: { windowSeconds: 60, max: 60 },
+  perAddress: { windowSeconds: 60, max: 1_200 },
+}
+
+reviewRoutes.use(limitRequests("reviews", REVIEW_LIMITS))
 
 // Records reviews the viewer finished and answers with each card's progress.
 reviewRoutes.post(
