@@ -29,14 +29,14 @@ export function Footer(): JSX.Element {
               Start Learning Free
             </Link>
             <Link
-              to="/community"
+              to="/courses"
               className={cn(
                 buttonVariants({ variant: "outline", size: "touch" }),
                 footerButtonClass,
                 "border-brand-slate bg-transparent text-brand-surface hover:bg-white/10 hover:text-white"
               )}
             >
-              Explore Community
+              Explore Courses
             </Link>
           </div>
         </div>
