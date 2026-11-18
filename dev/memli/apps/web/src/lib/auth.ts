@@ -1,4 +1,5 @@
 import type { SignInInput } from "@workspace/schemas/auth/sign-in"
+import type { SignUpInput } from "@workspace/schemas/auth/sign-up"
 import { createAuthClient } from "better-auth/client"
 
 /**
@@ -29,4 +30,9 @@ async function resultOf(call: Promise<ClientAnswer>): Promise<AuthResult> {
 /** `POST /api/auth/sign-in/email`. Sets the session cookie on success. */
 export function signIn(fields: SignInInput): Promise<AuthResult> {
   return resultOf(client.signIn.email(fields))
+}
+
+/** `POST /api/auth/sign-up/email`. Creates the learner and signs them in. */
+export function signUp(fields: SignUpInput): Promise<AuthResult> {
+  return resultOf(client.signUp.email(fields))
 }

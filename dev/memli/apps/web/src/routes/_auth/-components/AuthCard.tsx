@@ -7,6 +7,10 @@ import {
 } from "@workspace/ui/components/card"
 import { BrandMark } from "@/components/brand-mark"
 
+/** A link inside an auth card's sentence. Tall enough to tap (44 px). */
+export const authLinkClass =
+  "inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+
 /** The card every auth page sits in: the brand, a title and the form. */
 export function AuthCard({
   title,

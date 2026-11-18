@@ -1,10 +1,10 @@
 import type { JSX } from "react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { createFormReducer } from "@workspace/core/form/form-reducer"
 import { signInSchema } from "@workspace/schemas/auth/sign-in"
 import { Button } from "@workspace/ui/components/button"
 import { signIn } from "@/lib/auth"
-import { AuthCard } from "./-components/AuthCard"
+import { AuthCard, authLinkClass } from "./-components/AuthCard"
 import { FormField } from "./-components/FormField"
 import { refusalMessage } from "./-components/auth-messages"
 import { useAuthForm, validateWith } from "./-components/use-auth-form"
@@ -20,6 +20,8 @@ const messages = {
   password: "Password",
   submit: "Sign in",
   submitting: "Signing in…",
+  noAccount: "New to Memli?",
+  createAccount: "Create an account",
 } as const
 
 type Field = "email" | "password"
@@ -85,6 +87,13 @@ function SignIn(): JSX.Element {
           {busy ? messages.submitting : messages.submit}
         </Button>
       </form>
+
+      <p className="mt-6 text-center text-base text-muted-foreground">
+        {messages.noAccount}{" "}
+        <Link to="/signup" className={authLinkClass}>
+          {messages.createAccount}
+        </Link>
+      </p>
     </AuthCard>
   )
 }

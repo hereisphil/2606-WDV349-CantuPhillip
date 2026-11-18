@@ -298,6 +298,8 @@ export type ApiStub = {
   reviewsFail?: boolean
   /** Refuses `POST /api/auth/sign-in/email` the way Better Auth does. */
   signInRefusal?: AuthRefusal
+  /** Refuses `POST /api/auth/sign-up/email` the way Better Auth does. */
+  signUpRefusal?: AuthRefusal
 }
 
 /** A Better Auth refusal: its status and, when it sends one, its code. */
@@ -381,6 +383,9 @@ async function stubApi(
   })
   await page.route(path(/^\/api\/auth\/sign-in\/email$/), (route) =>
     route.fulfill(stub.signInRefusal ? refusal(stub.signInRefusal) : signedIn)
+  )
+  await page.route(path(/^\/api\/auth\/sign-up\/email$/), (route) =>
+    route.fulfill(stub.signUpRefusal ? refusal(stub.signUpRefusal) : signedIn)
   )
   await page.route(path(/^\/api\/reviews$/), async (route) => {
     const body = route.request().postDataJSON() as {

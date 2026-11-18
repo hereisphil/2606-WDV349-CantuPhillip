@@ -2,11 +2,17 @@ import AxeBuilder from "@axe-core/playwright"
 import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 
-/** `/signin` against the API stand-in (#108). */
+/** `/signin` and `/signup` against the API stand-in (#108). */
 
 async function fillSignIn(page: Page): Promise<void> {
   await page.getByLabel("Email address").fill("ana@memli.test")
   await page.getByLabel("Password").fill("Correct-horse-battery")
+}
+
+async function fillSignUp(page: Page, password: string): Promise<void> {
+  await page.getByLabel("Name").fill("Ana")
+  await page.getByLabel("Email address").fill("ana@memli.test")
+  await page.getByLabel("Password").fill(password)
 }
 
 async function expectNoViolations(page: Page): Promise<void> {
@@ -123,3 +129,99 @@ test.describe("too many tries", () => {
     )
   })
 })
+
+test.describe("sign up", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/signup", { waitUntil: "networkidle" })
+  })
+
+  test("opens the dashboard after creating an account", async ({ page }) => {
+    const request = page.waitForRequest("**/api/auth/sign-up/email")
+    await fillSignUp(page, "Correct-horse-battery")
+    await page.getByRole("button", { name: "Create account" }).click()
+
+    expect((await request).postDataJSON()).toEqual({
+      name: "Ana",
+      email: "ana@memli.test",
+      password: "Correct-horse-battery",
+    })
+    await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  test("names every password rule that is missed, before any request", async ({
+    page,
+  }) => {
+    let sent = false
+    page.on("request", (request) => {
+      if (request.url().includes("/api/auth/")) sent = true
+    })
+    await fillSignUp(page, "correcthorse")
+    await page.getByRole("button", { name: "Create account" }).click()
+
+    await expect(page.getByText("Add a capital letter.")).toBeVisible()
+    await expect(page.getByText("Add a symbol, like ! or #.")).toBeVisible()
+    await expect(page.getByText("Add a lowercase letter.")).toBeHidden()
+    await expect(page.getByLabel("Password")).toBeFocused()
+    expect(sent).toBe(false)
+  })
+
+  test("says the rules up front, tied to the password field", async ({
+    page,
+  }) => {
+    await expect(page.getByLabel("Password")).toHaveAccessibleDescription(
+      /capital letter, a lowercase letter and a symbol/
+    )
+  })
+
+  test("links to sign in, and sign in links back", async ({ page }) => {
+    await page.getByRole("link", { name: "Sign in" }).click()
+    await expect(page).toHaveURL(/\/signin$/)
+
+    await page.getByRole("link", { name: "Create an account" }).click()
+    await expect(page).toHaveURL(/\/signup$/)
+  })
+
+  for (const theme of ["light", "dark"] as const) {
+    test(`passes axe with its errors showing (${theme})`, async ({ page }) => {
+      await page.evaluate((next) => {
+        window.localStorage.setItem("theme", next)
+      }, theme)
+      await page.reload({ waitUntil: "networkidle" })
+      await page.getByRole("button", { name: "Create account" }).click()
+      await expect(page.getByLabel("Name")).toBeFocused()
+
+      await expectNoViolations(page)
+    })
+  }
+})
+
+for (const [label, signUpRefusal, message] of [
+  [
+    "an email that already has an account",
+    { status: 422, code: "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" },
+    "That email already has an account. Sign in instead.",
+  ],
+  [
+    "a password found in a breach",
+    { status: 400, code: "PASSWORD_COMPROMISED" },
+    "That password appeared in a data breach. Choose another one.",
+  ],
+  [
+    "a code this app does not know",
+    { status: 500, code: "SOMETHING_NEW" },
+    "Something went wrong. Try again.",
+  ],
+] as const) {
+  test.describe(`sign up refused for ${label}`, () => {
+    test.use({ api: { signUpRefusal } })
+
+    test("shows that reason and stays on the form", async ({ page }) => {
+      await page.goto("/signup", { waitUntil: "networkidle" })
+      await fillSignUp(page, "Correct-horse-battery")
+      await page.getByRole("button", { name: "Create account" }).click()
+
+      await expect(page.getByRole("alert")).toHaveText(message)
+      await expect(page).toHaveURL(/\/signup$/)
+    })
+  })
+}
