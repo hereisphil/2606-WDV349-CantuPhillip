@@ -9,6 +9,8 @@ export const apiErrorCodeSchema = z.enum([
   "INVALID_REQUEST",
   /** No route matched, or the thing asked for does not exist. */
   "NOT_FOUND",
+  /** The request has no session, or its session has ended. Sign in again. */
+  "UNAUTHORIZED",
   /** The server failed. The details are in its log, never in the response. */
   "INTERNAL_ERROR",
 ])

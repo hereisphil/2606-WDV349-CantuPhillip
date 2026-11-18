@@ -1,12 +1,13 @@
 /// <reference types="node" />
 import { join } from "node:path"
 import type { CardProgress } from "@workspace/core/srs/progress"
+import { eq } from "drizzle-orm"
 import { getPlatformProxy, unstable_splitSqlQuery } from "wrangler"
 
 import { app } from "../app"
 import { database, runTogether, type Database } from "./client"
 import { progressUpserts } from "./progress"
-import { cards, courses, mnemonics, reviews, users } from "./schema"
+import { cards, courses, mnemonics, reviews, sessions, users } from "./schema"
 import { apiRoot, migrationStatements, seedSql } from "./test-database"
 
 /**
@@ -18,8 +19,15 @@ export type TestApi = {
   db: Database
   /** What `request` hands the app. Spread it to try another environment. */
   env: Env
-  /** Calls a route the way a client would, with the test database bound. */
-  request: (path: string, init?: RequestInit) => Promise<Response>
+  /**
+   * Calls a route as a client would. Signed in as `as` (the viewer by
+   * default) when that learner exists; `null` sends no session.
+   */
+  request: (
+    path: string,
+    init?: RequestInit,
+    as?: string | null
+  ) => Promise<Response>
   /** Empties every table. */
   reset: () => Promise<void>
   /** Runs `seed/prototype.sql`, split the way `bun run db:seed` splits it. */
@@ -63,10 +71,20 @@ export async function startTestApi(): Promise<TestApi> {
     BETTER_AUTH_URL: TEST_ORIGIN,
   }
 
+  const db = database(env.DB)
+
   return {
-    db: database(env.DB),
+    db,
     env: testEnv,
-    request: async (path, init) => app.request(path, init, testEnv),
+    request: async (path, init, as = VIEWER_ID) => {
+      const headers = new Headers(init?.headers)
+      const cookie = as === null ? null : await sessionCookie(db, as)
+      // A test that sends its own cookie keeps it.
+      if (cookie !== null && !headers.has("Cookie")) {
+        headers.set("Cookie", cookie)
+      }
+      return app.request(path, { ...init, headers }, testEnv)
+    },
     // Deleting a course or a user takes everything that hangs off it along.
     reset: async () => {
       await run([
@@ -88,6 +106,57 @@ export const TEST_ORIGIN = "http://localhost:5173"
 const TEST_AUTH_SECRET = "test-only-secret-never-used-outside-vitest"
 
 export const VIEWER_ID = "usr_prototype_01"
+
+// Better Auth's cookie on an http origin, as the browser sends it.
+const SESSION_COOKIE = "better-auth.session_token"
+
+/**
+ * Signs a session token the way Better Auth does (better-call's
+ * `signCookieValue`). `src/lib/viewer.test.ts` proves a real sign-in works too.
+ */
+async function signToken(token: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(TEST_AUTH_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  )
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(token)
+  )
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+  return encodeURIComponent(`${token}.${base64}`)
+}
+
+/**
+ * A session cookie for `userId`, with its row in `sessions`, or `null` when
+ * that learner doesn't exist. Lasts past any faked clock in these tests.
+ */
+async function sessionCookie(
+  db: Database,
+  userId: string
+): Promise<string | null> {
+  const [user] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, userId))
+  if (user === undefined) return null
+
+  const token = `test-session-${userId}`
+  await db
+    .insert(sessions)
+    .values({
+      id: token,
+      userId,
+      token,
+      expiresAt: new Date("2100-01-01T00:00:00.000Z"),
+    })
+    .onConflictDoNothing()
+  return `${SESSION_COOKIE}=${await signToken(token)}`
+}
 export const AUTHOR_ID = "usr_author"
 
 /** The viewer and one mnemonic author. */

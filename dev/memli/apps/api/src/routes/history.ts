@@ -9,10 +9,13 @@ import { database } from "../db/client"
 import { reviewsSince, studyQuarterHours } from "../db/reviews"
 import type { AppEnv } from "../env"
 import { validate } from "../lib/validate"
-import { viewerId } from "../lib/viewer"
+import { requireViewer, viewerId } from "../lib/viewer"
 
 /** Mounted at `/api/history`. */
 export const historyRoutes = new Hono<AppEnv>()
+
+// Every route here is one learner's data, so each needs a session.
+historyRoutes.use(requireViewer)
 
 // A local month and the 30-day retention window both fit in 32 days, with a
 // day to spare for the widest time-zone offsets.

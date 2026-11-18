@@ -7,6 +7,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status"
 const STATUS = {
   INVALID_REQUEST: 400,
   NOT_FOUND: 404,
+  UNAUTHORIZED: 401,
   INTERNAL_ERROR: 500,
 } as const satisfies Record<ApiErrorCode, ContentfulStatusCode>
 

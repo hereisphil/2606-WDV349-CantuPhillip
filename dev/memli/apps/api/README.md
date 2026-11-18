@@ -216,7 +216,11 @@ Locally `BETTER_AUTH_URL` is the web app's `http://localhost:5173`, not this Wor
 
 ### Who is asking
 
-The data routes do not read the session yet, so every request to them is the prototype learner, `usr_prototype_01`. Routes ask [`src/lib/viewer.ts`](./src/lib/viewer.ts) and never name a user id themselves; #108 changes that one function. Until then anyone who can reach this API is that learner, so it runs only on staging, with no public URL, behind the staging password (#165). Production waits for #108.
+Every route under `/api/courses`, `/api/reviews` and `/api/history` needs a session. `requireViewer` in [`src/lib/viewer.ts`](./src/lib/viewer.ts) asks Better Auth for the session behind the request's cookie. With none, or one that has ended, the route answers `401` with `UNAUTHORIZED` and never runs. Otherwise it remembers the learner's id, and the route reads it with `viewerId(c)`.
+
+Routes never take a user id from the body, the query string or a path. So one learner can never read or change another's progress, and a test proves it ([`src/lib/viewer.test.ts`](./src/lib/viewer.test.ts)). `GET /api/health` and `/api/auth/*` need no session.
+
+In tests, `api.request(path, init)` is signed in as the viewer (`usr_prototype_01`) once that learner exists. Pass a third argument to be someone else, or `null` for no session.
 
 ### Checking a request
 
@@ -250,6 +254,7 @@ The server never writes the sentence a learner reads. The web app maps the code 
 | --- | --- | --- |
 | `INVALID_REQUEST` | 400 | The body or query string is not what the route accepts |
 | `NOT_FOUND` | 404 | No route matched, or the thing asked for does not exist |
+| `UNAUTHORIZED` | 401 | No session, or one that has ended. The learner signs in again |
 | `INTERNAL_ERROR` | 500 | A route threw. The details go to the log, never the response |
 
 In a route, send an error with the helper from [`src/lib/errors.ts`](./src/lib/errors.ts):
@@ -428,11 +433,11 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/routes/history.ts` | `GET /api/history`. |
 | `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
 | `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
-| `src/lib/viewer.ts` | Who is asking. The prototype learner until #108. |
+| `src/lib/viewer.ts` | `requireViewer`, which needs a session, and `viewerId`, who is asking. |
 | `src/lib/auth.ts` | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`. |
 | `src/test-setup.ts` | Runs before every test. Stands in for the breached-password service. |
 | `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |
-| `src/env.ts` | What Cloudflare passes the Worker: the `DB` binding, `BETTER_AUTH_URL` and `BETTER_AUTH_SECRET`. |
+| `src/env.ts` | What Cloudflare passes the Worker (`DB`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`), and what middleware passes a route (`viewerId`). |
 | `src/db/client.ts` | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`. |
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
@@ -475,7 +480,6 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 ## Not yet
 
 - **Production.** Only staging runs this Worker (#165). [`staging.yml`](../../../../.github/workflows/staging.yml) migrates `memli-staging`, deploys `memli-api-staging`, then deploys the root gate Worker, which sends `/api/*` to it through its `API` binding after the password check. Production waits for sign-in (#108); until then its `/api/*` answers a JSON 503.
-- **Sign-in for the data routes.** `/api/auth/*` works, but `/api/courses`, `/api/reviews` and `/api/history` still answer as the prototype learner until `viewerId()` reads the session (#108). See "Who is asking".
 - **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
 - **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
 - **A daily goal per learner.** Everyone's is 50 words (`DAILY_GOAL_WORDS` in core).

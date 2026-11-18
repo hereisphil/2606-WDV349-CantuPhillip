@@ -35,7 +35,8 @@ Update this file when a rule changes. A rule listed here should have a test or a
 - **No public URL.** `memli-api-staging` has `workers_dev: false` and `preview_urls: false` (`apps/api/wrangler.jsonc`). It is only reachable through the gate Worker.
 - **Staging is gated.** The gate Worker (`dev/memli/src/index.ts`) checks basic auth with a timing-safe compare, and it fails closed if its secrets are missing.
 - **Nothing is cached.** Every API answer sends `Cache-Control: no-store`.
-- **Production has no API yet.** Its `/api/*` answers a JSON 503 until sign-in (#108) lands.
+- **Every data route needs a session** (`requireViewer`, #108). Only `/api/health` and `/api/auth/*` answer without one.
+- **Production has no API yet.** Its `/api/*` answers a JSON 503 until the release (#114).
 
 ### Community content
 
@@ -83,8 +84,8 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] Session cookies are `HttpOnly`, `Secure` and `SameSite=Lax`. These are Better Auth's defaults: don't loosen them, and never use `SameSite=None`.
 - [x] A test reads the `Set-Cookie` header after sign-up on the staging origin and checks all three attributes (`apps/api/src/lib/auth-guards.test.ts`).
 - [ ] Decide the session length. Better Auth's default is 7 days, renewed after a day of use. Sign out (#45) deletes the session on the server, not just the cookie.
-- [ ] `viewerId()` in `apps/api/src/lib/viewer.ts` reads the session. With no session, a route answers a new `UNAUTHORIZED` code (401), added to `apiErrorCodeSchema` and mapped to copy in the web app.
-- [ ] Every query stays filtered by the viewer's id. A test signs in as one learner and proves they can't read or write another learner's progress or reviews.
+- [x] `viewerId()` in `apps/api/src/lib/viewer.ts` reads the session, through `requireViewer` on every data route. With no session, or an ended one, a route answers the new `UNAUTHORIZED` code (401) from `apiErrorCodeSchema`. The web app maps it with the session swap in #108.
+- [x] Every query stays filtered by the viewer's id. `apps/api/src/lib/viewer.test.ts` signs in as two learners and proves one can't read the other's progress or history, and that a `userId` in a request body is ignored.
 
 ### CSRF and origin
 

@@ -12,10 +12,13 @@ import type { AppEnv } from "../env"
 import { errorResponse } from "../lib/errors"
 import { applyReviews } from "../lib/review-batch"
 import { validate } from "../lib/validate"
-import { viewerId } from "../lib/viewer"
+import { requireViewer, viewerId } from "../lib/viewer"
 
 /** Mounted at `/api/reviews`. */
 export const reviewRoutes = new Hono<AppEnv>()
+
+// Every route here is one learner's data, so each needs a session.
+reviewRoutes.use(requireViewer)
 
 // Records reviews the viewer finished and answers with each card's progress.
 reviewRoutes.post(
