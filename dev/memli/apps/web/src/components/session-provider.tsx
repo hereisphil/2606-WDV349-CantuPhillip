@@ -1,7 +1,19 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, type JSX, type ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { useLocation } from "@tanstack/react-router"
 import { sessionQuery, type Viewer } from "@/lib/queries"
+
+// Stands in on `?preview=` snapshots opened signed out. Development only.
+const previewViewer: Viewer | null = import.meta.env.DEV
+  ? {
+      id: "usr_preview",
+      displayName: "Phillip",
+      email: "preview@memli.test",
+      plan: "pro",
+      uiLocale: "en",
+    }
+  : null
 
 // `undefined` until the first answer; `null` when signed out.
 const SessionContext = createContext<Viewer | null | undefined>(undefined)
@@ -32,8 +44,10 @@ export function useOptionalViewer(): Viewer | null | undefined {
  */
 export function useViewer(): Viewer {
   const viewer = useContext(SessionContext)
-  if (viewer === null || viewer === undefined) {
-    throw new Error("useViewer is for pages behind requireViewer")
-  }
-  return viewer
+  const inPreview = useLocation({
+    select: (location) => "preview" in location.search,
+  })
+  if (viewer !== null && viewer !== undefined) return viewer
+  if (previewViewer !== null && inPreview) return previewViewer
+  throw new Error("useViewer is for pages behind requireViewer")
 }

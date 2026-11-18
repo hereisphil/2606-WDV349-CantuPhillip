@@ -77,6 +77,7 @@ Products that steal the homepage after login train users to fight their tools (â
 - `/dashboard` and `/study/$courseId` need a session. A signed-out visitor is sent to `/signin?redirect=â€¦` and returns to that page after signing in or up. A signed-in learner who opens `/signin` or `/signup` goes straight to `/dashboard`. The guards are `requireViewer` and `redirectViewer` in `apps/web/src/lib/session.ts`.
 - `/` and the other marketing pages never redirect. The header shows **Sign in** to a visitor and the account menu, with **Dashboard**, to a learner.
 - A session that ends mid-visit (any API answer of `UNAUTHORIZED`) is forgotten, and the guard sends the learner to `/signin` with a way back.
+- In development only, a real `?preview=` snapshot (and the **Previews** menu) opens signed out. It shows a stand-in learner, and a study preview studies a fixture course (`study-fixture.ts`), so no one's data is read. A production build has none of this, and `apps/web/e2e/previews.spec.ts` checks the development side.
 - The return path is only ever a path on this site. `//other.site` and `/\other.site` are dropped (`safeReturnPath`).
 
 ### After logout

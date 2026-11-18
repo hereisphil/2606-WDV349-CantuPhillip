@@ -4,7 +4,15 @@ import { requireViewer } from "@/lib/session"
 import { AppSidebar } from "./_app/-components/AppSidebar"
 
 export const Route = createFileRoute("/_app")({
-  beforeLoad: requireViewer,
+  // The preview list loads only in development; production has no previews.
+  beforeLoad: requireViewer(
+    import.meta.env.DEV
+      ? async (preview) =>
+          (await import("./_app/-components/dashboard-previews")).isPreviewName(
+            preview
+          )
+      : undefined
+  ),
   component: AppLayout,
 })
 

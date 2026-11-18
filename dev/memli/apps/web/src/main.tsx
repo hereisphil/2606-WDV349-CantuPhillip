@@ -13,6 +13,8 @@ import { routeTree } from "@/routeTree.gen"
 // mid-visit is forgotten, and the route guards send the learner to /signin.
 const queryClient = createQueryClient({
   onUnauthorized: () => {
+    // Already signed out: nothing to forget, and no reason to load again.
+    if (queryClient.getQueryData(sessionQuery.queryKey) === null) return
     queryClient.setQueryData(sessionQuery.queryKey, null)
     void router.invalidate()
   },

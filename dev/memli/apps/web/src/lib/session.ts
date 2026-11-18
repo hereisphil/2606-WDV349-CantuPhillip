@@ -23,18 +23,30 @@ type GuardArgs = {
   location: ParsedLocation
 }
 
-/** `beforeLoad` for pages that need a learner: signed out goes to /signin. */
-export async function requireViewer({
-  context,
-  location,
-}: GuardArgs): Promise<void> {
-  const viewer = await context.queryClient.ensureQueryData(sessionQuery)
-  if (viewer === null) {
-    throw redirect({
-      to: "/signin",
-      search: { redirect: location.href },
-      replace: true,
-    })
+/** Says whether a `?preview=` value names one of a page's snapshots. */
+type IsPreview = (value: unknown) => Promise<boolean>
+
+/**
+ * `beforeLoad` for pages that need a learner: signed out goes to /signin.
+ * In development only, a real `?preview=` snapshot opens without one.
+ */
+export function requireViewer(
+  isPreview?: IsPreview
+): (args: GuardArgs) => Promise<void> {
+  return async ({ context, location }) => {
+    const preview = (location.search as Record<string, unknown>).preview
+    if (import.meta.env.DEV && isPreview !== undefined) {
+      if (await isPreview(preview)) return
+    }
+
+    const viewer = await context.queryClient.ensureQueryData(sessionQuery)
+    if (viewer === null) {
+      throw redirect({
+        to: "/signin",
+        search: { redirect: location.href },
+        replace: true,
+      })
+    }
   }
 }
 
