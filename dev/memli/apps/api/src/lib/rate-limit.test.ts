@@ -195,5 +195,6 @@ describe("POST /api/reviews", () => {
 
     vi.setSystemTime(now.getTime() + 60_000)
     expect((await postReview(VIEWER_ID)).status).toBe(200)
-  })
+    // Over 60 real requests: slow when every package's tests run at once.
+  }, 30_000)
 })
