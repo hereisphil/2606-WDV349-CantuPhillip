@@ -71,8 +71,8 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 | `GET /api/health` | `200 {"status":"ok"}` | `@workspace/schemas/api/health` |
 | `GET /api/courses` | Every course, with the viewer's progress in each | `@workspace/schemas/api/courses` |
 | `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
-| `GET /api/catalog` | Every published course, and whether the viewer added it | `@workspace/schemas/api/catalog` |
-| `GET /api/catalog/:courseId` | One published course's overview, with a few sample words | `@workspace/schemas/api/catalog` |
+| `GET /api/catalog` | Every published course, and whether the viewer added it. Public | `@workspace/schemas/api/catalog` |
+| `GET /api/catalog/:courseId` | One published course's overview, with a few sample words. Public | `@workspace/schemas/api/catalog` |
 | `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
 | `GET /api/history` | The viewer's week, days of study, retention and new words this month | `@workspace/schemas/api/history` |
 | `GET`, `POST /api/auth/*` | Sign-up, sign-in, the session and sign out, by Better Auth | `@workspace/schemas/auth/sign-up`, `auth/sign-in` |
@@ -121,7 +121,9 @@ The cards for one session, in the order to study them. `?mode=` picks the kind:
 
 ### `GET /api/catalog`
 
-The published courses a learner can browse and add (#174), by title. Drafts (`published_at` is `NULL`) never appear.
+The published courses anyone can browse (#174), by title. Drafts (`published_at` is `NULL`) never appear.
+
+**Public.** This route and the overview below answer with no session, so a visitor can browse before signing up. They are the only routes that read the database for someone who is not signed in.
 
 ```json
 {
@@ -139,7 +141,9 @@ The published courses a learner can browse and add (#174), by title. Drafts (`pu
 }
 ```
 
-`added` says whether the course is on the viewer's dashboard, from `enrollments`.
+`added` says whether the course is on the viewer's dashboard, from `enrollments`. A visitor has no dashboard, so it is `false` for every course.
+
+Anyone can call these two routes, so they are limited per address: 300 requests a minute (`CATALOG_LIMIT` in `src/routes/catalog.ts`), refused with `429 RATE_LIMITED` and `Retry-After`.
 
 ### `GET /api/catalog/:courseId`
 
@@ -258,7 +262,7 @@ The web app will call these through Better Auth's client, not by hand.
 - **`uiLocale` starts as `en`** and a sign-up body cannot set it. Neither can it set `emailVerified`.
 - **A wrong password and an unknown email answer the same**: `401` with `INVALID_EMAIL_OR_PASSWORD`.
 - **Tries are limited per address**, counted in the `rate_limits` table so every Worker instance sees the same count. Sign-in allows 3 tries in 10 seconds, and sign-up 5 new accounts a minute. A refusal is `429` with `X-Retry-After` in seconds. The address is Cloudflare's `cf-connecting-ip` header, never `X-Forwarded-For`, which any client can set. Locally there is no such header, so every request shares one count.
-- **Saving reviews is limited too.** `POST /api/reviews` allows 60 requests a minute per learner and 1,200 per address (`REVIEW_LIMITS` in `src/routes/reviews.ts`), counted in the same `rate_limits` table with keys that start `memli|`. A refusal is `429` with `RATE_LIMITED` and `Retry-After`. `limitRequests` in [`src/lib/rate-limit.ts`](./src/lib/rate-limit.ts) can limit any other route the same way, after `requireViewer`.
+- **Saving reviews is limited too.** `POST /api/reviews` allows 60 requests a minute per learner and 1,200 per address (`REVIEW_LIMITS` in `src/routes/reviews.ts`), counted in the same `rate_limits` table with keys that start `memli|`. A refusal is `429` with `RATE_LIMITED` and `Retry-After`. `limitRequests` in [`src/lib/rate-limit.ts`](./src/lib/rate-limit.ts) can limit any other route the same way, after `requireViewer`. A public route has no learner to count, so it uses `limitAddress` from the same file, as the catalog does.
 - **Writes must come from the app's own origin.** A `POST` carrying a cookie, or sent by a page on another site, answers `403` unless its `Origin` is `BETTER_AUTH_URL`. Better Auth turns this check off by itself under a test runner, so `auth.ts` sets it on by name and the tests run against the real thing.
 - **Errors here are Better Auth's shape**, `{ "code": "…", "message": "…" }`, not the `{ "error": { "code" } }` of Memli's own routes. The web app maps the `code` to copy and never shows the English `message`.
 
@@ -276,6 +280,8 @@ Locally `BETTER_AUTH_URL` is the web app's `http://localhost:5173`, not this Wor
 Every route under `/api/courses`, `/api/reviews` and `/api/history` needs a session. `requireViewer` in [`src/lib/viewer.ts`](./src/lib/viewer.ts) asks Better Auth for the session behind the request's cookie. With none, or one that has ended, the route answers `401` with `UNAUTHORIZED` and never runs. Otherwise it remembers the learner's id, and the route reads it with `viewerId(c)`.
 
 Routes never take a user id from the body, the query string or a path. So one learner can never read or change another's progress, and a test proves it ([`src/lib/viewer.test.ts`](./src/lib/viewer.test.ts)). `GET /api/health` and `/api/auth/*` need no session.
+
+The catalog (`/api/catalog`) is public. It uses `optionalViewer` instead: with a session it remembers the learner, and without one it lets the visitor through. The route reads `optionalViewerId(c)`, which is `null` for a visitor, and only uses it to mark the learner's own courses as added.
 
 In tests, `api.request(path, init)` is signed in as the viewer (`usr_prototype_01`) once that learner exists. Pass a third argument to be someone else, or `null` for no session.
 

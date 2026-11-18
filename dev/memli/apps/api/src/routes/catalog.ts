@@ -18,14 +18,24 @@ import {
 import { addedCourseIds, hasAdded } from "../db/enrollments"
 import type { AppEnv } from "../env"
 import { errorResponse } from "../lib/errors"
+import { limitAddress } from "../lib/rate-limit"
 import { validate } from "../lib/validate"
-import { requireViewer, viewerId } from "../lib/viewer"
+import { optionalViewer, optionalViewerId } from "../lib/viewer"
 
-/** Mounted at `/api/catalog`: the published courses a learner can add (#174). */
+/**
+ * Mounted at `/api/catalog`: the published courses anyone can browse (#174).
+ * Public: a visitor gets the same answer as a learner, with nothing added.
+ */
 export const catalogRoutes = new Hono<AppEnv>()
 
-// "Added" is per learner, so the catalog needs a session too.
-catalogRoutes.use(requireViewer)
+/**
+ * A page load is one request, so this leaves room for a classroom behind one
+ * network. Anyone can call these routes, so the limit is per address alone.
+ */
+export const CATALOG_LIMIT = { windowSeconds: 60, max: 300 }
+
+catalogRoutes.use(limitAddress("catalog", CATALOG_LIMIT))
+catalogRoutes.use(optionalViewer)
 
 /** What the catalog shows of a course, whichever route sends it. */
 function listed(
@@ -49,10 +59,12 @@ function listed(
 // Every published course, by title, and whether the viewer has added it.
 catalogRoutes.get("/", async (c) => {
   const db = database(c.env.DB)
+  const learner = optionalViewerId(c)
   const [courses, wordCounts, added] = await Promise.all([
     listPublishedCourses(db),
     cardCountByCourse(db),
-    addedCourseIds(db, viewerId(c)),
+    // A visitor has no dashboard, so nothing is added.
+    learner === null ? new Set<string>() : addedCourseIds(db, learner),
   ])
 
   const body: CatalogResponse = {
@@ -78,10 +90,11 @@ catalogRoutes.get(
     const course = await findPublishedCourse(db, courseId)
     if (course === null) return errorResponse(c, "NOT_FOUND")
 
+    const learner = optionalViewerId(c)
     const [wordCount, sampleWords, added] = await Promise.all([
       cardCount(db, courseId),
       firstWords(db, courseId, SAMPLE_WORD_COUNT),
-      hasAdded(db, viewerId(c), courseId),
+      learner === null ? false : hasAdded(db, learner, courseId),
     ])
 
     const body: CatalogCourseDetail = {

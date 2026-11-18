@@ -23,7 +23,7 @@ import {
 } from "../db/test-d1"
 import type { AppEnv } from "../env"
 import { REVIEW_LIMITS } from "../routes/reviews"
-import { consume, limitRequests } from "./rate-limit"
+import { consume, limitAddress, limitRequests } from "./rate-limit"
 
 const now = new Date("2026-11-17T12:00:00.000Z")
 const threePerTen = { windowSeconds: 10, max: 3 }
@@ -152,6 +152,44 @@ describe("limitRequests", () => {
     expect(apiErrorSchema.parse(await res.json())).toEqual({
       error: { code: "RATE_LIMITED" },
     })
+  })
+})
+
+describe("limitAddress", () => {
+  // A stand-in for a public route: no session, so no learner to count.
+  const app = new Hono<AppEnv>()
+    .use(limitAddress("public-test", threePerTen))
+    .get("/", (c) => c.text("ok"))
+
+  function ask(address: string): Promise<Response> {
+    return Promise.resolve(
+      app.request("/", { headers: { "cf-connecting-ip": address } }, api.env)
+    )
+  }
+
+  it("limits one address with no session, and leaves the next one alone", async () => {
+    const result: number[] = []
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      result.push((await ask("203.0.113.7")).status)
+    }
+
+    expect(result).toEqual([200, 200, 200, 429])
+    expect((await ask("203.0.113.8")).status).toBe(200)
+  })
+
+  it("answers RATE_LIMITED with Retry-After, and lets the address back in later", async () => {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await ask("203.0.113.7")
+    }
+
+    const res = await ask("203.0.113.7")
+    expect(res.headers.get("Retry-After")).toBe("10")
+    expect(apiErrorSchema.parse(await res.json())).toEqual({
+      error: { code: "RATE_LIMITED" },
+    })
+
+    vi.setSystemTime(now.getTime() + 10_000)
+    expect((await ask("203.0.113.7")).status).toBe(200)
   })
 })
 

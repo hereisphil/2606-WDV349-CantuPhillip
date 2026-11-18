@@ -7,6 +7,7 @@ import {
 import { apiErrorSchema } from "@workspace/schemas/api/error"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 
+import { rateLimits } from "../db/schema"
 import {
   AUTHOR_ID,
   addCourse,
@@ -17,6 +18,7 @@ import {
   startTestApi,
   type TestApi,
 } from "../db/test-d1"
+import { CATALOG_LIMIT } from "./catalog"
 
 let api: TestApi
 
@@ -33,14 +35,23 @@ beforeEach(async () => {
   await addUsers(api.db)
 })
 
-async function getCatalog(): Promise<CatalogResponse["courses"]> {
-  const res = await api.request("/api/catalog")
+/** A request with no session: someone who has not signed in. */
+const VISITOR = null
+
+/** As the viewer by default. Pass `VISITOR` to ask without a session. */
+async function getCatalog(
+  as?: typeof VISITOR
+): Promise<CatalogResponse["courses"]> {
+  const res = await api.request("/api/catalog", {}, as)
   expect(res.status).toBe(200)
   return catalogResponseSchema.parse(await res.json()).courses
 }
 
-async function getOverview(courseId: string): Promise<CatalogCourseDetail> {
-  const res = await api.request(`/api/catalog/${courseId}`)
+async function getOverview(
+  courseId: string,
+  as?: typeof VISITOR
+): Promise<CatalogCourseDetail> {
+  const res = await api.request(`/api/catalog/${courseId}`, {}, as)
   expect(res.status).toBe(200)
   return catalogCourseDetailSchema.parse(await res.json())
 }
@@ -107,6 +118,33 @@ describe("GET /api/catalog", () => {
       { courseId: "french", added: false },
       { courseId: "spanish", added: true },
     ])
+  })
+
+  it("shows a visitor the same courses, with none added", async () => {
+    await addCourse(api.db, "spanish", 2)
+    await addCourse(api.db, "draft", 1)
+    await publishCourse(api.db, "spanish")
+    await addEnrollment(api.db, "spanish")
+
+    expect(await getCatalog(VISITOR)).toEqual([
+      { ...(await getCatalog())[0], added: false },
+    ])
+  })
+
+  it("refuses an address past the minute's limit", async () => {
+    // Stands in for 300 requests: the count the limiter would have reached.
+    const key = "memli|catalog|address:local"
+    await api.db.insert(rateLimits).values({
+      id: key,
+      key,
+      count: CATALOG_LIMIT.max,
+      lastRequest: Date.now(),
+    })
+
+    const res = await api.request("/api/catalog", {}, VISITOR)
+
+    expect(res.headers.get("Retry-After")).not.toBeNull()
+    await expectError(res, 429, "RATE_LIMITED")
   })
 
   it("counts a published course with no words as zero", async () => {
@@ -183,6 +221,27 @@ describe("GET /api/catalog/:courseId", () => {
     })
   })
 
+  it("shows a visitor the same overview, not added", async () => {
+    await addCourse(api.db, "spanish", 3)
+    await publishCourse(api.db, "spanish")
+    await addEnrollment(api.db, "spanish")
+
+    expect(await getOverview("spanish", VISITOR)).toEqual({
+      ...(await getOverview("spanish")),
+      added: false,
+    })
+  })
+
+  it("hides a draft from a visitor too", async () => {
+    await addCourse(api.db, "draft", 1)
+
+    await expectError(
+      await api.request("/api/catalog/draft", {}, VISITOR),
+      404,
+      "NOT_FOUND"
+    )
+  })
+
   it("answers NOT_FOUND for a draft, as for a course that does not exist", async () => {
     await addCourse(api.db, "draft", 1)
 
@@ -216,6 +275,13 @@ describe("with the seeded database", () => {
       ["Portuguese Essentials", 3, true],
       ["Spanish Core 1000", 5, true],
     ])
+  })
+
+  it("lists them for a visitor, with none added", async () => {
+    const courses = await getCatalog(VISITOR)
+
+    expect(courses).toHaveLength(4)
+    expect(courses.every((course) => !course.added)).toBe(true)
   })
 
   it("sends every starter course's overview in a shape the contract accepts", async () => {

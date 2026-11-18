@@ -70,14 +70,17 @@ async function expectUnauthorized(res: Response): Promise<void> {
 }
 
 describe("without a session", () => {
-  it.each([
-    "/api/courses",
-    "/api/courses/spanish/study",
-    "/api/history",
-    "/api/catalog",
-    "/api/catalog/spanish",
-  ])("GET %s answers UNAUTHORIZED", async (path) => {
-    await expectUnauthorized(await api.request(path, {}, null))
+  it.each(["/api/courses", "/api/courses/spanish/study", "/api/history"])(
+    "GET %s answers UNAUTHORIZED",
+    async (path) => {
+      await expectUnauthorized(await api.request(path, {}, null))
+    }
+  )
+
+  it("GET /api/catalog still answers: anyone can browse the courses", async () => {
+    const res = await api.request("/api/catalog", {}, null)
+
+    expect(res.status).toBe(200)
   })
 
   it("POST /api/reviews answers UNAUTHORIZED and saves nothing", async () => {

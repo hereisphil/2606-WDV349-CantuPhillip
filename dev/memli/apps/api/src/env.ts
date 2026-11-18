@@ -5,7 +5,7 @@
 export type AppEnv = {
   Bindings: Env
   Variables: {
-    /** The signed-in learner, set by `requireViewer` (src/lib/viewer.ts). */
+    /** The signed-in learner, set by `requireViewer` or `optionalViewer`. */
     viewerId: string
   }
 }
