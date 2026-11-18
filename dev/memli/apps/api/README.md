@@ -71,6 +71,8 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 | `GET /api/health` | `200 {"status":"ok"}` | `@workspace/schemas/api/health` |
 | `GET /api/courses` | Every course, with the viewer's progress in each | `@workspace/schemas/api/courses` |
 | `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
+| `GET /api/catalog` | Every published course, and whether the viewer added it | `@workspace/schemas/api/catalog` |
+| `GET /api/catalog/:courseId` | One published course's overview, with a few sample words | `@workspace/schemas/api/catalog` |
 | `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
 | `GET /api/history` | The viewer's week, days of study, retention and new words this month | `@workspace/schemas/api/history` |
 | `GET`, `POST /api/auth/*` | Sign-up, sign-in, the session and sign out, by Better Auth | `@workspace/schemas/auth/sign-up`, `auth/sign-in` |
@@ -116,6 +118,60 @@ The cards for one session, in the order to study them. `?mode=` picks the kind:
 | `practice` | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
 
 `?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode`, `extra` or `timeZone` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
+
+### `GET /api/catalog`
+
+The published courses a learner can browse and add (#174), by title. Drafts (`published_at` is `NULL`) never appear.
+
+```json
+{
+  "courses": [
+    {
+      "courseId": "spanish-core-1000",
+      "title": "Spanish Core 1000",
+      "learningLanguage": "es",
+      "answerLanguage": "en",
+      "description": "Everyday Spanish words you will hear first, each with a story to help it stick.",
+      "wordCount": 5,
+      "added": true
+    }
+  ]
+}
+```
+
+`added` says whether the course is on the viewer's dashboard, from `enrollments`.
+
+### `GET /api/catalog/:courseId`
+
+The course overview: everything in the list, plus where the words came from and the first five words in course order (`SAMPLE_WORD_COUNT`).
+
+```json
+{
+  "courseId": "spanish-core-1000",
+  "title": "Spanish Core 1000",
+  "learningLanguage": "es",
+  "answerLanguage": "en",
+  "description": "Everyday Spanish words you will hear first, each with a story to help it stick.",
+  "wordCount": 5,
+  "added": true,
+  "publishedAt": "2026-11-17T12:26:40.000Z",
+  "source": "Written for Memli",
+  "license": "All rights reserved",
+  "attribution": null,
+  "sampleWords": [
+    {
+      "cardId": "es-gato",
+      "term": "gato",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["cat"],
+      "phonetic": "/ˈɡato/"
+    }
+  ]
+}
+```
+
+A sample word is the word and its meanings, without the example sentence or the stories: those are for studying. `attribution` is `null` when the license asks for no credit. A draft answers `NOT_FOUND`, the same as a course that does not exist.
 
 ### Time zones and "today"
 
@@ -453,6 +509,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | File | Purpose |
 | --- | --- |
 | `src/app.ts` | The Hono app. It mounts the routes. Tests import this. |
+| `src/routes/catalog.ts` | `GET /api/catalog` and `GET /api/catalog/:courseId`. |
 | `src/routes/courses.ts` | `GET /api/courses` and `GET /api/courses/:courseId/study`. |
 | `src/routes/reviews.ts` | `POST /api/reviews`. |
 | `src/routes/history.ts` | `GET /api/history`. |
@@ -469,6 +526,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
 | `src/db/progress.ts` | Reads and saves `user_progress` as core's `CardProgress`. |
+| `src/db/enrollments.ts` | Reads which courses a learner added to their dashboard. |
 | `src/db/reviews.ts` | Writes the review log with progress; reads it back for history and the daily limit. |
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
 | `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
@@ -510,4 +568,4 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 - **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
 - **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
 - **A daily goal per learner.** Everyone's is 50 words (`DAILY_GOAL_WORDS` in core).
-- **Enrollment.** `GET /api/courses` lists every course. There is no "my courses" yet.
+- **Adding and removing courses.** `enrollments` records each learner's courses and the catalog reads it, but there is no `PUT` or `DELETE` for it yet, and `GET /api/courses` still lists every course (#174).

@@ -1,7 +1,8 @@
+import type { SampleWord } from "@workspace/schemas/api/catalog"
 import type { Card } from "@workspace/schemas/content/card"
 import type { Course } from "@workspace/schemas/content/course"
 import type { Mnemonic } from "@workspace/schemas/content/mnemonic"
-import { asc, count, desc, eq, inArray } from "drizzle-orm"
+import { and, asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm"
 
 import { idGroups, type Database } from "./client"
 import { cards, courses, mnemonics, users } from "./schema"
@@ -42,6 +43,64 @@ export async function listCourses(db: Database): Promise<Course[]> {
   return rows.map(courseFromRow)
 }
 
+/** A course the catalog lists, with the details a published course must have. */
+export type PublishedCourse = Course & {
+  description: string
+  publishedAt: Date
+  source: string
+  license: string
+  attribution: string | null
+}
+
+/**
+ * `null` for a draft. The triggers in 0008_published_courses.sql keep a
+ * published row complete; the checks here only narrow the types.
+ */
+function publishedFromRow(row: CourseRow): PublishedCourse | null {
+  const { description, publishedAt, source, license } = row
+  if (
+    publishedAt === null ||
+    description === null ||
+    source === null ||
+    license === null
+  ) {
+    return null
+  }
+  return {
+    ...courseFromRow(row),
+    description,
+    publishedAt,
+    source,
+    license,
+    attribution: row.attribution,
+  }
+}
+
+/** Every published course, by title. Drafts are left out. */
+export async function listPublishedCourses(
+  db: Database
+): Promise<PublishedCourse[]> {
+  const rows = await db
+    .select()
+    .from(courses)
+    .where(isNotNull(courses.publishedAt))
+    .orderBy(asc(courses.title), asc(courses.id))
+  return rows.flatMap((row) => publishedFromRow(row) ?? [])
+}
+
+/** A published course, or `null` for a draft or a course that does not exist. */
+export async function findPublishedCourse(
+  db: Database,
+  courseId: string
+): Promise<PublishedCourse | null> {
+  const [row] = await db
+    .select()
+    .from(courses)
+    .where(and(eq(courses.id, courseId), isNotNull(courses.publishedAt)))
+    .limit(1)
+  return row === undefined ? null : publishedFromRow(row)
+}
+
 export async function findCourse(
   db: Database,
   courseId: string
@@ -63,6 +122,43 @@ export async function cardCountByCourse(
     .from(cards)
     .groupBy(cards.courseId)
   return new Map(rows.map((row) => [row.courseId, row.total]))
+}
+
+export async function cardCount(
+  db: Database,
+  courseId: string
+): Promise<number> {
+  const [row] = await db
+    .select({ total: count() })
+    .from(cards)
+    .where(eq(cards.courseId, courseId))
+  return row?.total ?? 0
+}
+
+/** A course's first `limit` words, in course order, without their stories. */
+export async function firstWords(
+  db: Database,
+  courseId: string,
+  limit: number
+): Promise<SampleWord[]> {
+  const rows = await db
+    .select()
+    .from(cards)
+    .where(eq(cards.courseId, courseId))
+    .orderBy(asc(cards.position))
+    .limit(limit)
+  return rows.map((row) => {
+    const { cardId, term, partOfSpeech, gender, answers, phonetic } =
+      cardFromRow(row, [])
+    return {
+      cardId,
+      term,
+      partOfSpeech,
+      ...(gender !== undefined && { gender }),
+      answers,
+      phonetic,
+    }
+  })
 }
 
 /** A course's card ids in the order new words are introduced. */
