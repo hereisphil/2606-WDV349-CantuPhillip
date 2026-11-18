@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { cn } from "@workspace/ui/lib/utils"
+import { useOptionalViewer } from "@/components/session-provider"
 import { prototypeDashboardMetrics } from "@/routes/_app/-components/dashboard-metrics"
 
 // Development-only shortcut to the `?preview=` snapshots. `__root.tsx` lazy-loads it
@@ -23,8 +24,15 @@ export default function DevPreviewsMenu(): JSX.Element {
   const inPreview = useLocation({
     select: (location) => "preview" in location.search,
   })
+  const signedIn = Boolean(useOptionalViewer())
+  // The catalog wears the app's frame only for a signed-in learner.
   const hasAppSidebar = useRouterState({
-    select: (state) => state.matches.some((match) => match.routeId === "/_app"),
+    select: (state) =>
+      state.matches.some(
+        (match) =>
+          match.routeId === "/_app" ||
+          (match.routeId === "/_catalog" && signedIn)
+      ),
   })
 
   // Bottom-left: clear of the app bar and session header, opposite the Router Devtools (bottom-right).
@@ -56,6 +64,11 @@ export default function DevPreviewsMenu(): JSX.Element {
               render={<Link to="/dashboard" search={{ preview: "default" }} />}
             >
               Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              render={<Link to="/courses" search={{ preview: "default" }} />}
+            >
+              Courses
             </DropdownMenuItem>
             <DropdownMenuItem
               render={

@@ -146,7 +146,9 @@ function CatalogView({
       {import.meta.env.DEV && search.preview !== undefined ? (
         <CatalogPreviewSwitcher current={search.preview} />
       ) : null}
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      {/* Stacked, never side by side: the menu's label changes width with the
+          choice, so sharing a line with the heading made it jump. */}
+      <div className="flex flex-col items-start gap-4">
         <div className="flex flex-col gap-2">
           <Heading level={1} size="2">
             {messages.heading}
