@@ -113,6 +113,15 @@ describe("the seeded courses", () => {
     }
   })
 
+  it("are all in the catalog, each saying what it teaches and where from", () => {
+    const unlisted = all(`
+      SELECT id FROM courses
+      WHERE published_at IS NULL OR description IS NULL
+        OR source IS NULL OR license IS NULL`)
+
+    expect(unlisted).toEqual([])
+  })
+
   it("hold only valid cards and mnemonics, and are never empty", () => {
     for (const course of seededCourses()) {
       const courseCards = {

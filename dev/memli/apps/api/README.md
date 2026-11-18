@@ -305,7 +305,7 @@ src/db/schema.ts ──(bun run db:generate)──► drizzle/migrations/*.sql �
 | `accounts` | way a learner signs in | Better Auth's `account`. For email sign-in, `provider_id` is `credential` and `password` is a scrypt hash |
 | `verifications` | short-lived token | Better Auth's `verification`, for things like a password reset |
 | `rate_limits` | client address and path | Better Auth's `rateLimit`: how many tries, and when the last one was (#169). Memli's own limits share it, with keys that start `memli\|` |
-| `courses` | course | `learning_language` and `answer_language`, never one `language` |
+| `courses` | course | `learning_language` and `answer_language`, never one `language`. Catalog details below |
 | `enrollments` | learner and course they added | What their dashboard lists, and `added_at` (#174). Removing a course deletes this row only, so progress stays |
 | `cards` | word in a course | `position` orders new words; `answers` is a JSON array |
 | `mnemonics` | memory hook on a card | `story` is JSON parts, never markup; `content_locale`; `author_id` goes `null` if the author leaves |
@@ -315,6 +315,18 @@ src/db/schema.ts ──(bun run db:generate)──► drizzle/migrations/*.sql �
 Deleting a course removes its cards, their mnemonics, its enrollments, and everyone's progress and reviews on them. Deleting a learner removes their sessions, accounts, enrollments, progress and reviews, and keeps their mnemonics without an author.
 
 Migration `0006` enrolled every learner who already had progress in a course in that course, so no one's courses disappeared when enrollments arrived.
+
+### Course catalog details (#174)
+
+| Column | Holds |
+| --- | --- |
+| `description` | A sentence or two for the catalog, in the course's `answer_language` |
+| `published_at` | When the catalog started listing it. `NULL` is a draft, which the catalog hides |
+| `source` | Where the words came from: who wrote them, or the dataset's URL |
+| `license` | The license the content is under, as learners see it: `CC BY-SA 4.0`, `All rights reserved` |
+| `attribution` | The credit line the license asks for, when it asks for one. Optional |
+
+All five are nullable, so `0007` added them in place with no table rebuild. A published course must have a description, a source and a license, none blank. Triggers in [`0008_published_courses.sql`](./drizzle/migrations/0008_published_courses.sql) refuse a published course without them, on insert and on update, the same way the language triggers work. A draft may leave them empty.
 
 ### FSRS progress
 
@@ -388,7 +400,7 @@ When a Better Auth plugin needs a new table or column (passkeys in #107, say), a
 | Table | Seeded rows |
 | --- | --- |
 | `users` | `usr_prototype_01`, the learner `useViewer()` has stood in for since MS 1, plus five mnemonic authors (`usr_seed_*`) |
-| `courses` | Spanish Core 1000, Japanese Hiragana & Katakana, French Travel Phrases, Portuguese Essentials |
+| `courses` | Spanish Core 1000, Japanese Hiragana & Katakana, French Travel Phrases, Portuguese Essentials. All published, with `Written for Memli` as the source |
 | `cards` | 16 words: 5 Spanish, 4 Japanese, 4 French, 3 Portuguese |
 | `mnemonics` | 6 stories on three Spanish cards, two with a picture |
 | `enrollments` | `usr_prototype_01` in all four courses |
@@ -417,7 +429,7 @@ Never edit a migration that is already committed; write a new one. CI regenerate
 
 If a generated migration has `__new_` in it and the table has children, do not commit it. Reach the same rule another way: a trigger (as in `0002`), a new column, or a new table. For hand-written SQL, `bunx drizzle-kit generate --custom --name <name>` makes an empty migration that CI's regenerate check accepts.
 
-[`src/db/migrations-d1.test.ts`](./src/db/migrations-d1.test.ts) guards this. It applies the first migration to a real D1, seeds the tables that exist then, then applies each later one and fails if any table lost rows. A migration may add rows, as `0006` does.
+[`src/db/migrations-d1.test.ts`](./src/db/migrations-d1.test.ts) guards this. It applies the first migration to a real D1, adds rows written for that first schema (not the seed, which follows the latest one), then applies each later migration and fails if any table lost rows. A migration may add rows, as `0006` does.
 
 ### Tests
 

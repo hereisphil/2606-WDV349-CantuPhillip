@@ -1,8 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { unstable_splitSqlQuery } from "wrangler"
 
 import { startD1 } from "./test-d1"
-import { migrations, seedSql } from "./test-database"
+import { migrations } from "./test-database"
 
 /**
  * Every migration keeps existing rows on a real D1, where a table rebuild
@@ -41,19 +40,33 @@ async function tableExists(table: string): Promise<boolean> {
 }
 
 /**
- * The seed's inserts into tables that exist already. The seed is written for
- * the latest schema, and a table added later has no rows to lose anyway.
+ * Rows in 0000's shape, not the seed's (README, "Changing the schema"). The
+ * French course has no progress, so 0006 must not enroll anyone in it.
  */
-async function seedExistingTables(): Promise<void> {
-  const statements: string[] = []
-  for (const statement of unstable_splitSqlQuery(seedSql())) {
-    const table = /INSERT INTO (\w+)/i.exec(statement)?.[1]
-    if (table === undefined || (await tableExists(table))) {
-      statements.push(statement)
-    }
-  }
-  await d1.run(statements)
-}
+const firstMigrationRows = [
+  `INSERT INTO users (id, name, email) VALUES
+     ('usr_prototype_01', 'Phillip', 'learner@prototype.memli.test'),
+     ('usr_seed_lucia_m', 'lucia_m', 'lucia_m@seed.memli.test')`,
+  `INSERT INTO courses (id, title, learning_language, answer_language) VALUES
+     ('spanish-core-1000', 'Spanish Core 1000', 'es', 'en'),
+     ('french-travel-phrases', 'French Travel Phrases', 'fr', 'en')`,
+  `INSERT INTO cards (id, course_id, position, term, part_of_speech, gender,
+     answers, phonetic, example_text, example_translation) VALUES
+     ('es-gato', 'spanish-core-1000', 1, 'gato', 'noun', 'masculine',
+       '["cat"]', '/ˈɡato/', 'El gato duerme.', 'The cat sleeps.'),
+     ('es-casa', 'spanish-core-1000', 2, 'casa', 'noun', 'feminine',
+       '["house"]', '/ˈkasa/', 'Mi casa.', 'My house.'),
+     ('fr-gare', 'french-travel-phrases', 1, 'gare', 'noun', 'feminine',
+       '["station"]', '/ɡaʁ/', 'La gare est loin.', 'The station is far.')`,
+  `INSERT INTO mnemonics (id, card_id, author_id, content_locale, story)
+     VALUES ('mn-1', 'es-gato', 'usr_seed_lucia_m', 'en',
+       '[{"kind":"plain","text":"A cat at a "},{"kind":"keyword","text":"gala"}]')`,
+  `INSERT INTO user_progress (user_id, card_id, state, due, last_review,
+     stability, stability_fast, difficulty, reps, lapses, learning_step,
+     scheduled_days)
+   VALUES ('usr_prototype_01', 'es-gato', 'review', 1794700000000,
+     1794600000000, 3.2, 0.4, 5.1, 2, 0, 0, 1.15)`,
+]
 
 async function counts(): Promise<Record<string, number>> {
   const result: Record<string, number> = {}
@@ -70,19 +83,18 @@ async function counts(): Promise<Record<string, number>> {
 }
 
 describe("migrations on a database that has data", () => {
-  it("start from the first migration and the seed", async () => {
+  it("start from the first migration and rows in its shape", async () => {
     if (first === undefined) throw new Error("No migrations found")
     await d1.run(first.statements)
-    await seedExistingTables()
-    await d1.run([
-      `INSERT INTO user_progress (user_id, card_id, state, due, last_review,
-         stability, stability_fast, difficulty, reps, lapses, learning_step,
-         scheduled_days)
-       VALUES ('usr_prototype_01', 'es-gato', 'review', 1794700000000,
-         1794600000000, 3.2, 0.4, 5.1, 2, 0, 0, 1.15)`,
-    ])
+    await d1.run(firstMigrationRows)
 
-    expect(await counts()).toMatchObject({ cards: 16, user_progress: 1 })
+    expect(await counts()).toMatchObject({
+      users: 2,
+      courses: 2,
+      cards: 3,
+      mnemonics: 1,
+      user_progress: 1,
+    })
   })
 
   it.each(later.map((migration) => [migration.name, migration] as const))(
@@ -102,7 +114,7 @@ describe("migrations on a database that has data", () => {
   )
 
   it("leave every learner with progress enrolled in that course", async () => {
-    // The seed ran before `enrollments` existed, so only 0006 can add this.
+    // The rows went in before `enrollments` existed, so only 0006 adds these.
     const { results } = await d1.env.DB.prepare(
       "SELECT user_id, course_id FROM enrollments"
     ).all()
