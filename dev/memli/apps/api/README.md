@@ -71,6 +71,8 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 | `GET /api/health` | `200 {"status":"ok"}` | `@workspace/schemas/api/health` |
 | `GET /api/courses` | Every course, with the viewer's progress in each | `@workspace/schemas/api/courses` |
 | `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
+| `PUT /api/courses/:courseId/enrollment` | Adds a published course to the viewer's dashboard. Safe to repeat | `@workspace/schemas/api/enrollment` |
+| `DELETE /api/courses/:courseId/enrollment` | Takes a course off the dashboard and keeps the viewer's progress. Safe to repeat | `@workspace/schemas/api/enrollment` |
 | `GET /api/catalog` | Every published course, and whether the viewer added it. Public | `@workspace/schemas/api/catalog` |
 | `GET /api/catalog/:courseId` | One published course's overview, with a few sample words. Public | `@workspace/schemas/api/catalog` |
 | `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
@@ -118,6 +120,19 @@ The cards for one session, in the order to study them. `?mode=` picks the kind:
 | `practice` | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
 
 `?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode`, `extra` or `timeZone` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
+
+### `PUT` and `DELETE /api/courses/:courseId/enrollment`
+
+Adds a course to the viewer's dashboard, or takes it off (#174). Both answer where the course stands now:
+
+```json
+{ "courseId": "spanish-core-1000", "added": true, "addedAt": "2026-11-18T12:00:00.000Z" }
+```
+
+- **Safe to repeat.** Adding a course already added changes nothing and keeps the first `addedAt`. Removing one that is not there answers `added: false` all the same. So a retried tap never shows an error.
+- **Removing keeps progress.** Only the `enrollments` row goes. Adding the course back picks up where the learner left off, with a new `addedAt`.
+- **Only published courses can be added.** `PUT` on a draft answers `NOT_FOUND`, like a course that does not exist. `DELETE` works on any course, so a course unpublished later can still be removed.
+- **Writes are guarded like reviews:** a session, the app's own `Origin`, and 60 requests a minute per learner and 1,200 per address (`ENROLLMENT_LIMITS` in `src/routes/courses.ts`).
 
 ### `GET /api/catalog`
 
@@ -516,7 +531,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | --- | --- |
 | `src/app.ts` | The Hono app. It mounts the routes. Tests import this. |
 | `src/routes/catalog.ts` | `GET /api/catalog` and `GET /api/catalog/:courseId`. |
-| `src/routes/courses.ts` | `GET /api/courses` and `GET /api/courses/:courseId/study`. |
+| `src/routes/courses.ts` | `GET /api/courses`, `GET /api/courses/:courseId/study`, and adding or removing a course (`/enrollment`). |
 | `src/routes/reviews.ts` | `POST /api/reviews`. |
 | `src/routes/history.ts` | `GET /api/history`. |
 | `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
@@ -532,7 +547,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
 | `src/db/progress.ts` | Reads and saves `user_progress` as core's `CardProgress`. |
-| `src/db/enrollments.ts` | Reads which courses a learner added to their dashboard. |
+| `src/db/enrollments.ts` | Which courses a learner added to their dashboard: read, add and remove. |
 | `src/db/reviews.ts` | Writes the review log with progress; reads it back for history and the daily limit. |
 | `drizzle/migrations/` | Generated SQL migrations. Never edited by hand. |
 | `seed/prototype.sql` | Local data: the prototype learner, starter courses, cards and mnemonics. |
@@ -574,4 +589,4 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 - **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
 - **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
 - **A daily goal per learner.** Everyone's is 50 words (`DAILY_GOAL_WORDS` in core).
-- **Adding and removing courses.** `enrollments` records each learner's courses and the catalog reads it, but there is no `PUT` or `DELETE` for it yet, and `GET /api/courses` still lists every course (#174).
+- **"My courses" on the dashboard.** Learners can add and remove courses, but `GET /api/courses` still lists every course, and starting a session doesn't add one yet (#174).

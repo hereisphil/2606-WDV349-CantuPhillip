@@ -9,6 +9,10 @@ import {
   type CoursesResponse,
 } from "@workspace/schemas/api/courses"
 import {
+  enrollmentParamsSchema,
+  type Enrollment,
+} from "@workspace/schemas/api/enrollment"
+import {
   studyParamsSchema,
   studyQuerySchema,
   type StudySession,
@@ -21,13 +25,16 @@ import {
   cardIdsInOrder,
   cardsById,
   findCourse,
+  findPublishedCourse,
   listCourses,
 } from "../db/content"
+import { addToDashboard, removeFromDashboard } from "../db/enrollments"
 import { courseProgress, progressByCourse } from "../db/progress"
 import { reviewsSince, type CourseReview } from "../db/reviews"
 import type { Database } from "../db/client"
 import type { AppEnv } from "../env"
 import { errorResponse } from "../lib/errors"
+import { limitRequests } from "../lib/rate-limit"
 import { validate } from "../lib/validate"
 import { requireViewer, viewerId } from "../lib/viewer"
 
@@ -133,6 +140,60 @@ courseRoutes.get(
         return card === undefined ? [] : [{ ...card, progress }]
       }),
     }
+    return c.json(body)
+  }
+)
+
+/**
+ * Adding and removing are one tap each, so a learner never needs many. An
+ * address allows a classroom of them behind one network.
+ */
+export const ENROLLMENT_LIMITS = {
+  perLearner: { windowSeconds: 60, max: 60 },
+  perAddress: { windowSeconds: 60, max: 1_200 },
+}
+
+courseRoutes.use(
+  "/:courseId/enrollment",
+  limitRequests("enrollment", ENROLLMENT_LIMITS)
+)
+
+// Adds a published course to the viewer's dashboard. Safe to repeat.
+courseRoutes.put(
+  "/:courseId/enrollment",
+  validate("param", enrollmentParamsSchema),
+  async (c) => {
+    const db = database(c.env.DB)
+    const { courseId } = c.req.valid("param")
+
+    // A draft can't be added, the same as a course that does not exist.
+    const course = await findPublishedCourse(db, courseId)
+    if (course === null) return errorResponse(c, "NOT_FOUND")
+
+    const addedAt = await addToDashboard(db, viewerId(c), courseId, new Date())
+    const body: Enrollment = {
+      courseId,
+      added: true,
+      addedAt: addedAt.toISOString(),
+    }
+    return c.json(body)
+  }
+)
+
+// Takes a course off the viewer's dashboard and keeps their progress.
+courseRoutes.delete(
+  "/:courseId/enrollment",
+  validate("param", enrollmentParamsSchema),
+  async (c) => {
+    const db = database(c.env.DB)
+    const { courseId } = c.req.valid("param")
+
+    // Any course, drafts included: a course unpublished later can still go.
+    const course = await findCourse(db, courseId)
+    if (course === null) return errorResponse(c, "NOT_FOUND")
+
+    await removeFromDashboard(db, viewerId(c), courseId)
+    const body: Enrollment = { courseId, added: false, addedAt: null }
     return c.json(body)
   }
 )

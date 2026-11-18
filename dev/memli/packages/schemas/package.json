@@ -21,6 +21,7 @@
   "exports": {
     "./api/catalog": "./src/api/catalog.ts",
     "./api/courses": "./src/api/courses.ts",
+    "./api/enrollment": "./src/api/enrollment.ts",
     "./api/error": "./src/api/error.ts",
     "./api/health": "./src/api/health.ts",
     "./api/history": "./src/api/history.ts",

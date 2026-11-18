@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 
 import type { Database } from "./client"
 import { enrollments } from "./schema"
@@ -33,4 +33,42 @@ export async function hasAdded(
     )
     .limit(1)
   return row !== undefined
+}
+
+/**
+ * Adds a course to the learner's dashboard and answers when it was first
+ * added. Adding it again changes nothing, so a retry keeps the first date.
+ */
+export async function addToDashboard(
+  db: Database,
+  userId: string,
+  courseId: string,
+  now: Date
+): Promise<Date> {
+  const [row] = await db
+    .insert(enrollments)
+    .values({ userId, courseId, addedAt: now })
+    .onConflictDoUpdate({
+      target: [enrollments.userId, enrollments.courseId],
+      // A no-op update, so `returning` sends the row that was already there.
+      set: { addedAt: sql`${enrollments.addedAt}` },
+    })
+    .returning({ addedAt: enrollments.addedAt })
+  return row?.addedAt ?? now
+}
+
+/**
+ * Takes a course off the learner's dashboard. Their progress stays, so
+ * adding it back picks up where they left off. Safe when it was not added.
+ */
+export async function removeFromDashboard(
+  db: Database,
+  userId: string,
+  courseId: string
+): Promise<void> {
+  await db
+    .delete(enrollments)
+    .where(
+      and(eq(enrollments.userId, userId), eq(enrollments.courseId, courseId))
+    )
 }
