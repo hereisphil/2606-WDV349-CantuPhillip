@@ -6,11 +6,19 @@ import { RouterProvider, createRouter } from "@tanstack/react-router"
 import "@workspace/ui/globals.css"
 import { SessionProvider } from "@/components/session-provider.tsx"
 import { ThemeProvider } from "@/components/theme-provider.tsx"
-import { createQueryClient } from "@/lib/queries"
+import { createQueryClient, sessionQuery } from "@/lib/queries"
 import { routeTree } from "@/routeTree.gen"
 
-// One cache for every API call (src/lib/queries.ts).
-const queryClient = createQueryClient()
+// One cache for every API call (src/lib/queries.ts). A session that ends
+// mid-visit is forgotten, and the route guards send the learner to /signin.
+const queryClient = createQueryClient({
+  onUnauthorized: () => {
+    // Already signed out: nothing to forget, and no reason to load again.
+    if (queryClient.getQueryData(sessionQuery.queryKey) === null) return
+    queryClient.setQueryData(sessionQuery.queryKey, null)
+    void router.invalidate()
+  },
+})
 
 const router = createRouter({
   routeTree,

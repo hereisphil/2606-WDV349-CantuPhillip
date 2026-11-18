@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { useState } from "react"
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   ChevronsUpDown,
   CreditCard,
@@ -28,19 +29,21 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 import { useViewer } from "@/components/session-provider"
 import { useFormatters } from "@/lib/formatters"
+import { signOut } from "@/lib/auth"
+import { endSession } from "@/lib/session"
 
 const messages = {
   sidebar: "Application sidebar",
   primaryNav: "Primary",
   navigationMenu: "Navigation menu",
-  accountMenu: "Account menu, @{username}",
+  accountMenu: "Account menu, {name}",
   accountMenuPrefix: "Account menu, ",
   dashboard: "Dashboard",
   community: "Community",
   profile: "View Profile",
   settings: "Learning Settings",
   plan: "Subscription / Plan",
-  signOut: "Sign Out",
+  signOut: "Sign out",
 } as const
 
 const railActiveClass =
@@ -102,6 +105,19 @@ function RailNav(): JSX.Element {
 }
 
 function AccountMenuItems(): JSX.Element {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  // Forget the learner only once the server has ended the session, so a
+  // failed request never shows "signed out" over a cookie that still works.
+  const handleSignOut = async (): Promise<void> => {
+    const result = await signOut()
+    if (!result.ok) return
+    // Leave the app first: its pages need a learner while they are mounted.
+    await navigate({ to: "/" })
+    endSession(queryClient)
+  }
+
   return (
     <>
       <DropdownMenuGroup>
@@ -120,7 +136,11 @@ function AccountMenuItems(): JSX.Element {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem render={<Link to="/" />}>
+        <DropdownMenuItem
+          onClick={() => {
+            void handleSignOut()
+          }}
+        >
           <LogOut aria-hidden="true" />
           {messages.signOut}
         </DropdownMenuItem>
@@ -149,7 +169,7 @@ export function AppSidebar(): JSX.Element {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={format(messages.accountMenu, {
-                username: viewer.username,
+                name: viewer.displayName,
               })}
               render={
                 <Button
@@ -167,7 +187,7 @@ export function AppSidebar(): JSX.Element {
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
                   <span className="truncate text-sm font-medium text-foreground">
-                    @{viewer.username}
+                    {viewer.displayName}
                   </span>
                   <PlanBadge plan={viewer.plan} />
                 </DropdownMenuLabel>
@@ -231,7 +251,7 @@ export function AppSidebar(): JSX.Element {
                 </Avatar>
                 <span className="flex min-w-0 flex-col items-start gap-0.5">
                   <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
-                    @{viewer.username}
+                    {viewer.displayName}
                   </span>{" "}
                   <PlanBadge plan={viewer.plan} />
                 </span>

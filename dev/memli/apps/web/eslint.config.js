@@ -115,10 +115,7 @@ export default defineConfig([
   },
   // React state guardrail exemptions (docs/state-management.md).
   {
-    files: [
-      "src/routes/_marketing/**/*.{ts,tsx}",
-      "src/routes/_auth/**/*.{ts,tsx}",
-    ],
+    files: ["src/routes/_marketing/**/*.{ts,tsx}"],
     rules: {
       "memli/no-use-state-sprawl": "off",
     },

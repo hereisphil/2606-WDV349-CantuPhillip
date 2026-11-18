@@ -1,225 +1,166 @@
 import type { JSX } from "react"
-import { useState } from "react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
+import { createFormReducer } from "@workspace/core/form/form-reducer"
 import { signInSchema } from "@workspace/schemas/auth/sign-in"
-import { BrandMark } from "@/components/brand-mark"
-import { Button, buttonVariants } from "@workspace/ui/components/button"
-import { cn } from "@workspace/ui/lib/utils"
+import { Button } from "@workspace/ui/components/button"
+import { signIn } from "@/lib/auth"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card"
-import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
+  HOME_PATH,
+  redirectViewer,
+  safeReturnPath,
+  startSession,
+} from "@/lib/session"
+import { AuthCard, authLinkClass } from "./-components/AuthCard"
+import { AuthPreviewSwitcher } from "./-components/AuthPreviewSwitcher"
+import {
+  isSignInPreviewName,
+  neverAnswers,
+  previewState,
+  signInPreviews,
+  type SignInPreviewName,
+} from "./-components/auth-previews"
+import { FormField } from "./-components/FormField"
+import { refusalMessage } from "./-components/auth-messages"
+import { useAuthForm, validateWith } from "./-components/use-auth-form"
+
+type AuthSearch = {
+  /** Where to go once signed in: a path on this site, checked by `safeReturnPath`. */
+  redirect?: string | undefined
+  /** A development-only snapshot of the form (`auth-previews.ts`). */
+  preview?: SignInPreviewName | undefined
+}
 
 export const Route = createFileRoute("/_auth/signin")({
+  validateSearch: (search: Record<string, unknown>): AuthSearch => ({
+    redirect: safeReturnPath(search.redirect),
+    preview:
+      import.meta.env.DEV && isSignInPreviewName(search.preview)
+        ? search.preview
+        : undefined,
+  }),
+  // A preview opens even when signed in, so it can be checked any time.
+  beforeLoad: (args) =>
+    import.meta.env.DEV && args.search.preview !== undefined
+      ? undefined
+      : redirectViewer(args, args.search.redirect),
   component: SignIn,
 })
 
-const labelClass = "text-xs font-semibold tracking-wide"
-const inputClass = "h-11 bg-secondary"
+const messages = {
+  title: "Welcome!",
+  description: "Master your vocabulary with visual memory.",
+  email: "Email address",
+  password: "Password",
+  submit: "Sign in",
+  submitting: "Signing in…",
+  noAccount: "New to Memli?",
+  createAccount: "Create an account",
+} as const
 
-type FieldErrors = Partial<Record<"email" | "password", string>>
+type Field = "email" | "password"
+
+const reducer = createFormReducer<Field>(validateWith(signInSchema))
+const emptyForm = { email: "", password: "" }
 
 function SignIn(): JSX.Element {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
-  const [formMessage, setFormMessage] = useState<string | null>(null)
-
-  const clearFieldError = (field: keyof FieldErrors): void => {
-    setFieldErrors((current) =>
-      current[field] === undefined
-        ? current
-        : { ...current, [field]: undefined }
+  const { preview } = Route.useSearch()
+  if (import.meta.env.DEV && preview !== undefined) {
+    return (
+      <div className="flex w-full max-w-md flex-col items-center">
+        <AuthPreviewSwitcher
+          previews={signInPreviews}
+          current={preview}
+          renderLink={(name, props) => (
+            <Link
+              from={Route.fullPath}
+              to="."
+              search={(search) => ({ ...search, preview: name })}
+              {...props}
+            />
+          )}
+        />
+        {/* Keyed, so switching previews starts the form over. */}
+        <SignInForm key={preview} preview={preview} />
+      </div>
     )
   }
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
-    event.preventDefault()
-    setFormMessage(null)
-
-    const result = signInSchema.safeParse({ email, password })
-
-    if (!result.success) {
-      const nextErrors: FieldErrors = {}
-      for (const issue of result.error.issues) {
-        const field = issue.path[0]
-        if (field === "email" || field === "password") {
-          nextErrors[field] = issue.message
-        }
-      }
-      setFieldErrors(nextErrors)
-      return
-    }
-
-    setFieldErrors({})
-    setFormMessage("Sign-in is not wired to the API yet. Validation passed.")
-  }
-
-  return (
-    <div className="w-full max-w-md">
-      <Card className="shadow-sm [--card-spacing:--spacing(6)]">
-        <CardHeader className="items-center text-center">
-          <div className="flex justify-center text-primary">
-            <BrandMark wordClassName="text-lg" />
-          </div>
-          <CardTitle className="mt-4 text-2xl font-bold tracking-tight">
-            Welcome!
-          </CardTitle>
-          <CardDescription>
-            Master your vocabulary with visual memory.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="flex flex-col">
-          <div className="mb-6 flex flex-col gap-3">
-            <p
-              id="prototype-mode-notice"
-              role="status"
-              className="rounded-lg border border-border bg-secondary px-3 py-2 text-center text-sm font-medium"
-            >
-              Prototype Mode: sign-in form disabled
-            </p>
-            <Link
-              to="/dashboard"
-              className={cn(buttonVariants({ size: "touch" }), "w-full")}
-            >
-              Skip & Continue to Prototype →
-            </Link>
-          </div>
-
-          <Button variant="outline" size="touch" className="w-full" disabled>
-            <GoogleIcon />
-            Continue with Google
-          </Button>
-
-          <div className="my-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-xs font-medium tracking-wide text-muted-foreground">
-              OR USE EMAIL ADDRESS
-            </span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={handleSubmit}
-            aria-describedby="prototype-mode-notice"
-          >
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className={labelClass}>
-                EMAIL ADDRESS
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="name@example.com"
-                className={inputClass}
-                disabled
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value)
-                  clearFieldError("email")
-                }}
-                aria-invalid={fieldErrors.email ? true : undefined}
-                aria-describedby={fieldErrors.email ? "email-error" : undefined}
-              />
-              {fieldErrors.email ? (
-                <p id="email-error" className="text-xs text-destructive">
-                  {fieldErrors.email}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className={labelClass}>
-                  PASSWORD
-                </Label>
-                <button
-                  type="button"
-                  className="touch-target inline-flex items-center text-xs font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50"
-                  disabled
-                >
-                  Forgot?
-                </button>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
-                className={inputClass}
-                disabled
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value)
-                  clearFieldError("password")
-                }}
-                aria-invalid={fieldErrors.password ? true : undefined}
-                aria-describedby={
-                  fieldErrors.password ? "password-error" : undefined
-                }
-              />
-              {fieldErrors.password ? (
-                <p id="password-error" className="text-xs text-destructive">
-                  {fieldErrors.password}
-                </p>
-              ) : null}
-            </div>
-
-            {formMessage ? (
-              <p className="text-sm text-muted-foreground" role="status">
-                {formMessage}
-              </p>
-            ) : null}
-
-            <Button type="submit" size="touch" className="mt-2 w-full" disabled>
-              Sign In / Sign Up
-            </Button>
-          </form>
-
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            By clicking continue, you agree to our{" "}
-            <Link to="/terms" className="underline hover:text-foreground">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link to="/privacy" className="underline hover:text-foreground">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  return <SignInForm />
 }
 
-function GoogleIcon(): JSX.Element {
+function SignInForm({ preview }: { preview?: SignInPreviewName }): JSX.Element {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { redirect } = Route.useSearch()
+  const seeded =
+    import.meta.env.DEV && preview !== undefined
+      ? signInPreviews[preview]
+      : undefined
+  const { state, dispatch, submit } = useAuthForm(
+    reducer,
+    emptyForm,
+    seeded === undefined ? signIn : neverAnswers,
+    async () => {
+      await startSession(queryClient)
+      await navigate({ href: redirect ?? HOME_PATH, replace: true })
+    },
+    seeded === undefined ? undefined : previewState(reducer, emptyForm, seeded)
+  )
+
+  // The fields stay locked after success, while the dashboard loads.
+  const busy = state.status === "submitting" || state.status === "success"
+  const fieldErrors = state.status === "idle" ? state.fieldErrors : {}
+
   return (
-    <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38Z"
-      />
-    </svg>
+    <AuthCard title={messages.title} description={messages.description}>
+      <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
+        <FormField
+          id="email"
+          label={messages.email}
+          type="email"
+          autoComplete="email"
+          value={state.fields.email}
+          onChange={(value) => {
+            dispatch({ type: "FIELD_CHANGED", field: "email", value })
+          }}
+          errors={fieldErrors.email}
+          disabled={busy}
+        />
+        <FormField
+          id="password"
+          label={messages.password}
+          type="password"
+          autoComplete="current-password"
+          value={state.fields.password}
+          onChange={(value) => {
+            dispatch({ type: "FIELD_CHANGED", field: "password", value })
+          }}
+          errors={fieldErrors.password}
+          disabled={busy}
+        />
+
+        {state.status === "error" ? (
+          <p role="alert" className="text-base text-destructive">
+            {refusalMessage(state.code)}
+          </p>
+        ) : null}
+
+        <Button
+          type="submit"
+          size="touch"
+          className="mt-2 w-full"
+          disabled={busy}
+        >
+          {busy ? messages.submitting : messages.submit}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-base text-muted-foreground">
+        {messages.noAccount}{" "}
+        <Link to="/signup" search={{ redirect }} className={authLinkClass}>
+          {messages.createAccount}
+        </Link>
+      </p>
+    </AuthCard>
   )
 }

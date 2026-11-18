@@ -24,6 +24,7 @@ dev/memli/.cf
 # Wrangler: local Worker state (and, later, the local D1 database) and local secrets
 .wrangler
 .dev.vars*
+!.dev.vars.example
 
 # turbo
 .turbo

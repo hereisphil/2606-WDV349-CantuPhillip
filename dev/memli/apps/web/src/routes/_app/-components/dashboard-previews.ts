@@ -8,6 +8,8 @@ import {
 /** A seeded dashboard state for `?preview=` in development builds. */
 export type DashboardPreview = {
   metrics: DashboardMetrics
+  /** Shows the page for a dashboard that couldn't load, instead of the numbers. */
+  loadFailed?: true
 }
 
 function withToday(cardsStudied: number): DashboardMetrics["dailyGoal"] {
@@ -118,6 +120,7 @@ export const previewNames = [
   "same-language",
   "long-titles",
   "large-numbers",
+  "load-error",
 ] as const
 
 export type PreviewName = (typeof previewNames)[number]
@@ -237,6 +240,7 @@ function buildPreviews(): Record<PreviewName, DashboardPreview> {
         daysOfStudy: 1000,
       },
     },
+    "load-error": { metrics: base, loadFailed: true },
   }
 }
 

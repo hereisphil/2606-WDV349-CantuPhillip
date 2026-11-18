@@ -29,10 +29,13 @@ import type { Database } from "../db/client"
 import type { AppEnv } from "../env"
 import { errorResponse } from "../lib/errors"
 import { validate } from "../lib/validate"
-import { viewerId } from "../lib/viewer"
+import { requireViewer, viewerId } from "../lib/viewer"
 
 /** Mounted at `/api/courses`. */
 export const courseRoutes = new Hono<AppEnv>()
+
+// Every route here is one learner's data, so each needs a session.
+courseRoutes.use(requireViewer)
 
 // Today, wherever the viewer is, is never longer than this ago.
 const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000

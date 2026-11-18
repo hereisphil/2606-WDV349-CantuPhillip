@@ -11,6 +11,7 @@ Update this file when a rule changes. A rule listed here should have a test or a
 | Rule | Where | Test |
 | --- | --- | --- |
 | Every body, query string and path param goes through a `@workspace/schemas` Zod schema before a route reads it | `validate()` in `apps/api/src/lib/validate.ts` | `routes/*.test.ts`, "answers INVALID_REQUEST for …" |
+| A write (`POST`, `PUT`, `PATCH`, `DELETE`) must carry the app's own `Origin`, or it answers `FORBIDDEN` | `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` | `same-origin.test.ts` |
 | A JSON body must be sent as `Content-Type: application/json`. A cross-site form can only send form or plain-text bodies, so this also refuses a forged write | `isJson()` in `validate.ts` | `reviews.test.ts` |
 | Ids (course, card, mnemonic) are 1 to 64 characters | `idSchema` in `packages/schemas/src/content/id.ts` | `courses.test.ts`, `reviews.test.ts`, `course.test.ts` |
 | One `POST /api/reviews` holds at most 500 reviews, and each `reviewId` is a UUID | `submitReviewsRequestSchema` in `packages/schemas/src/srs/review.ts` | `reviews.test.ts` |
@@ -35,7 +36,8 @@ Update this file when a rule changes. A rule listed here should have a test or a
 - **No public URL.** `memli-api-staging` has `workers_dev: false` and `preview_urls: false` (`apps/api/wrangler.jsonc`). It is only reachable through the gate Worker.
 - **Staging is gated.** The gate Worker (`dev/memli/src/index.ts`) checks basic auth with a timing-safe compare, and it fails closed if its secrets are missing.
 - **Nothing is cached.** Every API answer sends `Cache-Control: no-store`.
-- **Production has no API yet.** Its `/api/*` answers a JSON 503 until sign-in (#108) lands.
+- **Every data route needs a session** (`requireViewer`, #108). Only `/api/health` and `/api/auth/*` answer without one.
+- **Production has no API yet.** Its `/api/*` answers a JSON 503 until the release (#114).
 
 ### Community content
 
@@ -72,43 +74,46 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 ### Secrets and config
 
-- [ ] `BETTER_AUTH_SECRET` is a long random value, set with `wrangler secret put` for staging and production, and in `.dev.vars` locally (git-ignored). Never in the repo.
-- [ ] The Google client secret (#107) is a secret the same way. The client ID can live in `wrangler.jsonc`.
-- [ ] The API's environment is checked by a schema in `@workspace/schemas`, like `env/web.ts`, so a missing secret fails at startup, not on a learner's first sign-in.
-- [ ] `baseURL` is set per environment and is `https` outside local development, which is what makes Better Auth mark cookies `Secure`.
-- [ ] `trustedOrigins` lists exactly the app's origin for each environment. No wildcards, and no `localhost` on staging or production.
+- [x] `BETTER_AUTH_SECRET` is a long random value, set with `wrangler secret put` for staging and production, and in `.dev.vars` locally (git-ignored). Never in the repo. Staging's is set on `memli-api-staging` (2026-11-17). Production has no API Worker yet: #114 sets its secret when it creates one. `apiEnvSchema` refuses one under 32 characters, and the repo holds only the `.dev.vars.example` placeholder.
+- [ ] The Google client secret (#107) is a secret the same way. The client ID can live in `wrangler.jsonc`. Not in the beta: Google sign-in (#107) moved to Going Beyond, and this stays open for it.
+- [x] The API's environment is checked by a schema in `@workspace/schemas` (`env/api.ts`). A Worker has no startup step, so a missing or short secret fails every `/api/auth/*` request with `INTERNAL_ERROR`, from the first one after a deploy. Tested in `apps/api/src/lib/auth.test.ts`.
+- [x] `baseURL` is set per environment (`BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`) and is `https` outside local development, which is what makes Better Auth mark cookies `Secure`. `apiEnvSchema` refuses plain `http` on any host but `localhost`. Production gets its value with its API environment (#114).
+- [x] `trustedOrigins` lists exactly the app's origin for each environment. No wildcards, and no `localhost` on staging or production. The list is left empty on purpose: Better Auth then trusts only `baseURL`'s origin, so there is one value to get right.
 
 ### Cookies and sessions
 
-- [ ] Session cookies are `HttpOnly`, `Secure` and `SameSite=Lax`. These are Better Auth's defaults: don't loosen them, and never use `SameSite=None`.
-- [ ] A test reads the `Set-Cookie` header after sign-in and checks all three attributes.
-- [ ] Decide the session length. Better Auth's default is 7 days, renewed after a day of use. Sign out (#45) deletes the session on the server, not just the cookie.
-- [ ] `viewerId()` in `apps/api/src/lib/viewer.ts` reads the session. With no session, a route answers a new `UNAUTHORIZED` code (401), added to `apiErrorCodeSchema` and mapped to copy in the web app.
-- [ ] Every query stays filtered by the viewer's id. A test signs in as one learner and proves they can't read or write another learner's progress or reviews.
+- [x] Session cookies are `HttpOnly`, `Secure` and `SameSite=Lax`. These are Better Auth's defaults: don't loosen them, and never use `SameSite=None`.
+- [x] A test reads the `Set-Cookie` header after sign-up on the staging origin and checks all three attributes (`apps/api/src/lib/auth-guards.test.ts`).
+- [x] Decide the session length. Kept Better Auth's default for the beta: 7 days, renewed after a day of use. Sign out (#45) deletes the session on the server, not just the cookie (`apps/api/src/lib/auth.test.ts`), and the app forgets the learner only once the server has done so.
+- [x] `viewerId()` in `apps/api/src/lib/viewer.ts` reads the session, through `requireViewer` on every data route. With no session, or an ended one, a route answers the new `UNAUTHORIZED` code (401) from `apiErrorCodeSchema`. The web app maps it with the session swap in #108.
+- [x] Every query stays filtered by the viewer's id. `apps/api/src/lib/viewer.test.ts` signs in as two learners and proves one can't read the other's progress or history, and that a `userId` in a request body is ignored.
 
 ### CSRF and origin
 
-- [ ] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck`.
+- [x] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck` to `true`. Both are set to `false` by name, because Better Auth skips the origin check by itself under a test runner. Tests refuse a write from another origin, with no origin, and from another site's page.
 - [x] Memli's own routes accept only `application/json` bodies (done in #111).
-- [ ] Memli's own write routes check the `Origin` header too (#169).
+- [x] Memli's own write routes check the `Origin` header too (#169). `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` refuses any write outside `/api/auth/*` whose `Origin` isn't `BETTER_AUTH_URL`'s, a missing one included, with `403 FORBIDDEN`. Reads are left alone: without CORS, another site's page can't read the answer.
 
 ### Rate limiting
 
-- [ ] Turn Better Auth's rate limiter on explicitly for staging and production. It's only on by default when it detects production, and that detection is Node-style, so don't count on it inside a Worker.
-- [ ] Store its counts in D1 (`rateLimit.storage: "database"`, with a migration). The default is memory, and memory isn't shared across Worker instances, so the limit would barely apply.
-- [ ] Read the client IP from Cloudflare's header: `advanced.ipAddress.ipAddressHeaders: ["cf-connecting-ip"]`. The default, `X-Forwarded-For`, can be set by any client, so an attacker could pretend to be a new IP on every try.
-- [ ] Keep the strict default on email sign-in (3 tries per 10 seconds), and add `rateLimit.customRules` for sign-up and passkey sign-in.
-- [ ] Rate limit Memli's own `POST /api/reviews` (#169).
-- [ ] A test proves a burst of sign-in attempts gets refused.
+- [x] Turn Better Auth's rate limiter on explicitly. It's only on by default when it detects production, and that detection is Node-style, so don't count on it inside a Worker. It is on everywhere, local development included, so there is no environment check to get wrong.
+- [x] Store its counts in D1 (`rateLimit.storage: "database"`, the `rate_limits` table in migration `0004`). The default is memory, and memory isn't shared across Worker instances, so the limit would barely apply.
+- [x] Read the client IP from Cloudflare's header: `advanced.ipAddress.ipAddressHeaders: ["cf-connecting-ip"]`. The default, `X-Forwarded-For`, can be set by any client, so an attacker could pretend to be a new IP on every try. A test sends a new `X-Forwarded-For` on every try and is still refused.
+- [x] Keep the strict default on email sign-in (3 tries per 10 seconds), and add `rateLimit.customRules` for sign-up (5 new accounts a minute from one address). The passkey sign-in rule lands with passkeys (#107).
+- [x] Rate limit Memli's own `POST /api/reviews` (#169): 60 requests a minute per learner and 1,200 per address, so a classroom behind one network still fits. A refusal is `429 RATE_LIMITED` with `Retry-After`. The counts live in the same D1 `rate_limits` table as sign-in's (`limitRequests` in `apps/api/src/lib/rate-limit.ts`), counted in one statement so simultaneous requests can't slip past. Cloudflare's rate limiting binding was considered and not used: its docs don't say whether it is free, and it counts per location, not globally.
+- [x] A test proves a burst of sign-in attempts gets refused, and that the learner can try again once the window ends.
 
 ### Passwords and accounts (#108)
 
-- [ ] Keep Better Auth's password hashing (scrypt). Never write our own.
-- [ ] `signUpSchema` sets a minimum and maximum password length, with no "must contain a symbol" rules. Consider Better Auth's breached-password check.
-- [ ] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong.
-- [ ] Decide on email verification. With `requireEmailVerification` on (or `autoSignIn` off), sign-up answers the same way whether or not an email is already registered, so nobody can use the form to check who has an account. It needs an email provider, so it may land after the beta. Write the decision down either way.
+- [x] Keep Better Auth's password hashing (scrypt). Never write our own. A test checks that `accounts.password` is a hash.
+- [x] `signUpSchema` sets a minimum and maximum password length (8 and 128), and Better Auth is given the same two numbers. A password also needs a capital letter, a lowercase letter and a symbol (decided 2026-11-17, replacing the earlier "no must-contain rules" line). `meetsPasswordRules` in `@workspace/schemas/auth/sign-up` is the one definition: the form uses it, and the API runs it on sign-up, password change and password reset, answering `PASSWORD_TOO_WEAK`.
+- [x] A new password found in a known breach is refused with `PASSWORD_COMPROMISED` (Better Auth's `haveibeenpwned` plugin, turned on 2026-11-17). It runs on sign-up, password change and password reset, never on sign-in. Only the first five characters of the password's SHA-1 hash go to `api.pwnedpasswords.com`, which answers with every hash ending that shares them, so the service never learns the password or whether it matched. If the service is down, the request fails with a 500 and no account is made: it fails closed. The Privacy Policy (#170) names this service.
+- [x] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong. The API answers `INVALID_EMAIL_OR_PASSWORD` for both, and `/signin` maps that one code to that one sentence (`apps/web/e2e/auth.spec.ts`).
+- [x] Decide on email verification. Decided 2026-11-17: not for the beta, because it needs an email service and a domain. Until #175, sign-up answers `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` for a registered email, so the form can reveal who has an account. The beta is invite-only, which limits who can try. #175 adds the email service, `requireEmailVerification` (sign-up then answers the same either way) and password reset.
 
 ### Google OAuth (#107)
+
+Not in the beta. #107 moved to Going Beyond on 2026-11-17, so these stay open for it.
 
 - [ ] Keep Better Auth's OAuth `state` and PKCE. Both are on by default.
 - [ ] Register the exact redirect URI for each environment in Google Cloud. No wildcards.
@@ -117,14 +122,16 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 ### Passkeys (#107)
 
+Not in the beta, for the same reason as Google sign-in.
+
 - [ ] Set the relying party ID and origin per environment. Staging and production have different domains, so a passkey made on one won't work on the other, and that's expected.
 - [ ] Only a signed-in learner can add a passkey.
 
 ### Logs and privacy
 
-- [ ] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error.
-- [ ] Better Auth's session rows can keep an IP address and user agent. The Privacy Policy (#170) lists them, along with how long they're kept.
-- [ ] Deleting an account removes sessions, accounts and progress, and keeps mnemonics with `author: null`.
+- [x] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error, and Memli logs nothing else. A test runs sign-up, refused sign-ups, wrong and right sign-ins, a cross-origin write, a rate-limited burst and sign-out, and proves no log line holds a password, a session token or a cookie name (`apps/api/src/lib/auth.test.ts`, "the logs").
+- [ ] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days). The Privacy Policy lists them: that is #170, whose Privacy Policy task now names them.
+- [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. Until #170 says how, a learner asks and the account is deleted by hand.
 
 ## Open issues
 
@@ -133,4 +140,6 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 | #168 | Security headers and a Content Security Policy on the Worker and the API |
 | #169 | Rate limiting, an `Origin` check, and cookie and OAuth rules before real sign-in (#108, #107) |
 | #170 | Terms of Service, Privacy Policy and a Community Code of Conduct |
+| #175 | Email verification and password reset, so sign-up stops revealing existing accounts |
+| #176 | Measure password hashing against the Workers CPU limit on staging |
 | #171 | Pin GitHub Actions to commit SHAs |

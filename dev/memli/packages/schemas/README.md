@@ -13,7 +13,9 @@ Use this package for validation at API boundaries, forms, and env parsing. **Do 
 | `@workspace/schemas/api/health` | `GET /api/health` response |
 | `@workspace/schemas/api/history` | `GET /api/history`: its `timeZone` query and `StudyHistoryData` (the week, days of study, retention, new words) |
 | `@workspace/schemas/api/study` | `GET /api/courses/:courseId/study`: the `mode` and `extra` query, and `StudySession` (cards with progress) |
+| `@workspace/schemas/auth/session` | `GET /api/auth/get-session`: the signed-in learner, or `null` |
 | `@workspace/schemas/auth/sign-in` | Sign-in form input |
+| `@workspace/schemas/auth/sign-up` | Sign-up form input, `passwordSchema`, and the password rules and name limit the API enforces too |
 | `@workspace/schemas/content/course` | `Course` (title, `learningLanguage`, `answerLanguage`) and `CourseCards` (the cards to study). A course, never a "deck", in code as on screen |
 | `@workspace/schemas/content/card` | `Card`: the term, accepted answers, grammar codes, example, mnemonics |
 | `@workspace/schemas/content/mnemonic` | `Mnemonic` and its story parts |
@@ -21,6 +23,7 @@ Use this package for validation at API boundaries, forms, and env parsing. **Do 
 | `@workspace/schemas/srs/review` | Review outcomes and the review submission request and response |
 | `@workspace/schemas/locale/language-tag` | A canonical BCP 47 tag, used by every language field |
 | `@workspace/schemas/locale/time-zone` | An IANA time zone, for "today" where the learner is |
+| `@workspace/schemas/env/api` | `apps/api` settings: `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` |
 | `@workspace/schemas/env/web` | Vite `import.meta.env` validation |
 
 Each file exports the schema (`cardSchema`) and its type (`Card`). Import the type alone with `import type` when you only need the shape: it costs nothing at runtime.

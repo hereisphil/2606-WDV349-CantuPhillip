@@ -6,7 +6,13 @@ So far: a health check, the error format, and a local D1 database with the table
 
 ## Run it locally
 
-The first time, and after pulling a new migration, set up the local database from `apps/api`:
+The first time, from `apps/api`, make your local secrets file. It is gitignored:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+Put your own value in it (`openssl rand -base64 32`). Then, the first time and after pulling a new migration, set up the local database:
 
 ```bash
 bun run db:setup
@@ -67,6 +73,7 @@ It answers `{"status":"ok"}`. A `502` from that address means Vite is up but the
 | `GET /api/courses/:courseId/study` | One session's cards, each with the viewer's progress | `@workspace/schemas/api/study` |
 | `POST /api/reviews` | Saves reviews; answers each card's new progress | `@workspace/schemas/srs/review` |
 | `GET /api/history` | The viewer's week, days of study, retention and new words this month | `@workspace/schemas/api/history` |
+| `GET`, `POST /api/auth/*` | Sign-up, sign-in, the session and sign out, by Better Auth | `@workspace/schemas/auth/sign-up`, `auth/sign-in` |
 
 `/api/health` is a liveness check: the Worker is up and routing. It does not touch the database.
 
@@ -175,9 +182,52 @@ Each review saves two things together: the card's new state in `user_progress`, 
 - **The response time is capped again.** `durationMs` goes through core's `capElapsedMs` (30 seconds at most) on the server too. The app already caps it, but the server never takes a client's word for a number.
 - A body that is not JSON, or that the schema refuses, answers `INVALID_REQUEST`.
 
+### `/api/auth/*`: sign-in (#108)
+
+[Better Auth](https://www.better-auth.com/) owns every route under `/api/auth`. [`src/lib/auth.ts`](./src/lib/auth.ts) configures it, and `app.ts` hands it the request.
+
+| Route | Does |
+| --- | --- |
+| `POST /api/auth/sign-up/email` | Creates a learner from `name`, `email` and `password`, and signs them in |
+| `POST /api/auth/sign-in/email` | Signs in with `email` and `password` |
+| `GET /api/auth/get-session` | The signed-in learner and their session, or `null` |
+| `POST /api/auth/sign-out` | Deletes the session on the server and clears the cookie |
+
+The web app will call these through Better Auth's client, not by hand.
+
+- **A session is a cookie.** `HttpOnly`, `SameSite=Lax`, and `Secure` whenever `BETTER_AUTH_URL` is `https`. It lasts 7 days and renews after a day of use.
+- **Passwords** are 8 to 128 characters with a capital letter, a lowercase letter and a symbol, the rules in `@workspace/schemas/auth/sign-up`. Better Auth checks the length (`PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG`). A hook in `auth.ts` checks the rest on sign-up, password change and password reset, and answers `400` with `PASSWORD_TOO_WEAK`. Sign-in never checks them, so no one is locked out by a rule change. Better Auth stores a scrypt hash in `accounts.password`. On Workers it hashes with `node:crypto`, which is why `wrangler.jsonc` turns on `nodejs_compat`.
+- **A breached password is refused.** Better Auth's `haveibeenpwned` plugin asks `api.pwnedpasswords.com` about every new password and answers `400` with `PASSWORD_COMPROMISED` on a match. It sends the first five characters of the password's SHA-1 hash, never the password. If that service is down, sign-up answers `500` and makes no account. Tests never call it: `src/test-setup.ts` swaps in a stand-in from [`src/lib/test-breach-list.ts`](./src/lib/test-breach-list.ts).
+- **A name** is trimmed and cut at 64 characters, at sign-up and on a later rename, because it is shown under the learner's mnemonics. A blank name is refused.
+- **`uiLocale` starts as `en`** and a sign-up body cannot set it. Neither can it set `emailVerified`.
+- **A wrong password and an unknown email answer the same**: `401` with `INVALID_EMAIL_OR_PASSWORD`.
+- **Tries are limited per address**, counted in the `rate_limits` table so every Worker instance sees the same count. Sign-in allows 3 tries in 10 seconds, and sign-up 5 new accounts a minute. A refusal is `429` with `X-Retry-After` in seconds. The address is Cloudflare's `cf-connecting-ip` header, never `X-Forwarded-For`, which any client can set. Locally there is no such header, so every request shares one count.
+- **Saving reviews is limited too.** `POST /api/reviews` allows 60 requests a minute per learner and 1,200 per address (`REVIEW_LIMITS` in `src/routes/reviews.ts`), counted in the same `rate_limits` table with keys that start `memli|`. A refusal is `429` with `RATE_LIMITED` and `Retry-After`. `limitRequests` in [`src/lib/rate-limit.ts`](./src/lib/rate-limit.ts) can limit any other route the same way, after `requireViewer`.
+- **Writes must come from the app's own origin.** A `POST` carrying a cookie, or sent by a page on another site, answers `403` unless its `Origin` is `BETTER_AUTH_URL`. Better Auth turns this check off by itself under a test runner, so `auth.ts` sets it on by name and the tests run against the real thing.
+- **Errors here are Better Auth's shape**, `{ "code": "…", "message": "…" }`, not the `{ "error": { "code" } }` of Memli's own routes. The web app maps the `code` to copy and never shows the English `message`.
+
+Two settings come from the environment, checked by `apiEnvSchema` in `@workspace/schemas/env/api`:
+
+| Name | What | Where it is set |
+| --- | --- | --- |
+| `BETTER_AUTH_SECRET` | Signs session cookies. At least 32 characters | `.dev.vars` locally; `wrangler secret put BETTER_AUTH_SECRET --env staging` on Cloudflare. Never in the repo |
+| `BETTER_AUTH_URL` | The origin learners see, with no path. The only origin sign-in trusts | `vars` in [`wrangler.jsonc`](./wrangler.jsonc), one per environment |
+
+Locally `BETTER_AUTH_URL` is the web app's `http://localhost:5173`, not this Worker's port, because the browser reaches the API through the Vite proxy. With a missing or short secret, every `/api/auth/*` request answers `INTERNAL_ERROR` and the reason is in the log.
+
 ### Who is asking
 
-There is no sign-in until Better Auth (#108), so every request is the prototype learner, `usr_prototype_01`. Routes ask [`src/lib/viewer.ts`](./src/lib/viewer.ts) and never name a user id themselves; #108 changes that one function. Until then anyone who can reach this API is that learner, so it runs only on staging, with no public URL, behind the staging password (#165). Production waits for #108.
+Every route under `/api/courses`, `/api/reviews` and `/api/history` needs a session. `requireViewer` in [`src/lib/viewer.ts`](./src/lib/viewer.ts) asks Better Auth for the session behind the request's cookie. With none, or one that has ended, the route answers `401` with `UNAUTHORIZED` and never runs. Otherwise it remembers the learner's id, and the route reads it with `viewerId(c)`.
+
+Routes never take a user id from the body, the query string or a path. So one learner can never read or change another's progress, and a test proves it ([`src/lib/viewer.test.ts`](./src/lib/viewer.test.ts)). `GET /api/health` and `/api/auth/*` need no session.
+
+In tests, `api.request(path, init)` is signed in as the viewer (`usr_prototype_01`) once that learner exists. Pass a third argument to be someone else, or `null` for no session.
+
+### Where a write comes from
+
+Every `POST`, `PUT`, `PATCH` and `DELETE` outside `/api/auth/*` must carry an `Origin` header equal to `BETTER_AUTH_URL`'s origin, or it answers `403` with `FORBIDDEN` (`requireSameOrigin` in [`src/lib/same-origin.ts`](./src/lib/same-origin.ts)). Browsers send `Origin` on every write, so the app never notices, but another site's page can't act with a learner's cookie. A missing `Origin` is refused too. Better Auth checks its own routes the same way.
+
+In tests, `api.request` adds the app's `Origin` to every write, as a browser would. To test a missing one, call `app.request` with `api.env` directly.
 
 ### Checking a request
 
@@ -211,6 +261,9 @@ The server never writes the sentence a learner reads. The web app maps the code 
 | --- | --- | --- |
 | `INVALID_REQUEST` | 400 | The body or query string is not what the route accepts |
 | `NOT_FOUND` | 404 | No route matched, or the thing asked for does not exist |
+| `UNAUTHORIZED` | 401 | No session, or one that has ended. The learner signs in again |
+| `FORBIDDEN` | 403 | A write whose `Origin` isn't the app's own. See "Where a write comes from" |
+| `RATE_LIMITED` | 429 | Too many requests in a short time. `Retry-After` says how many seconds to wait |
 | `INTERNAL_ERROR` | 500 | A route threw. The details go to the log, never the response |
 
 In a route, send an error with the helper from [`src/lib/errors.ts`](./src/lib/errors.ts):
@@ -248,13 +301,17 @@ src/db/schema.ts ──(bun run db:generate)──► drizzle/migrations/*.sql �
 | Table | One row per | Notes |
 | --- | --- | --- |
 | `users` | learner | Better Auth's core `user` fields, plus `ui_locale`. See below |
+| `sessions` | signed-in browser | Better Auth's `session`. `token` is what the cookie carries; sign out deletes the row |
+| `accounts` | way a learner signs in | Better Auth's `account`. For email sign-in, `provider_id` is `credential` and `password` is a scrypt hash |
+| `verifications` | short-lived token | Better Auth's `verification`, for things like a password reset |
+| `rate_limits` | client address and path | Better Auth's `rateLimit`: how many tries, and when the last one was (#169). Memli's own limits share it, with keys that start `memli\|` |
 | `courses` | course | `learning_language` and `answer_language`, never one `language` |
 | `cards` | word in a course | `position` orders new words; `answers` is a JSON array |
 | `mnemonics` | memory hook on a card | `story` is JSON parts, never markup; `content_locale`; `author_id` goes `null` if the author leaves |
 | `user_progress` | learner and card | Core's `CardProgress`, one column per field. No row means never seen |
 | `reviews` | review | The review log: outcome, rating, response time, and the card before the review. Never changed |
 
-Deleting a course removes its cards, their mnemonics, and everyone's progress and reviews on them. Deleting a learner removes their progress and reviews, and keeps their mnemonics without an author.
+Deleting a course removes its cards, their mnemonics, and everyone's progress and reviews on them. Deleting a learner removes their sessions, accounts, progress and reviews, and keeps their mnemonics without an author.
 
 ### FSRS progress
 
@@ -313,15 +370,13 @@ The rule is enforced by **triggers** in [`0002_language_tag_checks.sql`](./drizz
 
 A test lists every column whose name contains `language` or `locale` and fails if one is missing its two triggers (before insert, before update). A new language column needs a name that says what it is about, and a migration like `0002`.
 
-### Ready for Better Auth (#108)
+### Better Auth's tables (#108)
 
-`users` has exactly Better Auth's core user fields (`id`, `name`, `email`, `emailVerified`, `image`, `createdAt`, `updatedAt`). In MS 4:
+`users` has exactly Better Auth's core user fields (`id`, `name`, `email`, `emailVerified`, `image`, `createdAt`, `updatedAt`), so sign-in needed no change to it. `uiLocale` is declared under `user.additionalFields` in [`src/lib/auth.ts`](./src/lib/auth.ts).
 
-- point Better Auth at it with `user: { modelName: "users" }`;
-- declare `uiLocale` under `user.additionalFields`;
-- run `bun run db:generate` again for the `session`, `account` and `verification` tables it adds.
+`sessions`, `accounts`, `verifications` and `rate_limits` are Better Auth's other models, written by hand in `src/db/schema.ts` like every other table, so Drizzle stays the one source of migrations. The Drizzle adapter's `usePlural` maps Better Auth's `user`, `session`, `account`, `verification` and `rateLimit` to these plural names. Better Auth checks its models against the schema the first time it runs, so a missing column fails loudly.
 
-Nothing in the current tables changes.
+When a Better Auth plugin needs a new table or column (passkeys in #107, say), add it to `src/db/schema.ts` and to the `schema` handed to the adapter, then `bun run db:generate`.
 
 ### Seed data
 
@@ -387,9 +442,13 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/routes/history.ts` | `GET /api/history`. |
 | `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
 | `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
-| `src/lib/viewer.ts` | Who is asking. The prototype learner until #108. |
+| `src/lib/viewer.ts` | `requireViewer`, which needs a session, and `viewerId`, who is asking. |
+| `src/lib/same-origin.ts` | `requireSameOrigin`: a write must come from the app's own origin. |
+| `src/lib/rate-limit.ts` | `limitRequests` and `consume`: Memli's own rate limits, counted in D1. |
+| `src/lib/auth.ts` | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`. |
+| `src/test-setup.ts` | Runs before every test. Stands in for the breached-password service. |
 | `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |
-| `src/env.ts` | What Cloudflare passes the Worker: the `DB` binding. |
+| `src/env.ts` | What Cloudflare passes the Worker (`DB`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`), and what middleware passes a route (`viewerId`). |
 | `src/db/client.ts` | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`. |
 | `src/db/schema.ts` | The tables, in Drizzle. |
 | `src/db/content.ts` | Reads courses, cards and mnemonics as `@workspace/schemas` shapes. |
@@ -401,7 +460,8 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/db/test-d1.ts` | For route and migration tests: a real in-memory D1, plus rows to fill it. |
 | `src/index.ts` | The Worker entry. It only exports the app. |
 | `src/**/*.test.ts` | Vitest. `app.request("/api/...")` calls a route with no server running. |
-| `wrangler.jsonc` | Worker name, entry, compatibility date, D1 binding, dev port. |
+| `wrangler.jsonc` | Worker name, entry, compatibility date and flags, D1 binding, `BETTER_AUTH_URL`, required secrets, dev port. |
+| `.dev.vars.example` | The local secrets to copy into `.dev.vars`. |
 | `worker-configuration.d.ts` | Generated by `bun run cf-typegen`. Workers runtime types for this compatibility date, plus the global `Env` with `DB`. Never edited by hand. |
 
 ## Scripts
@@ -431,9 +491,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 ## Not yet
 
 - **Production.** Only staging runs this Worker (#165). [`staging.yml`](../../../../.github/workflows/staging.yml) migrates `memli-staging`, deploys `memli-api-staging`, then deploys the root gate Worker, which sends `/api/*` to it through its `API` binding after the password check. Production waits for sign-in (#108); until then its `/api/*` answers a JSON 503.
-- **Sign-in.** Every request is the prototype learner until Better Auth (#108). See "Who is asking".
 - **Undo and FSRS parameter training.** The review log has what both need; nothing uses it for them yet.
 - **"Cleared" on past days.** A day the learner finished everything under the goal shows a check today, but not once it is past: that needs what was due at the end of each day, which nothing records yet.
 - **A daily goal per learner.** Everyone's is 50 words (`DAILY_GOAL_WORDS` in core).
 - **Enrollment.** `GET /api/courses` lists every course. There is no "my courses" yet.
-- **Local secrets.** When the API needs them, they go in `apps/api/.dev.vars`, which is gitignored.
