@@ -1,4 +1,6 @@
 import {
+  MutationCache,
+  QueryCache,
   QueryClient,
   queryOptions,
   type FetchQueryOptions,
@@ -6,6 +8,7 @@ import {
 import type { StudyMode } from "@workspace/core/study/course-progress"
 import { coursesResponseSchema } from "@workspace/schemas/api/courses"
 import { studyHistorySchema } from "@workspace/schemas/api/history"
+import { sessionResponseSchema } from "@workspace/schemas/auth/session"
 import {
   studySessionSchema,
   type StudySession,
@@ -16,21 +19,67 @@ import {
   type SubmitReviewsResponse,
 } from "@workspace/schemas/srs/review"
 
-import { apiRequest, shouldRetry } from "./api"
+import { ApiError, apiRequest, shouldRetry } from "./api"
 
 /**
  * Every API call as TanStack Query definitions; routes never `fetch`. Keys
  * live here so code that invalidates names the same key the query uses.
  */
 
-export function createQueryClient(): QueryClient {
+/**
+ * `onUnauthorized` runs when any request answers UNAUTHORIZED: the session
+ * ended while the learner was in the app.
+ */
+export function createQueryClient({
+  onUnauthorized,
+}: {
+  onUnauthorized: () => void
+}): QueryClient {
+  const onError = (error: unknown): void => {
+    if (error instanceof ApiError && error.code === "UNAUTHORIZED") {
+      onUnauthorized()
+    }
+  }
   return new QueryClient({
+    queryCache: new QueryCache({ onError }),
+    mutationCache: new MutationCache({ onError }),
     defaultOptions: {
       queries: { retry: shouldRetry },
       mutations: { retry: shouldRetry },
     },
   })
 }
+
+export type ViewerPlan = "free" | "pro"
+
+/** The signed-in learner, as every screen reads them. */
+export type Viewer = {
+  id: string
+  /** The name they signed up with, shown on the dashboard and in menus. */
+  displayName: string
+  email: string
+  plan: ViewerPlan
+  uiLocale: string
+}
+
+/**
+ * `GET /api/auth/get-session`: the viewer, or `null` when signed out. Route
+ * guards read it before a page loads (src/lib/session.ts).
+ */
+export const sessionQuery = queryOptions({
+  queryKey: ["session"],
+  queryFn: async (): Promise<Viewer | null> => {
+    const session = await apiRequest(
+      "/api/auth/get-session",
+      sessionResponseSchema
+    )
+    if (session === null) return null
+    const { id, name, email, uiLocale } = session.user
+    // Everyone is on the free plan until there is billing.
+    return { id, displayName: name, email, plan: "free", uiLocale }
+  },
+  staleTime: 5 * 60_000,
+})
 
 /**
  * Where the viewer is, so "today" and "this week" are their days. Sent with

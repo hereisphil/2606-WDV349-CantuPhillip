@@ -2,7 +2,10 @@ import AxeBuilder from "@axe-core/playwright"
 import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 
-/** `/signin` and `/signup` against the API stand-in (#108). */
+/** `/signin`, `/signup` and the route guards against the API stand-in (#108). */
+
+// The forms are for visitors who are not signed in yet.
+test.use({ api: { signedOut: true } })
 
 async function fillSignIn(page: Page): Promise<void> {
   await page.getByLabel("Email address").fill("ana@memli.test")
@@ -99,7 +102,10 @@ test.describe("sign in", () => {
 
 test.describe("a refused sign-in", () => {
   test.use({
-    api: { signInRefusal: { status: 401, code: "INVALID_EMAIL_OR_PASSWORD" } },
+    api: {
+      signedOut: true,
+      signInRefusal: { status: 401, code: "INVALID_EMAIL_OR_PASSWORD" },
+    },
   })
 
   test("says one thing, and never which part was wrong", async ({ page }) => {
@@ -117,7 +123,7 @@ test.describe("a refused sign-in", () => {
 })
 
 test.describe("too many tries", () => {
-  test.use({ api: { signInRefusal: { status: 429 } } })
+  test.use({ api: { signedOut: true, signInRefusal: { status: 429 } } })
 
   test("asks the learner to wait", async ({ page }) => {
     await page.goto("/signin", { waitUntil: "networkidle" })
@@ -213,7 +219,7 @@ for (const [label, signUpRefusal, message] of [
   ],
 ] as const) {
   test.describe(`sign up refused for ${label}`, () => {
-    test.use({ api: { signUpRefusal } })
+    test.use({ api: { signedOut: true, signUpRefusal } })
 
     test("shows that reason and stays on the form", async ({ page }) => {
       await page.goto("/signup", { waitUntil: "networkidle" })
@@ -225,3 +231,91 @@ for (const [label, signUpRefusal, message] of [
     })
   })
 }
+
+test.describe("pages that need a learner", () => {
+  for (const path of ["/dashboard", "/study/spanish-core-1000?mode=learn"]) {
+    test(`${path} sends a visitor to sign in, then back`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "networkidle" })
+      await expect(page).toHaveURL(/\/signin\?redirect=/)
+
+      await fillSignIn(page)
+      await page.getByRole("button", { name: "Sign in" }).click()
+
+      await expect(page).toHaveURL(
+        (url) => `${url.pathname}${url.search}` === path
+      )
+    })
+  }
+
+  test("keeps the return path when the visitor signs up instead", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard", { waitUntil: "networkidle" })
+    await page.getByRole("link", { name: "Create an account" }).click()
+    await expect(page).toHaveURL(/\/signup\?redirect=%2Fdashboard/)
+
+    await fillSignUp(page, "Correct-horse-battery")
+    await page.getByRole("button", { name: "Create account" }).click()
+
+    await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  test("ignores a return path on another site", async ({ page }) => {
+    await page.goto("/signin?redirect=//example.com/x", {
+      waitUntil: "networkidle",
+    })
+    await fillSignIn(page)
+    await page.getByRole("button", { name: "Sign in" }).click()
+
+    await expect(page).toHaveURL(/localhost|127\.0\.0\.1/)
+    await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  test("the homepage stays open and offers to sign in", async ({ page }) => {
+    await page.goto("/", { waitUntil: "networkidle" })
+
+    await expect(page).toHaveURL(/\/$/)
+    await expect(
+      page.getByRole("banner").getByRole("link", { name: "Sign in" }).first()
+    ).toBeVisible()
+  })
+})
+
+test.describe("a signed-in learner", () => {
+  test.use({ api: { signedOut: false } })
+
+  for (const path of ["/signin", "/signup"]) {
+    test(`skips ${path} and goes to the dashboard`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "networkidle" })
+
+      await expect(page).toHaveURL(/\/dashboard$/)
+    })
+  }
+
+  test("can still open the homepage, with the account menu", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "networkidle" })
+
+    await expect(page).toHaveURL(/\/$/)
+    await expect(
+      page
+        .getByRole("banner")
+        .getByRole("button", { name: "Account menu, Ana" })
+        .first()
+    ).toBeVisible()
+  })
+})
+
+test.describe("a session that ends while the learner is in the app", () => {
+  test.use({ api: { signedOut: false, sessionEnds: true } })
+
+  test("sends them to sign in, then back to where they were", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard", { waitUntil: "networkidle" })
+
+    await expect(page).toHaveURL(/\/signin\?redirect=%2Fdashboard/)
+    await expect(page.getByRole("heading", { name: "Welcome!" })).toBeVisible()
+  })
+})

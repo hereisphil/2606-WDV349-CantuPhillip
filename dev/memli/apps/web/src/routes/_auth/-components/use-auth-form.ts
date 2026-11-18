@@ -56,7 +56,7 @@ export function useAuthForm<Field extends string>(
   reducer: Reducer<Field>,
   initial: Readonly<Record<Field, string>>,
   send: (fields: Readonly<Record<Field, string>>) => Promise<AuthResult>,
-  onSuccess: () => void
+  onSuccess: () => Promise<void>
 ): AuthForm<Field> {
   const [state, dispatch] = useReducer(reducer, initial, startForm)
 
@@ -79,7 +79,7 @@ export function useAuthForm<Field extends string>(
     void send(next.fields).then((result) => {
       if (result.ok) {
         dispatch({ type: "SUBMIT_SUCCEEDED" })
-        onSuccess()
+        return onSuccess()
       } else {
         dispatch({ type: "SUBMIT_FAILED", code: result.code })
       }

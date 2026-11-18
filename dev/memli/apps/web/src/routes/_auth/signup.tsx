@@ -1,15 +1,31 @@
 import type { JSX } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import { createFormReducer } from "@workspace/core/form/form-reducer"
 import { signUpSchema } from "@workspace/schemas/auth/sign-up"
 import { Button } from "@workspace/ui/components/button"
 import { signUp } from "@/lib/auth"
+import {
+  HOME_PATH,
+  redirectViewer,
+  safeReturnPath,
+  startSession,
+} from "@/lib/session"
 import { AuthCard, authLinkClass } from "./-components/AuthCard"
 import { FormField } from "./-components/FormField"
 import { refusalMessage } from "./-components/auth-messages"
 import { useAuthForm, validateWith } from "./-components/use-auth-form"
 
+type AuthSearch = {
+  /** Where to go once signed in: a path on this site, checked by `safeReturnPath`. */
+  redirect?: string | undefined
+}
+
 export const Route = createFileRoute("/_auth/signup")({
+  validateSearch: (search: Record<string, unknown>): AuthSearch => ({
+    redirect: safeReturnPath(search.redirect),
+  }),
+  beforeLoad: (args) => redirectViewer(args, args.search.redirect),
   component: SignUp,
 })
 
@@ -42,12 +58,15 @@ const emptyForm = { name: "", email: "", password: "" }
 
 function SignUp(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { redirect } = Route.useSearch()
   const { state, dispatch, submit } = useAuthForm(
     reducer,
     emptyForm,
     signUp,
-    () => {
-      void navigate({ to: "/dashboard" })
+    async () => {
+      await startSession(queryClient)
+      await navigate({ href: redirect ?? HOME_PATH, replace: true })
     }
   )
 
@@ -128,7 +147,7 @@ function SignUp(): JSX.Element {
 
       <p className="mt-2 text-center text-base text-muted-foreground">
         {messages.haveAccount}{" "}
-        <Link to="/signin" className={authLinkClass}>
+        <Link to="/signin" search={{ redirect }} className={authLinkClass}>
           {messages.signIn}
         </Link>
       </p>

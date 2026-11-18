@@ -33,7 +33,7 @@ const messages = {
   sidebar: "Application sidebar",
   primaryNav: "Primary",
   navigationMenu: "Navigation menu",
-  accountMenu: "Account menu, @{username}",
+  accountMenu: "Account menu, {name}",
   accountMenuPrefix: "Account menu, ",
   dashboard: "Dashboard",
   community: "Community",
@@ -149,7 +149,7 @@ export function AppSidebar(): JSX.Element {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={format(messages.accountMenu, {
-                username: viewer.username,
+                name: viewer.displayName,
               })}
               render={
                 <Button
@@ -167,7 +167,7 @@ export function AppSidebar(): JSX.Element {
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
                   <span className="truncate text-sm font-medium text-foreground">
-                    @{viewer.username}
+                    {viewer.displayName}
                   </span>
                   <PlanBadge plan={viewer.plan} />
                 </DropdownMenuLabel>
@@ -231,7 +231,7 @@ export function AppSidebar(): JSX.Element {
                 </Avatar>
                 <span className="flex min-w-0 flex-col items-start gap-0.5">
                   <span className="max-w-full truncate text-sm leading-5 font-medium text-foreground">
-                    @{viewer.username}
+                    {viewer.displayName}
                   </span>{" "}
                   <PlanBadge plan={viewer.plan} />
                 </span>

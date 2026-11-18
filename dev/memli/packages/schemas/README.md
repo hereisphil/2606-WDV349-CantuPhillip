@@ -13,6 +13,7 @@ Use this package for validation at API boundaries, forms, and env parsing. **Do 
 | `@workspace/schemas/api/health` | `GET /api/health` response |
 | `@workspace/schemas/api/history` | `GET /api/history`: its `timeZone` query and `StudyHistoryData` (the week, days of study, retention, new words) |
 | `@workspace/schemas/api/study` | `GET /api/courses/:courseId/study`: the `mode` and `extra` query, and `StudySession` (cards with progress) |
+| `@workspace/schemas/auth/session` | `GET /api/auth/get-session`: the signed-in learner, or `null` |
 | `@workspace/schemas/auth/sign-in` | Sign-in form input |
 | `@workspace/schemas/auth/sign-up` | Sign-up form input, `passwordSchema`, and the password rules and name limit the API enforces too |
 | `@workspace/schemas/content/course` | `Course` (title, `learningLanguage`, `answerLanguage`) and `CourseCards` (the cards to study). A course, never a "deck", in code as on screen |

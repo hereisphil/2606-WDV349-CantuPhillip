@@ -25,6 +25,7 @@
     "./api/history": "./src/api/history.ts",
     "./api/study": "./src/api/study.ts",
     "./auth/sign-in": "./src/auth/sign-in.ts",
+    "./auth/session": "./src/auth/session.ts",
     "./auth/sign-up": "./src/auth/sign-up.ts",
     "./content/card": "./src/content/card.ts",
     "./content/course": "./src/content/course.ts",

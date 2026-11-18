@@ -110,7 +110,7 @@ To guarantee the core learning loop ships first without getting blocked on authe
    - Scaffold `apps/api` (Hono + Drizzle ORM + Cloudflare D1/SQLite) and shared course/review schemas in `@workspace/schemas` (#106), persisting seeded mnemonic courses and FSRS card state for `usr_prototype_01` (#112). The streak count follows the "days of study" rule in [`REDESIGN.md` section 5.7](../../../docs/designs/REDESIGN.md): any study counts, and one day off is forgiven.
    - Redesign `/dashboard` around one focal point (#151): a navy study hero with one amber button, a visible Match my device / Light / Dark theme control with real dark mode, three-tier OKLCH color tokens checked against WCAG 2.2 and APCA, plain words (course, words, to review), and a calmer This week, course list, tip card and "Your progress". Plan: [`docs/designs/REDESIGN.md`](../../../docs/designs/REDESIGN.md).
 4. **`359 MS 4` (Week 4 — MVP Polish, Auth Integration & Beta Showcase):**
-   - Replace the `/signin` prototype bypass with real Better Auth Email/Password (#108) and Google OAuth / Passkeys (#107) by swapping the inside of `useViewer()`.
+   - Replace the `/signin` prototype bypass with real Better Auth Email/Password (#108) by swapping the inside of `useViewer()`, with route guards on `/dashboard` and `/study/$courseId`. Google OAuth and passkeys (#107) moved to Going Beyond.
    - Gate `TanStackRouterDevtools` to `import.meta.env.DEV` (#113) and promote `dev → stage → main` (#114).
 
 ### Product / UX (still one React app)

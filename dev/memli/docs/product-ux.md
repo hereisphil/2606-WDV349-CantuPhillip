@@ -74,7 +74,10 @@ Products that steal the homepage after login train users to fight their tools (�
 
 - During the prototype milestones (`359 MS 1`–`359 MS 3`, #110), `/signin` had its inputs disabled and a "Skip & Continue to Prototype" button into `/dashboard`, so the study loop could be built before sign-in.
 - Since #108, `/signin` and `/signup` are real forms on Better Auth, and the bypass is removed. A good sign-in lands on `/dashboard`.
-- Until the session swap in #108 lands, `/dashboard` and `/study/$courseId` still read the seeded test user (`usr_prototype_01`) through `useViewer()`.
+- `/dashboard` and `/study/$courseId` need a session. A signed-out visitor is sent to `/signin?redirect=…` and returns to that page after signing in or up. A signed-in learner who opens `/signin` or `/signup` goes straight to `/dashboard`. The guards are `requireViewer` and `redirectViewer` in `apps/web/src/lib/session.ts`.
+- `/` and the other marketing pages never redirect. The header shows **Sign in** to a visitor and the account menu, with **Dashboard**, to a learner.
+- A session that ends mid-visit (any API answer of `UNAUTHORIZED`) is forgotten, and the guard sends the learner to `/signin` with a way back.
+- The return path is only ever a path on this site. `//other.site` and `/\other.site` are dropped (`safeReturnPath`).
 
 ### After logout
 

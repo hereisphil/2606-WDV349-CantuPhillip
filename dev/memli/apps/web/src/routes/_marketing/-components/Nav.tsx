@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
 import { LayoutDashboard } from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
-import { Button } from "@workspace/ui/components/button"
+import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
@@ -22,7 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { cn } from "@workspace/ui/lib/utils"
-import { useViewer, type Viewer } from "@/components/session-provider"
+import { useOptionalViewer } from "@/components/session-provider"
+import type { Viewer } from "@/lib/queries"
 
 const navItemClass =
   "touch-target inline-flex min-h-6 items-center rounded-md px-3 py-1.5 font-ui text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -57,7 +58,7 @@ function ViewerMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={`Account menu, @${viewer.username}`}
+        aria-label={`Account menu, ${viewer.displayName}`}
         render={
           <Button
             variant="ghost"
@@ -73,7 +74,7 @@ function ViewerMenu({
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
             <span className="truncate text-sm font-medium text-foreground">
-              @{viewer.username}
+              {viewer.displayName}
             </span>
             <PlanBadge plan={viewer.plan} />
           </DropdownMenuLabel>
@@ -92,8 +93,34 @@ function ViewerMenu({
   )
 }
 
+/**
+ * The account menu for a signed-in learner, a sign-in link otherwise, and
+ * nothing while the session is still loading, so the header doesn't flicker.
+ */
+function AccountSlot({
+  viewer,
+  onNavigate,
+}: {
+  viewer: Viewer | null | undefined
+  onNavigate?: () => void
+}): JSX.Element | null {
+  if (viewer === undefined) return null
+  if (viewer !== null) {
+    return <ViewerMenu viewer={viewer} onNavigate={onNavigate} />
+  }
+  return (
+    <Link
+      to="/signin"
+      onClick={() => onNavigate?.()}
+      className={cn(buttonVariants({ variant: "outline", size: "touch" }))}
+    >
+      Sign in
+    </Link>
+  )
+}
+
 export function Nav(): JSX.Element {
-  const viewer = useViewer()
+  const viewer = useOptionalViewer()
   const [mobileOpen, setMobileOpen] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
 
@@ -168,7 +195,7 @@ export function Nav(): JSX.Element {
         </div>
 
         <div className="flex justify-end">
-          <ViewerMenu viewer={viewer} />
+          <AccountSlot viewer={viewer} />
         </div>
       </nav>
 
@@ -185,7 +212,10 @@ export function Nav(): JSX.Element {
         </Link>
 
         <div className="flex items-center gap-1">
-          <ViewerMenu viewer={viewer} onNavigate={() => setMobileOpen(false)} />
+          <AccountSlot
+            viewer={viewer}
+            onNavigate={() => setMobileOpen(false)}
+          />
           <Button
             type="button"
             variant="ghost"

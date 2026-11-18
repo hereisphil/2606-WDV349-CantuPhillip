@@ -1,8 +1,10 @@
 import type { JSX } from "react"
 import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { requireViewer } from "@/lib/session"
 import { AppSidebar } from "./_app/-components/AppSidebar"
 
 export const Route = createFileRoute("/_app")({
+  beforeLoad: requireViewer,
   component: AppLayout,
 })
 

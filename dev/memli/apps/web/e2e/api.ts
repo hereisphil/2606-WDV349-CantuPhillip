@@ -296,6 +296,10 @@ export type ApiStub = {
   history?: Partial<StudyHistoryData>
   /** Answers `POST /api/reviews` with a server error. */
   reviewsFail?: boolean
+  /** Starts signed out: `GET /api/auth/get-session` answers `null`. */
+  signedOut?: boolean
+  /** The session ends: `GET /api/courses` answers UNAUTHORIZED, as the API does. */
+  sessionEnds?: boolean
   /** Refuses `POST /api/auth/sign-in/email` the way Better Auth does. */
   signInRefusal?: AuthRefusal
   /** Refuses `POST /api/auth/sign-up/email` the way Better Auth does. */
@@ -316,18 +320,28 @@ function refusal({ status, code }: AuthRefusal): {
   }
 }
 
+/** The learner every spec is signed in as, unless it starts signed out. */
+const learner = {
+  id: "usr_e2e_01",
+  name: "Ana",
+  email: "ana@memli.test",
+  emailVerified: false,
+  image: null,
+  uiLocale: "en",
+}
+
 /** What Better Auth answers when it signs a learner in or up. */
-const signedIn = {
+const signedIn = { json: { token: "e2e-session-token", user: learner } }
+
+/** `GET /api/auth/get-session` for a signed-in learner. */
+const session = {
   json: {
-    token: "e2e-session-token",
-    user: {
-      id: "usr_e2e_01",
-      name: "Ana",
-      email: "ana@memli.test",
-      emailVerified: false,
-      image: null,
-      uiLocale: "en",
+    session: {
+      id: "ses_e2e_01",
+      userId: learner.id,
+      token: "e2e-session-token",
     },
+    user: learner,
   },
 }
 
@@ -346,11 +360,21 @@ async function stubApi(
   // under URLs like /@fs/.../packages/schemas/src/api/courses.ts.
   const path = (pattern: RegExp) => (url: URL) => pattern.test(url.pathname)
 
+  // Signing in or up changes what the session answers, as the real API does.
+  let signedInNow = stub.signedOut !== true
+
   // Anything not stubbed below is a missing route, so a spec fails loudly.
   await page.route(path(/^\/api\//), (route) =>
     route.fulfill({ status: 404, json: { error: { code: "NOT_FOUND" } } })
   )
   await page.route(path(/^\/api\/courses$/), (route) => {
+    if (stub.sessionEnds) {
+      signedInNow = false
+      return route.fulfill({
+        status: 401,
+        json: { error: { code: "UNAUTHORIZED" } },
+      })
+    }
     if (stub.coursesHtml) {
       return route.fulfill({
         contentType: "text/html",
@@ -381,12 +405,19 @@ async function stubApi(
       json: mode === "learn" ? session : { ...session, mode, cards: [] },
     })
   })
-  await page.route(path(/^\/api\/auth\/sign-in\/email$/), (route) =>
-    route.fulfill(stub.signInRefusal ? refusal(stub.signInRefusal) : signedIn)
+  await page.route(path(/^\/api\/auth\/get-session$/), (route) =>
+    route.fulfill(signedInNow ? session : { json: null })
   )
-  await page.route(path(/^\/api\/auth\/sign-up\/email$/), (route) =>
-    route.fulfill(stub.signUpRefusal ? refusal(stub.signUpRefusal) : signedIn)
-  )
+  await page.route(path(/^\/api\/auth\/sign-in\/email$/), (route) => {
+    if (stub.signInRefusal) return route.fulfill(refusal(stub.signInRefusal))
+    signedInNow = true
+    return route.fulfill(signedIn)
+  })
+  await page.route(path(/^\/api\/auth\/sign-up\/email$/), (route) => {
+    if (stub.signUpRefusal) return route.fulfill(refusal(stub.signUpRefusal))
+    signedInNow = true
+    return route.fulfill(signedIn)
+  })
   await page.route(path(/^\/api\/reviews$/), async (route) => {
     const body = route.request().postDataJSON() as {
       reviews: ReviewSubmission[]

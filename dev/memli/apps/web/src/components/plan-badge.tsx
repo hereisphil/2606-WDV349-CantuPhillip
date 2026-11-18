@@ -1,6 +1,6 @@
 import type { JSX } from "react"
 import { Badge } from "@workspace/ui/components/badge"
-import type { ViewerPlan } from "@/components/session-provider"
+import type { ViewerPlan } from "@/lib/queries"
 
 export function PlanBadge({ plan }: { plan: ViewerPlan }): JSX.Element | null {
   if (plan !== "pro") return null

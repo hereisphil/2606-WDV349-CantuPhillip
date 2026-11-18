@@ -1,5 +1,5 @@
 import { Fragment, createElement, useMemo, type ReactNode } from "react"
-import { useViewer } from "@/components/session-provider"
+import { useOptionalViewer } from "@/components/session-provider"
 
 type MessageValues = Record<string, string | number>
 
@@ -207,6 +207,7 @@ function createFormatters(locale: string): Formatters {
 }
 
 export function useFormatters(): Formatters {
-  const { uiLocale } = useViewer()
+  // English until a signed-in learner says otherwise.
+  const uiLocale = useOptionalViewer()?.uiLocale ?? "en"
   return useMemo(() => createFormatters(uiLocale), [uiLocale])
 }
