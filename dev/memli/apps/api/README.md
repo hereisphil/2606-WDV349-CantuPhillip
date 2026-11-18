@@ -222,6 +222,12 @@ Routes never take a user id from the body, the query string or a path. So one le
 
 In tests, `api.request(path, init)` is signed in as the viewer (`usr_prototype_01`) once that learner exists. Pass a third argument to be someone else, or `null` for no session.
 
+### Where a write comes from
+
+Every `POST`, `PUT`, `PATCH` and `DELETE` outside `/api/auth/*` must carry an `Origin` header equal to `BETTER_AUTH_URL`'s origin, or it answers `403` with `FORBIDDEN` (`requireSameOrigin` in [`src/lib/same-origin.ts`](./src/lib/same-origin.ts)). Browsers send `Origin` on every write, so the app never notices, but another site's page can't act with a learner's cookie. A missing `Origin` is refused too. Better Auth checks its own routes the same way.
+
+In tests, `api.request` adds the app's `Origin` to every write, as a browser would. To test a missing one, call `app.request` with `api.env` directly.
+
 ### Checking a request
 
 Routes never read a raw body, query string or path param. `validate` in [`src/lib/validate.ts`](./src/lib/validate.ts) runs a schema from `@workspace/schemas` first:
@@ -255,6 +261,8 @@ The server never writes the sentence a learner reads. The web app maps the code 
 | `INVALID_REQUEST` | 400 | The body or query string is not what the route accepts |
 | `NOT_FOUND` | 404 | No route matched, or the thing asked for does not exist |
 | `UNAUTHORIZED` | 401 | No session, or one that has ended. The learner signs in again |
+| `FORBIDDEN` | 403 | A write whose `Origin` isn't the app's own. See "Where a write comes from" |
+| `RATE_LIMITED` | 429 | Too many requests in a short time. `Retry-After` says how many seconds to wait |
 | `INTERNAL_ERROR` | 500 | A route threw. The details go to the log, never the response |
 
 In a route, send an error with the helper from [`src/lib/errors.ts`](./src/lib/errors.ts):
@@ -434,6 +442,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/lib/errors.ts` | `errorResponse`, plus the app-wide not-found and error handlers. |
 | `src/lib/validate.ts` | `validate`: checks a body or query string against a schema. |
 | `src/lib/viewer.ts` | `requireViewer`, which needs a session, and `viewerId`, who is asking. |
+| `src/lib/same-origin.ts` | `requireSameOrigin`: a write must come from the app's own origin. |
 | `src/lib/auth.ts` | Better Auth's configuration: sign-up, sign-in and sessions under `/api/auth/*`. |
 | `src/test-setup.ts` | Runs before every test. Stands in for the breached-password service. |
 | `src/lib/review-batch.ts` | Pure: reported reviews to new progress, on the server's clock. |

@@ -78,6 +78,11 @@ export async function startTestApi(): Promise<TestApi> {
     env: testEnv,
     request: async (path, init, as = VIEWER_ID) => {
       const headers = new Headers(init?.headers)
+      // A browser on the app's own page sends this with every write.
+      const method = init?.method ?? "GET"
+      if (method !== "GET" && !headers.has("Origin")) {
+        headers.set("Origin", TEST_ORIGIN)
+      }
       const cookie = as === null ? null : await sessionCookie(db, as)
       // A test that sends its own cookie keeps it.
       if (cookie !== null && !headers.has("Cookie")) {

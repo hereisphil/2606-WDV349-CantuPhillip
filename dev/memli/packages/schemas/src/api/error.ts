@@ -11,6 +11,10 @@ export const apiErrorCodeSchema = z.enum([
   "NOT_FOUND",
   /** The request has no session, or its session has ended. Sign in again. */
   "UNAUTHORIZED",
+  /** A write that didn't come from Memli's own pages. */
+  "FORBIDDEN",
+  /** Too many requests in a short time. Wait, then try again. */
+  "RATE_LIMITED",
   /** The server failed. The details are in its log, never in the response. */
   "INTERNAL_ERROR",
 ])

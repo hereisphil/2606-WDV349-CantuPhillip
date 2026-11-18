@@ -167,14 +167,19 @@ describe("requests from another origin", () => {
   it("refuses a write with a cookie and no origin at all", async () => {
     const signUp = await post("/sign-up/email", learner)
 
-    const res = await api.request("/api/auth/sign-out", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: cookiesOf(signUp),
+    // Straight to the app: the test helper adds an Origin to every write.
+    const res = await app.request(
+      "/api/auth/sign-out",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: cookiesOf(signUp),
+        },
+        body: "{}",
       },
-      body: "{}",
-    })
+      api.env
+    )
 
     expect(res.status).toBe(403)
     expect(await api.db.select().from(sessions)).toHaveLength(1)

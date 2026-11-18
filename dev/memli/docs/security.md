@@ -11,6 +11,7 @@ Update this file when a rule changes. A rule listed here should have a test or a
 | Rule | Where | Test |
 | --- | --- | --- |
 | Every body, query string and path param goes through a `@workspace/schemas` Zod schema before a route reads it | `validate()` in `apps/api/src/lib/validate.ts` | `routes/*.test.ts`, "answers INVALID_REQUEST for …" |
+| A write (`POST`, `PUT`, `PATCH`, `DELETE`) must carry the app's own `Origin`, or it answers `FORBIDDEN` | `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` | `same-origin.test.ts` |
 | A JSON body must be sent as `Content-Type: application/json`. A cross-site form can only send form or plain-text bodies, so this also refuses a forged write | `isJson()` in `validate.ts` | `reviews.test.ts` |
 | Ids (course, card, mnemonic) are 1 to 64 characters | `idSchema` in `packages/schemas/src/content/id.ts` | `courses.test.ts`, `reviews.test.ts`, `course.test.ts` |
 | One `POST /api/reviews` holds at most 500 reviews, and each `reviewId` is a UUID | `submitReviewsRequestSchema` in `packages/schemas/src/srs/review.ts` | `reviews.test.ts` |
@@ -91,7 +92,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 - [x] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck` to `true`. Both are set to `false` by name, because Better Auth skips the origin check by itself under a test runner. Tests refuse a write from another origin, with no origin, and from another site's page.
 - [x] Memli's own routes accept only `application/json` bodies (done in #111).
-- [ ] Memli's own write routes check the `Origin` header too (#169).
+- [x] Memli's own write routes check the `Origin` header too (#169). `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` refuses any write outside `/api/auth/*` whose `Origin` isn't `BETTER_AUTH_URL`'s, a missing one included, with `403 FORBIDDEN`. Reads are left alone: without CORS, another site's page can't read the answer.
 
 ### Rate limiting
 

@@ -4,6 +4,7 @@ import { Hono } from "hono"
 import type { AppEnv } from "./env"
 import { auth } from "./lib/auth"
 import { handleError, handleNotFound } from "./lib/errors"
+import { requireSameOrigin } from "./lib/same-origin"
 import { courseRoutes } from "./routes/courses"
 import { historyRoutes } from "./routes/history"
 import { reviewRoutes } from "./routes/reviews"
@@ -23,6 +24,8 @@ app.use(async (c, next) => {
   await next()
   c.header("Cache-Control", "no-store")
 })
+
+app.use(requireSameOrigin)
 
 // Liveness only: the Worker is up and routing. It does not touch the database.
 app.get("/health", (c) => {
