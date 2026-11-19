@@ -179,6 +179,8 @@ export function Nav(): JSX.Element {
   return (
     <header
       ref={headerRef}
+      // The page keeps focused elements clear of this sticky bar (globals.css).
+      data-sticky-header=""
       className={cn(
         "sticky top-0 z-50 w-full",
         mobileOpen

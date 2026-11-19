@@ -421,6 +421,11 @@
   html {
     scrollbar-gutter: stable;
   }
+  /* Under a sticky header, scrolling to a focused element stops below it, so
+     focus is never hidden behind the bar (WCAG 2.4.11). */
+  html:has([data-sticky-header]) {
+    scroll-padding-top: 6rem;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: "Inter Variable", sans-serif;
