@@ -1,5 +1,6 @@
 import type { JSX } from "react"
-import { Check } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { Check, ChevronRight } from "lucide-react"
 import type { CatalogCourse } from "@workspace/schemas/api/catalog"
 import { useFormatters } from "@/lib/formatters"
 import { LanguageBadge } from "@/routes/_app/-components/LanguageBadge"
@@ -17,12 +18,19 @@ function CatalogRow({ course }: { course: CatalogCourse }): JSX.Element {
   const { plural } = useFormatters()
 
   return (
-    <li className="flex items-start gap-3 px-4 py-4">
+    // The title's link covers the whole row (its ::after), so the row is one target with one name.
+    <li className="relative flex items-start gap-3 px-4 py-4 first:rounded-t-xl last:rounded-b-xl hover:bg-muted/60 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-ring">
       <LanguageBadge tag={course.learningLanguage} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         {/* Plain text, not a heading: the list groups the rows (as on the dashboard). */}
         <p className="text-base font-semibold text-pretty wrap-break-word text-foreground-strong">
-          {course.title}
+          <Link
+            to="/courses/$courseId"
+            params={{ courseId: course.courseId }}
+            className="outline-none after:absolute after:inset-0 after:content-['']"
+          >
+            {course.title}
+          </Link>
         </p>
         <p className="text-base text-pretty wrap-break-word text-muted-foreground">
           {course.description}
@@ -40,6 +48,10 @@ function CatalogRow({ course }: { course: CatalogCourse }): JSX.Element {
           ) : null}
         </p>
       </div>
+      <ChevronRight
+        aria-hidden="true"
+        className="mt-0.5 size-5 shrink-0 self-center text-muted-foreground"
+      />
     </li>
   )
 }

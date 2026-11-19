@@ -17,6 +17,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { LanguageMenu } from "@/components/language-menu"
 import { catalogQuery } from "@/lib/queries"
 import { CatalogList } from "../-components/CatalogList"
+import { catalogPageClass } from "../-components/catalog-layout"
 import { CatalogPreviewSwitcher } from "../-components/CatalogPreviewSwitcher"
 import {
   catalogPreviews,
@@ -42,8 +43,7 @@ const messages = {
   },
 } as const
 
-// One container for the list, loading and error, so nothing moves between them.
-const pageClass = "max-w-3xl px-4 pt-4 sm:px-6 sm:pt-8"
+const pageClass = catalogPageClass
 
 type CatalogSearch = {
   preview?: CatalogPreviewName | undefined

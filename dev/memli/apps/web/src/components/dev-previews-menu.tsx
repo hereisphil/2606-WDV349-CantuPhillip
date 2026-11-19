@@ -73,6 +73,17 @@ export default function DevPreviewsMenu(): JSX.Element {
             <DropdownMenuItem
               render={
                 <Link
+                  to="/courses/$courseId"
+                  params={{ courseId: studyCourseId }}
+                  search={{ preview: "learner" }}
+                />
+              }
+            >
+              Course overview
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              render={
+                <Link
                   to="/study/$courseId"
                   params={{ courseId: studyCourseId }}
                   // Learn: a freshly seeded database has nothing to review yet.

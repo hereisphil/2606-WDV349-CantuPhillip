@@ -96,6 +96,7 @@ export default defineConfig([
       "src/routes/_app/-components/PreviewSwitcher.tsx",
       "src/routes/_session/-components/StudyPreviewSwitcher.tsx",
       "src/routes/_catalog/-components/CatalogPreviewSwitcher.tsx",
+      "src/routes/_catalog/-components/OverviewPreviewSwitcher.tsx",
     ],
     rules: {
       "memli/no-restricted-classes": "off",

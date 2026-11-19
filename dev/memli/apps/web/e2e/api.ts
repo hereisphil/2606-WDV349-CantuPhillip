@@ -4,6 +4,7 @@ import type { CourseSummary } from "@workspace/schemas/api/courses"
 import type { StudyHistoryData } from "@workspace/schemas/api/history"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
 import { catalogPreviews } from "../src/routes/_catalog/-components/catalog-previews"
+import { overviewPreviews } from "../src/routes/_catalog/-components/overview-previews"
 import { spanishLearnSession } from "../src/routes/_session/-components/study-fixture"
 
 /**
@@ -213,16 +214,60 @@ async function stubApi(
         : { json: { courses: stub.courses ?? courses } }
     )
   })
-  // Public, like the real route: a visitor gets the same courses, none added.
+  // Public, like the real routes: a visitor gets the same courses, none added.
+  const published = stub.catalog ?? catalogPreviews.default.courses
+  const added = new Set(
+    published.filter((course) => course.added).map((course) => course.courseId)
+  )
   await page.route(path(/^\/api\/catalog$/), (route) => {
     if (stub.catalogFail) return route.fulfill(serverError)
-    const published = stub.catalog ?? catalogPreviews.default.courses
     return route.fulfill({
       json: {
         courses: published.map((course) => ({
           ...course,
-          added: signedInNow && course.added,
+          added: signedInNow && added.has(course.courseId),
         })),
+      },
+    })
+  })
+  await page.route(path(/^\/api\/catalog\/[^/]+$/), (route) => {
+    const courseId = decodeURIComponent(
+      new URL(route.request().url()).pathname.split("/").at(-1) ?? ""
+    )
+    const course = published.find((row) => row.courseId === courseId)
+    if (course === undefined) {
+      return route.fulfill({
+        status: 404,
+        json: { error: { code: "NOT_FOUND" } },
+      })
+    }
+    // The preview's details and sample words, under this course's own fields.
+    return route.fulfill({
+      json: {
+        ...overviewPreviews.visitor.course,
+        ...course,
+        added: signedInNow && added.has(courseId),
+      },
+    })
+  })
+  await page.route(path(/^\/api\/courses\/[^/]+\/enrollment$/), (route) => {
+    if (!signedInNow) {
+      return route.fulfill({
+        status: 401,
+        json: { error: { code: "UNAUTHORIZED" } },
+      })
+    }
+    const courseId = decodeURIComponent(
+      new URL(route.request().url()).pathname.split("/").at(-2) ?? ""
+    )
+    const adding = route.request().method() === "PUT"
+    if (adding) added.add(courseId)
+    else added.delete(courseId)
+    return route.fulfill({
+      json: {
+        courseId,
+        added: adding,
+        addedAt: adding ? new Date().toISOString() : null,
       },
     })
   })

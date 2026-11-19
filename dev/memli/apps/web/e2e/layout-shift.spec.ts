@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 import { previewNames } from "../src/routes/_app/-components/dashboard-previews"
 import { catalogPreviewNames } from "../src/routes/_catalog/-components/catalog-previews"
+import { overviewPreviewNames } from "../src/routes/_catalog/-components/overview-previews"
 
 /**
  * A page that scrolls and one that doesn't sit in the same place. A scrollbar
@@ -56,6 +57,13 @@ test("every catalog preview starts at the same place", async ({ page }) => {
   const starts: Record<string, number> = {}
   for (const name of catalogPreviewNames) {
     starts[name] = await contentStart(page, `/courses?preview=${name}`)
+  }
+  // The overview shares the catalog's container, in every state.
+  for (const name of overviewPreviewNames) {
+    starts[`overview ${name}`] = await contentStart(
+      page,
+      `/courses/spanish-core-1000?preview=${name}`
+    )
   }
 
   expect(new Set(Object.values(starts)).size, JSON.stringify(starts)).toBe(1)

@@ -1,12 +1,18 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "./api"
 import { catalogPreviewNames } from "../src/routes/_catalog/-components/catalog-previews"
+import { overviewPreviewNames } from "../src/routes/_catalog/-components/overview-previews"
 
 /** The public catalog (#174): every preview, signed out and signed in, both themes. */
 const paths = [
   "/courses",
   "/courses?language=ja",
   ...catalogPreviewNames.map((name) => `/courses?preview=${name}`),
+  "/courses/spanish-core-1000",
+  "/courses/nope",
+  ...overviewPreviewNames.map(
+    (name) => `/courses/spanish-core-1000?preview=${name}`
+  ),
 ]
 
 for (const signedOut of [true, false]) {

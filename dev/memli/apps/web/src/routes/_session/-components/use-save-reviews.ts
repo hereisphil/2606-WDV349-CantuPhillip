@@ -2,7 +2,12 @@ import { useEffect, useRef } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { SessionReview } from "@workspace/core/study/session-reducer"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
-import { coursesQuery, historyQuery, submitReviews } from "@/lib/queries"
+import {
+  catalogQuery,
+  coursesQuery,
+  historyQuery,
+  submitReviews,
+} from "@/lib/queries"
 
 type SaveReviews = {
   /** Some reviews could not be saved, even after retrying. */
@@ -30,7 +35,12 @@ export function useSaveReviews(
     // by the time it opens.
     onSuccess: () =>
       Promise.all(
-        [coursesQuery.queryKey, historyQuery.queryKey].map((queryKey) =>
+        // A first review adds its course, so the catalog's "Added" changes too.
+        [
+          coursesQuery.queryKey,
+          historyQuery.queryKey,
+          catalogQuery.queryKey,
+        ].map((queryKey) =>
           queryClient.invalidateQueries({ queryKey, refetchType: "all" })
         )
       ),

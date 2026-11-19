@@ -107,17 +107,24 @@ test.describe("catalog pseudo-localization", () => {
         for (const { width, height } of sizes) {
           test(`${mode} ${width}x${height}`, async ({ page }) => {
             await page.setViewportSize({ width, height })
-            await page.goto(`/courses?preview=long-text&pseudo=${mode}`, {
-              waitUntil: "networkidle",
-            })
-            await expect(page.locator("main h1")).toBeVisible()
+            // The list, and the overview with its longest title, words and credit.
+            for (const path of [
+              "/courses?preview=long-text",
+              "/courses/german-a1?preview=long-text",
+              "/courses/spanish-core-1000?preview=added",
+            ]) {
+              await page.goto(`${path}&pseudo=${mode}`, {
+                waitUntil: "networkidle",
+              })
+              await expect(page.locator("main h1")).toBeVisible()
 
-            const pageWidth = await page.evaluate(
-              () => document.documentElement.scrollWidth
-            )
-            expect(pageWidth, "the page scrolls sideways").toBeLessThanOrEqual(
-              width
-            )
+              const pageWidth = await page.evaluate(
+                () => document.documentElement.scrollWidth
+              )
+              expect(pageWidth, `${path} scrolls sideways`).toBeLessThanOrEqual(
+                width
+              )
+            }
           })
         }
       }

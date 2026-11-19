@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test"
 import { expect, test } from "./api"
 import { previewNames } from "../src/routes/_app/-components/dashboard-previews"
 import { catalogPreviewNames } from "../src/routes/_catalog/-components/catalog-previews"
+import { overviewPreviewNames } from "../src/routes/_catalog/-components/overview-previews"
 import { studyPreviewNames } from "../src/routes/_session/-components/study-previews"
 
 /**
@@ -18,6 +19,10 @@ const paths = [
   "/courses",
   "/courses?language=ja",
   ...catalogPreviewNames.map((name) => `/courses?preview=${name}`),
+  "/courses/spanish-core-1000",
+  ...overviewPreviewNames.map(
+    (name) => `/courses/spanish-core-1000?preview=${name}`
+  ),
 ]
 
 const MIN_TEXT_PX = 14
