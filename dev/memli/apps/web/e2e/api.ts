@@ -109,6 +109,11 @@ export function manyCourses(): CourseSummary[] {
 }
 
 export type ApiStub = {
+  /**
+   * A learner with no courses yet. The dashboard starts empty and lists what
+   * they add, by button or by a first saved review, as `apps/api` does.
+   */
+  newLearner?: boolean
   /** Replaces the published courses `GET /api/catalog` answers. */
   catalog?: CatalogCourse[]
   /** Answers `GET /api/catalog` with a server error. */
@@ -190,6 +195,37 @@ async function stubApi(
   // Signing in or up changes what the session answers, as the real API does.
   let signedInNow = stub.signedOut !== true
 
+  // Which courses are on the dashboard. Adding one, or a first review, changes it.
+  const published = stub.catalog ?? catalogPreviews.default.courses
+  const added = new Set(
+    stub.newLearner
+      ? []
+      : published
+          .filter((course) => course.added)
+          .map((course) => course.courseId)
+  )
+
+  /** A course just added: every word new, nothing to review yet. */
+  const freshSummary = (course: CatalogCourse): CourseSummary => ({
+    courseId: course.courseId,
+    title: course.title,
+    learningLanguage: course.learningLanguage,
+    answerLanguage: course.answerLanguage,
+    dueCount: 0,
+    newAvailable: Math.min(10, course.wordCount),
+    masteredCount: 0,
+    learningCount: 0,
+    unseenCount: course.wordCount,
+    trickyCount: 0,
+    lastReviewedAt: null,
+  })
+  const dashboardCourses = (): CourseSummary[] =>
+    stub.newLearner
+      ? published
+          .filter((course) => added.has(course.courseId))
+          .map(freshSummary)
+      : (stub.courses ?? courses)
+
   // Anything not stubbed below is a missing route, so a spec fails loudly.
   await page.route(path(/^\/api\//), (route) =>
     route.fulfill({ status: 404, json: { error: { code: "NOT_FOUND" } } })
@@ -209,16 +245,10 @@ async function stubApi(
       })
     }
     return route.fulfill(
-      stub.coursesFail
-        ? serverError
-        : { json: { courses: stub.courses ?? courses } }
+      stub.coursesFail ? serverError : { json: { courses: dashboardCourses() } }
     )
   })
   // Public, like the real routes: a visitor gets the same courses, none added.
-  const published = stub.catalog ?? catalogPreviews.default.courses
-  const added = new Set(
-    published.filter((course) => course.added).map((course) => course.courseId)
-  )
   await page.route(path(/^\/api\/catalog$/), (route) => {
     if (stub.catalogFail) return route.fulfill(serverError)
     return route.fulfill({
@@ -311,6 +341,8 @@ async function stubApi(
       reviews: ReviewSubmission[]
     }
     reviews.push(...body.reviews)
+    // The fixture's study session is Spanish Core 1000: studying it adds it.
+    if (body.reviews.length > 0) added.add("spanish-core-1000")
     await route.fulfill(
       stub.reviewsFail ? serverError : { json: { progress: [] } }
     )
