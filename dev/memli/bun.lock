@@ -102,6 +102,7 @@
         "zod": "^4.4.3",
       },
       "devDependencies": {
+        "@types/node": "26",
         "@workspace/eslint-config": "workspace:*",
         "@workspace/typescript-config": "workspace:*",
         "eslint": "^10",

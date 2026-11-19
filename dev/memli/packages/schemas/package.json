@@ -12,6 +12,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/node": "26",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^10",
@@ -31,6 +32,7 @@
     "./auth/sign-up": "./src/auth/sign-up.ts",
     "./content/card": "./src/content/card.ts",
     "./content/course": "./src/content/course.ts",
+    "./content/course-file": "./src/content/course-file.ts",
     "./content/id": "./src/content/id.ts",
     "./content/mnemonic": "./src/content/mnemonic.ts",
     "./env/api": "./src/env/api.ts",

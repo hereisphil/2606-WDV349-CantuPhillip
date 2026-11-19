@@ -1,0 +1,63 @@
+{
+  "format": "memli-course/1",
+  "course": {
+    "courseId": "spanish-kitchen",
+    "title": "Spanish in the Kitchen",
+    "learningLanguage": "es",
+    "answerLanguage": "en",
+    "description": "Words for cooking and eating, from the fridge to the table.",
+    "published": true,
+    "source": "Written for Memli",
+    "license": "CC BY 4.0",
+    "attribution": "Spanish in the Kitchen, by Memli, under CC BY 4.0."
+  },
+  "cards": [
+    {
+      "cardId": "es-kitchen-cocinar",
+      "term": "cocinar",
+      "partOfSpeech": "verb",
+      "answers": ["to cook", "cook"],
+      "phonetic": "/ko.θiˈnaɾ/",
+      "example": {
+        "text": "Me gusta cocinar los domingos.",
+        "translation": "I like to cook on Sundays."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-kitchen-cocinar-1",
+          "contentLocale": "en",
+          "story": [
+            { "kind": "plain", "text": "A " },
+            { "kind": "keyword", "text": "cozy" },
+            { "kind": "plain", "text": " kitchen, where you " },
+            { "kind": "term", "text": "cocinar" },
+            { "kind": "plain", "text": " all day." }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-kitchen-cuchara",
+      "term": "cuchara",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["spoon"],
+      "phonetic": "/kuˈtʃa.ɾa/",
+      "example": {
+        "text": "Necesito una cuchara para la sopa.",
+        "translation": "I need a spoon for the soup."
+      }
+    },
+    {
+      "cardId": "es-kitchen-tengo-hambre",
+      "term": "tengo hambre",
+      "partOfSpeech": "phrase",
+      "answers": ["I'm hungry", "I am hungry"],
+      "phonetic": "/ˈteŋ.ɡo ˈam.bɾe/",
+      "example": {
+        "text": "¿Cenamos ya? Tengo hambre.",
+        "translation": "Shall we eat now? I'm hungry."
+      }
+    }
+  ]
+}
