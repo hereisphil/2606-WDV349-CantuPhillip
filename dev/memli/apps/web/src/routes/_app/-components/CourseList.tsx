@@ -36,7 +36,6 @@ const messages = {
     other: "Show all {count} courses",
   },
   showFewer: "Show fewer courses",
-  findAnother: "Find another course",
 } as const
 
 /** Rows shown before "Show all". */
@@ -106,29 +105,22 @@ function CourseRow({ course }: { course: DashboardCourse }): JSX.Element {
 }
 
 /**
- * The learner's courses other than the hero's, most in need first. The
- * Studying menu (`filter`) sits in the header and narrows only this list.
+ * The other courses, most in need first; left out when there are none.
+ * The Studying menu (`filter`) in the header narrows only this list.
  */
 export function CourseList({
   courses,
   filter,
-  showFindAnother,
   className,
 }: {
   courses: readonly DashboardCourse[]
   filter: ReactNode
-  /** With no other courses, a dashed row offers to find one, unless the hero already does. */
-  showFindAnother: boolean
   /** Grid placement from the page. */
   className?: string | undefined
-}): JSX.Element | null {
+}): JSX.Element {
   const { plural } = useFormatters()
   const [expanded, setExpanded] = useState(false)
   const listId = useId()
-
-  if (courses.length === 0 && !showFindAnother) {
-    return null
-  }
 
   const hidden = courses.length - VISIBLE_ROWS
   const shown = expanded ? courses : courses.slice(0, VISIBLE_ROWS)
@@ -144,25 +136,14 @@ export function CourseList({
         </Heading>
         {filter}
       </div>
-      {courses.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-border-strong p-4">
-          <Link
-            to="/community"
-            className="inline-flex min-h-11 items-center text-base font-semibold text-link underline underline-offset-4"
-          >
-            {messages.findAnother}
-          </Link>
-        </div>
-      ) : (
-        <ul
-          id={listId}
-          className="divide-y rounded-xl border bg-card shadow-xs dark:shadow-none"
-        >
-          {shown.map((course) => (
-            <CourseRow key={course.courseId} course={course} />
-          ))}
-        </ul>
-      )}
+      <ul
+        id={listId}
+        className="divide-y rounded-xl border bg-card shadow-xs dark:shadow-none"
+      >
+        {shown.map((course) => (
+          <CourseRow key={course.courseId} course={course} />
+        ))}
+      </ul>
       {hidden > 0 ? (
         <Button
           variant="ghost"
