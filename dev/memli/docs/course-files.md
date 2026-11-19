@@ -1,6 +1,6 @@
 # Course files
 
-A course reaches a real database as one JSON file (#174). The import script reads the file, checks it, and adds or updates the course, its words and their starter mnemonics. The prototype seed (`apps/api/seed/prototype.sql`) is for local development and staging only; course files are how real courses reach staging and production.
+A course reaches a real database as one JSON file (#174). The import script (`bun run db:import-course`, in [`apps/api/README.md`](../apps/api/README.md#importing-a-course)) reads the file, checks it, and adds or updates the course, its words and their starter mnemonics. The prototype seed (`apps/api/seed/prototype.sql`) is for local development and staging only; course files are how real courses reach staging and production.
 
 The schema is `courseFileSchema` in [`@workspace/schemas/content/course-file`](../packages/schemas/src/content/course-file.ts). A full, valid example is [`course-file.example.json`](./course-file.example.json), and a test parses it, so this page and the schema can't drift apart.
 
@@ -62,7 +62,7 @@ The same shape a learner's mnemonic has, without what belongs to learners:
 | `story` | Parts, never markup: `plain` text, the `term` being learned, and the `keyword` that sounds like it |
 | `image` | Optional: `{ "src": "/mnemonics/…", "alt": "…" }`. A path on Memli's own site, and a description of the picture |
 
-No `author` and no `upvotes`: a course's starter mnemonics are Memli's, and votes come from learners. How the app credits them is decided with the import script.
+No `author` and no `upvotes`: votes come from learners. The import credits every starter mnemonic to **Memli**, so the study screen shows "By Memli" like any other author.
 
 ## Rules the schema enforces
 

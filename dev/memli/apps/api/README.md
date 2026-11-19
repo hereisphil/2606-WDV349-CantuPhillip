@@ -498,6 +498,29 @@ Things worth knowing:
 
 To add a word, add a row to the `cards` insert with the next `position` in its course. The comments at the top of the file cover the two quoting rules (SQL doubles a quote, JSON uses double quotes).
 
+### Importing a course
+
+Real courses reach a database as course files ([`docs/course-files.md`](../../docs/course-files.md)), never through the prototype seed.
+
+```bash
+bun run db:import-course ../../docs/course-file.example.json                    # into your local database
+bun run db:import-course path/to/course.json --target staging                  # shows what would change
+bun run db:import-course path/to/course.json --target staging --yes            # imports it
+```
+
+It runs from `apps/api` with your own Wrangler login, so only someone who can already change the database can import. It:
+
+1. **Checks the file** with `courseFileSchema` and lists every problem by its place in the file (`cards.2.cardId: …`).
+2. **Asks the database** what the import would change (read-only queries from `importChecks`). It stops if a card or mnemonic id already belongs to another course or to a learner, or if the file has dropped words the course has now: deleting a word deletes every learner's progress on it. `--remove-missing` allows that, on purpose.
+3. **Prints a summary**, and for staging stops there unless you add `--yes`.
+4. **Imports the file as one SQL file** (`importStatements` in [`src/import/course-import.ts`](./src/import/course-import.ts)) through `wrangler d1 execute`.
+
+Running it again is safe. Every row is an upsert by id, so an unchanged file changes nothing, and words keep their ids, so learners' progress and votes stay. Reordering the file reorders the course. A course keeps the date it was first published; `"published": false` hides it again.
+
+**Starter mnemonics are credited to Memli**: a `users` row, `usr_memli`, named "Memli", with an `.invalid` email and no account, so no one can sign in as it. A starter mnemonic the file no longer has is deleted; learners' own mnemonics are never touched.
+
+**Production** has no database yet. #114 creates it, then adds it to `targets` in [`src/scripts/import-course.ts`](./src/scripts/import-course.ts).
+
 ### Changing the schema
 
 1. Edit `src/db/schema.ts`.
@@ -551,6 +574,8 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `src/db/client.ts`          | Drizzle around the D1 binding, `runTogether` (one transaction) and `idGroups`.                                                               |
 | `src/db/schema.ts`          | The tables, in Drizzle.                                                                                                                      |
 | `src/db/content.ts`         | Reads courses, cards and mnemonics as `@workspace/schemas` shapes.                                                                           |
+| `src/import/course-import.ts` | Turns a course file into import SQL, and the checks to run first. |
+| `src/scripts/import-course.ts` | `bun run db:import-course`: checks, confirms and imports a course file through Wrangler. |
 | `src/db/progress.ts`        | Reads and saves `user_progress` as core's `CardProgress`.                                                                                    |
 | `src/db/enrollments.ts`     | Which courses a learner added to their dashboard: read, add and remove.                                                                      |
 | `src/db/reviews.ts`         | Writes the review log with progress; reads it back for history and the daily limit.                                                          |
@@ -580,6 +605,7 @@ To start over locally, delete `.wrangler/state` and run `bun run db:setup`.
 | `bun run build`              | `wrangler deploy --dry-run`: bundles the Worker and uploads nothing. It fails if an import cannot run on Workers.      |
 | `bun run db:migrate:staging` | Apply new migrations to `memli-staging`. The staging deploy runs it first                                              |
 | `bun run db:seed:staging`    | Seed `memli-staging`. Run by hand after changing the seed; deploys don't                                               |
+| `bun run db:import-course <file>` | Import a course file into the local database, or `--target staging --yes`. See "Importing a course" |
 | `bun run deploy:staging`     | Deploy `memli-api-staging`. The staging deploy runs it before the gate Worker                                          |
 
 ## Rules
