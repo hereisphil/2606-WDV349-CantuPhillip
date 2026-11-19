@@ -13,6 +13,7 @@ import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { Text } from "@workspace/ui/components/text"
+import { cn } from "@workspace/ui/lib/utils"
 import { LanguageMenu } from "@/components/language-menu"
 import { catalogQuery } from "@/lib/queries"
 import { CatalogList } from "../-components/CatalogList"
@@ -40,6 +41,9 @@ const messages = {
     retry: "Try again",
   },
 } as const
+
+// One container for the list, loading and error, so nothing moves between them.
+const pageClass = "max-w-3xl px-4 pt-4 sm:px-6 sm:pt-8"
 
 type CatalogSearch = {
   preview?: CatalogPreviewName | undefined
@@ -95,9 +99,9 @@ function Catalog(): JSX.Element {
   if (import.meta.env.DEV && preview !== undefined) {
     const seeded = catalogPreviews[preview]
     const switcher = (
-      <div className="px-4 pt-4 sm:px-6 sm:pt-8">
+      <Section padding="none" className={pageClass}>
         <CatalogPreviewSwitcher current={preview} />
-      </div>
+      </Section>
     )
     if (seeded.loadFailed === true || seeded.loading === true) {
       return (
@@ -141,7 +145,7 @@ function CatalogView({
   return (
     <Section
       padding="compact"
-      className="flex max-w-3xl flex-col gap-6 px-4 pt-4 pb-12 sm:gap-8 sm:px-6 sm:pt-8"
+      className={cn(pageClass, "flex flex-col gap-6 pb-12 sm:gap-8")}
     >
       {import.meta.env.DEV && search.preview !== undefined ? (
         <CatalogPreviewSwitcher current={search.preview} />
@@ -190,7 +194,7 @@ function CatalogView({
 /** Shown only if the courses take more than a second to arrive. */
 function CatalogPending(): JSX.Element {
   return (
-    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+    <Section padding="compact" className={pageClass}>
       <div
         role="status"
         className="flex items-center gap-3 text-muted-foreground"
@@ -205,7 +209,7 @@ function CatalogPending(): JSX.Element {
 function CatalogError({ reset }: ErrorComponentProps): JSX.Element {
   const router = useRouter()
   return (
-    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+    <Section padding="compact" className={pageClass}>
       <div
         role="alert"
         className="flex max-w-xl flex-col items-start gap-4 rounded-xl border border-border bg-card p-6"

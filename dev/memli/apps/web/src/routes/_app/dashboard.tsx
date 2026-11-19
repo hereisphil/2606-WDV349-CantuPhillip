@@ -107,9 +107,10 @@ function Dashboard(): JSX.Element {
     if (seeded.loadFailed === true) {
       return (
         <>
-          <div className="px-4 pt-4 sm:px-6 sm:pt-8">
+          {/* The page's own container, so the switcher sits where it does in every other preview. */}
+          <Section padding="none" className="px-4 pt-4 sm:px-6 sm:pt-8">
             <PreviewSwitcher current={preview} />
-          </div>
+          </Section>
           <DashboardError error={new Error("preview")} reset={() => {}} />
         </>
       )
