@@ -44,6 +44,33 @@ test.describe("a visitor", () => {
     expect(redirect).toBe("/study/spanish-core-1000?mode=learn")
   })
 
+  test("can go back to the course from sign-up, and from sign-in", async ({
+    page,
+  }) => {
+    await page.goto(spanish, { waitUntil: "networkidle" })
+    await page
+      .locator("main")
+      .getByRole("link", { name: "Start learning", exact: true })
+      .click()
+    await expect(page).toHaveURL(/\/signup\?/)
+
+    // Named by the course, not "Home": that is where the visitor came from.
+    const back = page.locator("main").getByRole("link", {
+      name: "Spanish Core 1000",
+    })
+    await expect(back).toHaveAttribute("href", spanish)
+
+    // Switching to sign-in keeps the course, and so does its back link.
+    await page.getByRole("link", { name: "Sign in" }).last().click()
+    await expect(page).toHaveURL(/\/signin\?/)
+    await page
+      .locator("main")
+      .getByRole("link", { name: "Spanish Core 1000" })
+      .click()
+    await expect(page).toHaveURL(new RegExp(`${spanish}$`))
+    await expect(page.locator("main h1")).toHaveText("Spanish Core 1000")
+  })
+
   test("sees the course's first words and where they came from", async ({
     page,
   }) => {
