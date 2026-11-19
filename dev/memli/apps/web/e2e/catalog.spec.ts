@@ -183,3 +183,69 @@ test.describe("finding the catalog", () => {
     })
   })
 })
+
+test.describe("the dashboard leads to the catalog", () => {
+  test("with no courses, Find a course opens it", async ({ page }) => {
+    await page.goto("/dashboard?preview=no-courses", {
+      waitUntil: "networkidle",
+    })
+
+    await expect(
+      page.locator("main").getByRole("link", { name: "Find a course" })
+    ).toHaveAttribute("href", "/courses")
+  })
+
+  test("with everything done, Find another course opens the same language", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard?preview=finished", {
+      waitUntil: "networkidle",
+    })
+
+    await expect(
+      page.locator("main").getByRole("link", { name: "Find another course" })
+    ).toHaveAttribute("href", "/courses?language=es")
+  })
+
+  test("the list of other courses ends with Browse courses", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard?preview=default", {
+      waitUntil: "networkidle",
+    })
+    const list = page.getByRole("region", { name: "Your other courses" })
+
+    await expect(
+      list.getByRole("link", { name: "Browse courses" })
+    ).toHaveAttribute("href", "/courses")
+  })
+})
+
+test.describe("signing up and in", () => {
+  test.use({ api: { signedOut: true } })
+
+  test("the footer's Start Learning Free makes an account", async ({
+    page,
+  }) => {
+    await page.goto("/", { waitUntil: "networkidle" })
+
+    await expect(
+      page.getByRole("link", { name: "Start Learning Free" })
+    ).toHaveAttribute("href", "/signup")
+  })
+
+  for (const path of ["/signin", "/signup"]) {
+    test(`${path} has a way home just above its card`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "networkidle" })
+      const home = page.locator("main").getByRole("link", { name: "Home" })
+
+      await expect(home).toHaveAttribute("href", "/")
+      const link = await home.boundingBox()
+      const card = await page.locator("main [data-slot=card]").boundingBox()
+      expect(link?.x).toBe(card?.x)
+      expect((link?.y ?? 0) + (link?.height ?? 0)).toBeLessThanOrEqual(
+        card?.y ?? 0
+      )
+    })
+  }
+})

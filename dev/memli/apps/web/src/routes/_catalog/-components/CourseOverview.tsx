@@ -1,8 +1,8 @@
 import type { JSX, ReactNode } from "react"
-import { Link } from "@tanstack/react-router"
-import { Check, ChevronLeft } from "lucide-react"
+import { Check } from "lucide-react"
 import type { CatalogCourseDetail } from "@workspace/schemas/api/catalog"
 import { Heading } from "@workspace/ui/components/heading"
+import { BackLink } from "@/components/back-link"
 import { Text } from "@workspace/ui/components/text"
 import { useFormatters } from "@/lib/formatters"
 import { LanguageBadge } from "@/routes/_app/-components/LanguageBadge"
@@ -25,15 +25,7 @@ const messages = {
 
 /** Back to the catalog: shown on the overview and on its not-found state. */
 export function BackToCourses(): JSX.Element {
-  return (
-    <Link
-      to="/courses"
-      className="inline-flex min-h-11 items-center gap-1 self-start text-base font-semibold text-link"
-    >
-      <ChevronLeft aria-hidden="true" className="size-5" />
-      {messages.back}
-    </Link>
-  )
+  return <BackLink to="/courses">{messages.back}</BackLink>
 }
 
 /**

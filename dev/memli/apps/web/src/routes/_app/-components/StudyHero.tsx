@@ -278,8 +278,10 @@ function KeepGoingActions({
 
 /** No amber button on purpose: when everything is done, the right next step is to stop. */
 function DoneContent({
+  course,
   keepGoing,
 }: {
+  course: DashboardCourse
   keepGoing: KeepGoing | null
 }): JSX.Element {
   return (
@@ -298,7 +300,12 @@ function DoneContent({
       </div>
       {keepGoing === null ? (
         <div className={actionsClass}>
-          <Link to="/community" className={quietButtonClass}>
+          {/* Most learners study one language: start with more of the same (#179). */}
+          <Link
+            to="/courses"
+            search={{ language: course.learningLanguage }}
+            className={quietButtonClass}
+          >
             {messages.done.findAnother}
           </Link>
         </div>
@@ -319,7 +326,7 @@ function EmptyContent(): JSX.Element {
         <p className={mutedClass}>{messages.empty.detail}</p>
       </div>
       <div className={actionsClass}>
-        <Link to="/community" className={mainButtonClass}>
+        <Link to="/courses" className={mainButtonClass}>
           {messages.empty.find}
         </Link>
       </div>
@@ -370,7 +377,7 @@ export function StudyHero({ state }: { state: TodayState }): JSX.Element {
       return (
         <HeroFrame>
           <CourseHeading course={state.course} />
-          <DoneContent keepGoing={state.keepGoing} />
+          <DoneContent course={state.course} keepGoing={state.keepGoing} />
           <CourseProgress course={state.course} />
         </HeroFrame>
       )

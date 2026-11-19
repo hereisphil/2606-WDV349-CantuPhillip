@@ -36,6 +36,7 @@ const messages = {
     other: "Show all {count} courses",
   },
   showFewer: "Show fewer courses",
+  browse: "Browse courses",
 } as const
 
 /** Rows shown before "Show all". */
@@ -167,6 +168,12 @@ export function CourseList({
           />
         </Button>
       ) : null}
+      <Link
+        to="/courses"
+        className="inline-flex min-h-11 items-center self-start text-base font-semibold text-link underline underline-offset-4"
+      >
+        {messages.browse}
+      </Link>
     </section>
   )
 }

@@ -5,7 +5,12 @@ import {
   CardDescription,
   CardHeader,
 } from "@workspace/ui/components/card"
+import { BackLink } from "@/components/back-link"
 import { BrandMark } from "@/components/brand-mark"
+
+const messages = {
+  home: "Home",
+} as const
 
 /** A link inside an auth card's sentence. Tall enough to tap (44 px). */
 export const authLinkClass =
@@ -22,7 +27,9 @@ export function AuthCard({
   children: ReactNode
 }): JSX.Element {
   return (
-    <div className="w-full max-w-md">
+    // The way out sits with the card, where the eye already is, not in the page's corner.
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <BackLink to="/">{messages.home}</BackLink>
       <Card className="shadow-sm [--card-spacing:--spacing(6)]">
         <CardHeader className="items-center text-center">
           <div className="flex justify-center text-primary">

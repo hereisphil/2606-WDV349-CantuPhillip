@@ -19,8 +19,9 @@ export function Footer(): JSX.Element {
             with Memli.
           </p>
           <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+            {/* "Start" means a new account, so sign-up, not sign-in. */}
             <Link
-              to="/signin"
+              to="/signup"
               className={cn(
                 buttonVariants({ size: "touch" }),
                 footerButtonClass
