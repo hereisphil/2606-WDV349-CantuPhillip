@@ -11,7 +11,7 @@ import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { Text } from "@workspace/ui/components/text"
-import { useViewer } from "@/components/session-provider"
+import { useViewer, useViewerIfAny } from "@/components/session-provider"
 import { coursesQuery, historyQuery } from "@/lib/queries"
 import {
   metricsFromApi,
@@ -50,6 +50,10 @@ const messages = {
     retry: "Try again",
   },
 } as const
+
+// Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
+// Shared with the error screen, so the greeting never moves between them.
+const pageClass = "flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
 
 type DashboardSearch = {
   preview?: PreviewName | undefined
@@ -105,15 +109,7 @@ function Dashboard(): JSX.Element {
   if (import.meta.env.DEV && preview !== undefined) {
     const seeded: DashboardPreview = dashboardPreviews[preview]
     if (seeded.loadFailed === true) {
-      return (
-        <>
-          {/* The page's own container, so the switcher sits where it does in every other preview. */}
-          <Section padding="none" className="px-4 pt-4 sm:px-6 sm:pt-8">
-            <PreviewSwitcher current={preview} />
-          </Section>
-          <DashboardError error={new Error("preview")} reset={() => {}} />
-        </>
-      )
+      return <DashboardError error={new Error("preview")} reset={() => {}} />
     }
     return <DashboardView metrics={seeded.metrics} />
   }
@@ -164,11 +160,7 @@ function DashboardView({
     today.status === "caught-up" && today.keepGoing === null
 
   return (
-    <Section
-      padding="compact"
-      // Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
-      className="flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
-    >
+    <Section padding="compact" className={pageClass}>
       {import.meta.env.DEV && preview !== undefined ? (
         <PreviewSwitcher current={preview} />
       ) : null}
@@ -246,15 +238,29 @@ function DashboardPending(): JSX.Element {
   )
 }
 
+/**
+ * Only the courses failed, so the greeting stays and the page keeps its shape.
+ * Time of day: without the courses, a new learner can't be told apart.
+ */
 function DashboardError({ reset }: ErrorComponentProps): JSX.Element {
   const router = useRouter()
+  const { preview } = Route.useSearch()
+  // An ended session also lands here, on its way to /signin: no one to greet.
+  const name = useViewerIfAny()?.displayName
   return (
-    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+    <Section padding="compact" className={pageClass}>
+      {import.meta.env.DEV && preview !== undefined ? (
+        <PreviewSwitcher current={preview} />
+      ) : null}
+      {name === undefined ? null : (
+        <DashboardGreeting name={name} hasCourses now={new Date()} />
+      )}
       <div
         role="alert"
         className="flex max-w-xl flex-col items-start gap-4 rounded-xl border border-border bg-card p-6"
       >
-        <Heading level={1} size="3">
+        {/* The greeting is the page's heading; this card is a part of it. */}
+        <Heading level={name === undefined ? 1 : 2} size="3">
           {messages.error.heading}
         </Heading>
         <Text variant="muted">{messages.error.body}</Text>

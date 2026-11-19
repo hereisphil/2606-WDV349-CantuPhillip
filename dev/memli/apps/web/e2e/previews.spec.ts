@@ -102,6 +102,13 @@ test.describe("error previews", () => {
 
     await expect(page.getByRole("alert")).toBeVisible()
     await expect(page.getByRole("button", { name: "Try again" })).toBeVisible()
+    // Only the courses failed: the learner is still greeted, by time of day.
+    await expect(page.locator("main h1")).toHaveText(
+      /^Good (morning|afternoon|evening), Phillip$/
+    )
+    await expect(page.getByRole("alert").getByRole("heading")).toHaveText(
+      "We couldn't load your courses"
+    )
     await expectNoViolations(page)
   })
 

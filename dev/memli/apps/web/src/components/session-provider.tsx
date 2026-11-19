@@ -39,15 +39,25 @@ export function useOptionalViewer(): Viewer | null | undefined {
 }
 
 /**
- * The signed-in learner, on pages behind a route guard (`requireViewer` in
- * src/lib/session.ts), which loads the session before the page renders.
+ * The signed-in learner, or the stand-in on a `?preview=` snapshot, or
+ * `null`. For guarded pages' error screens, which a session ending can reach.
  */
-export function useViewer(): Viewer {
+export function useViewerIfAny(): Viewer | null {
   const viewer = useContext(SessionContext)
   const inPreview = useLocation({
     select: (location) => "preview" in location.search,
   })
   if (viewer !== null && viewer !== undefined) return viewer
   if (previewViewer !== null && inPreview) return previewViewer
+  return null
+}
+
+/**
+ * The signed-in learner, on pages behind a route guard (`requireViewer` in
+ * src/lib/session.ts), which loads the session before the page renders.
+ */
+export function useViewer(): Viewer {
+  const viewer = useViewerIfAny()
+  if (viewer !== null) return viewer
   throw new Error("useViewer is for pages behind requireViewer")
 }
