@@ -27,6 +27,7 @@ import {
   AUTHOR_ID,
   VIEWER_ID,
   addCourse,
+  addPublishedCourse,
   addEnrollment,
   addUsers,
   startTestApi,
@@ -98,7 +99,7 @@ async function loggedRows(): Promise<(typeof reviewLog.$inferSelect)[]> {
 
 describe("POST /api/reviews", () => {
   it("schedules a new card with core and saves it for the viewer", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
     const expected = applyOutcome(
       createProgress("spanish-1", now),
       "got_it",
@@ -114,7 +115,7 @@ describe("POST /api/reviews", () => {
   })
 
   it("stamps the review with the server's clock, not the client's", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const slowClock = new Date("2020-01-01T00:00:00.000Z")
 
     const [progress] = await submit([review("spanish-1", "got_it", slowClock)])
@@ -124,7 +125,7 @@ describe("POST /api/reviews", () => {
 
   it("builds the next review on what was saved", async () => {
     // A new review of the same card, with its own id, does count.
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const [first] = await submit([review("spanish-1")])
     if (first === undefined) throw new Error("No progress came back")
     const later = new Date(first.due)
@@ -138,7 +139,7 @@ describe("POST /api/reviews", () => {
   })
 
   it("applies a missed word's two reviews in order, minutes apart", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
     const earlier = new Date(now.getTime() - 5 * minute)
     const missed = applyOutcome(
       createProgress("spanish-1", earlier),
@@ -161,7 +162,7 @@ describe("POST /api/reviews", () => {
   })
 
   it("refuses the whole request when one card does not exist", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
 
     const res = await post({
       reviews: [review("spanish-1"), review("spanish-999")],
@@ -214,7 +215,7 @@ describe("POST /api/reviews", () => {
   ])(
     "answers INVALID_REQUEST for a JSON body sent as %s",
     async (_name, type) => {
-      const [cardId = ""] = await addCourse(api.db, "spanish", 1)
+      const [cardId = ""] = await addPublishedCourse(api.db, "spanish", 1)
 
       const res = await api.request("/api/reviews", {
         method: "POST",
@@ -231,7 +232,7 @@ describe("POST /api/reviews", () => {
   )
 
   it("accepts a JSON content type with a charset", async () => {
-    const [cardId = ""] = await addCourse(api.db, "spanish", 1)
+    const [cardId = ""] = await addPublishedCourse(api.db, "spanish", 1)
 
     const res = await api.request("/api/reviews", {
       method: "POST",
@@ -245,7 +246,7 @@ describe("POST /api/reviews", () => {
   it("saves a request larger than D1 lets one query list", async () => {
     // D1 allows 100 bound values per statement; this request names 120 cards
     // and 120 review ids, and saves 240 rows in one batch.
-    const cardIds = await addCourse(api.db, "spanish", 120)
+    const cardIds = await addPublishedCourse(api.db, "spanish", 120)
 
     const progress = await submit(cardIds.map((cardId) => review(cardId)))
 
@@ -257,7 +258,7 @@ describe("POST /api/reviews", () => {
 
 describe("the review log", () => {
   it("keeps one row per review: the outcome, its rating, and the card before", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const earlier = new Date(now.getTime() - 5 * minute)
     const missed = review("spanish-1", "missed", earlier)
     const gotIt = review("spanish-1", "got_it", now)
@@ -308,7 +309,7 @@ describe("the review log", () => {
   })
 
   it("caps a response time the client did not cap", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
 
     await submit([
       { ...review("spanish-1"), durationMs: 600_000 },
@@ -325,7 +326,7 @@ describe("the review log", () => {
 
 describe("a request sent twice", () => {
   it("counts each review once and answers the same progress", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const reviews = [review("spanish-1")]
 
     const first = await submit(reviews)
@@ -339,7 +340,7 @@ describe("a request sent twice", () => {
   })
 
   it("records only the reviews it has not seen", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
     const sent = review("spanish-1")
     await submit([sent])
 
@@ -355,7 +356,7 @@ describe("a request sent twice", () => {
   it("saves nothing when two copies race and the second reaches the database", async () => {
     // Both copies passed the route's check before either saved. The review id
     // is the primary key, so the second log row fails its whole batch.
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const sent = review("spanish-1")
     const [saved] = await submit([sent])
     if (saved === undefined) throw new Error("No progress came back")
@@ -372,7 +373,7 @@ describe("a request sent twice", () => {
   })
 
   it("counts a review once when one request names it twice", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const sent = review("spanish-1")
 
     const [progress] = await submit([sent, sent])
@@ -393,7 +394,7 @@ describe("after a review", () => {
   }
 
   it("the course list shows the progress, and the card comes due later", async () => {
-    await addCourse(api.db, "spanish", 3)
+    await addPublishedCourse(api.db, "spanish", 3)
     await addEnrollment(api.db, "spanish")
     expect(await spanish()).toMatchObject({ unseenCount: 3, learningCount: 0 })
 
@@ -413,7 +414,7 @@ describe("after a review", () => {
   })
 
   it("the card leaves the learn session and joins the review session when due", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
     const [progress] = await submit([review("spanish-1")])
     const cardIds = async (mode: string): Promise<string[]> => {
       const res = await api.request(`/api/courses/spanish/study?mode=${mode}`)
@@ -441,7 +442,7 @@ describe("studying a course adds it to the dashboard", () => {
   }
 
   it("adds the course with the first saved review, stamped by the server", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
 
     await submit([review("spanish-1")])
 
@@ -449,7 +450,7 @@ describe("studying a course adds it to the dashboard", () => {
   })
 
   it("keeps the day a course was first added", async () => {
-    await addCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "spanish", 2)
     await addEnrollment(api.db, "spanish")
     const [added] = await dashboard()
 
@@ -460,8 +461,8 @@ describe("studying a course adds it to the dashboard", () => {
   })
 
   it("adds each course a request reviews, once", async () => {
-    await addCourse(api.db, "spanish", 2)
-    await addCourse(api.db, "french", 1)
+    await addPublishedCourse(api.db, "spanish", 2)
+    await addPublishedCourse(api.db, "french", 1)
 
     await submit([review("spanish-1"), review("spanish-2"), review("french-1")])
 
@@ -472,7 +473,7 @@ describe("studying a course adds it to the dashboard", () => {
   })
 
   it("never brings back a removed course for a retried old review", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
     const sent = review("spanish-1")
     await submit([sent])
     await api.db.delete(enrollments)
@@ -483,7 +484,7 @@ describe("studying a course adds it to the dashboard", () => {
   })
 
   it("adds nothing when the request is refused", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
 
     const res = await api.request("/api/reviews", {
       method: "POST",
@@ -495,8 +496,40 @@ describe("studying a course adds it to the dashboard", () => {
     expect(await dashboard()).toEqual([])
   })
 
+  it("answers NOT_FOUND for a card in a draft the viewer never added, and saves nothing", async () => {
+    await addPublishedCourse(api.db, "spanish", 1)
+    await addCourse(api.db, "draft", 1)
+    // Someone else's dashboard does not make it the viewer's.
+    await addEnrollment(api.db, "draft", AUTHOR_ID)
+
+    for (const reviews of [
+      [review("draft-1")],
+      [review("spanish-1"), review("draft-1")],
+    ]) {
+      const res = await post({ reviews })
+
+      expect(res.status).toBe(404)
+      expect(apiErrorSchema.parse(await res.json())).toEqual({
+        error: { code: "NOT_FOUND" },
+      })
+    }
+    expect(await dashboard()).toEqual([])
+    expect(await savedRows()).toEqual([])
+    expect(await loggedRows()).toEqual([])
+  })
+
+  it("saves a review in a course the viewer added before it became a draft", async () => {
+    await addCourse(api.db, "retired", 1)
+    await addEnrollment(api.db, "retired")
+
+    const [progress] = await submit([review("retired-1")])
+
+    expect(progress?.cardId).toBe("retired-1")
+    expect(await loggedRows()).toHaveLength(1)
+  })
+
   it("touches only the reviewer's dashboard", async () => {
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
 
     await submit([review("spanish-1")])
 

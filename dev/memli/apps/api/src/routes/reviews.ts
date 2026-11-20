@@ -5,7 +5,7 @@ import {
 import { Hono } from "hono"
 
 import { database } from "../db/client"
-import { courseIdsByCard } from "../db/content"
+import { studyableCourseIdsByCard } from "../db/content"
 import { progressForCards } from "../db/progress"
 import { recordedReviewIds, saveReviews } from "../db/reviews"
 import type { AppEnv } from "../env"
@@ -45,14 +45,15 @@ reviewRoutes.post(
     const cardIds = [...new Set(reviews.map((review) => review.cardId))]
 
     const [courseOf, saved, recorded] = await Promise.all([
-      courseIdsByCard(db, cardIds),
+      studyableCourseIdsByCard(db, userId, cardIds),
       progressForCards(db, userId, cardIds),
       recordedReviewIds(
         db,
         reviews.map((review) => review.reviewId)
       ),
     ])
-    // One unknown card refuses the whole request, so nothing is half saved.
+    // One unknown card refuses the whole request, so nothing is half saved. A
+    // card in a draft the viewer never added counts as unknown (#174).
     if (courseOf.size !== cardIds.length) return errorResponse(c, "NOT_FOUND")
 
     // A request sent twice names the same review ids. Each review counts

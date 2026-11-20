@@ -16,7 +16,7 @@ import { rateLimits } from "../db/schema"
 import {
   AUTHOR_ID,
   VIEWER_ID,
-  addCourse,
+  addPublishedCourse,
   addUsers,
   startTestApi,
   type TestApi,
@@ -196,7 +196,7 @@ describe("limitAddress", () => {
 describe("POST /api/reviews", () => {
   beforeEach(async () => {
     await addUsers(api.db)
-    await addCourse(api.db, "spanish", 1)
+    await addPublishedCourse(api.db, "spanish", 1)
   })
 
   function postReview(as: string): Promise<Response> {

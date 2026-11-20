@@ -2,7 +2,17 @@ import type { SampleWord } from "@workspace/schemas/api/catalog"
 import type { Card } from "@workspace/schemas/content/card"
 import type { Course } from "@workspace/schemas/content/course"
 import type { Mnemonic } from "@workspace/schemas/content/mnemonic"
-import { and, asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm"
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  or,
+  type SQL,
+} from "drizzle-orm"
 
 import { idGroups, type Database } from "./client"
 import { cards, courses, enrollments, mnemonics, users } from "./schema"
@@ -122,6 +132,40 @@ export async function findCourse(
   return row === undefined ? null : courseFromRow(row)
 }
 
+/** Joins this learner's own enrollment, if any, onto each course row. */
+function ownEnrollment(userId: string): SQL | undefined {
+  return and(
+    eq(enrollments.courseId, courses.id),
+    eq(enrollments.userId, userId)
+  )
+}
+
+/**
+ * Who may study a course: anyone once it is published, and a learner who
+ * added it before it became a draft. Needs `ownEnrollment` joined.
+ */
+function studyable(): SQL | undefined {
+  return or(isNotNull(courses.publishedAt), isNotNull(enrollments.userId))
+}
+
+/**
+ * A course this learner may study, or `null`. A draft they never added answers
+ * `null`, the same as a course that does not exist, as on the catalog.
+ */
+export async function findStudyableCourse(
+  db: Database,
+  userId: string,
+  courseId: string
+): Promise<Course | null> {
+  const [row] = await db
+    .select({ course: courses })
+    .from(courses)
+    .leftJoin(enrollments, ownEnrollment(userId))
+    .where(and(eq(courses.id, courseId), studyable()))
+    .limit(1)
+  return row === undefined ? null : courseFromRow(row.course)
+}
+
 /** How many cards each course has, by course id. A course with none is absent. */
 export async function cardCountByCourse(
   db: Database
@@ -183,9 +227,13 @@ export async function cardIdsInOrder(
   return rows.map((row) => row.id)
 }
 
-/** Each card's course, by card id. Ids that do not exist are absent. */
-export async function courseIdsByCard(
+/**
+ * Each card's course, by card id, for cards this learner may study. A card that
+ * does not exist and a card in a draft they never added are both absent.
+ */
+export async function studyableCourseIdsByCard(
   db: Database,
+  userId: string,
   cardIds: readonly string[]
 ): Promise<Map<string, string>> {
   const groups = await Promise.all(
@@ -193,7 +241,9 @@ export async function courseIdsByCard(
       db
         .select({ id: cards.id, courseId: cards.courseId })
         .from(cards)
-        .where(inArray(cards.id, ids))
+        .innerJoin(courses, eq(courses.id, cards.courseId))
+        .leftJoin(enrollments, ownEnrollment(userId))
+        .where(and(inArray(cards.id, ids), studyable()))
     )
   )
   return new Map(groups.flat().map((row) => [row.id, row.courseId]))

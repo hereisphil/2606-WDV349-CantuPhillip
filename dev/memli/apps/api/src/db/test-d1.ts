@@ -237,6 +237,20 @@ export async function publishCourse(
     .where(eq(courses.id, courseId))
 }
 
+/**
+ * A course from `addCourse`, already published: one any learner may study.
+ * Use `addCourse` alone for a draft.
+ */
+export async function addPublishedCourse(
+  db: Database,
+  courseId: string,
+  cardCount: number
+): Promise<string[]> {
+  const cardIds = await addCourse(db, courseId, cardCount)
+  await publishCourse(db, courseId)
+  return cardIds
+}
+
 /** Puts a course on a learner's dashboard, as `PUT …/enrollment` will. */
 export async function addEnrollment(
   db: Database,

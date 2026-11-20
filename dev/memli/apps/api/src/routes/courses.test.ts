@@ -23,6 +23,7 @@ import {
   addReviewLog,
   addMnemonic,
   addProgress,
+  addPublishedCourse,
   addUsers,
   startTestApi,
   type TestApi,
@@ -214,6 +215,37 @@ describe("GET /api/courses/:courseId/study", () => {
     })
   })
 
+  it("answers NOT_FOUND for a draft the viewer never added, as for no course", async () => {
+    await addCourse(api.db, "draft", 3)
+    // Someone else's dashboard does not make it the viewer's.
+    await addEnrollment(api.db, "draft", AUTHOR_ID)
+
+    for (const mode of ["review", "learn", "practice"]) {
+      const res = await api.request(`/api/courses/draft/study?mode=${mode}`)
+
+      expect(res.status).toBe(404)
+      expect(apiErrorSchema.parse(await res.json())).toEqual({
+        error: { code: "NOT_FOUND" },
+      })
+    }
+  })
+
+  it("still sends a course the viewer added before it became a draft", async () => {
+    const [first] = await addAddedCourse("retired", 2)
+
+    const { cards } = await getStudy("retired/study?mode=learn")
+
+    expect(cards.map((card) => card.cardId)).toEqual([first, "retired-2"])
+  })
+
+  it("sends a published course the viewer has not added yet", async () => {
+    await addPublishedCourse(api.db, "spanish", 1)
+
+    const { cards } = await getStudy("spanish/study?mode=learn")
+
+    expect(cards.map((card) => card.cardId)).toEqual(["spanish-1"])
+  })
+
   it("answers INVALID_REQUEST for a course id longer than any real one", async () => {
     const res = await api.request(`/api/courses/${"c".repeat(65)}/study`)
 
@@ -238,7 +270,7 @@ describe("GET /api/courses/:courseId/study", () => {
   )
 
   it("reviews by default, and has nothing for a learner who has not started", async () => {
-    await addCourse(api.db, "spanish", 3)
+    await addPublishedCourse(api.db, "spanish", 3)
 
     expect(await getStudy("spanish/study")).toEqual({
       course: {
@@ -253,7 +285,11 @@ describe("GET /api/courses/:courseId/study", () => {
   })
 
   it("learn sends unseen cards in course order, each as new progress", async () => {
-    const [first, second, third] = await addCourse(api.db, "spanish", 3)
+    const [first, second, third] = await addPublishedCourse(
+      api.db,
+      "spanish",
+      3
+    )
     await addProgress(api.db, [reviewed(String(second), 1)])
 
     const { cards } = await getStudy("spanish/study?mode=learn")
@@ -275,7 +311,7 @@ describe("GET /api/courses/:courseId/study", () => {
   })
 
   it("review sends what is due, most overdue first, with the saved progress", async () => {
-    const [a, b, c] = await addCourse(api.db, "spanish", 4)
+    const [a, b, c] = await addPublishedCourse(api.db, "spanish", 4)
     const overdue = reviewed(String(a), 20)
     const mostOverdue = reviewed(String(b), 40)
     await addProgress(api.db, [overdue, mostOverdue, reviewed(String(c), 0)])
@@ -286,7 +322,7 @@ describe("GET /api/courses/:courseId/study", () => {
   })
 
   it("practice sends tricky cards, most forgotten first", async () => {
-    const [a, b, c] = await addCourse(api.db, "spanish", 3)
+    const [a, b, c] = await addPublishedCourse(api.db, "spanish", 3)
     await addProgress(api.db, [
       { ...reviewed(String(a), 1), lapses: 3 },
       { ...reviewed(String(b), 1), lapses: 7 },
@@ -299,7 +335,7 @@ describe("GET /api/courses/:courseId/study", () => {
   })
 
   it("nests a card's mnemonics, most upvoted first", async () => {
-    const [cardId] = await addCourse(api.db, "spanish", 1)
+    const [cardId] = await addPublishedCourse(api.db, "spanish", 1)
     const card = String(cardId)
     await addMnemonic(api.db, { id: "mn-low", cardId: card, upvotes: 2 })
     await addMnemonic(api.db, {
@@ -337,7 +373,7 @@ describe("GET /api/courses/:courseId/study", () => {
   })
 
   it("keeps a mnemonic whose author deleted their account", async () => {
-    const [cardId] = await addCourse(api.db, "spanish", 1)
+    const [cardId] = await addPublishedCourse(api.db, "spanish", 1)
     await addMnemonic(api.db, {
       id: "mn-1",
       cardId: String(cardId),
@@ -353,7 +389,7 @@ describe("GET /api/courses/:courseId/study", () => {
   })
 
   it("learn stops at the daily limit unless the learner asks for more", async () => {
-    await addCourse(api.db, "spanish", 25)
+    await addPublishedCourse(api.db, "spanish", 25)
 
     const usual = await getStudy("spanish/study?mode=learn")
     const more = await getStudy("spanish/study?mode=learn&extra=5")
@@ -363,7 +399,7 @@ describe("GET /api/courses/:courseId/study", () => {
 
   it("handles a session larger than D1 lets one query list", async () => {
     // D1 allows 100 bound values per statement; this session has 110 ids.
-    const cardIds = await addCourse(api.db, "spanish", 120)
+    const cardIds = await addPublishedCourse(api.db, "spanish", 120)
 
     const { cards } = await getStudy("spanish/study?mode=learn&extra=100")
 

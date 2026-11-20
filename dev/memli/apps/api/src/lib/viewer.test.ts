@@ -10,7 +10,7 @@ import {
   AUTHOR_ID,
   TEST_ORIGIN,
   VIEWER_ID,
-  addCourse,
+  addPublishedCourse,
   addEnrollment,
   addUsers,
   startTestApi,
@@ -35,7 +35,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await api.reset()
   await addUsers(api.db)
-  await addCourse(api.db, "spanish", 3)
+  await addPublishedCourse(api.db, "spanish", 3)
 })
 
 function review(cardId: string): ReviewSubmission {

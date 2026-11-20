@@ -6,7 +6,7 @@ import { app } from "../app"
 import { reviews } from "../db/schema"
 import {
   TEST_ORIGIN,
-  addCourse,
+  addPublishedCourse,
   addUsers,
   startTestApi,
   type TestApi,
@@ -27,7 +27,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await api.reset()
   await addUsers(api.db)
-  await addCourse(api.db, "spanish", 2)
+  await addPublishedCourse(api.db, "spanish", 2)
 })
 
 function body(): string {

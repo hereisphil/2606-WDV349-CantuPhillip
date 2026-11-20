@@ -119,7 +119,7 @@ The cards for one session, in the order to study them. `?mode=` picks the kind:
 | `learn`            | Never seen, up to 10 a day                          | Course order         |
 | `practice`         | Tricky: forgotten 3 times or more, not yet mastered | Most forgotten first |
 
-`?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`; a bad `mode`, `extra` or `timeZone` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
+`?extra=5` adds new cards past the daily limit (`learn` only, 1 to 100). An unknown course answers `NOT_FOUND`, and so does a draft the viewer never added: a course must be published, or already on the viewer's dashboard (added before it became a draft). A bad `mode`, `extra` or `timeZone` answers `INVALID_REQUEST`. A session with nothing waiting answers `200` with `"cards": []`.
 
 ### `PUT` and `DELETE /api/courses/:courseId/enrollment`
 
@@ -256,7 +256,7 @@ Each review saves three things together: the card's new state in `user_progress`
 - **A client reports what happened, never the result.** The route loads its own saved progress and schedules with core's `applyOutcome`. Extra fields in the body (a made-up `stability`, say) are dropped by the schema.
 - **The server's clock decides when.** Devices' clocks disagree, and FSRS measures memory by the time since the last review. The last review in a request happened now, by the server's clock. Earlier ones in the same request keep their distance from it, because the gap between two reviews on one device is real even when its clock is wrong. One review per request, the usual case, is simply stamped now. See [`src/lib/review-batch.ts`](./src/lib/review-batch.ts).
 - **In order, oldest first.** A missed word comes back in the same session, so one card can appear twice.
-- **All or nothing.** One unknown card answers `NOT_FOUND` and saves nothing. The writes go in one D1 batch, which is a transaction.
+- **All or nothing.** One unknown card answers `NOT_FOUND` and saves nothing. A card in a draft the viewer never added counts as unknown, so a review can't put a hidden course on the dashboard (#174). The writes go in one D1 batch, which is a transaction.
 - **Studying a course adds it.** The batch adds each reviewed card's course to the dashboard, so progress never exists for a course the dashboard leaves off. A course already added keeps the date it was first added. Only new reviews count, so a retried old request never brings back a course the learner removed. This happens on the first saved review, not when a session opens: opening a session is a `GET`, and a `GET` never changes anything.
 - **Safe to send twice.** `reviewId` is a UUID the client makes for each review (`crypto.randomUUID()`). If a request is sent again, after a dropped connection say, the server sees ids it already has, skips those reviews, and answers the same progress. Without it, a retry would count the review twice and push the card's next date out.
 - **The response time is capped again.** `durationMs` goes through core's `capElapsedMs` (30 seconds at most) on the server too. The app already caps it, but the server never takes a client's word for a number.

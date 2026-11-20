@@ -21,7 +21,7 @@ import {
 } from "../db/schema"
 import {
   TEST_ORIGIN,
-  addCourse,
+  addPublishedCourse,
   addMnemonic,
   startTestApi,
   type TestApi,
@@ -371,7 +371,7 @@ describe("deleting a learner", () => {
     const signUp = await post("/sign-up/email", learner)
     const [user] = await api.db.select().from(users)
     if (user === undefined) throw new Error("sign-up made no learner")
-    const [cardId] = await addCourse(api.db, "spanish", 1)
+    const [cardId] = await addPublishedCourse(api.db, "spanish", 1)
     if (cardId === undefined) throw new Error("no card")
     await addMnemonic(api.db, {
       id: "mn-1",

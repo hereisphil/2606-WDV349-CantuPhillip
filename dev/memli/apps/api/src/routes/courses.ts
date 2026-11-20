@@ -26,6 +26,7 @@ import {
   cardsById,
   findCourse,
   findPublishedCourse,
+  findStudyableCourse,
   listAddedCourses,
 } from "../db/content"
 import { addToDashboard, removeFromDashboard } from "../db/enrollments"
@@ -106,7 +107,8 @@ courseRoutes.get(
     const { mode, extra, timeZone } = c.req.valid("query")
     const userId = viewerId(c)
 
-    const course = await findCourse(db, courseId)
+    // A draft the viewer never added answers NOT_FOUND, like no course at all.
+    const course = await findStudyableCourse(db, userId, courseId)
     if (course === null) return errorResponse(c, "NOT_FOUND")
 
     // Choose from ids and progress alone, then load only the chosen cards'
