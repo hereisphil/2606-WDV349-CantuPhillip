@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "./api"
 
 /** The legal pages (#170): readable by a visitor, linkable by section, no overflow. */
-const paths = ["/terms", "/code-of-conduct"]
+const paths = ["/terms", "/privacy", "/code-of-conduct"]
 
 test.use({ api: { signedOut: true } })
 

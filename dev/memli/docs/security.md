@@ -68,7 +68,7 @@ Mnemonics are the one place strangers' content will reach other learners.
 
 - **Accessibility:** axe (WCAG 2.2 AA) runs in CI on every preview in both themes.
 - **Terms and community rules** (#170): `/terms` covers the 13+ age requirement (COPPA), the license to show learners' mnemonics, reporting, and DMCA notices. `/code-of-conduct` says what a mnemonic may and may not be. Both are in `apps/web/src/routes/_marketing/`. Reports and notices go to hello@phillipcantu.com, and Arizona law applies.
-- **Privacy policy:** not written yet. `/privacy` says "Coming soon" (#170). It lists the reviews log and how to export or delete data (GDPR / CCPA).
+- **Privacy policy** (#170): `/privacy` lists every table that holds personal data, Cloudflare and Have I Been Pwned, how long each thing is kept, and how to ask for a copy or a deletion (GDPR / CCPA). Its promises rely on the daily cleanup (see Rate limiting). If a table, a third party or a retention period changes, change `privacy.tsx` in the same pull request.
 - [ ] **Register a DMCA designated agent before #114 opens sign-up.** The Terms describe DMCA notices, but the safe harbor only protects Memli once an agent is registered in the Copyright Office's [DMCA Designated Agent Directory](https://copyright.gov/dmca-directory/). Online only, $6, and it expires 3 years after it was filed or last changed (a reminder email comes first). The directory is public: a P.O. box is allowed for the agent's address. Afterwards, name the agent in the "Copyright complaints" section of `terms.tsx`, exactly as registered.
 - **Deleting an account** keeps the author's mnemonics with `author: null`.
 
@@ -137,8 +137,8 @@ Not in the beta, for the same reason as Google sign-in.
 ### Logs and privacy
 
 - [x] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error, and Memli logs nothing else. A test runs sign-up, refused sign-ups, wrong and right sign-ins, a cross-origin write, a rate-limited burst and sign-out, and proves no log line holds a password, a session token or a cookie name (`apps/api/src/lib/auth.test.ts`, "the logs").
-- [ ] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days). The daily cleanup deletes an expired row within a day. The Privacy Policy lists them: that is #170, whose Privacy Policy task now names them.
-- [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. Until #170 says how, a learner asks and the account is deleted by hand.
+- [x] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days after the last visit). The daily cleanup deletes an expired row within a day. The Privacy Policy lists both (#170).
+- [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. The Privacy Policy tells a learner to email from their account's address, and the account is deleted by hand.
 
 ## Open issues
 

@@ -29,10 +29,13 @@ const inlineLink =
 type RichTags = Record<string, (chunk: string) => ReactNode>
 
 /**
- * Tags every legal message may use: `<email>` mails `legalEmail`, and
- * `<terms>`, `<privacy>` and `<conduct>` link the legal pages.
+ * Tags every legal message may use: `<strong>` leads a paragraph, `<email>`
+ * mails `legalEmail`, and `<terms>`, `<privacy>` and `<conduct>` link pages.
  */
 const legalTags: RichTags = {
+  strong: (chunk: string): ReactNode => (
+    <strong className="font-semibold text-foreground-strong">{chunk}</strong>
+  ),
   email: (chunk: string): ReactNode => (
     <a href={`mailto:${legalEmail}`} className={inlineLink}>
       {chunk}
