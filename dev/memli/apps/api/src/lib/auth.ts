@@ -2,6 +2,7 @@ import {
   DISPLAY_NAME_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
+  TERMS_VERSION,
   meetsPasswordRules,
 } from "@workspace/schemas/auth/sign-up"
 import { parseApiEnv } from "@workspace/schemas/env/api"
@@ -42,6 +43,15 @@ function newPassword(path: string, body: unknown): unknown {
   return (body as Record<string, unknown>)[field]
 }
 
+/** True when a sign-up body accepts the current Terms of Service (#170). */
+function acceptsTerms(body: unknown): boolean {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    (body as Record<string, unknown>).acceptedTermsVersion === TERMS_VERSION
+  )
+}
+
 /** A display name as Memli stores it: trimmed and bounded. */
 function tidyName(name: string): string {
   return name.trim().slice(0, DISPLAY_NAME_MAX_LENGTH)
@@ -79,16 +89,27 @@ function authOptions(env: Env): BetterAuthOptions {
           defaultValue: "en",
           input: false,
         },
+        // Which Terms the learner accepted, and when. Only the server sets them.
+        termsVersion: { type: "string", required: false, input: false },
+        termsAcceptedAt: { type: "date", required: false, input: false },
       },
     },
     databaseHooks: {
       user: {
         create: {
-          // A name is shown under a learner's mnemonics, so it is bounded
-          // however the learner signed up. `false` refuses a blank one.
+          // Bounds the name shown under mnemonics; `false` refuses a blank one.
+          // Records the Terms that `hooks.before` checked: Google (#107) must ask too.
           before: async (user) => {
             const name = tidyName(user.name)
-            return name === "" ? false : { data: { ...user, name } }
+            if (name === "") return false
+            return {
+              data: {
+                ...user,
+                name,
+                termsVersion: TERMS_VERSION,
+                termsAcceptedAt: new Date(),
+              },
+            }
           },
         },
         // The same bound when a learner renames themselves later.
@@ -102,9 +123,15 @@ function authOptions(env: Env): BetterAuthOptions {
       },
     },
     hooks: {
-      // Better Auth checks a password's length. This adds Memli's own rules:
-      // a capital letter, a lowercase letter and a symbol.
+      // Memli's own sign-up rules on top of Better Auth's: the current Terms,
+      // and a password with a capital, a lowercase letter and a symbol.
       before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === "/sign-up/email" && !acceptsTerms(ctx.body)) {
+          throw new APIError("BAD_REQUEST", {
+            code: "TERMS_NOT_ACCEPTED",
+            message: "Accept the Terms of Service to sign up",
+          })
+        }
         const password = newPassword(ctx.path, ctx.body)
         if (typeof password === "string" && !meetsPasswordRules(password)) {
           throw new APIError("BAD_REQUEST", {

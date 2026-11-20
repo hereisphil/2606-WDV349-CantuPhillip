@@ -1,5 +1,6 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { LegalPage } from "./-components/LegalPage"
 
 export const Route = createFileRoute("/_marketing/terms")({
@@ -8,11 +9,11 @@ export const Route = createFileRoute("/_marketing/terms")({
 
 /**
  * Plain language on purpose, so a 13 year old can follow it (#170).
- * Bump `updated` whenever a change matters to a learner.
+ * Bump `TERMS_VERSION` when a change matters: sign-up then asks again.
  */
 const messages = {
   title: "Terms of Service",
-  updated: "2026-11-20",
+  updated: TERMS_VERSION,
   intro: [
     "These terms are the rules for using Memli. Please read them before you sign up.",
     "By creating an account or using Memli, you agree to them.",

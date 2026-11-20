@@ -13,6 +13,7 @@ const refusals: Partial<Record<string, string>> = {
   PASSWORD_TOO_WEAK: "Add a capital letter, a lowercase letter and a symbol.",
   PASSWORD_TOO_SHORT: "Password must be at least 8 characters.",
   PASSWORD_TOO_LONG: "Use 128 characters or fewer.",
+  TERMS_NOT_ACCEPTED: "Check the box to accept the Terms of Service.",
   RATE_LIMITED: "Too many tries. Wait a moment, then try again.",
   NETWORK_ERROR: "We couldn't reach Memli. Check your connection.",
 }

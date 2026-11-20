@@ -3,6 +3,12 @@ import { z } from "zod"
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 128
 
+/**
+ * The Terms of Service a learner accepts at sign-up: their "last updated"
+ * date. Change it whenever the Terms change in a way that matters (#170).
+ */
+export const TERMS_VERSION = "2026-11-20"
+
 /** The same ceiling as a mnemonic author's display name. */
 export const DISPLAY_NAME_MAX_LENGTH = 64
 
@@ -42,6 +48,11 @@ export const signUpSchema = z.object({
     .max(DISPLAY_NAME_MAX_LENGTH, "Use 64 characters or fewer."),
   email: z.email("Enter a valid email address."),
   password: passwordSchema,
+  /** The Terms the learner ticked: `TERMS_VERSION`, or "" when unticked. */
+  acceptedTermsVersion: z.literal(
+    TERMS_VERSION,
+    "Check the box to accept the Terms of Service."
+  ),
 })
 
 export type SignUpInput = z.infer<typeof signUpSchema>

@@ -32,8 +32,13 @@ export function signIn(fields: SignInInput): Promise<AuthResult> {
   return resultOf(client.signIn.email(fields))
 }
 
-/** `POST /api/auth/sign-up/email`. Creates the learner and signs them in. */
-export function signUp(fields: SignUpInput): Promise<AuthResult> {
+/**
+ * `POST /api/auth/sign-up/email`. Creates the learner and signs them in. The
+ * form's own strings: the API refuses Terms other than `TERMS_VERSION`.
+ */
+export function signUp(
+  fields: Readonly<Record<keyof SignUpInput, string>>
+): Promise<AuthResult> {
   return resultOf(client.signUp.email(fields))
 }
 

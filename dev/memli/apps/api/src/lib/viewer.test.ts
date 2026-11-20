@@ -2,6 +2,7 @@ import { coursesResponseSchema } from "@workspace/schemas/api/courses"
 import { apiErrorSchema } from "@workspace/schemas/api/error"
 import { studyHistorySchema } from "@workspace/schemas/api/history"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { eq } from "drizzle-orm"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 
@@ -129,6 +130,7 @@ describe("with a real sign-in", () => {
           name: "Ana",
           email: "ana@memli.test",
           password: "Correct-horse-battery",
+          acceptedTermsVersion: TERMS_VERSION,
         }),
       },
       null

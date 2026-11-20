@@ -1,5 +1,6 @@
 import { apiErrorSchema } from "@workspace/schemas/api/error"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 import { app } from "../app"
@@ -113,6 +114,7 @@ describe("what the check leaves alone", () => {
           name: "Ana",
           email: "ana@memli.test",
           password: "Correct-horse-battery",
+          acceptedTermsVersion: TERMS_VERSION,
         }),
       },
       api.env

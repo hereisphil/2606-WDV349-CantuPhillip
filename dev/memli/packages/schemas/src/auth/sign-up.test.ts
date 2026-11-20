@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest"
 
-import { meetsPasswordRules, passwordSchema, signUpSchema } from "./sign-up"
+import {
+  meetsPasswordRules,
+  passwordSchema,
+  signUpSchema,
+  TERMS_VERSION,
+} from "./sign-up"
 
 const valid = {
   name: "Ana",
   email: "ana@memli.test",
   password: "Correct-horse-battery",
+  acceptedTermsVersion: TERMS_VERSION,
 }
 
 describe("signUpSchema", () => {
@@ -22,6 +28,8 @@ describe("signUpSchema", () => {
     ["a password with no capital letter", { password: "correct-horse" }],
     ["a password with no lowercase letter", { password: "CORRECT-HORSE" }],
     ["a password with no symbol", { password: "CorrectHorse1" }],
+    ["unticked Terms", { acceptedTermsVersion: "" }],
+    ["an older version of the Terms", { acceptedTermsVersion: "2026-01-01" }],
   ])("refuses %s", (_label, change) => {
     expect(signUpSchema.safeParse({ ...valid, ...change }).success).toBe(false)
   })

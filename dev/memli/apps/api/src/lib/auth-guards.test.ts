@@ -1,3 +1,4 @@
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import {
   afterAll,
   afterEach,
@@ -22,6 +23,7 @@ const learner = {
   name: "Ana",
   email: "ana@memli.test",
   password: "Correct-horse-battery",
+  acceptedTermsVersion: TERMS_VERSION,
 }
 const wrong = { email: learner.email, password: "not the password" }
 

@@ -82,6 +82,12 @@ export const users = sqliteTable("users", {
   image: text("image"),
   /** A language tag; checked by a trigger (see the note at the top). */
   uiLocale: text("ui_locale").notNull().default("en"),
+  /**
+   * The Terms of Service the learner accepted at sign-up, and when (#170).
+   * Set by the server, never by a request. `null` before sign-up asked.
+   */
+  termsVersion: text("terms_version"),
+  termsAcceptedAt: integer("terms_accepted_at", { mode: "timestamp_ms" }),
   ...timestamps,
 })
 

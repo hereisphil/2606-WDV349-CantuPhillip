@@ -3,6 +3,7 @@ import {
   type FormEvent,
   type FormState,
 } from "@workspace/core/form/form-reducer"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import type { AuthResult } from "@/lib/auth"
 
 // Development-only `?preview=` states for /signin and /signup. Plain data, so
@@ -21,6 +22,7 @@ const filled = {
   name: "Ana",
   email: "ana@memli.test",
   password: "Correct-horse-battery",
+  acceptedTermsVersion: TERMS_VERSION,
 }
 
 export const signInPreviews = {
@@ -55,7 +57,12 @@ export const signUpPreviews = {
   "field-errors": {
     description: "Sent empty: each field says what it needs",
     shows: "field-errors",
-    fields: { name: "", email: "", password: "" },
+    fields: { name: "", email: "", password: "", acceptedTermsVersion: "" },
+  },
+  "terms-unticked": {
+    description: "Everything filled in but the Terms box",
+    shows: "field-errors",
+    fields: { acceptedTermsVersion: "" },
   },
   "password-rules": {
     description: "A password that misses two rules, caught before sending",

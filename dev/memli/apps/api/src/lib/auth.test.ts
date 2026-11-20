@@ -1,4 +1,5 @@
 import { apiErrorSchema } from "@workspace/schemas/api/error"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { eq } from "drizzle-orm"
 import {
   afterAll,
@@ -32,6 +33,7 @@ const learner = {
   name: "Ana",
   email: "ana@memli.test",
   password: "Correct-horse-battery",
+  acceptedTermsVersion: TERMS_VERSION,
 }
 
 let api: TestApi
@@ -93,6 +95,44 @@ describe("POST /api/auth/sign-up/email", () => {
       uiLocale: "en",
     })
     expect(await api.db.select().from(sessions)).toHaveLength(1)
+  })
+
+  it("records which Terms of Service the learner accepted, and when", async () => {
+    const before = Date.now()
+    await post("/sign-up/email", learner)
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.termsVersion).toBe(TERMS_VERSION)
+    expect(user?.termsAcceptedAt?.getTime()).toBeGreaterThanOrEqual(before)
+  })
+
+  it.each([
+    ["no answer", undefined],
+    ["an unticked box", ""],
+    ["an older version", "2026-01-01"],
+  ])(
+    "refuses a sign-up with %s for the Terms, and makes no account",
+    async (_label, acceptedTermsVersion) => {
+      const res = await post("/sign-up/email", {
+        ...learner,
+        acceptedTermsVersion,
+      })
+
+      expect(res.status).toBe(400)
+      expect(await codeOf(res)).toBe("TERMS_NOT_ACCEPTED")
+      expect(await api.db.select().from(users)).toEqual([])
+    }
+  )
+
+  it("never lets a request set the accepted Terms itself", async () => {
+    const res = await post("/sign-up/email", {
+      ...learner,
+      termsVersion: "2099-01-01",
+      termsAcceptedAt: "2000-01-01T00:00:00.000Z",
+    })
+
+    expect(res.status).toBe(400)
+    expect(await api.db.select().from(users)).toEqual([])
   })
 
   it("stores a hash, never the password", async () => {
