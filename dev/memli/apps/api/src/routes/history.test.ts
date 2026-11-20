@@ -18,7 +18,7 @@ import {
 import { studyQuarterHours } from "../db/reviews"
 import {
   VIEWER_ID,
-  addCourse,
+  addPublishedCourse,
   addReviewLog,
   addUsers,
   startTestApi,
@@ -43,7 +43,7 @@ beforeEach(async () => {
   vi.useFakeTimers({ toFake: ["Date"], now })
   await api.reset()
   await addUsers(api.db)
-  await addCourse(api.db, "spanish", 20)
+  await addPublishedCourse(api.db, "spanish", 20)
 })
 
 afterEach(() => {

@@ -35,8 +35,10 @@ Update this file when a rule changes. A rule listed here should have a test or a
 - **No CORS on purpose.** The web app and the API share one origin. Locally, Vite proxies `/api/*`. On staging, the gate Worker sends `/api/*` to the API through a service binding.
 - **No public URL.** `memli-api-staging` has `workers_dev: false` and `preview_urls: false` (`apps/api/wrangler.jsonc`). It is only reachable through the gate Worker.
 - **Staging is gated.** The gate Worker (`dev/memli/src/index.ts`) checks basic auth with a timing-safe compare, and it fails closed if its secrets are missing.
-- **Nothing is cached.** Every API answer sends `Cache-Control: no-store`.
-- **Every data route needs a session** (`requireViewer`, #108). Only `/api/health` and `/api/auth/*` answer without one.
+- **Nothing is cached.** Every API answer sends `Cache-Control: no-store`. Whether the public catalog may be cached at the edge is part of the rendering research (#178).
+- **Every route with a learner's data needs a session** (`requireViewer`, #108). `/api/health` and `/api/auth/*` answer without one.
+- **The course catalog is public on purpose** (#174). `GET /api/catalog` and `GET /api/catalog/:courseId` answer anyone, so a visitor can browse courses before signing up. They send only published courses, each one's details and its first five words, never a draft and never anything about a learner. With a session they also say which courses that learner added (`optionalViewer` in `apps/api/src/lib/viewer.ts`); a visitor gets `added: false`. Tested in `apps/api/src/routes/catalog.test.ts`.
+- **A draft stays hidden on every route** (#174). The catalog, `PUT …/enrollment`, `GET /api/courses/:courseId/study` and `POST /api/reviews` all answer `NOT_FOUND` for a draft, the same as for a course that does not exist. A learner who added a course before it became a draft keeps studying it (`findStudyableCourse` and `studyableCourseIdsByCard` in `apps/api/src/db/content.ts`). The study and review routes once looked a course up by id alone, so a learner who guessed a draft's id could read it and add it; a security audit found that on 2026-11-20. Tested in `apps/api/src/routes/courses.test.ts` and `reviews.test.ts`.
 - **Production has no API yet.** Its `/api/*` answers a JSON 503 until the release (#114).
 
 ### Community content
@@ -101,6 +103,8 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] Read the client IP from Cloudflare's header: `advanced.ipAddress.ipAddressHeaders: ["cf-connecting-ip"]`. The default, `X-Forwarded-For`, can be set by any client, so an attacker could pretend to be a new IP on every try. A test sends a new `X-Forwarded-For` on every try and is still refused.
 - [x] Keep the strict default on email sign-in (3 tries per 10 seconds), and add `rateLimit.customRules` for sign-up (5 new accounts a minute from one address). The passkey sign-in rule lands with passkeys (#107).
 - [x] Rate limit Memli's own `POST /api/reviews` (#169): 60 requests a minute per learner and 1,200 per address, so a classroom behind one network still fits. A refusal is `429 RATE_LIMITED` with `Retry-After`. The counts live in the same D1 `rate_limits` table as sign-in's (`limitRequests` in `apps/api/src/lib/rate-limit.ts`), counted in one statement so simultaneous requests can't slip past. Cloudflare's rate limiting binding was considered and not used: its docs don't say whether it is free, and it counts per location, not globally.
+- [x] Rate limit adding and removing a course (#174): `PUT` and `DELETE /api/courses/:courseId/enrollment` allow 60 requests a minute per learner and 1,200 per address, the same shape as reviews (`ENROLLMENT_LIMITS` in `apps/api/src/routes/courses.ts`). They need a session and the app's own `Origin` like every write, tested in `apps/api/src/routes/enrollment.test.ts`.
+- [x] Rate limit the public catalog routes (#174): 300 requests a minute per address, since a visitor has no learner id to count (`limitAddress` in `apps/api/src/lib/rate-limit.ts`, `CATALOG_LIMIT` in `apps/api/src/routes/catalog.ts`). It costs one D1 write per request, on routes anyone can call. Serving the catalog as static or cached pages would remove that cost: see #178.
 - [x] A test proves a burst of sign-in attempts gets refused, and that the learner can try again once the window ends.
 
 ### Passwords and accounts (#108)
@@ -141,5 +145,6 @@ Not in the beta, for the same reason as Google sign-in.
 | #169 | Rate limiting, an `Origin` check, and cookie and OAuth rules before real sign-in (#108, #107) |
 | #170 | Terms of Service, Privacy Policy and a Community Code of Conduct |
 | #175 | Email verification and password reset, so sign-up stops revealing existing accounts |
+| #178 | Research: which pages are server-rendered or static, including what the public catalog may cache |
 | #176 | Measure password hashing against the Workers CPU limit on staging |
 | #171 | Pin GitHub Actions to commit SHAs |

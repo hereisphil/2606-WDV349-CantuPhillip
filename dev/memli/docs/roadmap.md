@@ -197,12 +197,19 @@ Deep dive: [i18n.md](./i18n.md).
 - `{brand}.com/dashboard` (and other app paths) → React app
 - Optional soft “welcome back” on `/` with **Open app** CTA — never a hard lock-in redirect that makes marketing unreachable
 - Auth routes either stay on the app deployable or are carefully shared — document the choice in [architecture.md](./architecture.md) at implementation time
+- The public course catalog (`/courses`, `/courses/$courseId`, #174) is reachable signed out, and still shows a signed-in learner which courses they added
+
+### Research first (#178)
+
+The owner's working position (2026-11-18) is that every public page should be server-rendered or static: landing, pricing, about, blog, privacy, terms, the course catalog and each course overview. Everything from the sign-in page on (sign-in, sign-up, dashboard, study sessions, settings) stays the dynamic web app.
+
+That widens this phase. The catalog pages are public but built from the database, so "prerender the marketing pages" does not cover them. Before any of this is built, #178 researches and decides what is static, what is rendered per request, which tool does it, and how one course page serves both a visitor and a signed-in learner. The questions are listed in [architecture.md](./architecture.md), "What gets server-rendered".
 
 ### Target engineering
 
 | Deployable | Role | User-facing host |
 | --- | --- | --- |
-| `apps/marketing` (Astro) | Landing, pricing, blog, about, legal | `{brand}.com` (mostly `/`, `/pricing`, …) |
+| `apps/marketing` (Astro) | Landing, pricing, blog, about, legal. The course catalog and course overviews too, if #178 decides so | `{brand}.com` (mostly `/`, `/pricing`, …) |
 | `apps/web` (React / TanStack) | Authenticated product | `{brand}.com/dashboard`, `/learn`, … |
 | `apps/api` (Hono) | Shared backend | `api.{brand}.com` |
 
@@ -216,7 +223,9 @@ Edge/reverse-proxy routing keeps **one site** in the browser’s address bar. Su
 
 ### Exit criteria
 
+- [ ] The rendering research (#178) is done and its decision is written in [architecture.md](./architecture.md)
 - [ ] Marketing HTML is prerendered/SSG for key pages
+- [ ] A course overview opens as real HTML from a shared link, signed out
 - [ ] App JS is not required to first-paint the homepage
 - [ ] Same-domain navigation feels seamless (shared brand tokens, no jarring theme break)
 - [ ] Logged-in users can still open `/` and reach marketing content
@@ -296,6 +305,8 @@ Today `apps/web` and `apps/api` exist among the apps; that is expected.
 | API hostname | `api.{brand}.com` OK | Forcing everything same-origin forever | API subdomain is invisible to learners; fine for CORS/cookies design |
 | Homepage when logged in | `/` remains marketing (or soft welcome + CTA) | Hard redirect `/` → dashboard always | Avoid Vercel-style “can’t see marketing without logout” |
 | Marketing tech (future) | Astro SSG/SSR | Keep heavy SPA forever for marketing | Perf + SEO for acquisition pages |
+| Course catalog access | Public: anyone can browse courses and read an overview (#174) | Catalog only after sign-in | A visitor should see what they can learn before making an account. Adding and studying still need a session |
+| Which pages are server-rendered | Open: research in #178. Owner's position is every public page, catalog included | Deciding now, mid-beta | The catalog is public and data-driven, which the Phase 3 plan did not cover |
 | When to split frontends | After core learning loop | Split immediately | Focus and shipping risk |
 | Mobile | React Native (Expo) | Separate native rewrite / delay forever | Share TS domain; phones are core for language habits |
 | First non-English UI | `es-419` | Many regional `es-*` at once | LATAM reach without combinatorial explosion |

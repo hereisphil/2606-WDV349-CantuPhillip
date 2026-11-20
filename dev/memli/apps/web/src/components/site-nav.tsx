@@ -5,6 +5,8 @@ import { marketingSections } from "@/components/marketing-sections"
 
 const pages = {
   home: { to: "/" as const, label: "Home", scrollToTop: true },
+  // The public course catalog (#174).
+  courses: { to: "/courses" as const, label: "Courses", scrollToTop: true },
   whyMnemonics: {
     to: "/" as const,
     hash: marketingSections.whyMnemonics,
@@ -27,6 +29,7 @@ type PageId = keyof typeof pages
 
 export const headerNav = [
   "home",
+  "courses",
   "whyMnemonics",
   "features",
   "about",
@@ -36,6 +39,7 @@ export const headerNav = [
 
 export const footerNav = [
   "home",
+  "courses",
   "features",
   "about",
   "contact",

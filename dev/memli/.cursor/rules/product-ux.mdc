@@ -24,6 +24,7 @@ Full detail: `docs/product-ux.md` and `docs/roadmap.md`.
 - Canonical post-login app home is `/dashboard` (study sessions run at `/study/$courseId`).
 - **Sign-in is real (`359 MS 4`, #108):** `/signin` and `/signup` talk to Better Auth under `/api/auth/*`. The prototype's disabled form and its "Skip & Continue to Prototype" button are gone: do not bring a bypass back. `_app` and `_session` routes are guarded by `requireViewer` (`apps/web/src/lib/session.ts`) and read the learner with `useViewer()`. Marketing reads `useOptionalViewer()`, which may be `null`, and never redirects.
 - Secondary marketing/legal stub pages (`/about`, `/contact`, `/community`, `/blog`, `/pricing`, `/privacy`, `/terms`) are frozen in content during Phase 1 prototype work (only refactoring raw tags to `@workspace/ui` `<Section>`, `<Heading>`, `<Text>`).
+- **The course catalog is public (#174):** `/courses` and `/courses/$courseId` open signed out and never redirect to `/signin`. A visitor's only course button is **Start learning**, to `/signup?redirect=/study/$courseId?mode=learn`. **Add to my courses**, **Continue** and **Remove from my courses** render only for a signed-in learner. Their API routes (`/api/catalog`) are public too, and must never send a draft or a learner's data.
 - Logged-in marketing nav: emphasize **Open app** / **Dashboard**, not “you are trapped in the product.”
 - Do not replace marketing layout chrome with the full app shell on `/`.
 

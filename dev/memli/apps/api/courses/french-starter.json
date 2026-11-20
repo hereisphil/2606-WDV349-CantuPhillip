@@ -1,0 +1,1771 @@
+{
+  "format": "memli-course/1",
+  "course": {
+    "courseId": "french-starter",
+    "title": "French Starter",
+    "learningLanguage": "fr",
+    "answerLanguage": "en",
+    "description": "Your first French words: people, food, home, getting around, and the verbs to use them.",
+    "published": true,
+    "source": "Written for Memli",
+    "license": "CC BY 4.0",
+    "attribution": "French Starter by Memli, licensed under CC BY 4.0."
+  },
+  "cards": [
+    {
+      "cardId": "fr-starter-bonjour",
+      "term": "bonjour",
+      "partOfSpeech": "phrase",
+      "answers": ["hello", "good morning", "hi"],
+      "phonetic": "/bɔ̃.ʒuʁ/",
+      "example": {
+        "text": "Bonjour, madame !",
+        "translation": "Hello, ma'am!"
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-bonjour-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "A dog says hello by bringing you a "
+            },
+            {
+              "kind": "keyword",
+              "text": "bone"
+            },
+            {
+              "kind": "plain",
+              "text": " every day: "
+            },
+            {
+              "kind": "term",
+              "text": "bonjour"
+            },
+            {
+              "kind": "plain",
+              "text": ", hello."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-merci",
+      "term": "merci",
+      "partOfSpeech": "phrase",
+      "answers": ["thank you", "thanks"],
+      "phonetic": "/mɛʁ.si/",
+      "example": {
+        "text": "Merci pour le café.",
+        "translation": "Thanks for the coffee."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-merci-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Show someone "
+            },
+            {
+              "kind": "keyword",
+              "text": "mercy"
+            },
+            {
+              "kind": "plain",
+              "text": " and they thank you: "
+            },
+            {
+              "kind": "term",
+              "text": "merci"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-s-il-vous-plait",
+      "term": "s'il vous plaît",
+      "partOfSpeech": "phrase",
+      "answers": ["please"],
+      "phonetic": "/sil vu plɛ/",
+      "example": {
+        "text": "Un croissant, s'il vous plaît.",
+        "translation": "A croissant, please."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-s-il-vous-plait-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Please, "
+            },
+            {
+              "kind": "keyword",
+              "text": "seal, will you play"
+            },
+            {
+              "kind": "plain",
+              "text": "? "
+            },
+            {
+              "kind": "term",
+              "text": "s'il vous plaît"
+            },
+            {
+              "kind": "plain",
+              "text": ", please."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-au-revoir",
+      "term": "au revoir",
+      "partOfSpeech": "phrase",
+      "answers": ["goodbye", "bye"],
+      "phonetic": "/o ʁə.vwaʁ/",
+      "example": {
+        "text": "Au revoir, à demain !",
+        "translation": "Goodbye, see you tomorrow!"
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-au-revoir-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "You wave goodbye from a boat: "
+            },
+            {
+              "kind": "keyword",
+              "text": "oh, river"
+            },
+            {
+              "kind": "plain",
+              "text": "! "
+            },
+            {
+              "kind": "term",
+              "text": "au revoir"
+            },
+            {
+              "kind": "plain",
+              "text": ", goodbye."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-oui",
+      "term": "oui",
+      "partOfSpeech": "phrase",
+      "answers": ["yes"],
+      "phonetic": "/wi/",
+      "example": {
+        "text": "Oui, je veux bien.",
+        "translation": "Yes, I'd like that."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-oui-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "keyword",
+              "text": "We"
+            },
+            {
+              "kind": "plain",
+              "text": " all say yes: "
+            },
+            {
+              "kind": "term",
+              "text": "oui"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-non",
+      "term": "non",
+      "partOfSpeech": "phrase",
+      "answers": ["no"],
+      "phonetic": "/nɔ̃/",
+      "example": {
+        "text": "Non, merci.",
+        "translation": "No, thank you."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-non-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Say "
+            },
+            {
+              "kind": "keyword",
+              "text": "no"
+            },
+            {
+              "kind": "plain",
+              "text": " through your nose: "
+            },
+            {
+              "kind": "term",
+              "text": "non"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-eau",
+      "term": "eau",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["water"],
+      "phonetic": "/o/",
+      "example": {
+        "text": "Je voudrais de l'eau.",
+        "translation": "I'd like some water."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-eau-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "keyword",
+              "text": "Oh"
+            },
+            {
+              "kind": "plain",
+              "text": ", water! you gasp in the desert: "
+            },
+            {
+              "kind": "term",
+              "text": "eau"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-cafe",
+      "term": "café",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["coffee"],
+      "phonetic": "/ka.fe/",
+      "example": {
+        "text": "Le café est chaud.",
+        "translation": "The coffee is hot."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-cafe-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "A "
+            },
+            {
+              "kind": "keyword",
+              "text": "café"
+            },
+            {
+              "kind": "plain",
+              "text": " is where you drink coffee: "
+            },
+            {
+              "kind": "term",
+              "text": "café"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-manger",
+      "term": "manger",
+      "partOfSpeech": "verb",
+      "answers": ["to eat", "eat"],
+      "phonetic": "/mɑ̃.ʒe/",
+      "example": {
+        "text": "On mange à midi.",
+        "translation": "We eat at noon."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-manger-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Animals eat their hay from a "
+            },
+            {
+              "kind": "keyword",
+              "text": "manger"
+            },
+            {
+              "kind": "plain",
+              "text": ": "
+            },
+            {
+              "kind": "term",
+              "text": "manger"
+            },
+            {
+              "kind": "plain",
+              "text": ", to eat."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-boire",
+      "term": "boire",
+      "partOfSpeech": "verb",
+      "answers": ["to drink", "drink"],
+      "phonetic": "/bwaʁ/",
+      "example": {
+        "text": "Je bois du thé le matin.",
+        "translation": "I drink tea in the morning."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-fr-starter-boire-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "A thirsty "
+            },
+            {
+              "kind": "keyword",
+              "text": "boar"
+            },
+            {
+              "kind": "plain",
+              "text": " drinks at the pond: "
+            },
+            {
+              "kind": "term",
+              "text": "boire"
+            },
+            {
+              "kind": "plain",
+              "text": ", to drink."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "fr-starter-vouloir",
+      "term": "vouloir",
+      "partOfSpeech": "verb",
+      "answers": ["to want", "want"],
+      "phonetic": "/vu.lwaʁ/",
+      "example": {
+        "text": "Je veux un sandwich.",
+        "translation": "I want a sandwich."
+      }
+    },
+    {
+      "cardId": "fr-starter-avoir",
+      "term": "avoir",
+      "partOfSpeech": "verb",
+      "answers": ["to have", "have"],
+      "phonetic": "/a.vwaʁ/",
+      "example": {
+        "text": "J'ai deux frères.",
+        "translation": "I have two brothers."
+      }
+    },
+    {
+      "cardId": "fr-starter-etre",
+      "term": "être",
+      "partOfSpeech": "verb",
+      "answers": ["to be", "be"],
+      "phonetic": "/ɛtʁ/",
+      "example": {
+        "text": "Je suis de Montréal.",
+        "translation": "I'm from Montreal."
+      }
+    },
+    {
+      "cardId": "fr-starter-aller",
+      "term": "aller",
+      "partOfSpeech": "verb",
+      "answers": ["to go", "go"],
+      "phonetic": "/a.le/",
+      "example": {
+        "text": "Je vais au marché.",
+        "translation": "I'm going to the market."
+      }
+    },
+    {
+      "cardId": "fr-starter-parler",
+      "term": "parler",
+      "partOfSpeech": "verb",
+      "answers": ["to speak", "speak", "to talk", "talk"],
+      "phonetic": "/paʁ.le/",
+      "example": {
+        "text": "Je parle un peu français.",
+        "translation": "I speak a little French."
+      }
+    },
+    {
+      "cardId": "fr-starter-pain",
+      "term": "pain",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bread"],
+      "phonetic": "/pɛ̃/",
+      "example": {
+        "text": "J'achète du pain tous les matins.",
+        "translation": "I buy bread every morning."
+      }
+    },
+    {
+      "cardId": "fr-starter-lait",
+      "term": "lait",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["milk"],
+      "phonetic": "/lɛ/",
+      "example": {
+        "text": "Le chat boit du lait.",
+        "translation": "The cat drinks milk."
+      }
+    },
+    {
+      "cardId": "fr-starter-fruit",
+      "term": "fruit",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["fruit"],
+      "phonetic": "/fʁɥi/",
+      "example": {
+        "text": "Je mange un fruit chaque jour.",
+        "translation": "I eat a piece of fruit every day."
+      }
+    },
+    {
+      "cardId": "fr-starter-pomme",
+      "term": "pomme",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["apple"],
+      "phonetic": "/pɔm/",
+      "example": {
+        "text": "La pomme est rouge.",
+        "translation": "The apple is red."
+      }
+    },
+    {
+      "cardId": "fr-starter-riz",
+      "term": "riz",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["rice"],
+      "phonetic": "/ʁi/",
+      "example": {
+        "text": "Nous mangeons du riz avec du poulet.",
+        "translation": "We eat rice with chicken."
+      }
+    },
+    {
+      "cardId": "fr-starter-poulet",
+      "term": "poulet",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["chicken"],
+      "phonetic": "/pu.lɛ/",
+      "example": {
+        "text": "Le poulet est délicieux.",
+        "translation": "The chicken is delicious."
+      }
+    },
+    {
+      "cardId": "fr-starter-viande",
+      "term": "viande",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["meat"],
+      "phonetic": "/vjɑ̃d/",
+      "example": {
+        "text": "Je ne mange pas de viande.",
+        "translation": "I don't eat meat."
+      }
+    },
+    {
+      "cardId": "fr-starter-poisson",
+      "term": "poisson",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["fish"],
+      "phonetic": "/pwa.sɔ̃/",
+      "example": {
+        "text": "Le poisson est frais.",
+        "translation": "The fish is fresh."
+      }
+    },
+    {
+      "cardId": "fr-starter-oeuf",
+      "term": "œuf",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["egg"],
+      "phonetic": "/œf/",
+      "example": {
+        "text": "Je voudrais deux œufs.",
+        "translation": "I'd like two eggs."
+      }
+    },
+    {
+      "cardId": "fr-starter-fromage",
+      "term": "fromage",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["cheese"],
+      "phonetic": "/fʁɔ.maʒ/",
+      "example": {
+        "text": "J'aime le fromage.",
+        "translation": "I like cheese."
+      }
+    },
+    {
+      "cardId": "fr-starter-soupe",
+      "term": "soupe",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["soup"],
+      "phonetic": "/sup/",
+      "example": {
+        "text": "La soupe est chaude.",
+        "translation": "The soup is hot."
+      }
+    },
+    {
+      "cardId": "fr-starter-petit-dejeuner",
+      "term": "petit-déjeuner",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["breakfast"],
+      "phonetic": "/pə.ti de.ʒœ.ne/",
+      "example": {
+        "text": "Le petit-déjeuner est prêt.",
+        "translation": "Breakfast is ready."
+      }
+    },
+    {
+      "cardId": "fr-starter-diner",
+      "term": "dîner",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["dinner", "supper"],
+      "phonetic": "/di.ne/",
+      "example": {
+        "text": "Le dîner est à huit heures.",
+        "translation": "Dinner is at eight."
+      }
+    },
+    {
+      "cardId": "fr-starter-cuisiner",
+      "term": "cuisiner",
+      "partOfSpeech": "verb",
+      "answers": ["to cook", "cook"],
+      "phonetic": "/kɥi.zi.ne/",
+      "example": {
+        "text": "J'aime cuisiner le dimanche.",
+        "translation": "I like to cook on Sundays."
+      }
+    },
+    {
+      "cardId": "fr-starter-famille",
+      "term": "famille",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["family"],
+      "phonetic": "/fa.mij/",
+      "example": {
+        "text": "Ma famille est grande.",
+        "translation": "My family is big."
+      }
+    },
+    {
+      "cardId": "fr-starter-mere",
+      "term": "mère",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["mother", "mom"],
+      "phonetic": "/mɛʁ/",
+      "example": {
+        "text": "Ma mère cuisine très bien.",
+        "translation": "My mother cooks very well."
+      }
+    },
+    {
+      "cardId": "fr-starter-pere",
+      "term": "père",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["father", "dad"],
+      "phonetic": "/pɛʁ/",
+      "example": {
+        "text": "Mon père travaille dans une banque.",
+        "translation": "My father works at a bank."
+      }
+    },
+    {
+      "cardId": "fr-starter-fils",
+      "term": "fils",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["son"],
+      "phonetic": "/fis/",
+      "example": {
+        "text": "Son fils a cinq ans.",
+        "translation": "Her son is five years old."
+      }
+    },
+    {
+      "cardId": "fr-starter-fille",
+      "term": "fille",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["daughter", "girl"],
+      "phonetic": "/fij/",
+      "example": {
+        "text": "Ma fille étudie à l'université.",
+        "translation": "My daughter studies at the university."
+      }
+    },
+    {
+      "cardId": "fr-starter-frere",
+      "term": "frère",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["brother"],
+      "phonetic": "/fʁɛʁ/",
+      "example": {
+        "text": "Mon frère joue au foot.",
+        "translation": "My brother plays soccer."
+      }
+    },
+    {
+      "cardId": "fr-starter-soeur",
+      "term": "sœur",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["sister"],
+      "phonetic": "/sœʁ/",
+      "example": {
+        "text": "Ma sœur a un chien.",
+        "translation": "My sister has a dog."
+      }
+    },
+    {
+      "cardId": "fr-starter-ami",
+      "term": "ami",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["friend"],
+      "phonetic": "/a.mi/",
+      "example": {
+        "text": "Mon ami habite à Paris.",
+        "translation": "My friend lives in Paris."
+      }
+    },
+    {
+      "cardId": "fr-starter-amie",
+      "term": "amie",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["friend"],
+      "phonetic": "/a.mi/",
+      "example": {
+        "text": "Mon amie parle espagnol.",
+        "translation": "My friend speaks Spanish."
+      }
+    },
+    {
+      "cardId": "fr-starter-enfant",
+      "term": "enfant",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["child", "kid"],
+      "phonetic": "/ɑ̃.fɑ̃/",
+      "example": {
+        "text": "L'enfant joue dans le parc.",
+        "translation": "The child is playing in the park."
+      }
+    },
+    {
+      "cardId": "fr-starter-nom",
+      "term": "nom",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["name"],
+      "phonetic": "/nɔ̃/",
+      "example": {
+        "text": "Quel est ton nom ?",
+        "translation": "What is your name?"
+      }
+    },
+    {
+      "cardId": "fr-starter-chien",
+      "term": "chien",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["dog"],
+      "phonetic": "/ʃjɛ̃/",
+      "example": {
+        "text": "Le chien dort sur le canapé.",
+        "translation": "The dog sleeps on the sofa."
+      }
+    },
+    {
+      "cardId": "fr-starter-chat",
+      "term": "chat",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["cat"],
+      "phonetic": "/ʃa/",
+      "example": {
+        "text": "Le chat est à la fenêtre.",
+        "translation": "The cat is at the window."
+      }
+    },
+    {
+      "cardId": "fr-starter-habiter",
+      "term": "habiter",
+      "partOfSpeech": "verb",
+      "answers": ["to live", "live"],
+      "phonetic": "/a.bi.te/",
+      "example": {
+        "text": "J'habite dans une grande ville.",
+        "translation": "I live in a big city."
+      }
+    },
+    {
+      "cardId": "fr-starter-maison",
+      "term": "maison",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["house", "home"],
+      "phonetic": "/mɛ.zɔ̃/",
+      "example": {
+        "text": "Ma maison est petite.",
+        "translation": "My house is small."
+      }
+    },
+    {
+      "cardId": "fr-starter-cuisine",
+      "term": "cuisine",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["kitchen"],
+      "phonetic": "/kɥi.zin/",
+      "example": {
+        "text": "Ma mère est dans la cuisine.",
+        "translation": "My mother is in the kitchen."
+      }
+    },
+    {
+      "cardId": "fr-starter-toilettes",
+      "term": "toilettes",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["bathroom", "restroom", "toilet"],
+      "phonetic": "/twa.lɛt/",
+      "example": {
+        "text": "Où sont les toilettes ?",
+        "translation": "Where is the bathroom?"
+      }
+    },
+    {
+      "cardId": "fr-starter-table",
+      "term": "table",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["table"],
+      "phonetic": "/tabl/",
+      "example": {
+        "text": "Le repas est sur la table.",
+        "translation": "The meal is on the table."
+      }
+    },
+    {
+      "cardId": "fr-starter-chaise",
+      "term": "chaise",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["chair"],
+      "phonetic": "/ʃɛz/",
+      "example": {
+        "text": "Il y a une chaise dans la cuisine.",
+        "translation": "There is a chair in the kitchen."
+      }
+    },
+    {
+      "cardId": "fr-starter-lit",
+      "term": "lit",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bed"],
+      "phonetic": "/li/",
+      "example": {
+        "text": "Le lit est très confortable.",
+        "translation": "The bed is very comfortable."
+      }
+    },
+    {
+      "cardId": "fr-starter-porte",
+      "term": "porte",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["door"],
+      "phonetic": "/pɔʁt/",
+      "example": {
+        "text": "Ferme la porte, s'il te plaît.",
+        "translation": "Close the door, please."
+      }
+    },
+    {
+      "cardId": "fr-starter-fenetre",
+      "term": "fenêtre",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["window"],
+      "phonetic": "/fə.nɛtʁ/",
+      "example": {
+        "text": "Ouvre la fenêtre.",
+        "translation": "Open the window."
+      }
+    },
+    {
+      "cardId": "fr-starter-cle",
+      "term": "clé",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["key"],
+      "phonetic": "/kle/",
+      "example": {
+        "text": "Où sont mes clés ?",
+        "translation": "Where are my keys?"
+      }
+    },
+    {
+      "cardId": "fr-starter-dormir",
+      "term": "dormir",
+      "partOfSpeech": "verb",
+      "answers": ["to sleep", "sleep"],
+      "phonetic": "/dɔʁ.miʁ/",
+      "example": {
+        "text": "Je veux dormir huit heures.",
+        "translation": "I want to sleep eight hours."
+      }
+    },
+    {
+      "cardId": "fr-starter-jour",
+      "term": "jour",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["day"],
+      "phonetic": "/ʒuʁ/",
+      "example": {
+        "text": "Il y a sept jours dans une semaine.",
+        "translation": "There are seven days in a week."
+      }
+    },
+    {
+      "cardId": "fr-starter-nuit",
+      "term": "nuit",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["night"],
+      "phonetic": "/nɥi/",
+      "example": {
+        "text": "Je travaille la nuit.",
+        "translation": "I work at night."
+      }
+    },
+    {
+      "cardId": "fr-starter-matin",
+      "term": "matin",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["morning"],
+      "phonetic": "/ma.tɛ̃/",
+      "example": {
+        "text": "Je cours le matin.",
+        "translation": "I run in the morning."
+      }
+    },
+    {
+      "cardId": "fr-starter-semaine",
+      "term": "semaine",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["week"],
+      "phonetic": "/sə.mɛn/",
+      "example": {
+        "text": "Je vais à la salle de sport trois fois par semaine.",
+        "translation": "I go to the gym three times a week."
+      }
+    },
+    {
+      "cardId": "fr-starter-an",
+      "term": "an",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["year"],
+      "phonetic": "/ɑ̃/",
+      "example": {
+        "text": "J'ai vingt ans.",
+        "translation": "I'm twenty years old."
+      }
+    },
+    {
+      "cardId": "fr-starter-heure",
+      "term": "heure",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["hour", "time", "o'clock"],
+      "phonetic": "/œʁ/",
+      "example": {
+        "text": "Quelle heure est-il ?",
+        "translation": "What time is it?"
+      }
+    },
+    {
+      "cardId": "fr-starter-aujourd-hui",
+      "term": "aujourd'hui",
+      "partOfSpeech": "adverb",
+      "answers": ["today"],
+      "phonetic": "/o.ʒuʁ.dɥi/",
+      "example": {
+        "text": "Il fait chaud aujourd'hui.",
+        "translation": "It's hot today."
+      }
+    },
+    {
+      "cardId": "fr-starter-temps",
+      "term": "temps",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["time", "weather"],
+      "phonetic": "/tɑ̃/",
+      "example": {
+        "text": "Je n'ai pas le temps.",
+        "translation": "I don't have time."
+      }
+    },
+    {
+      "cardId": "fr-starter-travailler",
+      "term": "travailler",
+      "partOfSpeech": "verb",
+      "answers": ["to work", "work"],
+      "phonetic": "/tʁa.va.je/",
+      "example": {
+        "text": "Je travaille du lundi au vendredi.",
+        "translation": "I work Monday to Friday."
+      }
+    },
+    {
+      "cardId": "fr-starter-travail",
+      "term": "travail",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["work", "job"],
+      "phonetic": "/tʁa.vaj/",
+      "example": {
+        "text": "Mon travail est près d'ici.",
+        "translation": "My job is near here."
+      }
+    },
+    {
+      "cardId": "fr-starter-ecole",
+      "term": "école",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["school"],
+      "phonetic": "/e.kɔl/",
+      "example": {
+        "text": "Les enfants vont à l'école.",
+        "translation": "The children go to school."
+      }
+    },
+    {
+      "cardId": "fr-starter-apprendre",
+      "term": "apprendre",
+      "partOfSpeech": "verb",
+      "answers": ["to learn", "learn"],
+      "phonetic": "/a.pʁɑ̃dʁ/",
+      "example": {
+        "text": "Je veux apprendre le français.",
+        "translation": "I want to learn French."
+      }
+    },
+    {
+      "cardId": "fr-starter-comprendre",
+      "term": "comprendre",
+      "partOfSpeech": "verb",
+      "answers": ["to understand", "understand"],
+      "phonetic": "/kɔ̃.pʁɑ̃dʁ/",
+      "example": {
+        "text": "Je ne comprends pas la question.",
+        "translation": "I don't understand the question."
+      }
+    },
+    {
+      "cardId": "fr-starter-lire",
+      "term": "lire",
+      "partOfSpeech": "verb",
+      "answers": ["to read", "read"],
+      "phonetic": "/liʁ/",
+      "example": {
+        "text": "Je lis un livre chaque mois.",
+        "translation": "I read a book every month."
+      }
+    },
+    {
+      "cardId": "fr-starter-livre",
+      "term": "livre",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["book"],
+      "phonetic": "/livʁ/",
+      "example": {
+        "text": "Le livre est sur la table.",
+        "translation": "The book is on the table."
+      }
+    },
+    {
+      "cardId": "fr-starter-ecrire",
+      "term": "écrire",
+      "partOfSpeech": "verb",
+      "answers": ["to write", "write"],
+      "phonetic": "/e.kʁiʁ/",
+      "example": {
+        "text": "J'écris une lettre à ma grand-mère.",
+        "translation": "I'm writing a letter to my grandmother."
+      }
+    },
+    {
+      "cardId": "fr-starter-savoir",
+      "term": "savoir",
+      "partOfSpeech": "verb",
+      "answers": ["to know", "know"],
+      "phonetic": "/sa.vwaʁ/",
+      "example": {
+        "text": "Je ne sais pas.",
+        "translation": "I don't know."
+      }
+    },
+    {
+      "cardId": "fr-starter-pouvoir",
+      "term": "pouvoir",
+      "partOfSpeech": "verb",
+      "answers": ["can", "to be able to", "to be able"],
+      "phonetic": "/pu.vwaʁ/",
+      "example": {
+        "text": "Je peux entrer ?",
+        "translation": "Can I come in?"
+      }
+    },
+    {
+      "cardId": "fr-starter-faire",
+      "term": "faire",
+      "partOfSpeech": "verb",
+      "answers": ["to do", "do", "to make", "make"],
+      "phonetic": "/fɛʁ/",
+      "example": {
+        "text": "Qu'est-ce que tu fais aujourd'hui ?",
+        "translation": "What are you doing today?"
+      }
+    },
+    {
+      "cardId": "fr-starter-ville",
+      "term": "ville",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["city", "town"],
+      "phonetic": "/vil/",
+      "example": {
+        "text": "La ville est très jolie.",
+        "translation": "The city is very pretty."
+      }
+    },
+    {
+      "cardId": "fr-starter-rue",
+      "term": "rue",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["street"],
+      "phonetic": "/ʁy/",
+      "example": {
+        "text": "Ma maison est dans cette rue.",
+        "translation": "My house is on this street."
+      }
+    },
+    {
+      "cardId": "fr-starter-magasin",
+      "term": "magasin",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["store", "shop"],
+      "phonetic": "/ma.ɡa.zɛ̃/",
+      "example": {
+        "text": "Le magasin ouvre à neuf heures.",
+        "translation": "The store opens at nine."
+      }
+    },
+    {
+      "cardId": "fr-starter-marche",
+      "term": "marché",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["market"],
+      "phonetic": "/maʁ.ʃe/",
+      "example": {
+        "text": "J'achète des fruits au marché.",
+        "translation": "I buy fruit at the market."
+      }
+    },
+    {
+      "cardId": "fr-starter-acheter",
+      "term": "acheter",
+      "partOfSpeech": "verb",
+      "answers": ["to buy", "buy"],
+      "phonetic": "/aʃ.te/",
+      "example": {
+        "text": "Je veux acheter des chaussures.",
+        "translation": "I want to buy shoes."
+      }
+    },
+    {
+      "cardId": "fr-starter-payer",
+      "term": "payer",
+      "partOfSpeech": "verb",
+      "answers": ["to pay", "pay"],
+      "phonetic": "/pe.je/",
+      "example": {
+        "text": "Je veux payer par carte.",
+        "translation": "I want to pay by card."
+      }
+    },
+    {
+      "cardId": "fr-starter-argent",
+      "term": "argent",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["money"],
+      "phonetic": "/aʁ.ʒɑ̃/",
+      "example": {
+        "text": "Je n'ai pas d'argent.",
+        "translation": "I don't have any money."
+      }
+    },
+    {
+      "cardId": "fr-starter-prix",
+      "term": "prix",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["price"],
+      "phonetic": "/pʁi/",
+      "example": {
+        "text": "Quel est le prix ?",
+        "translation": "What is the price?"
+      }
+    },
+    {
+      "cardId": "fr-starter-combien-ca-coute",
+      "term": "combien ça coûte ?",
+      "partOfSpeech": "phrase",
+      "answers": ["how much does it cost?", "how much is it?", "how much?"],
+      "phonetic": "/kɔ̃.bjɛ̃ sa kut/",
+      "example": {
+        "text": "Combien ça coûte, cette chemise ?",
+        "translation": "How much does this shirt cost?"
+      }
+    },
+    {
+      "cardId": "fr-starter-ou",
+      "term": "où ?",
+      "partOfSpeech": "phrase",
+      "answers": ["where?", "where"],
+      "phonetic": "/u/",
+      "example": {
+        "text": "Où est la gare ?",
+        "translation": "Where is the station?"
+      }
+    },
+    {
+      "cardId": "fr-starter-banque",
+      "term": "banque",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["bank"],
+      "phonetic": "/bɑ̃k/",
+      "example": {
+        "text": "La banque ouvre à neuf heures.",
+        "translation": "The bank opens at nine."
+      }
+    },
+    {
+      "cardId": "fr-starter-gare",
+      "term": "gare",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["train station", "station"],
+      "phonetic": "/ɡaʁ/",
+      "example": {
+        "text": "La gare est loin.",
+        "translation": "The station is far."
+      }
+    },
+    {
+      "cardId": "fr-starter-voiture",
+      "term": "voiture",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["car"],
+      "phonetic": "/vwa.tyʁ/",
+      "example": {
+        "text": "Ma voiture est bleue.",
+        "translation": "My car is blue."
+      }
+    },
+    {
+      "cardId": "fr-starter-bus",
+      "term": "bus",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bus"],
+      "phonetic": "/bys/",
+      "example": {
+        "text": "Je prends le bus à sept heures.",
+        "translation": "I take the bus at seven."
+      }
+    },
+    {
+      "cardId": "fr-starter-train",
+      "term": "train",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["train"],
+      "phonetic": "/tʁɛ̃/",
+      "example": {
+        "text": "Le train arrive à dix heures.",
+        "translation": "The train arrives at ten."
+      }
+    },
+    {
+      "cardId": "fr-starter-marcher",
+      "term": "marcher",
+      "partOfSpeech": "verb",
+      "answers": ["to walk", "walk"],
+      "phonetic": "/maʁ.ʃe/",
+      "example": {
+        "text": "J'aime marcher l'après-midi.",
+        "translation": "I like to walk in the afternoon."
+      }
+    },
+    {
+      "cardId": "fr-starter-parc",
+      "term": "parc",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["park"],
+      "phonetic": "/paʁk/",
+      "example": {
+        "text": "On se promène dans le parc.",
+        "translation": "We walk in the park."
+      }
+    },
+    {
+      "cardId": "fr-starter-voyager",
+      "term": "voyager",
+      "partOfSpeech": "verb",
+      "answers": ["to travel", "travel"],
+      "phonetic": "/vwa.ja.ʒe/",
+      "example": {
+        "text": "J'aime voyager en été.",
+        "translation": "I like to travel in summer."
+      }
+    },
+    {
+      "cardId": "fr-starter-hotel",
+      "term": "hôtel",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["hotel"],
+      "phonetic": "/o.tɛl/",
+      "example": {
+        "text": "L'hôtel est près de la mer.",
+        "translation": "The hotel is near the sea."
+      }
+    },
+    {
+      "cardId": "fr-starter-plage",
+      "term": "plage",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["beach"],
+      "phonetic": "/plaʒ/",
+      "example": {
+        "text": "On va à la plage ?",
+        "translation": "Shall we go to the beach?"
+      }
+    },
+    {
+      "cardId": "fr-starter-mer",
+      "term": "mer",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["sea", "ocean"],
+      "phonetic": "/mɛʁ/",
+      "example": {
+        "text": "La mer est calme.",
+        "translation": "The sea is calm."
+      }
+    },
+    {
+      "cardId": "fr-starter-soleil",
+      "term": "soleil",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["sun"],
+      "phonetic": "/sɔ.lɛj/",
+      "example": {
+        "text": "Il y a du soleil.",
+        "translation": "It's sunny."
+      }
+    },
+    {
+      "cardId": "fr-starter-pleuvoir",
+      "term": "pleuvoir",
+      "partOfSpeech": "verb",
+      "answers": ["to rain", "rain"],
+      "phonetic": "/plø.vwaʁ/",
+      "example": {
+        "text": "Il va pleuvoir cet après-midi.",
+        "translation": "It's going to rain this afternoon."
+      }
+    },
+    {
+      "cardId": "fr-starter-vetements",
+      "term": "vêtements",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["clothes", "clothing"],
+      "phonetic": "/vɛt.mɑ̃/",
+      "example": {
+        "text": "J'ai besoin de nouveaux vêtements.",
+        "translation": "I need new clothes."
+      }
+    },
+    {
+      "cardId": "fr-starter-chaussure",
+      "term": "chaussure",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["shoe"],
+      "phonetic": "/ʃo.syʁ/",
+      "example": {
+        "text": "Ces chaussures sont confortables.",
+        "translation": "These shoes are comfortable."
+      }
+    },
+    {
+      "cardId": "fr-starter-chemise",
+      "term": "chemise",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["shirt"],
+      "phonetic": "/ʃə.miz/",
+      "example": {
+        "text": "La chemise est blanche.",
+        "translation": "The shirt is white."
+      }
+    },
+    {
+      "cardId": "fr-starter-tete",
+      "term": "tête",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["head"],
+      "phonetic": "/tɛt/",
+      "example": {
+        "text": "J'ai mal à la tête.",
+        "translation": "I have a headache."
+      }
+    },
+    {
+      "cardId": "fr-starter-main",
+      "term": "main",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["hand"],
+      "phonetic": "/mɛ̃/",
+      "example": {
+        "text": "Lave-toi les mains.",
+        "translation": "Wash your hands."
+      }
+    },
+    {
+      "cardId": "fr-starter-oeil",
+      "term": "œil",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["eye"],
+      "phonetic": "/œj/",
+      "example": {
+        "text": "Elle a les yeux verts.",
+        "translation": "She has green eyes."
+      }
+    },
+    {
+      "cardId": "fr-starter-medecin",
+      "term": "médecin",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["doctor"],
+      "phonetic": "/med.sɛ̃/",
+      "example": {
+        "text": "Je dois voir le médecin.",
+        "translation": "I need to see the doctor."
+      }
+    },
+    {
+      "cardId": "fr-starter-hopital",
+      "term": "hôpital",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["hospital"],
+      "phonetic": "/o.pi.tal/",
+      "example": {
+        "text": "L'hôpital est ouvert.",
+        "translation": "The hospital is open."
+      }
+    },
+    {
+      "cardId": "fr-starter-aider",
+      "term": "aider",
+      "partOfSpeech": "verb",
+      "answers": ["to help", "help"],
+      "phonetic": "/e.de/",
+      "example": {
+        "text": "Tu peux m'aider ?",
+        "translation": "Can you help me?"
+      }
+    },
+    {
+      "cardId": "fr-starter-chercher",
+      "term": "chercher",
+      "partOfSpeech": "verb",
+      "answers": ["to look for", "look for", "to search", "search"],
+      "phonetic": "/ʃɛʁ.ʃe/",
+      "example": {
+        "text": "Je cherche mes clés.",
+        "translation": "I'm looking for my keys."
+      }
+    },
+    {
+      "cardId": "fr-starter-trouver",
+      "term": "trouver",
+      "partOfSpeech": "verb",
+      "answers": ["to find", "find"],
+      "phonetic": "/tʁu.ve/",
+      "example": {
+        "text": "Je ne trouve pas mon téléphone.",
+        "translation": "I can't find my phone."
+      }
+    },
+    {
+      "cardId": "fr-starter-telephone",
+      "term": "téléphone",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["phone", "telephone"],
+      "phonetic": "/te.le.fɔn/",
+      "example": {
+        "text": "Mon téléphone ne marche pas.",
+        "translation": "My phone doesn't work."
+      }
+    },
+    {
+      "cardId": "fr-starter-appeler",
+      "term": "appeler",
+      "partOfSpeech": "verb",
+      "answers": ["to call", "call"],
+      "phonetic": "/a.ple/",
+      "example": {
+        "text": "Je t'appelle demain.",
+        "translation": "I'll call you tomorrow."
+      }
+    },
+    {
+      "cardId": "fr-starter-venir",
+      "term": "venir",
+      "partOfSpeech": "verb",
+      "answers": ["to come", "come"],
+      "phonetic": "/və.niʁ/",
+      "example": {
+        "text": "Tu viens à la fête ?",
+        "translation": "Are you coming to the party?"
+      }
+    },
+    {
+      "cardId": "fr-starter-donner",
+      "term": "donner",
+      "partOfSpeech": "verb",
+      "answers": ["to give", "give"],
+      "phonetic": "/dɔ.ne/",
+      "example": {
+        "text": "Je te donne mon numéro.",
+        "translation": "I'll give you my number."
+      }
+    },
+    {
+      "cardId": "fr-starter-ouvrir",
+      "term": "ouvrir",
+      "partOfSpeech": "verb",
+      "answers": ["to open", "open"],
+      "phonetic": "/u.vʁiʁ/",
+      "example": {
+        "text": "Tu peux ouvrir la fenêtre ?",
+        "translation": "Can you open the window?"
+      }
+    },
+    {
+      "cardId": "fr-starter-fermer",
+      "term": "fermer",
+      "partOfSpeech": "verb",
+      "answers": ["to close", "close", "to shut", "shut"],
+      "phonetic": "/fɛʁ.me/",
+      "example": {
+        "text": "La banque ferme à cinq heures.",
+        "translation": "The bank closes at five."
+      }
+    },
+    {
+      "cardId": "fr-starter-voir",
+      "term": "voir",
+      "partOfSpeech": "verb",
+      "answers": ["to see", "see"],
+      "phonetic": "/vwaʁ/",
+      "example": {
+        "text": "On va voir un film.",
+        "translation": "We're going to see a movie."
+      }
+    },
+    {
+      "cardId": "fr-starter-ecouter",
+      "term": "écouter",
+      "partOfSpeech": "verb",
+      "answers": ["to listen", "listen"],
+      "phonetic": "/e.ku.te/",
+      "example": {
+        "text": "J'aime écouter de la musique.",
+        "translation": "I like to listen to music."
+      }
+    },
+    {
+      "cardId": "fr-starter-musique",
+      "term": "musique",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["music"],
+      "phonetic": "/my.zik/",
+      "example": {
+        "text": "J'écoute de la musique dans le bus.",
+        "translation": "I listen to music on the bus."
+      }
+    },
+    {
+      "cardId": "fr-starter-film",
+      "term": "film",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["movie", "film"],
+      "phonetic": "/film/",
+      "example": {
+        "text": "Le film commence à huit heures.",
+        "translation": "The movie starts at eight."
+      }
+    },
+    {
+      "cardId": "fr-starter-fete",
+      "term": "fête",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["party"],
+      "phonetic": "/fɛt/",
+      "example": {
+        "text": "Il y a une fête samedi.",
+        "translation": "There's a party on Saturday."
+      }
+    },
+    {
+      "cardId": "fr-starter-jouer",
+      "term": "jouer",
+      "partOfSpeech": "verb",
+      "answers": ["to play", "play"],
+      "phonetic": "/ʒwe/",
+      "example": {
+        "text": "Les enfants jouent dans la rue.",
+        "translation": "The children play in the street."
+      }
+    },
+    {
+      "cardId": "fr-starter-grand",
+      "term": "grand",
+      "partOfSpeech": "adjective",
+      "answers": ["big", "large", "tall"],
+      "phonetic": "/ɡʁɑ̃/",
+      "example": {
+        "text": "La maison est grande.",
+        "translation": "The house is big."
+      }
+    },
+    {
+      "cardId": "fr-starter-petit",
+      "term": "petit",
+      "partOfSpeech": "adjective",
+      "answers": ["small", "little"],
+      "phonetic": "/pə.ti/",
+      "example": {
+        "text": "Le chien est petit.",
+        "translation": "The dog is small."
+      }
+    },
+    {
+      "cardId": "fr-starter-bon",
+      "term": "bon",
+      "partOfSpeech": "adjective",
+      "answers": ["good"],
+      "phonetic": "/bɔ̃/",
+      "example": {
+        "text": "Ce café est bon.",
+        "translation": "This coffee is good."
+      }
+    },
+    {
+      "cardId": "fr-starter-mauvais",
+      "term": "mauvais",
+      "partOfSpeech": "adjective",
+      "answers": ["bad"],
+      "phonetic": "/mo.vɛ/",
+      "example": {
+        "text": "Ce film est mauvais.",
+        "translation": "This movie is bad."
+      }
+    },
+    {
+      "cardId": "fr-starter-nouveau",
+      "term": "nouveau",
+      "partOfSpeech": "adjective",
+      "answers": ["new"],
+      "phonetic": "/nu.vo/",
+      "example": {
+        "text": "J'ai un nouveau téléphone.",
+        "translation": "I have a new phone."
+      }
+    },
+    {
+      "cardId": "fr-starter-chaud",
+      "term": "chaud",
+      "partOfSpeech": "adjective",
+      "answers": ["hot", "warm"],
+      "phonetic": "/ʃo/",
+      "example": {
+        "text": "Le thé est chaud.",
+        "translation": "The tea is hot."
+      }
+    },
+    {
+      "cardId": "fr-starter-froid",
+      "term": "froid",
+      "partOfSpeech": "adjective",
+      "answers": ["cold"],
+      "phonetic": "/fʁwa/",
+      "example": {
+        "text": "L'eau est froide.",
+        "translation": "The water is cold."
+      }
+    },
+    {
+      "cardId": "fr-starter-pardon",
+      "term": "pardon",
+      "partOfSpeech": "phrase",
+      "answers": ["sorry", "excuse me", "pardon"],
+      "phonetic": "/paʁ.dɔ̃/",
+      "example": {
+        "text": "Pardon, je ne comprends pas.",
+        "translation": "Sorry, I don't understand."
+      }
+    },
+    {
+      "cardId": "fr-starter-bonsoir",
+      "term": "bonsoir",
+      "partOfSpeech": "phrase",
+      "answers": ["good evening"],
+      "phonetic": "/bɔ̃.swaʁ/",
+      "example": {
+        "text": "Bonsoir, madame.",
+        "translation": "Good evening, ma'am."
+      }
+    },
+    {
+      "cardId": "fr-starter-bonne-nuit",
+      "term": "bonne nuit",
+      "partOfSpeech": "phrase",
+      "answers": ["good night"],
+      "phonetic": "/bɔn nɥi/",
+      "example": {
+        "text": "Bonne nuit, à demain !",
+        "translation": "Good night, see you tomorrow!"
+      }
+    }
+  ]
+}

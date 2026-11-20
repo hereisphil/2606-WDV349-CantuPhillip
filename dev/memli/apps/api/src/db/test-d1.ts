@@ -7,7 +7,15 @@ import { getPlatformProxy, unstable_splitSqlQuery } from "wrangler"
 import { app } from "../app"
 import { database, runTogether, type Database } from "./client"
 import { progressUpserts } from "./progress"
-import { cards, courses, mnemonics, reviews, sessions, users } from "./schema"
+import {
+  cards,
+  courses,
+  enrollments,
+  mnemonics,
+  reviews,
+  sessions,
+  users,
+} from "./schema"
 import { apiRoot, migrationStatements, seedSql } from "./test-database"
 
 /**
@@ -208,6 +216,48 @@ export async function addCourse(
     rows.map((row) => db.insert(cards).values(row))
   )
   return rows.map((row) => row.id)
+}
+
+/** Lists a course from `addCourse` in the catalog, with every detail it needs. */
+export async function publishCourse(
+  db: Database,
+  courseId: string,
+  details: { title?: string; attribution?: string } = {}
+): Promise<void> {
+  await db
+    .update(courses)
+    .set({
+      ...(details.title !== undefined && { title: details.title }),
+      description: `Words for ${courseId}.`,
+      publishedAt: new Date("2026-11-01T00:00:00.000Z"),
+      source: "Written for Memli",
+      license: "CC BY-SA 4.0",
+      attribution: details.attribution ?? null,
+    })
+    .where(eq(courses.id, courseId))
+}
+
+/**
+ * A course from `addCourse`, already published: one any learner may study.
+ * Use `addCourse` alone for a draft.
+ */
+export async function addPublishedCourse(
+  db: Database,
+  courseId: string,
+  cardCount: number
+): Promise<string[]> {
+  const cardIds = await addCourse(db, courseId, cardCount)
+  await publishCourse(db, courseId)
+  return cardIds
+}
+
+/** Puts a course on a learner's dashboard, as `PUT …/enrollment` will. */
+export async function addEnrollment(
+  db: Database,
+  courseId: string,
+  userId: string = VIEWER_ID
+): Promise<void> {
+  await db.insert(enrollments).values({ userId, courseId })
 }
 
 export async function addMnemonic(

@@ -76,13 +76,15 @@ Single deployable web app with **logical** boundaries:
 | `_auth` | Sign-in / sign-up | `/signin` |
 | `_app` | Authenticated product | `/dashboard`, future `/learn` |
 
+**The course catalog is public (#174).** `/courses` and `/courses/$courseId` open without a session, so they cannot sit behind the `_app` guard. A visitor sees them with the marketing header; a signed-in learner sees them with the app sidebar. They are the first pages that are both public and built from the database, which is why they lead the rendering question below.
+
 This is the correct interim architecture. Do not split Astro/React solely because another monorepo (e.g. Hgraph-style `services/marketing` + `services/app`) uses separate hosts.
 
 ### Target (Phase 3+)
 
 | App | Stack | Serves |
 | --- | --- | --- |
-| `apps/marketing` | Astro | Static/SSG marketing & content |
+| `apps/marketing` | Astro | Static/SSG marketing & content. Whether the public course catalog belongs here is open (#178) |
 | `apps/web` | Vite/React + TanStack Router | Authenticated SPA (and auth screens as decided) |
 | `apps/api` | Hono | JSON API, auth, business operations |
 | `apps/mobile` | Expo / React Native | iOS + Android clients |
@@ -111,6 +113,37 @@ Split when most of these are true:
 - You can afford dual frontend CI/deploy complexity
 
 Until then, keep route groups and invest in the product.
+
+---
+
+## What gets server-rendered (open research, #178)
+
+**The owner's working position (2026-11-18):** every page a visitor can open without signing in should arrive as real HTML, server-rendered or static. From the sign-in page on, it is the dynamic web app.
+
+| Side | Pages | Rendering wanted |
+| --- | --- | --- |
+| Public | `/`, `/pricing`, `/about`, `/blog`, `/community`, `/contact`, `/privacy`, `/terms`, the course catalog `/courses`, each course overview `/courses/$courseId` | Server-rendered or static |
+| Web app | `/signin`, `/signup`, `/dashboard`, `/study/$courseId`, `/settings` | Client-rendered, as today |
+
+This is a position, not yet a decision. It agrees with the Phase 3 plan above and adds two things that plan did not cover:
+
+- **The catalog is public** (#174), so course pages are landing pages too: a shared link to a course should show the course, not a blank page waiting for JavaScript.
+- **The catalog is data.** The other public pages are written by hand and change on a deploy. Catalog pages come from D1 and change when a course is imported.
+
+**Today:** everything is client-rendered by `apps/web`, the public catalog included. That is how it ships for the beta.
+
+**Research and decide before building** (tracked in #178):
+
+1. **Static, server-rendered, or both?** Landing and legal pages can be static. For catalog pages: rebuild when a course is imported, render per request on the Worker, or cache at the edge and clear it on import.
+2. **Which tool?** Astro (the Phase 3 plan), TanStack Start, prerendering routes in the existing Vite app, or HTML from the Hono Worker. Compare them on Cloudflare Workers with D1.
+3. **One page, two audiences.** A learner sees "Added", **Continue** and **Add to my courses** on the page a visitor sees. On a static page those parts load in the browser afterwards. Routing by path cannot pick a deployable by session, so decide whether a learner browses the catalog in the app shell or on the public page.
+4. **Where the boundary sits.** Who owns `/signin` and `/signup` (already open below), and how **Start learning** hands a visitor from a static page to sign-up and into the course.
+5. **Shared look.** Tokens, logo, the theme control and `packages/ui` components across both sides, with no visible seam.
+6. **Languages.** How `es-419` pages and URLs work when rendered on the server ([i18n.md](./i18n.md)).
+7. **Caching and security.** Every API answer is `no-store` today, and the public catalog routes cost a D1 write per request for rate limiting ([security.md](./security.md)). Decide what the edge may cache, and keep the Content Security Policy (#168) covering both sides.
+8. **Cost of two frontends.** CI, deploys, the staging gate and previews for a second deployable.
+
+Do not start the split from this section. The Phase 3 conditions below the Astro heading, and `.cursor/rules/architecture-guardrails.mdc`, still decide when.
 
 ---
 
@@ -173,6 +206,7 @@ Exact paths can evolve; conventions should not.
 | Concern | Convention |
 | --- | --- |
 | Marketing home | `/` always addressable as marketing (see [product-ux.md](./product-ux.md)) |
+| Course catalog | `/courses` and `/courses/$courseId` are public; adding a course and studying it need a session (#174) |
 | Post-login default | `/dashboard` **or** `/learn` — choose one primary; redirects may alias |
 | Auth | `/signin`, `/signup` (names flexible; stay under obvious paths) |
 | App namespace (optional later) | If path collisions appear, mount product under `/app/*` **on the same host** — still not `app.` subdomain |
@@ -191,6 +225,7 @@ Illustrative only — implement with whatever hosts the site (e.g. Cloudflare):
 {brand}.com/learn*      →  web
 {brand}.com/signin*     →  web   # or shared decision
 {brand}.com/signup*     →  web
+{brand}.com/courses*    →  open: public pages a learner also uses (#178)
 {brand}.com/*           →  marketing (Astro)  # default
 api.{brand}.com/*       →  api (Hono)
 ```
@@ -240,6 +275,9 @@ Record the outcome here when chosen:
 | Post-login canonical path | `/dashboard` vs `/learn` | **Chosen: `/dashboard`** (active study sessions use `/study/$courseId`) |
 | Auth mechanism | Cookie session vs JWT/bearer hybrid | Better Auth in `359 MS 4` (seeded `useViewer()` test user `usr_prototype_01` in `359 MS 1`–`359 MS 3`, a real `users` row from #106). `users` already has Better Auth's core user fields |
 | Auth route ownership after Astro split | App only vs lightweight marketing links out | Open — default lean: app owns auth pages |
+| What is server-rendered or static | Every public page (marketing, legal, catalog, course overviews) vs marketing pages only | Open, research in #178. Owner's position: every public page; the web app starts at sign-in |
+| How the public catalog is rendered | Static, rebuilt on course import vs rendered per request from D1 vs edge-cached | Open, research in #178. Client-rendered in `apps/web` for the beta (#174) |
+| Rendering tool for public pages | Astro vs TanStack Start vs prerendered Vite routes vs HTML from the Worker | Open, research in #178. Phase 3 plan says Astro |
 | App path prefix | Root paths vs `/app/*` | Open — only if proxy/SEO needs it |
 | Hosting | Cloudflare-centric (already in repo tooling) vs other | Lean current stack unless requirements change |
 | SRS scheduler | Hand-rolled SM-2 vs FSRS (`ts-fsrs`) | **Chosen: FSRS-7 via `ts-fsrs` wrapper in `@workspace/core`** (#130, #132) |

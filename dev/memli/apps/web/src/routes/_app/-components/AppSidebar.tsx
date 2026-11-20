@@ -7,6 +7,7 @@ import {
   CreditCard,
   Image as ImageIcon,
   LayoutDashboard,
+  Library,
   LogOut,
   SlidersHorizontal,
   UserIcon,
@@ -39,6 +40,7 @@ const messages = {
   accountMenu: "Account menu, {name}",
   accountMenuPrefix: "Account menu, ",
   dashboard: "Dashboard",
+  courses: "Courses",
   community: "Community",
   profile: "View Profile",
   settings: "Learning Settings",
@@ -57,6 +59,13 @@ const railLinks = [
     exact: true,
   },
   {
+    // Not exact: a course's overview page keeps Courses lit.
+    to: "/courses" as const,
+    label: messages.courses,
+    icon: Library,
+    exact: false,
+  },
+  {
     to: "/community" as const,
     label: messages.community,
     icon: ImageIcon,
@@ -70,7 +79,7 @@ function RailLink({
   icon: Icon,
   exact = false,
 }: {
-  to: "/dashboard" | "/community"
+  to: "/dashboard" | "/courses" | "/community"
   label: string
   icon: typeof LayoutDashboard
   exact?: boolean

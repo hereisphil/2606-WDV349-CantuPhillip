@@ -123,7 +123,11 @@ function SignUpForm({ preview }: { preview?: SignUpPreviewName }): JSX.Element {
   const fieldErrors = state.status === "idle" ? state.fieldErrors : {}
 
   return (
-    <AuthCard title={messages.title} description={messages.description}>
+    <AuthCard
+      title={messages.title}
+      description={messages.description}
+      returnTo={redirect}
+    >
       <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
         <FormField
           id="name"

@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
+import { ThemeMenu } from "@/components/theme-control"
 import {
   headerNav,
   MarketingLink,
@@ -178,6 +179,8 @@ export function Nav(): JSX.Element {
   return (
     <header
       ref={headerRef}
+      // The page keeps focused elements clear of this sticky bar (globals.css).
+      data-sticky-header=""
       className={cn(
         "sticky top-0 z-50 w-full",
         mobileOpen
@@ -185,7 +188,8 @@ export function Nav(): JSX.Element {
           : "bg-background/65 backdrop-blur-sm"
       )}
     >
-      <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 md:grid">
+      {/* From lg up: seven links, Theme and Sign in don't fit a 768 px tablet (#174). */}
+      <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 lg:grid">
         <Link to="/" className="flex" onClick={scrollWindowToTop}>
           <BrandMark />
         </Link>
@@ -194,12 +198,13 @@ export function Nav(): JSX.Element {
           <NavLinks className={navItemClass} />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-1">
+          <ThemeMenu placement="topBar" />
           <AccountSlot viewer={viewer} />
         </div>
       </nav>
 
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:hidden">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 lg:hidden">
         <Link
           to="/"
           className="text-xl font-semibold"
@@ -212,6 +217,7 @@ export function Nav(): JSX.Element {
         </Link>
 
         <div className="flex items-center gap-1">
+          <ThemeMenu placement="topBar" />
           <AccountSlot
             viewer={viewer}
             onNavigate={() => setMobileOpen(false)}
@@ -220,6 +226,8 @@ export function Nav(): JSX.Element {
             type="button"
             variant="ghost"
             size="icon"
+            // Named like the app's own phone menu; the glyph alone says nothing to a screen reader.
+            aria-label="Navigation menu"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((open) => !open)}
@@ -232,7 +240,7 @@ export function Nav(): JSX.Element {
       {mobileOpen ? (
         <nav
           id="mobile-nav"
-          className="flex flex-col gap-1 px-6 py-4 md:hidden"
+          className="flex flex-col gap-1 px-6 py-4 lg:hidden"
         >
           <NavLinks
             className={mobileNavItemClass}

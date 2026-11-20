@@ -5,6 +5,7 @@ import type { AppEnv } from "./env"
 import { auth } from "./lib/auth"
 import { handleError, handleNotFound } from "./lib/errors"
 import { requireSameOrigin } from "./lib/same-origin"
+import { catalogRoutes } from "./routes/catalog"
 import { courseRoutes } from "./routes/courses"
 import { historyRoutes } from "./routes/history"
 import { reviewRoutes } from "./routes/reviews"
@@ -36,6 +37,7 @@ app.get("/health", (c) => {
 // Better Auth owns everything under /api/auth: sign-up, sign-in, sign out.
 app.on(["GET", "POST"], "/auth/*", (c) => auth(c.env).handler(c.req.raw))
 
+app.route("/catalog", catalogRoutes)
 app.route("/courses", courseRoutes)
 app.route("/reviews", reviewRoutes)
 app.route("/history", historyRoutes)

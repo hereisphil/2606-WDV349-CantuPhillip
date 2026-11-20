@@ -4,8 +4,18 @@ import {
   QueryClient,
   queryOptions,
   type FetchQueryOptions,
+  type UseSuspenseQueryOptions,
 } from "@tanstack/react-query"
 import type { StudyMode } from "@workspace/core/study/course-progress"
+import {
+  catalogCourseDetailSchema,
+  catalogResponseSchema,
+  type CatalogCourseDetail,
+} from "@workspace/schemas/api/catalog"
+import {
+  enrollmentSchema,
+  type Enrollment,
+} from "@workspace/schemas/api/enrollment"
 import { coursesResponseSchema } from "@workspace/schemas/api/courses"
 import { studyHistorySchema } from "@workspace/schemas/api/history"
 import { sessionResponseSchema } from "@workspace/schemas/auth/session"
@@ -99,6 +109,57 @@ export const coursesQuery = queryOptions({
       .courses,
   staleTime: 10_000,
 })
+
+/**
+ * `GET /api/catalog`: every published course. Public: a visitor gets it too,
+ * with nothing added. Signing in or out clears it (`src/lib/session.ts`).
+ */
+export const catalogQuery = queryOptions({
+  queryKey: ["catalog"],
+  queryFn: async () =>
+    (await apiRequest("/api/catalog", catalogResponseSchema)).courses,
+  staleTime: 60_000,
+})
+
+/**
+ * `GET /api/catalog/:courseId`: one course's overview. Its key starts with
+ * `catalog`, so invalidating the catalog refreshes it too.
+ */
+type CatalogCourseKey = readonly ["catalog", courseId: string]
+
+export function catalogCourseQuery(
+  courseId: string
+): UseSuspenseQueryOptions<
+  CatalogCourseDetail,
+  Error,
+  CatalogCourseDetail,
+  CatalogCourseKey
+> {
+  return queryOptions({
+    queryKey: ["catalog", courseId] as const,
+    queryFn: () =>
+      apiRequest(
+        `/api/catalog/${encodeURIComponent(courseId)}`,
+        catalogCourseDetailSchema
+      ),
+    staleTime: 60_000,
+  })
+}
+
+/**
+ * `PUT` or `DELETE /api/courses/:courseId/enrollment`: adds a course to the
+ * dashboard or takes it off. Both are safe to repeat.
+ */
+export function setCourseAdded(
+  courseId: string,
+  added: boolean
+): Promise<Enrollment> {
+  return apiRequest(
+    `/api/courses/${encodeURIComponent(courseId)}/enrollment`,
+    enrollmentSchema,
+    { method: added ? "PUT" : "DELETE" }
+  )
+}
 
 /**
  * `GET /api/history`: the week, days of study, retention and new words

@@ -123,6 +123,132 @@ describe("courses, cards and mnemonics", () => {
   })
 })
 
+describe("course catalog details", () => {
+  const details = {
+    description: "'Everyday Spanish words.'",
+    source: "'Written for Memli'",
+    license: "'CC BY-SA 4.0'",
+  }
+  type Detail = keyof typeof details
+
+  /** A new course with `details`, published unless `publishedAt` is NULL. */
+  const insertCourse = (
+    values: Partial<Record<Detail, string>> = {},
+    publishedAt = "1794700000000"
+  ): string => {
+    const row = { ...details, ...values }
+    return `
+      INSERT INTO courses (id, title, learning_language, answer_language,
+        description, source, license, published_at)
+      VALUES ('c2', 'Course', 'es', 'en', ${row.description}, ${row.source},
+        ${row.license}, ${publishedAt})`
+  }
+
+  it("lets a draft leave every detail empty", () => {
+    db.exec(
+      insertCourse(
+        { description: "NULL", source: "NULL", license: "NULL" },
+        "NULL"
+      )
+    )
+
+    expect(count("courses")).toBe(2)
+  })
+
+  it("publishes a course that has every detail", () => {
+    db.exec(insertCourse())
+
+    expect(
+      db.prepare("SELECT published_at FROM courses WHERE id = 'c2'").get()
+    ).toEqual({ published_at: 1794700000000 })
+  })
+
+  it.each(["description", "source", "license"] as const)(
+    "refuses to publish a course with no %s, or a blank one",
+    (detail) => {
+      for (const value of ["NULL", "''", "'   '"]) {
+        expect(() => db.exec(insertCourse({ [detail]: value }))).toThrow(
+          "courses_published_check"
+        )
+      }
+    }
+  )
+
+  it("refuses to publish a draft that is missing a detail", () => {
+    db.exec(insertCourse({ license: "NULL" }, "NULL"))
+
+    expect(() =>
+      db.exec("UPDATE courses SET published_at = 1794700000000 WHERE id = 'c2'")
+    ).toThrow("courses_published_check")
+  })
+
+  it("refuses to clear a detail of a published course", () => {
+    db.exec(insertCourse())
+
+    expect(() =>
+      db.exec("UPDATE courses SET source = NULL WHERE id = 'c2'")
+    ).toThrow("courses_published_check")
+  })
+
+  it("lets a course go back to a draft", () => {
+    db.exec(insertCourse())
+    db.exec("UPDATE courses SET published_at = NULL WHERE id = 'c2'")
+    db.exec("UPDATE courses SET license = NULL WHERE id = 'c2'")
+
+    expect(
+      db.prepare("SELECT license FROM courses WHERE id = 'c2'").get()
+    ).toEqual({ license: null })
+  })
+})
+
+describe("enrollments", () => {
+  const enrollmentRow = `
+    INSERT INTO enrollments (user_id, course_id)
+    VALUES ('usr_prototype_01', 'spanish-core-1000')`
+
+  it("adds a course to a learner's dashboard once", () => {
+    db.exec(enrollmentRow)
+
+    expect(() => db.exec(enrollmentRow)).toThrow(
+      /UNIQUE constraint failed: enrollments.user_id, enrollments.course_id/
+    )
+  })
+
+  it("records when the course was added", () => {
+    db.exec(enrollmentRow)
+
+    const row = db.prepare("SELECT added_at FROM enrollments").get()
+    expect(Number(row?.added_at)).toBeGreaterThan(Date.UTC(2026, 0, 1))
+  })
+
+  it("refuses a course that does not exist", () => {
+    expect(() =>
+      db.exec(enrollmentRow.replace("'spanish-core-1000'", "'klingon'"))
+    ).toThrow(/FOREIGN KEY constraint failed/)
+  })
+
+  it("removing a course from the dashboard keeps the learner's progress", () => {
+    db.exec(enrollmentRow)
+    db.exec(progressRow)
+    db.exec("DELETE FROM enrollments")
+
+    expect(count("user_progress")).toBe(1)
+  })
+
+  it("goes away with the learner, and with the course", () => {
+    db.exec(enrollmentRow)
+    db.exec("DELETE FROM users WHERE id = 'usr_prototype_01'")
+    expect(count("enrollments")).toBe(0)
+
+    db.exec(`
+      INSERT INTO users (id, name, email)
+        VALUES ('usr_prototype_01', 'Phillip', 'learner@prototype.memli.test')`)
+    db.exec(enrollmentRow)
+    db.exec("DELETE FROM courses WHERE id = 'spanish-core-1000'")
+    expect(count("enrollments")).toBe(0)
+  })
+})
+
 describe("reviews", () => {
   const reviewRow = `
     INSERT INTO reviews (id, user_id, card_id, outcome, rating, reviewed_at,

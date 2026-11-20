@@ -173,9 +173,46 @@ export const courses = sqliteTable(
     learningLanguage: text("learning_language").notNull(),
     /** What the answers and example translations are written in. A language tag. */
     answerLanguage: text("answer_language").notNull(),
+    /** For the catalog, in `answerLanguage`. README, "Course catalog details". */
+    description: text("description"),
+    /**
+     * When the catalog started listing it; `null` is a hidden draft. Needs a
+     * description, source and license: triggers in 0008_published_courses.sql.
+     */
+    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
+    /** Where the words came from: who wrote them, or the dataset's URL. */
+    source: text("source"),
+    /** The license the content is under, as shown: `CC BY-SA 4.0`. */
+    license: text("license"),
+    /** The credit line the license asks for, when it asks for one. */
+    attribution: text("attribution"),
     ...timestamps,
   },
   (t) => [index("courses_learning_language_idx").on(t.learningLanguage)]
+)
+
+/**
+ * A course a learner added to their dashboard (#174). Removing one deletes
+ * only this row: their `user_progress` stays, so adding it back resumes.
+ */
+export const enrollments = sqliteTable(
+  "enrollments",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    courseId: text("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    addedAt: integer("added_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(now),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.courseId] }),
+    // The key starts with the learner, so deleting a course needs its own index.
+    index("enrollments_course_idx").on(t.courseId),
+  ]
 )
 
 /** One word to learn. What the course teaches, never how well anyone knows it. */
