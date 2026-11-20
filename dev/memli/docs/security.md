@@ -108,6 +108,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] Rate limit adding and removing a course (#174): `PUT` and `DELETE /api/courses/:courseId/enrollment` allow 60 requests a minute per learner and 1,200 per address, the same shape as reviews (`ENROLLMENT_LIMITS` in `apps/api/src/routes/courses.ts`). They need a session and the app's own `Origin` like every write, tested in `apps/api/src/routes/enrollment.test.ts`.
 - [x] Rate limit the public catalog routes (#174): 300 requests a minute per address, since a visitor has no learner id to count (`limitAddress` in `apps/api/src/lib/rate-limit.ts`, `CATALOG_LIMIT` in `apps/api/src/routes/catalog.ts`). It costs one D1 write per request, on routes anyone can call. Serving the catalog as static or cached pages would remove that cost: see #178.
 - [x] A test proves a burst of sign-in attempts gets refused, and that the learner can try again once the window ends.
+- [x] Rate-limit rows hold an IP address, so they don't stay forever (#170). A daily cron (`0 4 * * *` in `apps/api/wrangler.jsonc`) deletes rows idle for more than 24 hours, expired sessions and expired verification codes (`deleteExpiredRows` in `apps/api/src/lib/cleanup.ts`, tested in `cleanup.test.ts`). The Privacy Policy promises these limits.
 
 ### Passwords and accounts (#108)
 
@@ -136,7 +137,7 @@ Not in the beta, for the same reason as Google sign-in.
 ### Logs and privacy
 
 - [x] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error, and Memli logs nothing else. A test runs sign-up, refused sign-ups, wrong and right sign-ins, a cross-origin write, a rate-limited burst and sign-out, and proves no log line holds a password, a session token or a cookie name (`apps/api/src/lib/auth.test.ts`, "the logs").
-- [ ] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days). The Privacy Policy lists them: that is #170, whose Privacy Policy task now names them.
+- [ ] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days). The daily cleanup deletes an expired row within a day. The Privacy Policy lists them: that is #170, whose Privacy Policy task now names them.
 - [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. Until #170 says how, a learner asks and the account is deleted by hand.
 
 ## Open issues
