@@ -502,8 +502,10 @@ To add a word, add a row to the `cards` insert with the next `position` in its c
 
 Real courses reach a database as course files ([`docs/course-files.md`](../../docs/course-files.md)), never through the prototype seed.
 
+The launch courses live in [`courses/`](./courses): **Spanish Starter** (130 words) and **French Starter** (128 words), written for Memli under CC BY 4.0. Both are mostly nouns and verbs a beginner can use at once, not a word-frequency list, and the first ten words of each have a starter mnemonic. [`src/import/launch-courses.test.ts`](./src/import/launch-courses.test.ts) holds every file there to that: at least 100 words, at least 75% nouns and verbs, a gender on every noun, ids named after the course, and a clean import beside the seed.
+
 ```bash
-bun run db:import-course ../../docs/course-file.example.json                    # into your local database
+bun run db:import-course courses/spanish-starter.json                          # into your local database
 bun run db:import-course path/to/course.json --target staging                  # shows what would change
 bun run db:import-course path/to/course.json --target staging --yes            # imports it
 ```

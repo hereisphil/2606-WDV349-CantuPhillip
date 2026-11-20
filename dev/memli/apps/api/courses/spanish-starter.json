@@ -1,0 +1,1809 @@
+{
+  "format": "memli-course/1",
+  "course": {
+    "courseId": "spanish-starter",
+    "title": "Spanish Starter",
+    "learningLanguage": "es",
+    "answerLanguage": "en",
+    "description": "Your first Spanish words: people, food, home, getting around, and the verbs to use them.",
+    "published": true,
+    "source": "Written for Memli",
+    "license": "CC BY 4.0",
+    "attribution": "Spanish Starter by Memli, licensed under CC BY 4.0."
+  },
+  "cards": [
+    {
+      "cardId": "es-starter-hola",
+      "term": "hola",
+      "partOfSpeech": "phrase",
+      "answers": ["hello", "hi"],
+      "phonetic": "/ˈo.la/",
+      "example": {
+        "text": "¡Hola! ¿Cómo estás?",
+        "translation": "Hello! How are you?"
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-hola-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "A friend waves across the street and sings "
+            },
+            {
+              "kind": "keyword",
+              "text": "oh-la"
+            },
+            {
+              "kind": "plain",
+              "text": "! That's "
+            },
+            {
+              "kind": "term",
+              "text": "hola"
+            },
+            {
+              "kind": "plain",
+              "text": ": hello."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-gracias",
+      "term": "gracias",
+      "partOfSpeech": "phrase",
+      "answers": ["thank you", "thanks"],
+      "phonetic": "/ˈɡɾa.sjas/",
+      "example": {
+        "text": "Gracias por la comida.",
+        "translation": "Thank you for the food."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-gracias-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "You thank a neighbor for letting you nap on their "
+            },
+            {
+              "kind": "keyword",
+              "text": "grassy"
+            },
+            {
+              "kind": "plain",
+              "text": " lawn: "
+            },
+            {
+              "kind": "term",
+              "text": "gracias"
+            },
+            {
+              "kind": "plain",
+              "text": ", thank you."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-por-favor",
+      "term": "por favor",
+      "partOfSpeech": "phrase",
+      "answers": ["please"],
+      "phonetic": "/poɾ faˈβoɾ/",
+      "example": {
+        "text": "Un café, por favor.",
+        "translation": "A coffee, please."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-por-favor-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Please "
+            },
+            {
+              "kind": "keyword",
+              "text": "pour"
+            },
+            {
+              "kind": "plain",
+              "text": " me some water and do me a "
+            },
+            {
+              "kind": "keyword",
+              "text": "favor"
+            },
+            {
+              "kind": "plain",
+              "text": ": "
+            },
+            {
+              "kind": "term",
+              "text": "por favor"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-adios",
+      "term": "adiós",
+      "partOfSpeech": "phrase",
+      "answers": ["goodbye", "bye"],
+      "phonetic": "/aˈðjos/",
+      "example": {
+        "text": "Adiós, hasta mañana.",
+        "translation": "Goodbye, see you tomorrow."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-adios-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "You wave goodbye as you drive off in your "
+            },
+            {
+              "kind": "keyword",
+              "text": "Audi"
+            },
+            {
+              "kind": "plain",
+              "text": ": "
+            },
+            {
+              "kind": "term",
+              "text": "adiós"
+            },
+            {
+              "kind": "plain",
+              "text": "!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-agua",
+      "term": "agua",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["water"],
+      "phonetic": "/ˈa.ɣwa/",
+      "example": {
+        "text": "Quiero agua fría.",
+        "translation": "I want cold water."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-agua-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "You squeeze "
+            },
+            {
+              "kind": "keyword",
+              "text": "a guava"
+            },
+            {
+              "kind": "plain",
+              "text": " into a glass of water: "
+            },
+            {
+              "kind": "term",
+              "text": "agua"
+            },
+            {
+              "kind": "plain",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-comer",
+      "term": "comer",
+      "partOfSpeech": "verb",
+      "answers": ["to eat", "eat"],
+      "phonetic": "/koˈmeɾ/",
+      "example": {
+        "text": "Vamos a comer a las dos.",
+        "translation": "We're going to eat at two."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-comer-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Eat too much and you fall into a food "
+            },
+            {
+              "kind": "keyword",
+              "text": "coma"
+            },
+            {
+              "kind": "plain",
+              "text": ": "
+            },
+            {
+              "kind": "term",
+              "text": "comer"
+            },
+            {
+              "kind": "plain",
+              "text": ", to eat."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-beber",
+      "term": "beber",
+      "partOfSpeech": "verb",
+      "answers": ["to drink", "drink"],
+      "phonetic": "/beˈβeɾ/",
+      "example": {
+        "text": "Me gusta beber té.",
+        "translation": "I like to drink tea."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-beber-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "A "
+            },
+            {
+              "kind": "keyword",
+              "text": "baby bear"
+            },
+            {
+              "kind": "plain",
+              "text": " drinks from the river: "
+            },
+            {
+              "kind": "term",
+              "text": "beber"
+            },
+            {
+              "kind": "plain",
+              "text": ", to drink."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-casa",
+      "term": "casa",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["house", "home"],
+      "phonetic": "/ˈka.sa/",
+      "example": {
+        "text": "Mi casa es pequeña.",
+        "translation": "My house is small."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-casa-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "Every home is a little "
+            },
+            {
+              "kind": "keyword",
+              "text": "castle"
+            },
+            {
+              "kind": "plain",
+              "text": ": "
+            },
+            {
+              "kind": "term",
+              "text": "casa"
+            },
+            {
+              "kind": "plain",
+              "text": ", house."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-querer",
+      "term": "querer",
+      "partOfSpeech": "verb",
+      "answers": ["to want", "want", "to love", "love"],
+      "phonetic": "/keˈɾeɾ/",
+      "example": {
+        "text": "Quiero un café.",
+        "translation": "I want a coffee."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-querer-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "You really want a great "
+            },
+            {
+              "kind": "keyword",
+              "text": "career"
+            },
+            {
+              "kind": "plain",
+              "text": ": "
+            },
+            {
+              "kind": "term",
+              "text": "querer"
+            },
+            {
+              "kind": "plain",
+              "text": ", to want."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-tener",
+      "term": "tener",
+      "partOfSpeech": "verb",
+      "answers": ["to have", "have"],
+      "phonetic": "/teˈneɾ/",
+      "example": {
+        "text": "Tengo dos hermanos.",
+        "translation": "I have two brothers."
+      },
+      "mnemonics": [
+        {
+          "mnemonicId": "mn-es-starter-tener-1",
+          "contentLocale": "en",
+          "story": [
+            {
+              "kind": "plain",
+              "text": "The "
+            },
+            {
+              "kind": "keyword",
+              "text": "tenor"
+            },
+            {
+              "kind": "plain",
+              "text": " has a huge voice: "
+            },
+            {
+              "kind": "term",
+              "text": "tener"
+            },
+            {
+              "kind": "plain",
+              "text": ", to have."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cardId": "es-starter-si",
+      "term": "sí",
+      "partOfSpeech": "phrase",
+      "answers": ["yes"],
+      "phonetic": "/si/",
+      "example": {
+        "text": "Sí, quiero ir.",
+        "translation": "Yes, I want to go."
+      }
+    },
+    {
+      "cardId": "es-starter-no",
+      "term": "no",
+      "partOfSpeech": "phrase",
+      "answers": ["no"],
+      "phonetic": "/no/",
+      "example": {
+        "text": "No, gracias.",
+        "translation": "No, thank you."
+      }
+    },
+    {
+      "cardId": "es-starter-ser",
+      "term": "ser",
+      "partOfSpeech": "verb",
+      "answers": ["to be", "be"],
+      "phonetic": "/seɾ/",
+      "example": {
+        "text": "Soy de México.",
+        "translation": "I'm from Mexico."
+      }
+    },
+    {
+      "cardId": "es-starter-estar",
+      "term": "estar",
+      "partOfSpeech": "verb",
+      "answers": ["to be", "be"],
+      "phonetic": "/esˈtaɾ/",
+      "example": {
+        "text": "Estoy en casa.",
+        "translation": "I'm at home."
+      }
+    },
+    {
+      "cardId": "es-starter-ir",
+      "term": "ir",
+      "partOfSpeech": "verb",
+      "answers": ["to go", "go"],
+      "phonetic": "/iɾ/",
+      "example": {
+        "text": "Voy al mercado.",
+        "translation": "I'm going to the market."
+      }
+    },
+    {
+      "cardId": "es-starter-hablar",
+      "term": "hablar",
+      "partOfSpeech": "verb",
+      "answers": ["to speak", "speak", "to talk", "talk"],
+      "phonetic": "/aˈβlaɾ/",
+      "example": {
+        "text": "Hablo un poco de español.",
+        "translation": "I speak a little Spanish."
+      }
+    },
+    {
+      "cardId": "es-starter-cafe",
+      "term": "café",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["coffee"],
+      "phonetic": "/kaˈfe/",
+      "example": {
+        "text": "El café está caliente.",
+        "translation": "The coffee is hot."
+      }
+    },
+    {
+      "cardId": "es-starter-pan",
+      "term": "pan",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bread"],
+      "phonetic": "/pan/",
+      "example": {
+        "text": "Compro pan cada mañana.",
+        "translation": "I buy bread every morning."
+      }
+    },
+    {
+      "cardId": "es-starter-leche",
+      "term": "leche",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["milk"],
+      "phonetic": "/ˈle.tʃe/",
+      "example": {
+        "text": "El gato bebe leche.",
+        "translation": "The cat drinks milk."
+      }
+    },
+    {
+      "cardId": "es-starter-fruta",
+      "term": "fruta",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["fruit"],
+      "phonetic": "/ˈfɾu.ta/",
+      "example": {
+        "text": "Como fruta todos los días.",
+        "translation": "I eat fruit every day."
+      }
+    },
+    {
+      "cardId": "es-starter-manzana",
+      "term": "manzana",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["apple"],
+      "phonetic": "/manˈsa.na/",
+      "example": {
+        "text": "La manzana es roja.",
+        "translation": "The apple is red."
+      }
+    },
+    {
+      "cardId": "es-starter-arroz",
+      "term": "arroz",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["rice"],
+      "phonetic": "/aˈros/",
+      "example": {
+        "text": "Comemos arroz con pollo.",
+        "translation": "We eat rice with chicken."
+      }
+    },
+    {
+      "cardId": "es-starter-pollo",
+      "term": "pollo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["chicken"],
+      "phonetic": "/ˈpo.ʝo/",
+      "example": {
+        "text": "El pollo está muy rico.",
+        "translation": "The chicken is delicious."
+      }
+    },
+    {
+      "cardId": "es-starter-carne",
+      "term": "carne",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["meat"],
+      "phonetic": "/ˈkaɾ.ne/",
+      "example": {
+        "text": "No como carne.",
+        "translation": "I don't eat meat."
+      }
+    },
+    {
+      "cardId": "es-starter-pescado",
+      "term": "pescado",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["fish"],
+      "phonetic": "/pesˈka.ðo/",
+      "example": {
+        "text": "El pescado es fresco.",
+        "translation": "The fish is fresh."
+      }
+    },
+    {
+      "cardId": "es-starter-huevo",
+      "term": "huevo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["egg"],
+      "phonetic": "/ˈwe.βo/",
+      "example": {
+        "text": "Quiero dos huevos, por favor.",
+        "translation": "I want two eggs, please."
+      }
+    },
+    {
+      "cardId": "es-starter-queso",
+      "term": "queso",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["cheese"],
+      "phonetic": "/ˈke.so/",
+      "example": {
+        "text": "Me gusta el queso.",
+        "translation": "I like cheese."
+      }
+    },
+    {
+      "cardId": "es-starter-sopa",
+      "term": "sopa",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["soup"],
+      "phonetic": "/ˈso.pa/",
+      "example": {
+        "text": "La sopa está caliente.",
+        "translation": "The soup is hot."
+      }
+    },
+    {
+      "cardId": "es-starter-desayuno",
+      "term": "desayuno",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["breakfast"],
+      "phonetic": "/de.saˈʝu.no/",
+      "example": {
+        "text": "El desayuno está listo.",
+        "translation": "Breakfast is ready."
+      }
+    },
+    {
+      "cardId": "es-starter-cena",
+      "term": "cena",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["dinner", "supper"],
+      "phonetic": "/ˈse.na/",
+      "example": {
+        "text": "La cena es a las ocho.",
+        "translation": "Dinner is at eight."
+      }
+    },
+    {
+      "cardId": "es-starter-cocinar",
+      "term": "cocinar",
+      "partOfSpeech": "verb",
+      "answers": ["to cook", "cook"],
+      "phonetic": "/ko.siˈnaɾ/",
+      "example": {
+        "text": "Me gusta cocinar los domingos.",
+        "translation": "I like to cook on Sundays."
+      }
+    },
+    {
+      "cardId": "es-starter-familia",
+      "term": "familia",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["family"],
+      "phonetic": "/faˈmi.lja/",
+      "example": {
+        "text": "Mi familia es grande.",
+        "translation": "My family is big."
+      }
+    },
+    {
+      "cardId": "es-starter-madre",
+      "term": "madre",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["mother", "mom"],
+      "phonetic": "/ˈma.ðɾe/",
+      "example": {
+        "text": "Mi madre cocina muy bien.",
+        "translation": "My mother cooks very well."
+      }
+    },
+    {
+      "cardId": "es-starter-padre",
+      "term": "padre",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["father", "dad"],
+      "phonetic": "/ˈpa.ðɾe/",
+      "example": {
+        "text": "Mi padre trabaja en un banco.",
+        "translation": "My father works at a bank."
+      }
+    },
+    {
+      "cardId": "es-starter-hijo",
+      "term": "hijo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["son"],
+      "phonetic": "/ˈi.xo/",
+      "example": {
+        "text": "Su hijo tiene cinco años.",
+        "translation": "Her son is five years old."
+      }
+    },
+    {
+      "cardId": "es-starter-hija",
+      "term": "hija",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["daughter"],
+      "phonetic": "/ˈi.xa/",
+      "example": {
+        "text": "Mi hija estudia en la universidad.",
+        "translation": "My daughter studies at the university."
+      }
+    },
+    {
+      "cardId": "es-starter-hermano",
+      "term": "hermano",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["brother"],
+      "phonetic": "/eɾˈma.no/",
+      "example": {
+        "text": "Mi hermano juega al fútbol.",
+        "translation": "My brother plays soccer."
+      }
+    },
+    {
+      "cardId": "es-starter-hermana",
+      "term": "hermana",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["sister"],
+      "phonetic": "/eɾˈma.na/",
+      "example": {
+        "text": "Mi hermana tiene un perro.",
+        "translation": "My sister has a dog."
+      }
+    },
+    {
+      "cardId": "es-starter-amigo",
+      "term": "amigo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["friend"],
+      "phonetic": "/aˈmi.ɣo/",
+      "example": {
+        "text": "Mi amigo vive en Lima.",
+        "translation": "My friend lives in Lima."
+      }
+    },
+    {
+      "cardId": "es-starter-amiga",
+      "term": "amiga",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["friend"],
+      "phonetic": "/aˈmi.ɣa/",
+      "example": {
+        "text": "Mi amiga habla francés.",
+        "translation": "My friend speaks French."
+      }
+    },
+    {
+      "cardId": "es-starter-nino",
+      "term": "niño",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["child", "boy", "kid"],
+      "phonetic": "/ˈni.ɲo/",
+      "example": {
+        "text": "El niño juega en el parque.",
+        "translation": "The boy plays in the park."
+      }
+    },
+    {
+      "cardId": "es-starter-nombre",
+      "term": "nombre",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["name"],
+      "phonetic": "/ˈnom.bɾe/",
+      "example": {
+        "text": "¿Cuál es tu nombre?",
+        "translation": "What is your name?"
+      }
+    },
+    {
+      "cardId": "es-starter-perro",
+      "term": "perro",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["dog"],
+      "phonetic": "/ˈpe.ro/",
+      "example": {
+        "text": "El perro duerme en el sofá.",
+        "translation": "The dog sleeps on the sofa."
+      }
+    },
+    {
+      "cardId": "es-starter-gato",
+      "term": "gato",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["cat"],
+      "phonetic": "/ˈɡa.to/",
+      "example": {
+        "text": "El gato está en la ventana.",
+        "translation": "The cat is at the window."
+      }
+    },
+    {
+      "cardId": "es-starter-vivir",
+      "term": "vivir",
+      "partOfSpeech": "verb",
+      "answers": ["to live", "live"],
+      "phonetic": "/biˈβiɾ/",
+      "example": {
+        "text": "Vivo en una ciudad grande.",
+        "translation": "I live in a big city."
+      }
+    },
+    {
+      "cardId": "es-starter-cocina",
+      "term": "cocina",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["kitchen"],
+      "phonetic": "/koˈsi.na/",
+      "example": {
+        "text": "Mi madre está en la cocina.",
+        "translation": "My mother is in the kitchen."
+      }
+    },
+    {
+      "cardId": "es-starter-bano",
+      "term": "baño",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bathroom", "restroom", "toilet"],
+      "phonetic": "/ˈba.ɲo/",
+      "example": {
+        "text": "¿Dónde está el baño?",
+        "translation": "Where is the bathroom?"
+      }
+    },
+    {
+      "cardId": "es-starter-mesa",
+      "term": "mesa",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["table"],
+      "phonetic": "/ˈme.sa/",
+      "example": {
+        "text": "La comida está en la mesa.",
+        "translation": "The food is on the table."
+      }
+    },
+    {
+      "cardId": "es-starter-silla",
+      "term": "silla",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["chair"],
+      "phonetic": "/ˈsi.ʝa/",
+      "example": {
+        "text": "Hay una silla en la cocina.",
+        "translation": "There is a chair in the kitchen."
+      }
+    },
+    {
+      "cardId": "es-starter-cama",
+      "term": "cama",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["bed"],
+      "phonetic": "/ˈka.ma/",
+      "example": {
+        "text": "La cama es muy cómoda.",
+        "translation": "The bed is very comfortable."
+      }
+    },
+    {
+      "cardId": "es-starter-puerta",
+      "term": "puerta",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["door"],
+      "phonetic": "/ˈpweɾ.ta/",
+      "example": {
+        "text": "Cierra la puerta, por favor.",
+        "translation": "Close the door, please."
+      }
+    },
+    {
+      "cardId": "es-starter-ventana",
+      "term": "ventana",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["window"],
+      "phonetic": "/benˈta.na/",
+      "example": {
+        "text": "Abre la ventana.",
+        "translation": "Open the window."
+      }
+    },
+    {
+      "cardId": "es-starter-llave",
+      "term": "llave",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["key"],
+      "phonetic": "/ˈʝa.βe/",
+      "example": {
+        "text": "¿Dónde están mis llaves?",
+        "translation": "Where are my keys?"
+      }
+    },
+    {
+      "cardId": "es-starter-dormir",
+      "term": "dormir",
+      "partOfSpeech": "verb",
+      "answers": ["to sleep", "sleep"],
+      "phonetic": "/doɾˈmiɾ/",
+      "example": {
+        "text": "Quiero dormir ocho horas.",
+        "translation": "I want to sleep eight hours."
+      }
+    },
+    {
+      "cardId": "es-starter-dia",
+      "term": "día",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["day"],
+      "phonetic": "/ˈdi.a/",
+      "example": {
+        "text": "Hoy es un buen día.",
+        "translation": "Today is a good day."
+      }
+    },
+    {
+      "cardId": "es-starter-noche",
+      "term": "noche",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["night"],
+      "phonetic": "/ˈno.tʃe/",
+      "example": {
+        "text": "Trabajo de noche.",
+        "translation": "I work at night."
+      }
+    },
+    {
+      "cardId": "es-starter-manana",
+      "term": "mañana",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["morning", "tomorrow"],
+      "phonetic": "/maˈɲa.na/",
+      "example": {
+        "text": "Corro por la mañana.",
+        "translation": "I run in the morning."
+      }
+    },
+    {
+      "cardId": "es-starter-semana",
+      "term": "semana",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["week"],
+      "phonetic": "/seˈma.na/",
+      "example": {
+        "text": "Voy al gimnasio tres veces por semana.",
+        "translation": "I go to the gym three times a week."
+      }
+    },
+    {
+      "cardId": "es-starter-ano",
+      "term": "año",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["year"],
+      "phonetic": "/ˈa.ɲo/",
+      "example": {
+        "text": "Tengo veinte años.",
+        "translation": "I'm twenty years old."
+      }
+    },
+    {
+      "cardId": "es-starter-hora",
+      "term": "hora",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["hour", "time"],
+      "phonetic": "/ˈo.ɾa/",
+      "example": {
+        "text": "¿Qué hora es?",
+        "translation": "What time is it?"
+      }
+    },
+    {
+      "cardId": "es-starter-hoy",
+      "term": "hoy",
+      "partOfSpeech": "adverb",
+      "answers": ["today"],
+      "phonetic": "/oj/",
+      "example": {
+        "text": "Hoy hace calor.",
+        "translation": "It's hot today."
+      }
+    },
+    {
+      "cardId": "es-starter-tiempo",
+      "term": "tiempo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["time", "weather"],
+      "phonetic": "/ˈtjem.po/",
+      "example": {
+        "text": "No tengo tiempo.",
+        "translation": "I don't have time."
+      }
+    },
+    {
+      "cardId": "es-starter-trabajar",
+      "term": "trabajar",
+      "partOfSpeech": "verb",
+      "answers": ["to work", "work"],
+      "phonetic": "/tɾa.βaˈxaɾ/",
+      "example": {
+        "text": "Trabajo de lunes a viernes.",
+        "translation": "I work Monday to Friday."
+      }
+    },
+    {
+      "cardId": "es-starter-trabajo",
+      "term": "trabajo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["work", "job"],
+      "phonetic": "/tɾaˈβa.xo/",
+      "example": {
+        "text": "Mi trabajo está cerca.",
+        "translation": "My job is nearby."
+      }
+    },
+    {
+      "cardId": "es-starter-escuela",
+      "term": "escuela",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["school"],
+      "phonetic": "/esˈkwe.la/",
+      "example": {
+        "text": "Los niños van a la escuela.",
+        "translation": "The children go to school."
+      }
+    },
+    {
+      "cardId": "es-starter-aprender",
+      "term": "aprender",
+      "partOfSpeech": "verb",
+      "answers": ["to learn", "learn"],
+      "phonetic": "/a.pɾenˈdeɾ/",
+      "example": {
+        "text": "Quiero aprender español.",
+        "translation": "I want to learn Spanish."
+      }
+    },
+    {
+      "cardId": "es-starter-entender",
+      "term": "entender",
+      "partOfSpeech": "verb",
+      "answers": ["to understand", "understand"],
+      "phonetic": "/en.tenˈdeɾ/",
+      "example": {
+        "text": "No entiendo la pregunta.",
+        "translation": "I don't understand the question."
+      }
+    },
+    {
+      "cardId": "es-starter-leer",
+      "term": "leer",
+      "partOfSpeech": "verb",
+      "answers": ["to read", "read"],
+      "phonetic": "/leˈeɾ/",
+      "example": {
+        "text": "Leo un libro cada mes.",
+        "translation": "I read a book every month."
+      }
+    },
+    {
+      "cardId": "es-starter-libro",
+      "term": "libro",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["book"],
+      "phonetic": "/ˈli.βɾo/",
+      "example": {
+        "text": "El libro está en la mesa.",
+        "translation": "The book is on the table."
+      }
+    },
+    {
+      "cardId": "es-starter-escribir",
+      "term": "escribir",
+      "partOfSpeech": "verb",
+      "answers": ["to write", "write"],
+      "phonetic": "/es.kɾiˈβiɾ/",
+      "example": {
+        "text": "Escribo una carta a mi abuela.",
+        "translation": "I'm writing a letter to my grandmother."
+      }
+    },
+    {
+      "cardId": "es-starter-saber",
+      "term": "saber",
+      "partOfSpeech": "verb",
+      "answers": ["to know", "know"],
+      "phonetic": "/saˈβeɾ/",
+      "example": {
+        "text": "No sé la respuesta.",
+        "translation": "I don't know the answer."
+      }
+    },
+    {
+      "cardId": "es-starter-poder",
+      "term": "poder",
+      "partOfSpeech": "verb",
+      "answers": ["can", "to be able to", "to be able"],
+      "phonetic": "/poˈðeɾ/",
+      "example": {
+        "text": "¿Puedo pasar?",
+        "translation": "Can I come in?"
+      }
+    },
+    {
+      "cardId": "es-starter-hacer",
+      "term": "hacer",
+      "partOfSpeech": "verb",
+      "answers": ["to do", "do", "to make", "make"],
+      "phonetic": "/aˈseɾ/",
+      "example": {
+        "text": "¿Qué vas a hacer hoy?",
+        "translation": "What are you going to do today?"
+      }
+    },
+    {
+      "cardId": "es-starter-ciudad",
+      "term": "ciudad",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["city", "town"],
+      "phonetic": "/sjuˈðað/",
+      "example": {
+        "text": "La ciudad es muy bonita.",
+        "translation": "The city is very pretty."
+      }
+    },
+    {
+      "cardId": "es-starter-calle",
+      "term": "calle",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["street"],
+      "phonetic": "/ˈka.ʝe/",
+      "example": {
+        "text": "Mi casa está en esta calle.",
+        "translation": "My house is on this street."
+      }
+    },
+    {
+      "cardId": "es-starter-tienda",
+      "term": "tienda",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["store", "shop"],
+      "phonetic": "/ˈtjen.da/",
+      "example": {
+        "text": "La tienda abre a las nueve.",
+        "translation": "The store opens at nine."
+      }
+    },
+    {
+      "cardId": "es-starter-mercado",
+      "term": "mercado",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["market"],
+      "phonetic": "/meɾˈka.ðo/",
+      "example": {
+        "text": "Compro fruta en el mercado.",
+        "translation": "I buy fruit at the market."
+      }
+    },
+    {
+      "cardId": "es-starter-comprar",
+      "term": "comprar",
+      "partOfSpeech": "verb",
+      "answers": ["to buy", "buy"],
+      "phonetic": "/komˈpɾaɾ/",
+      "example": {
+        "text": "Quiero comprar zapatos.",
+        "translation": "I want to buy shoes."
+      }
+    },
+    {
+      "cardId": "es-starter-pagar",
+      "term": "pagar",
+      "partOfSpeech": "verb",
+      "answers": ["to pay", "pay"],
+      "phonetic": "/paˈɣaɾ/",
+      "example": {
+        "text": "Quiero pagar con tarjeta.",
+        "translation": "I want to pay by card."
+      }
+    },
+    {
+      "cardId": "es-starter-dinero",
+      "term": "dinero",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["money"],
+      "phonetic": "/diˈne.ɾo/",
+      "example": {
+        "text": "No tengo dinero.",
+        "translation": "I don't have any money."
+      }
+    },
+    {
+      "cardId": "es-starter-precio",
+      "term": "precio",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["price"],
+      "phonetic": "/ˈpɾe.sjo/",
+      "example": {
+        "text": "¿Cuál es el precio?",
+        "translation": "What is the price?"
+      }
+    },
+    {
+      "cardId": "es-starter-cuanto-cuesta",
+      "term": "¿cuánto cuesta?",
+      "partOfSpeech": "phrase",
+      "answers": ["how much does it cost?", "how much is it?", "how much?"],
+      "phonetic": "/ˈkwan.to ˈkwes.ta/",
+      "example": {
+        "text": "¿Cuánto cuesta esta camisa?",
+        "translation": "How much does this shirt cost?"
+      }
+    },
+    {
+      "cardId": "es-starter-donde",
+      "term": "¿dónde?",
+      "partOfSpeech": "phrase",
+      "answers": ["where?", "where"],
+      "phonetic": "/ˈdon.de/",
+      "example": {
+        "text": "¿Dónde está la estación?",
+        "translation": "Where is the station?"
+      }
+    },
+    {
+      "cardId": "es-starter-banco",
+      "term": "banco",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bank"],
+      "phonetic": "/ˈbaŋ.ko/",
+      "example": {
+        "text": "El banco abre a las nueve.",
+        "translation": "The bank opens at nine."
+      }
+    },
+    {
+      "cardId": "es-starter-estacion",
+      "term": "estación",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["station"],
+      "phonetic": "/es.taˈsjon/",
+      "example": {
+        "text": "La estación está lejos.",
+        "translation": "The station is far."
+      }
+    },
+    {
+      "cardId": "es-starter-carro",
+      "term": "carro",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["car"],
+      "phonetic": "/ˈka.ro/",
+      "example": {
+        "text": "Mi carro es azul.",
+        "translation": "My car is blue."
+      }
+    },
+    {
+      "cardId": "es-starter-autobus",
+      "term": "autobús",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["bus"],
+      "phonetic": "/aw.toˈβus/",
+      "example": {
+        "text": "Tomo el autobús a las siete.",
+        "translation": "I take the bus at seven."
+      }
+    },
+    {
+      "cardId": "es-starter-tren",
+      "term": "tren",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["train"],
+      "phonetic": "/tɾen/",
+      "example": {
+        "text": "El tren llega a las diez.",
+        "translation": "The train arrives at ten."
+      }
+    },
+    {
+      "cardId": "es-starter-caminar",
+      "term": "caminar",
+      "partOfSpeech": "verb",
+      "answers": ["to walk", "walk"],
+      "phonetic": "/ka.miˈnaɾ/",
+      "example": {
+        "text": "Me gusta caminar por la tarde.",
+        "translation": "I like to walk in the afternoon."
+      }
+    },
+    {
+      "cardId": "es-starter-parque",
+      "term": "parque",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["park"],
+      "phonetic": "/ˈpaɾ.ke/",
+      "example": {
+        "text": "Caminamos en el parque.",
+        "translation": "We walk in the park."
+      }
+    },
+    {
+      "cardId": "es-starter-viajar",
+      "term": "viajar",
+      "partOfSpeech": "verb",
+      "answers": ["to travel", "travel"],
+      "phonetic": "/bjaˈxaɾ/",
+      "example": {
+        "text": "Me gusta viajar en verano.",
+        "translation": "I like to travel in summer."
+      }
+    },
+    {
+      "cardId": "es-starter-hotel",
+      "term": "hotel",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["hotel"],
+      "phonetic": "/oˈtel/",
+      "example": {
+        "text": "El hotel está cerca del mar.",
+        "translation": "The hotel is near the sea."
+      }
+    },
+    {
+      "cardId": "es-starter-playa",
+      "term": "playa",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["beach"],
+      "phonetic": "/ˈpla.ʝa/",
+      "example": {
+        "text": "Vamos a la playa.",
+        "translation": "Let's go to the beach."
+      }
+    },
+    {
+      "cardId": "es-starter-mar",
+      "term": "mar",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["sea", "ocean"],
+      "phonetic": "/maɾ/",
+      "example": {
+        "text": "El mar está tranquilo.",
+        "translation": "The sea is calm."
+      }
+    },
+    {
+      "cardId": "es-starter-sol",
+      "term": "sol",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["sun"],
+      "phonetic": "/sol/",
+      "example": {
+        "text": "Hace mucho sol.",
+        "translation": "It's very sunny."
+      }
+    },
+    {
+      "cardId": "es-starter-llover",
+      "term": "llover",
+      "partOfSpeech": "verb",
+      "answers": ["to rain", "rain"],
+      "phonetic": "/ʝoˈβeɾ/",
+      "example": {
+        "text": "Va a llover esta tarde.",
+        "translation": "It's going to rain this afternoon."
+      }
+    },
+    {
+      "cardId": "es-starter-ropa",
+      "term": "ropa",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["clothes", "clothing"],
+      "phonetic": "/ˈro.pa/",
+      "example": {
+        "text": "Necesito ropa nueva.",
+        "translation": "I need new clothes."
+      }
+    },
+    {
+      "cardId": "es-starter-zapato",
+      "term": "zapato",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["shoe"],
+      "phonetic": "/saˈpa.to/",
+      "example": {
+        "text": "Estos zapatos son cómodos.",
+        "translation": "These shoes are comfortable."
+      }
+    },
+    {
+      "cardId": "es-starter-camisa",
+      "term": "camisa",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["shirt"],
+      "phonetic": "/kaˈmi.sa/",
+      "example": {
+        "text": "La camisa es blanca.",
+        "translation": "The shirt is white."
+      }
+    },
+    {
+      "cardId": "es-starter-cabeza",
+      "term": "cabeza",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["head"],
+      "phonetic": "/kaˈβe.sa/",
+      "example": {
+        "text": "Me duele la cabeza.",
+        "translation": "My head hurts."
+      }
+    },
+    {
+      "cardId": "es-starter-mano",
+      "term": "mano",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["hand"],
+      "phonetic": "/ˈma.no/",
+      "example": {
+        "text": "Lávate las manos.",
+        "translation": "Wash your hands."
+      }
+    },
+    {
+      "cardId": "es-starter-ojo",
+      "term": "ojo",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["eye"],
+      "phonetic": "/ˈo.xo/",
+      "example": {
+        "text": "Tiene los ojos verdes.",
+        "translation": "She has green eyes."
+      }
+    },
+    {
+      "cardId": "es-starter-medico",
+      "term": "médico",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["doctor"],
+      "phonetic": "/ˈme.ði.ko/",
+      "example": {
+        "text": "Necesito ver al médico.",
+        "translation": "I need to see the doctor."
+      }
+    },
+    {
+      "cardId": "es-starter-hospital",
+      "term": "hospital",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["hospital"],
+      "phonetic": "/os.piˈtal/",
+      "example": {
+        "text": "El hospital está abierto.",
+        "translation": "The hospital is open."
+      }
+    },
+    {
+      "cardId": "es-starter-necesitar",
+      "term": "necesitar",
+      "partOfSpeech": "verb",
+      "answers": ["to need", "need"],
+      "phonetic": "/ne.se.siˈtaɾ/",
+      "example": {
+        "text": "Necesito un taxi.",
+        "translation": "I need a taxi."
+      }
+    },
+    {
+      "cardId": "es-starter-ayudar",
+      "term": "ayudar",
+      "partOfSpeech": "verb",
+      "answers": ["to help", "help"],
+      "phonetic": "/a.ʝuˈðaɾ/",
+      "example": {
+        "text": "¿Me puedes ayudar?",
+        "translation": "Can you help me?"
+      }
+    },
+    {
+      "cardId": "es-starter-buscar",
+      "term": "buscar",
+      "partOfSpeech": "verb",
+      "answers": ["to look for", "look for", "to search", "search"],
+      "phonetic": "/busˈkaɾ/",
+      "example": {
+        "text": "Busco mis llaves.",
+        "translation": "I'm looking for my keys."
+      }
+    },
+    {
+      "cardId": "es-starter-encontrar",
+      "term": "encontrar",
+      "partOfSpeech": "verb",
+      "answers": ["to find", "find"],
+      "phonetic": "/en.konˈtɾaɾ/",
+      "example": {
+        "text": "No encuentro mi teléfono.",
+        "translation": "I can't find my phone."
+      }
+    },
+    {
+      "cardId": "es-starter-telefono",
+      "term": "teléfono",
+      "partOfSpeech": "noun",
+      "gender": "masculine",
+      "answers": ["phone", "telephone"],
+      "phonetic": "/teˈle.fo.no/",
+      "example": {
+        "text": "Mi teléfono no funciona.",
+        "translation": "My phone doesn't work."
+      }
+    },
+    {
+      "cardId": "es-starter-llamar",
+      "term": "llamar",
+      "partOfSpeech": "verb",
+      "answers": ["to call", "call"],
+      "phonetic": "/ʝaˈmaɾ/",
+      "example": {
+        "text": "Te llamo mañana.",
+        "translation": "I'll call you tomorrow."
+      }
+    },
+    {
+      "cardId": "es-starter-venir",
+      "term": "venir",
+      "partOfSpeech": "verb",
+      "answers": ["to come", "come"],
+      "phonetic": "/beˈniɾ/",
+      "example": {
+        "text": "¿Vienes a la fiesta?",
+        "translation": "Are you coming to the party?"
+      }
+    },
+    {
+      "cardId": "es-starter-dar",
+      "term": "dar",
+      "partOfSpeech": "verb",
+      "answers": ["to give", "give"],
+      "phonetic": "/daɾ/",
+      "example": {
+        "text": "Te doy mi número.",
+        "translation": "I'll give you my number."
+      }
+    },
+    {
+      "cardId": "es-starter-abrir",
+      "term": "abrir",
+      "partOfSpeech": "verb",
+      "answers": ["to open", "open"],
+      "phonetic": "/aˈβɾiɾ/",
+      "example": {
+        "text": "¿Puedes abrir la ventana?",
+        "translation": "Can you open the window?"
+      }
+    },
+    {
+      "cardId": "es-starter-cerrar",
+      "term": "cerrar",
+      "partOfSpeech": "verb",
+      "answers": ["to close", "close", "to shut", "shut"],
+      "phonetic": "/seˈraɾ/",
+      "example": {
+        "text": "El banco cierra a las cinco.",
+        "translation": "The bank closes at five."
+      }
+    },
+    {
+      "cardId": "es-starter-ver",
+      "term": "ver",
+      "partOfSpeech": "verb",
+      "answers": ["to see", "see", "to watch", "watch"],
+      "phonetic": "/beɾ/",
+      "example": {
+        "text": "Vamos a ver una película.",
+        "translation": "We're going to watch a movie."
+      }
+    },
+    {
+      "cardId": "es-starter-escuchar",
+      "term": "escuchar",
+      "partOfSpeech": "verb",
+      "answers": ["to listen", "listen", "to hear", "hear"],
+      "phonetic": "/es.kuˈtʃaɾ/",
+      "example": {
+        "text": "Me gusta escuchar música.",
+        "translation": "I like to listen to music."
+      }
+    },
+    {
+      "cardId": "es-starter-musica",
+      "term": "música",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["music"],
+      "phonetic": "/ˈmu.si.ka/",
+      "example": {
+        "text": "Escucho música en el autobús.",
+        "translation": "I listen to music on the bus."
+      }
+    },
+    {
+      "cardId": "es-starter-pelicula",
+      "term": "película",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["movie", "film"],
+      "phonetic": "/peˈli.ku.la/",
+      "example": {
+        "text": "La película empieza a las ocho.",
+        "translation": "The movie starts at eight."
+      }
+    },
+    {
+      "cardId": "es-starter-fiesta",
+      "term": "fiesta",
+      "partOfSpeech": "noun",
+      "gender": "feminine",
+      "answers": ["party"],
+      "phonetic": "/ˈfjes.ta/",
+      "example": {
+        "text": "Hay una fiesta el sábado.",
+        "translation": "There's a party on Saturday."
+      }
+    },
+    {
+      "cardId": "es-starter-jugar",
+      "term": "jugar",
+      "partOfSpeech": "verb",
+      "answers": ["to play", "play"],
+      "phonetic": "/xuˈɣaɾ/",
+      "example": {
+        "text": "Los niños juegan en la calle.",
+        "translation": "The children play in the street."
+      }
+    },
+    {
+      "cardId": "es-starter-grande",
+      "term": "grande",
+      "partOfSpeech": "adjective",
+      "answers": ["big", "large"],
+      "phonetic": "/ˈɡɾan.de/",
+      "example": {
+        "text": "La casa es grande.",
+        "translation": "The house is big."
+      }
+    },
+    {
+      "cardId": "es-starter-pequeno",
+      "term": "pequeño",
+      "partOfSpeech": "adjective",
+      "answers": ["small", "little"],
+      "phonetic": "/peˈke.ɲo/",
+      "example": {
+        "text": "El perro es pequeño.",
+        "translation": "The dog is small."
+      }
+    },
+    {
+      "cardId": "es-starter-bueno",
+      "term": "bueno",
+      "partOfSpeech": "adjective",
+      "answers": ["good"],
+      "phonetic": "/ˈbwe.no/",
+      "example": {
+        "text": "Este café es bueno.",
+        "translation": "This coffee is good."
+      }
+    },
+    {
+      "cardId": "es-starter-malo",
+      "term": "malo",
+      "partOfSpeech": "adjective",
+      "answers": ["bad"],
+      "phonetic": "/ˈma.lo/",
+      "example": {
+        "text": "Esta película es mala.",
+        "translation": "This movie is bad."
+      }
+    },
+    {
+      "cardId": "es-starter-nuevo",
+      "term": "nuevo",
+      "partOfSpeech": "adjective",
+      "answers": ["new"],
+      "phonetic": "/ˈnwe.βo/",
+      "example": {
+        "text": "Tengo un teléfono nuevo.",
+        "translation": "I have a new phone."
+      }
+    },
+    {
+      "cardId": "es-starter-caliente",
+      "term": "caliente",
+      "partOfSpeech": "adjective",
+      "answers": ["hot"],
+      "phonetic": "/kaˈljen.te/",
+      "example": {
+        "text": "El té está caliente.",
+        "translation": "The tea is hot."
+      }
+    },
+    {
+      "cardId": "es-starter-frio",
+      "term": "frío",
+      "partOfSpeech": "adjective",
+      "answers": ["cold"],
+      "phonetic": "/ˈfɾi.o/",
+      "example": {
+        "text": "El agua está fría.",
+        "translation": "The water is cold."
+      }
+    },
+    {
+      "cardId": "es-starter-lo-siento",
+      "term": "lo siento",
+      "partOfSpeech": "phrase",
+      "answers": ["I'm sorry", "sorry"],
+      "phonetic": "/lo ˈsjen.to/",
+      "example": {
+        "text": "Lo siento, no entiendo.",
+        "translation": "Sorry, I don't understand."
+      }
+    },
+    {
+      "cardId": "es-starter-buenos-dias",
+      "term": "buenos días",
+      "partOfSpeech": "phrase",
+      "answers": ["good morning"],
+      "phonetic": "/ˈbwe.nos ˈði.as/",
+      "example": {
+        "text": "Buenos días, señora.",
+        "translation": "Good morning, ma'am."
+      }
+    },
+    {
+      "cardId": "es-starter-buenas-noches",
+      "term": "buenas noches",
+      "partOfSpeech": "phrase",
+      "answers": ["good night", "good evening"],
+      "phonetic": "/ˈbwe.nas ˈno.tʃes/",
+      "example": {
+        "text": "Buenas noches, hasta mañana.",
+        "translation": "Good night, see you tomorrow."
+      }
+    }
+  ]
+}
