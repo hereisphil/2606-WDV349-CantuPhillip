@@ -28,6 +28,11 @@ export type Formatters = {
   weekday: (date: Date, width: "narrow" | "short" | "long") => string
   /** 1 = Monday … 7 = Sunday, from the UI locale's region. */
   firstDayOfWeek: number
+  /**
+   * A calendar day written as "YYYY-MM-DD", spelled out: "November 20, 2026".
+   * Read as UTC, so it never slips a day in the viewer's time zone.
+   */
+  calendarDate: (isoDate: string) => string
   format: (template: string, values?: MessageValues) => string
   plural: (
     count: number,
@@ -142,6 +147,15 @@ function createFormatters(locale: string): Formatters {
 
   const firstDayOfWeek = localeFirstDay(locale)
 
+  const calendarDateFormat = new Intl.DateTimeFormat(locale, {
+    dateStyle: "long",
+    timeZone: "UTC",
+  })
+
+  // "2026-11-20" parses as UTC midnight, so formatting in UTC keeps the day.
+  const calendarDate = (isoDate: string): string =>
+    calendarDateFormat.format(new Date(isoDate))
+
   const format = (template: string, values: MessageValues = {}): string => {
     const formatted = Object.fromEntries(
       Object.entries(values).map(([key, value]) => [
@@ -200,6 +214,7 @@ function createFormatters(locale: string): Formatters {
     relativeTime,
     weekday,
     firstDayOfWeek,
+    calendarDate,
     format,
     plural,
     rich,
