@@ -11,13 +11,13 @@ const MAX_ALT_LENGTH = 250
 const MAX_DISPLAY_NAME_LENGTH = 64
 
 /**
- * A path on Memli's own origin, like `/mnemonics/gato.svg`. No other host: a
- * picture from anywhere else could track who views it. `//` and `/\` are hosts.
+ * A picture Memli ships in `apps/web/public/mnemonics/`, like `/mnemonics/gato.svg`.
+ * No other host or folder (docs/security.md, "Community content").
  */
 export const mnemonicImageSrcSchema = z
   .string()
-  .max(512)
-  .regex(/^\/(?![/\\])[^\s\\]*$/)
+  .max(128)
+  .regex(/^\/mnemonics\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:svg|png|webp)$/)
 
 /**
  * One run of a mnemonic story: data, not markup, so community text is never

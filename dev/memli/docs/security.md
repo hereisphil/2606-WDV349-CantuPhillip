@@ -47,7 +47,8 @@ Mnemonics are the one place strangers' content will reach other learners.
 
 - **No HTML from data.** A mnemonic story is typed parts (`plain`, `term`, `keyword`), never markup (`packages/schemas/src/content/mnemonic.ts`). React escapes text, and the web app has no `dangerouslySetInnerHTML`.
 - **Bounded fields.** At most 24 story parts of up to 280 characters, alt text up to 250, display names up to 64.
-- **Pictures only from Memli's own origin.** An image `src` must be a root path like `/mnemonics/gato.svg`. Another host, `//host`, `/\host`, `javascript:` and `data:` URLs are refused, so a picture can't track who views it. When image uploads land, their host is added to `mnemonicImageSrcSchema` on purpose (#170).
+- **Pictures only from Memli's own folder** (#170). An image `src` must match `^/mnemonics/[a-z0-9]+(-[a-z0-9]+)*\.(svg|png|webp)$`, like `/mnemonics/gato.svg` (`mnemonicImageSrcSchema`). No other host, so a picture can't track who views it. No other folder on Memli's origin (`/api/...` once passed), no `..` or `%2e`, no subfolder and no query string. A test checks every file in `apps/web/public/mnemonics/` against the same rule (`apps/api/src/db/seed.test.ts`).
+- **SVG only from Memli itself.** An SVG can carry script, and one served from Memli's origin would run as Memli. `/mnemonics/` is part of the built web app, so only a commit can add a file there, never a learner. Learner uploads must go to a separate host, added to the schema on purpose, and that schema must refuse SVG (#170).
 - The seed file is checked against these schemas in `apps/api/src/db/seed.test.ts`, so seeded content follows the same rules.
 
 ## Supply chain and pipeline
