@@ -23,6 +23,7 @@ const pages = {
   pricing: { to: "/pricing" as const, label: "Pricing" },
   terms: { to: "/terms" as const, label: "Terms of Service" },
   privacy: { to: "/privacy" as const, label: "Privacy Policy" },
+  conduct: { to: "/code-of-conduct" as const, label: "Code of Conduct" },
 }
 
 type PageId = keyof typeof pages
@@ -48,6 +49,7 @@ export const footerNav = [
   "pricing",
   "terms",
   "privacy",
+  "conduct",
 ] as const satisfies readonly PageId[]
 
 export function scrollWindowToTop(): void {

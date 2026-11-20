@@ -100,6 +100,7 @@ const messages = {
             "Copies someone else’s work without permission",
           ],
         },
+        "Our <conduct>Community Code of Conduct</conduct> shows examples of both.",
       ],
     },
     {

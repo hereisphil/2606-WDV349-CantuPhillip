@@ -21,6 +21,7 @@ import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as MarketingBlogRouteImport } from './routes/_marketing/blog'
+import { Route as MarketingCodeOfConductRouteImport } from './routes/_marketing/code-of-conduct'
 import { Route as MarketingCommunityRouteImport } from './routes/_marketing/community'
 import { Route as MarketingContactRouteImport } from './routes/_marketing/contact'
 import { Route as MarketingPricingRouteImport } from './routes/_marketing/pricing'
@@ -85,6 +86,11 @@ const MarketingBlogRoute = MarketingBlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => MarketingRoute,
 } as any)
+const MarketingCodeOfConductRoute = MarketingCodeOfConductRouteImport.update({
+  id: '/code-of-conduct',
+  path: '/code-of-conduct',
+  getParentRoute: () => MarketingRoute,
+} as any)
 const MarketingCommunityRoute = MarketingCommunityRouteImport.update({
   id: '/community',
   path: '/community',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof AuthSignupRoute
   '/about': typeof MarketingAboutRoute
   '/blog': typeof MarketingBlogRoute
+  '/code-of-conduct': typeof MarketingCodeOfConductRoute
   '/community': typeof MarketingCommunityRoute
   '/contact': typeof MarketingContactRoute
   '/pricing': typeof MarketingPricingRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/signup': typeof AuthSignupRoute
   '/about': typeof MarketingAboutRoute
   '/blog': typeof MarketingBlogRoute
+  '/code-of-conduct': typeof MarketingCodeOfConductRoute
   '/community': typeof MarketingCommunityRoute
   '/contact': typeof MarketingContactRoute
   '/pricing': typeof MarketingPricingRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_auth/signup': typeof AuthSignupRoute
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/blog': typeof MarketingBlogRoute
+  '/_marketing/code-of-conduct': typeof MarketingCodeOfConductRoute
   '/_marketing/community': typeof MarketingCommunityRoute
   '/_marketing/contact': typeof MarketingContactRoute
   '/_marketing/pricing': typeof MarketingPricingRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/about'
     | '/blog'
+    | '/code-of-conduct'
     | '/community'
     | '/contact'
     | '/pricing'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/about'
     | '/blog'
+    | '/code-of-conduct'
     | '/community'
     | '/contact'
     | '/pricing'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/_auth/signup'
     | '/_marketing/about'
     | '/_marketing/blog'
+    | '/_marketing/code-of-conduct'
     | '/_marketing/community'
     | '/_marketing/contact'
     | '/_marketing/pricing'
@@ -336,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingBlogRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_marketing/code-of-conduct': {
+      id: '/_marketing/code-of-conduct'
+      path: '/code-of-conduct'
+      fullPath: '/code-of-conduct'
+      preLoaderRoute: typeof MarketingCodeOfConductRouteImport
+      parentRoute: typeof MarketingRoute
+    }
     '/_marketing/community': {
       id: '/_marketing/community'
       path: '/community'
@@ -435,6 +454,7 @@ const CatalogRouteWithChildren =
 interface MarketingRouteChildren {
   MarketingAboutRoute: typeof MarketingAboutRoute
   MarketingBlogRoute: typeof MarketingBlogRoute
+  MarketingCodeOfConductRoute: typeof MarketingCodeOfConductRoute
   MarketingCommunityRoute: typeof MarketingCommunityRoute
   MarketingContactRoute: typeof MarketingContactRoute
   MarketingPricingRoute: typeof MarketingPricingRoute
@@ -446,6 +466,7 @@ interface MarketingRouteChildren {
 const MarketingRouteChildren: MarketingRouteChildren = {
   MarketingAboutRoute: MarketingAboutRoute,
   MarketingBlogRoute: MarketingBlogRoute,
+  MarketingCodeOfConductRoute: MarketingCodeOfConductRoute,
   MarketingCommunityRoute: MarketingCommunityRoute,
   MarketingContactRoute: MarketingContactRoute,
   MarketingPricingRoute: MarketingPricingRoute,

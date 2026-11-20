@@ -26,11 +26,13 @@ const messages = {
 const inlineLink =
   "font-semibold wrap-break-word text-link underline underline-offset-4"
 
+type RichTags = Record<string, (chunk: string) => ReactNode>
+
 /**
- * Tags a legal message may use: `<email>…</email>` mails `legalEmail`,
- * `<terms>…</terms>` and `<privacy>…</privacy>` link the other legal page.
+ * Tags every legal message may use: `<email>` mails `legalEmail`, and
+ * `<terms>`, `<privacy>` and `<conduct>` link the legal pages.
  */
-const richTags = {
+const legalTags: RichTags = {
   email: (chunk: string): ReactNode => (
     <a href={`mailto:${legalEmail}`} className={inlineLink}>
       {chunk}
@@ -46,10 +48,15 @@ const richTags = {
       {chunk}
     </Link>
   ),
+  conduct: (chunk: string): ReactNode => (
+    <Link to="/code-of-conduct" className={inlineLink}>
+      {chunk}
+    </Link>
+  ),
 }
 
 /**
- * The frame of `/terms` and `/privacy`: title, date, contents, sections.
+ * The frame of the legal pages: title, date, contents, sections.
  * Plain content with no app state, so it can move to static HTML (#178).
  */
 export function LegalPage({
@@ -57,14 +64,18 @@ export function LegalPage({
   updated,
   intro,
   sections,
+  tags,
 }: {
   title: string
   /** "YYYY-MM-DD" of the last change that matters to a learner. */
   updated: string
   intro: readonly string[]
   sections: readonly LegalSection[]
+  /** More tags for this page's messages, like `<es>` for a Spanish word. */
+  tags?: RichTags
 }): JSX.Element {
   const { calendarDate, format, rich } = useFormatters()
+  const richTags = { ...legalTags, ...tags }
 
   return (
     <Section width="narrow" className="py-12 sm:py-16">
