@@ -67,7 +67,9 @@ Mnemonics are the one place strangers' content will reach other learners.
 ## Compliance
 
 - **Accessibility:** axe (WCAG 2.2 AA) runs in CI on every preview in both themes.
-- **Terms, privacy and community rules:** not written yet. `/terms` and `/privacy` say "Coming soon" (#170). Before any sign-up: a 13+ age requirement (COPPA), a license to show learners' mnemonics, a way to report copyrighted or harmful content, a Code of Conduct, and a privacy policy that lists the reviews log and how to export or delete data (GDPR / CCPA).
+- **Terms and community rules** (#170): `/terms` covers the 13+ age requirement (COPPA), the license to show learners' mnemonics, reporting, and DMCA notices. `/code-of-conduct` says what a mnemonic may and may not be. Both are in `apps/web/src/routes/_marketing/`. Reports and notices go to hello@phillipcantu.com, and Arizona law applies.
+- **Privacy policy:** not written yet. `/privacy` says "Coming soon" (#170). It lists the reviews log and how to export or delete data (GDPR / CCPA).
+- [ ] **Register a DMCA designated agent before #114 opens sign-up.** The Terms describe DMCA notices, but the safe harbor only protects Memli once an agent is registered in the Copyright Office's [DMCA Designated Agent Directory](https://copyright.gov/dmca-directory/). Online only, $6, and it expires 3 years after it was filed or last changed (a reminder email comes first). The directory is public: a P.O. box is allowed for the agent's address. Afterwards, name the agent in the "Copyright complaints" section of `terms.tsx`, exactly as registered.
 - **Deleting an account** keeps the author's mnemonics with `author: null`.
 
 ## Sign-in checklist (Week 4: #108, #107)
