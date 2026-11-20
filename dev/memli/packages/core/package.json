@@ -20,6 +20,7 @@
   },
   "exports": {
     "./answer/evaluate": "./src/answer/evaluate.ts",
+    "./form/form-reducer": "./src/form/form-reducer.ts",
     "./srs/outcome": "./src/srs/outcome.ts",
     "./srs/progress": "./src/srs/progress.ts",
     "./study/course-progress": "./src/study/course-progress.ts",

@@ -19,8 +19,9 @@ export function Footer(): JSX.Element {
             with Memli.
           </p>
           <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+            {/* "Start" means a new account, so sign-up, not sign-in. */}
             <Link
-              to="/signin"
+              to="/signup"
               className={cn(
                 buttonVariants({ size: "touch" }),
                 footerButtonClass
@@ -29,14 +30,14 @@ export function Footer(): JSX.Element {
               Start Learning Free
             </Link>
             <Link
-              to="/community"
+              to="/courses"
               className={cn(
                 buttonVariants({ variant: "outline", size: "touch" }),
                 footerButtonClass,
                 "border-brand-slate bg-transparent text-brand-surface hover:bg-white/10 hover:text-white"
               )}
             >
-              Explore Community
+              Explore Courses
             </Link>
           </div>
         </div>

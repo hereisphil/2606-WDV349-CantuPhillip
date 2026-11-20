@@ -3,10 +3,11 @@ import { useState, useEffect, useRef } from "react"
 import { Link } from "@tanstack/react-router"
 import { LayoutDashboard } from "lucide-react"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
-import { Button } from "@workspace/ui/components/button"
+import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { BrandMark } from "@/components/brand-mark"
 import { MenuGlyph } from "@/components/menu-glyph"
 import { PlanBadge } from "@/components/plan-badge"
+import { ThemeMenu } from "@/components/theme-control"
 import {
   headerNav,
   MarketingLink,
@@ -22,7 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { cn } from "@workspace/ui/lib/utils"
-import { useViewer, type Viewer } from "@/components/session-provider"
+import { useOptionalViewer } from "@/components/session-provider"
+import type { Viewer } from "@/lib/queries"
 
 const navItemClass =
   "touch-target inline-flex min-h-6 items-center rounded-md px-3 py-1.5 font-ui text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -57,7 +59,7 @@ function ViewerMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={`Account menu, @${viewer.username}`}
+        aria-label={`Account menu, ${viewer.displayName}`}
         render={
           <Button
             variant="ghost"
@@ -73,7 +75,7 @@ function ViewerMenu({
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center justify-between gap-2 py-1.5">
             <span className="truncate text-sm font-medium text-foreground">
-              @{viewer.username}
+              {viewer.displayName}
             </span>
             <PlanBadge plan={viewer.plan} />
           </DropdownMenuLabel>
@@ -92,8 +94,34 @@ function ViewerMenu({
   )
 }
 
+/**
+ * The account menu for a signed-in learner, a sign-in link otherwise, and
+ * nothing while the session is still loading, so the header doesn't flicker.
+ */
+function AccountSlot({
+  viewer,
+  onNavigate,
+}: {
+  viewer: Viewer | null | undefined
+  onNavigate?: () => void
+}): JSX.Element | null {
+  if (viewer === undefined) return null
+  if (viewer !== null) {
+    return <ViewerMenu viewer={viewer} onNavigate={onNavigate} />
+  }
+  return (
+    <Link
+      to="/signin"
+      onClick={() => onNavigate?.()}
+      className={cn(buttonVariants({ variant: "outline", size: "touch" }))}
+    >
+      Sign in
+    </Link>
+  )
+}
+
 export function Nav(): JSX.Element {
-  const viewer = useViewer()
+  const viewer = useOptionalViewer()
   const [mobileOpen, setMobileOpen] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
 
@@ -151,6 +179,8 @@ export function Nav(): JSX.Element {
   return (
     <header
       ref={headerRef}
+      // The page keeps focused elements clear of this sticky bar (globals.css).
+      data-sticky-header=""
       className={cn(
         "sticky top-0 z-50 w-full",
         mobileOpen
@@ -158,7 +188,8 @@ export function Nav(): JSX.Element {
           : "bg-background/65 backdrop-blur-sm"
       )}
     >
-      <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 md:grid">
+      {/* From lg up: seven links, Theme and Sign in don't fit a 768 px tablet (#174). */}
+      <nav className="mx-auto hidden max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 py-5 lg:grid">
         <Link to="/" className="flex" onClick={scrollWindowToTop}>
           <BrandMark />
         </Link>
@@ -167,12 +198,13 @@ export function Nav(): JSX.Element {
           <NavLinks className={navItemClass} />
         </div>
 
-        <div className="flex justify-end">
-          <ViewerMenu viewer={viewer} />
+        <div className="flex items-center justify-end gap-1">
+          <ThemeMenu placement="topBar" />
+          <AccountSlot viewer={viewer} />
         </div>
       </nav>
 
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:hidden">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 lg:hidden">
         <Link
           to="/"
           className="text-xl font-semibold"
@@ -185,11 +217,17 @@ export function Nav(): JSX.Element {
         </Link>
 
         <div className="flex items-center gap-1">
-          <ViewerMenu viewer={viewer} onNavigate={() => setMobileOpen(false)} />
+          <ThemeMenu placement="topBar" />
+          <AccountSlot
+            viewer={viewer}
+            onNavigate={() => setMobileOpen(false)}
+          />
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            // Named like the app's own phone menu; the glyph alone says nothing to a screen reader.
+            aria-label="Navigation menu"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((open) => !open)}
@@ -202,7 +240,7 @@ export function Nav(): JSX.Element {
       {mobileOpen ? (
         <nav
           id="mobile-nav"
-          className="flex flex-col gap-1 px-6 py-4 md:hidden"
+          className="flex flex-col gap-1 px-6 py-4 lg:hidden"
         >
           <NavLinks
             className={mobileNavItemClass}

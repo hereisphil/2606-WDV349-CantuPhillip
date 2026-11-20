@@ -70,10 +70,16 @@ Products that steal the homepage after login train users to fight their tools (�
 - Send the user to the **canonical app home**: `/dashboard` (active study sessions live at `/study/$courseId`).
 - Deep-link return URLs are fine (`?redirect=/study/korean-101`) when safe and same-origin.
 
-### Prototype Mode (`359 MS 1`–`359 MS 3`) vs. Production Auth (`359 MS 4`)
+### Prototype Mode (`359 MS 1`–`359 MS 3`) and real sign-in (`359 MS 4`)
 
-- During prototype milestones (`359 MS 1`–`359 MS 3`, Issue #110), `/signin` temporarily disables its credential inputs and provides a **"Skip & Continue to Prototype →"** button that navigates to `/dashboard`.
-- `/dashboard` and `/study/$courseId` read the current learner from a typed `SessionContext` / `useViewer()` provider backed by a seeded test user (`usr_prototype_01`), allowing the full SRS + Mnemonic study engine to be built and verified before Better Auth (#108, #107) replaces the bypass in `359 MS 4`.
+- During the prototype milestones (`359 MS 1`–`359 MS 3`, #110), `/signin` had its inputs disabled and a "Skip & Continue to Prototype" button into `/dashboard`, so the study loop could be built before sign-in.
+- Since #108, `/signin` and `/signup` are real forms on Better Auth, and the bypass is removed. A good sign-in lands on `/dashboard`.
+- `/dashboard` and `/study/$courseId` need a session. A signed-out visitor is sent to `/signin?redirect=…` and returns to that page after signing in or up.
+- The course catalog is public (#174). `/courses` and `/courses/$courseId` open signed out, with the marketing header. A visitor's only button on a course is **Start learning**, which goes to `/signup?redirect=/study/$courseId?mode=learn`, so they land in that course after signing up, not on the dashboard. **Add to my courses**, **Continue** and **Remove from my courses** show only to a signed-in learner, who sees the same pages with the app sidebar. A signed-in learner who opens `/signin` or `/signup` goes straight to `/dashboard`. The guards are `requireViewer` and `redirectViewer` in `apps/web/src/lib/session.ts`.
+- `/` and the other marketing pages never redirect. The header shows **Sign in** to a visitor and the account menu, with **Dashboard**, to a learner.
+- A session that ends mid-visit (any API answer of `UNAUTHORIZED`) is forgotten, and the guard sends the learner to `/signin` with a way back.
+- In development only, a real `?preview=` snapshot (and the **Previews** menu) opens signed out. It shows a stand-in learner, and a study preview studies a fixture course (`study-fixture.ts`), so no one's data is read. A production build has none of this, and `apps/web/e2e/previews.spec.ts` checks the development side.
+- The return path is only ever a path on this site. `//other.site` and `/\other.site` are dropped (`safeReturnPath`).
 
 ### After logout
 
@@ -90,6 +96,8 @@ When anonymous:
 
 - **Sign in** / **Get started**
 
+Both see a **Courses** link to the public catalog (#174).
+
 Do not replace the entire marketing nav with the authenticated app shell on `/`.
 
 ---
@@ -99,6 +107,7 @@ Do not replace the entire marketing nav with the authenticated app shell on `/`.
 | Surface | Chrome |
 | --- | --- |
 | Marketing routes | Marketing `Nav` + `Footer` (current `_marketing` layout) |
+| Course catalog (`/courses`, `/courses/$courseId`) | Marketing `Nav` + `Footer` for a visitor; the app shell for a signed-in learner (#174). Whether that stays one page after the Phase 3 split is open (#178) |
 | Auth routes | Minimal / branded; back to home; not the full app sidebar |
 | App routes | App shell (sidebar/top bar as designed); not the marketing mega-footer |
 
@@ -120,12 +129,15 @@ Marketing
   /contact
   /privacy  /terms
 
+Public and product (open signed out; more buttons when signed in)
+  /courses            the course catalog
+  /courses/$courseId  a course overview: Start learning, or Add to my courses
+
 Auth
   /signin  /signup  (+ password reset later)
 
 Product
   /dashboard        home base (or /learn)
-  /courses…           library
   /learn or /review session engine
   /settings         includes UI language + learning goals (see i18n.md)
 ```

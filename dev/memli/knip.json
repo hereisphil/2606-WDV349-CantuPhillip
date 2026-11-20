@@ -13,6 +13,7 @@
       ]
     },
     "apps/api": {
+      "entry": ["src/scripts/*.ts"],
       "project": ["src/**/*.ts"]
     },
     "packages/ui": {

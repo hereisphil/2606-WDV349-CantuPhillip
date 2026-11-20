@@ -1,10 +1,11 @@
 import { test as base, type Page } from "@playwright/test"
-import { createProgress } from "@workspace/core/srs/progress"
+import type { CatalogCourse } from "@workspace/schemas/api/catalog"
 import type { CourseSummary } from "@workspace/schemas/api/courses"
 import type { StudyHistoryData } from "@workspace/schemas/api/history"
-import type { StudySession } from "@workspace/schemas/api/study"
-import type { Card } from "@workspace/schemas/content/card"
 import type { ReviewSubmission } from "@workspace/schemas/srs/review"
+import { catalogPreviews } from "../src/routes/_catalog/-components/catalog-previews"
+import { overviewPreviews } from "../src/routes/_catalog/-components/overview-previews"
+import { spanishLearnSession } from "../src/routes/_session/-components/study-fixture"
 
 /**
  * Stands in for `apps/api` in the browser: no D1, no Worker, no shared state.
@@ -95,184 +96,6 @@ export function history(): StudyHistoryData {
   }
 }
 
-/**
- * The first five Spanish words, as in apps/api/seed, with 3, 2, 1, 0 and 0
- * mnemonics so every mnemonic state shows.
- */
-const spanishCards: Card[] = [
-  {
-    cardId: "es-gato",
-    term: "gato",
-    partOfSpeech: "noun",
-    gender: "masculine",
-    answers: ["cat"],
-    phonetic: "/ˈɡato/",
-    example: {
-      text: "El gato está durmiendo en el sofá.",
-      translation: "The cat is sleeping on the sofa.",
-    },
-    mnemonics: [
-      {
-        mnemonicId: "mn-es-gato-1",
-        contentLocale: "en",
-        story: [
-          {
-            kind: "plain",
-            text: "A cat in a giant sombrero crashes a fancy ",
-          },
-          { kind: "keyword", text: "gala" },
-          // U+2011, a non-breaking hyphen, keeps "Gala‑cat" on one line.
-          { kind: "plain", text: ". Gala\u2011cat, " },
-          { kind: "term", text: "gato" },
-          { kind: "plain", text: "!" },
-        ],
-        author: { displayName: "lucia_m" },
-        upvotes: 1240,
-        image: {
-          src: "/mnemonics/gato.svg",
-          alt: "A ginger cat in a bow tie, wearing a giant sombrero at a gala.",
-        },
-      },
-      {
-        mnemonicId: "mn-es-gato-2",
-        contentLocale: "en",
-        story: [
-          { kind: "plain", text: "A cat knocks over your " },
-          { kind: "keyword", text: "gateau" },
-          { kind: "plain", text: " and licks the frosting. Bad " },
-          { kind: "term", text: "gato" },
-          { kind: "plain", text: "!" },
-        ],
-        author: { displayName: "kenji.k" },
-        upvotes: 312,
-      },
-      {
-        mnemonicId: "mn-es-gato-3",
-        contentLocale: "en",
-        story: [
-          { kind: "plain", text: "The cat is the " },
-          { kind: "keyword", text: "gatekeeper" },
-          { kind: "plain", text: ": no one gets past the " },
-          { kind: "term", text: "gato" },
-          { kind: "plain", text: "." },
-        ],
-        author: { displayName: "sam_studies" },
-        upvotes: 1,
-      },
-    ],
-  },
-  {
-    cardId: "es-casa",
-    term: "casa",
-    partOfSpeech: "noun",
-    gender: "feminine",
-    answers: ["house", "home"],
-    phonetic: "/ˈkasa/",
-    example: {
-      text: "Mi casa es tu casa.",
-      translation: "My house is your house.",
-    },
-    mnemonics: [
-      {
-        mnemonicId: "mn-es-casa-1",
-        contentLocale: "en",
-        story: [
-          { kind: "plain", text: "You keep your " },
-          { kind: "keyword", text: "cash" },
-          { kind: "plain", text: " in your " },
-          { kind: "term", text: "casa" },
-          { kind: "plain", text: ", the safest place in the house." },
-        ],
-        author: { displayName: "dan.learns" },
-        upvotes: 860,
-        image: {
-          src: "/mnemonics/casa.svg",
-          alt: "A house with a box of cash sitting on its roof.",
-        },
-      },
-      {
-        mnemonicId: "mn-es-casa-2",
-        contentLocale: "en",
-        story: [
-          { kind: "plain", text: "Your house is your " },
-          { kind: "keyword", text: "castle" },
-          { kind: "plain", text: ", and every " },
-          { kind: "term", text: "casa" },
-          { kind: "plain", text: " is a castle to someone." },
-        ],
-        author: { displayName: "lucia_m" },
-        upvotes: 94,
-      },
-    ],
-  },
-  {
-    cardId: "es-comer",
-    term: "comer",
-    partOfSpeech: "verb",
-    answers: ["to eat", "eat"],
-    phonetic: "/koˈmeɾ/",
-    example: {
-      text: "Vamos a comer a las dos.",
-      translation: "We're going to eat at two.",
-    },
-    // A mnemonic without a picture, so the fallback shows in a real course.
-    mnemonics: [
-      {
-        mnemonicId: "mn-es-comer-1",
-        contentLocale: "en",
-        story: [
-          { kind: "plain", text: "Dinner's ready: " },
-          { kind: "keyword", text: "come here" },
-          { kind: "plain", text: " and eat! " },
-          { kind: "term", text: "Comer" },
-          { kind: "plain", text: " means to eat." },
-        ],
-        author: { displayName: "profe_ana" },
-        upvotes: 57,
-      },
-    ],
-  },
-  {
-    cardId: "es-rapido",
-    term: "rápido",
-    partOfSpeech: "adjective",
-    answers: ["fast", "quick"],
-    phonetic: "/ˈrapido/",
-    example: {
-      text: "El tren es muy rápido.",
-      translation: "The train is very fast.",
-    },
-  },
-  {
-    cardId: "es-que-tal",
-    term: "¿Qué tal?",
-    partOfSpeech: "phrase",
-    answers: ["how are you", "how's it going"],
-    phonetic: "/ke ˈtal/",
-    example: {
-      text: "Hola, Ana, ¿qué tal?",
-      translation: "Hi, Ana, how's it going?",
-    },
-  },
-]
-
-/** What `GET /api/courses/spanish-core-1000/study?mode=learn` answers. */
-export function spanishLearnSession(now = new Date()): StudySession {
-  return {
-    course: {
-      courseId: "spanish-core-1000",
-      title: "Spanish Core 1000",
-      learningLanguage: "es",
-      answerLanguage: "en",
-    },
-    mode: "learn",
-    cards: spanishCards.map((card) => ({
-      ...card,
-      progress: createProgress(card.cardId, now),
-    })),
-  }
-}
-
 /** Seven courses in two learning languages, so the Studying menu shows. */
 export function manyCourses(): CourseSummary[] {
   return ["es", "es", "es", "de", "de", "de", "de"].map(
@@ -286,6 +109,15 @@ export function manyCourses(): CourseSummary[] {
 }
 
 export type ApiStub = {
+  /**
+   * A learner with no courses yet. The dashboard starts empty and lists what
+   * they add, by button or by a first saved review, as `apps/api` does.
+   */
+  newLearner?: boolean
+  /** Replaces the published courses `GET /api/catalog` answers. */
+  catalog?: CatalogCourse[]
+  /** Answers `GET /api/catalog` with a server error. */
+  catalogFail?: boolean
   /** Replaces the courses `GET /api/courses` answers. */
   courses?: CourseSummary[]
   /** Answers `GET /api/courses` with a server error. */
@@ -296,6 +128,53 @@ export type ApiStub = {
   history?: Partial<StudyHistoryData>
   /** Answers `POST /api/reviews` with a server error. */
   reviewsFail?: boolean
+  /** Starts signed out: `GET /api/auth/get-session` answers `null`. */
+  signedOut?: boolean
+  /** The session ends: `GET /api/courses` answers UNAUTHORIZED, as the API does. */
+  sessionEnds?: boolean
+  /** Refuses `POST /api/auth/sign-in/email` the way Better Auth does. */
+  signInRefusal?: AuthRefusal
+  /** Refuses `POST /api/auth/sign-up/email` the way Better Auth does. */
+  signUpRefusal?: AuthRefusal
+}
+
+/** A Better Auth refusal: its status and, when it sends one, its code. */
+export type AuthRefusal = { status: number; code?: string }
+
+/** Better Auth's body for a refusal. Its 429 carries a message and no code. */
+function refusal({ status, code }: AuthRefusal): {
+  status: number
+  json: { message: string; code?: string }
+} {
+  return {
+    status,
+    json: { message: "Not shown to learners", ...(code && { code }) },
+  }
+}
+
+/** The learner every spec is signed in as, unless it starts signed out. */
+const learner = {
+  id: "usr_e2e_01",
+  name: "Ana",
+  email: "ana@memli.test",
+  emailVerified: false,
+  image: null,
+  uiLocale: "en",
+}
+
+/** What Better Auth answers when it signs a learner in or up. */
+const signedIn = { json: { token: "e2e-session-token", user: learner } }
+
+/** `GET /api/auth/get-session` for a signed-in learner. */
+const session = {
+  json: {
+    session: {
+      id: "ses_e2e_01",
+      userId: learner.id,
+      token: "e2e-session-token",
+    },
+    user: learner,
+  },
 }
 
 /** Answers every `/api/*` request the app makes. */
@@ -313,11 +192,52 @@ async function stubApi(
   // under URLs like /@fs/.../packages/schemas/src/api/courses.ts.
   const path = (pattern: RegExp) => (url: URL) => pattern.test(url.pathname)
 
+  // Signing in or up changes what the session answers, as the real API does.
+  let signedInNow = stub.signedOut !== true
+
+  // Which courses are on the dashboard. Adding one, or a first review, changes it.
+  const published = stub.catalog ?? catalogPreviews.default.courses
+  const added = new Set(
+    stub.newLearner
+      ? []
+      : published
+          .filter((course) => course.added)
+          .map((course) => course.courseId)
+  )
+
+  /** A course just added: every word new, nothing to review yet. */
+  const freshSummary = (course: CatalogCourse): CourseSummary => ({
+    courseId: course.courseId,
+    title: course.title,
+    learningLanguage: course.learningLanguage,
+    answerLanguage: course.answerLanguage,
+    dueCount: 0,
+    newAvailable: Math.min(10, course.wordCount),
+    masteredCount: 0,
+    learningCount: 0,
+    unseenCount: course.wordCount,
+    trickyCount: 0,
+    lastReviewedAt: null,
+  })
+  const dashboardCourses = (): CourseSummary[] =>
+    stub.newLearner
+      ? published
+          .filter((course) => added.has(course.courseId))
+          .map(freshSummary)
+      : (stub.courses ?? courses)
+
   // Anything not stubbed below is a missing route, so a spec fails loudly.
   await page.route(path(/^\/api\//), (route) =>
     route.fulfill({ status: 404, json: { error: { code: "NOT_FOUND" } } })
   )
   await page.route(path(/^\/api\/courses$/), (route) => {
+    if (stub.sessionEnds) {
+      signedInNow = false
+      return route.fulfill({
+        status: 401,
+        json: { error: { code: "UNAUTHORIZED" } },
+      })
+    }
     if (stub.coursesHtml) {
       return route.fulfill({
         contentType: "text/html",
@@ -325,10 +245,61 @@ async function stubApi(
       })
     }
     return route.fulfill(
-      stub.coursesFail
-        ? serverError
-        : { json: { courses: stub.courses ?? courses } }
+      stub.coursesFail ? serverError : { json: { courses: dashboardCourses() } }
     )
+  })
+  // Public, like the real routes: a visitor gets the same courses, none added.
+  await page.route(path(/^\/api\/catalog$/), (route) => {
+    if (stub.catalogFail) return route.fulfill(serverError)
+    return route.fulfill({
+      json: {
+        courses: published.map((course) => ({
+          ...course,
+          added: signedInNow && added.has(course.courseId),
+        })),
+      },
+    })
+  })
+  await page.route(path(/^\/api\/catalog\/[^/]+$/), (route) => {
+    const courseId = decodeURIComponent(
+      new URL(route.request().url()).pathname.split("/").at(-1) ?? ""
+    )
+    const course = published.find((row) => row.courseId === courseId)
+    if (course === undefined) {
+      return route.fulfill({
+        status: 404,
+        json: { error: { code: "NOT_FOUND" } },
+      })
+    }
+    // The preview's details and sample words, under this course's own fields.
+    return route.fulfill({
+      json: {
+        ...overviewPreviews.visitor.course,
+        ...course,
+        added: signedInNow && added.has(courseId),
+      },
+    })
+  })
+  await page.route(path(/^\/api\/courses\/[^/]+\/enrollment$/), (route) => {
+    if (!signedInNow) {
+      return route.fulfill({
+        status: 401,
+        json: { error: { code: "UNAUTHORIZED" } },
+      })
+    }
+    const courseId = decodeURIComponent(
+      new URL(route.request().url()).pathname.split("/").at(-2) ?? ""
+    )
+    const adding = route.request().method() === "PUT"
+    if (adding) added.add(courseId)
+    else added.delete(courseId)
+    return route.fulfill({
+      json: {
+        courseId,
+        added: adding,
+        addedAt: adding ? new Date().toISOString() : null,
+      },
+    })
   })
   await page.route(path(/^\/api\/history$/), (route) =>
     route.fulfill({ json: { ...history(), ...stub.history } })
@@ -348,11 +319,30 @@ async function stubApi(
       json: mode === "learn" ? session : { ...session, mode, cards: [] },
     })
   })
+  await page.route(path(/^\/api\/auth\/get-session$/), (route) =>
+    route.fulfill(signedInNow ? session : { json: null })
+  )
+  await page.route(path(/^\/api\/auth\/sign-in\/email$/), (route) => {
+    if (stub.signInRefusal) return route.fulfill(refusal(stub.signInRefusal))
+    signedInNow = true
+    return route.fulfill(signedIn)
+  })
+  await page.route(path(/^\/api\/auth\/sign-up\/email$/), (route) => {
+    if (stub.signUpRefusal) return route.fulfill(refusal(stub.signUpRefusal))
+    signedInNow = true
+    return route.fulfill(signedIn)
+  })
+  await page.route(path(/^\/api\/auth\/sign-out$/), (route) => {
+    signedInNow = false
+    return route.fulfill({ json: { success: true } })
+  })
   await page.route(path(/^\/api\/reviews$/), async (route) => {
     const body = route.request().postDataJSON() as {
       reviews: ReviewSubmission[]
     }
     reviews.push(...body.reviews)
+    // The fixture's study session is Spanish Core 1000: studying it adds it.
+    if (body.reviews.length > 0) added.add("spanish-core-1000")
     await route.fulfill(
       stub.reviewsFail ? serverError : { json: { progress: [] } }
     )

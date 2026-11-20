@@ -12,6 +12,7 @@ Full detail: `docs/architecture.md`, `docs/roadmap.md`, `docs/mobile.md`, `docs/
 - **Today:** one `apps/web` with `_marketing`, `_auth`, `_app` route groups is correct.
 - **Do not** split Astro marketing + React app until the roadmap Phase 3 criteria are met (working learning loop + clear SEO/perf need).
 - **Do not** start React Native until the shared API and `packages/core` FSRS path are stable (Phase 4).
+- **Rendering is an open decision (#178).** The owner's position: every public page (marketing, legal, the course catalog, course overviews) should be server-rendered or static, and the web app starts at sign-in. Until #178 decides how, keep public pages client-rendered in `apps/web`, and do not add SSR, prerendering or a second frontend on the side. Detail: `docs/architecture.md`, "What gets server-rendered".
 
 ## Sharing rules
 

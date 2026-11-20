@@ -85,6 +85,84 @@ export const users = sqliteTable("users", {
   ...timestamps,
 })
 
+/**
+ * Better Auth's `session` model: one row per signed-in browser (#108).
+ * Deleted on sign out; `token` is what the session cookie carries.
+ */
+export const sessions = sqliteTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    /** Personal data: listed in the Privacy Policy (#170). */
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    ...timestamps,
+  },
+  (t) => [index("sessions_user_idx").on(t.userId)]
+)
+
+/**
+ * Better Auth's `account` model: one way a learner signs in. For email
+ * sign-in, `providerId` is `credential` and `password` holds the scrypt hash.
+ */
+export const accounts = sqliteTable(
+  "accounts",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** The learner's id at the provider; their own user id for `credential`. */
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: integer("access_token_expires_at", {
+      mode: "timestamp_ms",
+    }),
+    refreshTokenExpiresAt: integer("refresh_token_expires_at", {
+      mode: "timestamp_ms",
+    }),
+    scope: text("scope"),
+    /** A scrypt hash, never the password. Only on `credential` accounts. */
+    password: text("password"),
+    ...timestamps,
+  },
+  (t) => [index("accounts_user_idx").on(t.userId)]
+)
+
+/** Better Auth's `verification` model: short-lived tokens, such as a password reset. */
+export const verifications = sqliteTable(
+  "verifications",
+  {
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    ...timestamps,
+  },
+  (t) => [index("verifications_identifier_idx").on(t.identifier)]
+)
+
+/**
+ * Better Auth's `rateLimit` model: tries per client and path. In D1 because a
+ * count kept in memory is not shared across Worker instances (#169).
+ */
+export const rateLimits = sqliteTable("rate_limits", {
+  id: text("id").primaryKey(),
+  /** The client's IP address and the path, joined by Better Auth. */
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  /** Milliseconds since 1970, as a number: Better Auth compares it itself. */
+  lastRequest: integer("last_request").notNull(),
+})
+
 /** What learners study. Never called a deck (`.cursor/rules/ui-design.mdc`). */
 export const courses = sqliteTable(
   "courses",
@@ -95,9 +173,46 @@ export const courses = sqliteTable(
     learningLanguage: text("learning_language").notNull(),
     /** What the answers and example translations are written in. A language tag. */
     answerLanguage: text("answer_language").notNull(),
+    /** For the catalog, in `answerLanguage`. README, "Course catalog details". */
+    description: text("description"),
+    /**
+     * When the catalog started listing it; `null` is a hidden draft. Needs a
+     * description, source and license: triggers in 0008_published_courses.sql.
+     */
+    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
+    /** Where the words came from: who wrote them, or the dataset's URL. */
+    source: text("source"),
+    /** The license the content is under, as shown: `CC BY-SA 4.0`. */
+    license: text("license"),
+    /** The credit line the license asks for, when it asks for one. */
+    attribution: text("attribution"),
     ...timestamps,
   },
   (t) => [index("courses_learning_language_idx").on(t.learningLanguage)]
+)
+
+/**
+ * A course a learner added to their dashboard (#174). Removing one deletes
+ * only this row: their `user_progress` stays, so adding it back resumes.
+ */
+export const enrollments = sqliteTable(
+  "enrollments",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    courseId: text("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    addedAt: integer("added_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(now),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.courseId] }),
+    // The key starts with the learner, so deleting a course needs its own index.
+    index("enrollments_course_idx").on(t.courseId),
+  ]
 )
 
 /** One word to learn. What the course teaches, never how well anyone knows it. */

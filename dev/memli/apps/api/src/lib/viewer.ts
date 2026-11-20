@@ -1,11 +1,47 @@
-import type { Context } from "hono"
+import type { Context, MiddlewareHandler } from "hono"
 
 import type { AppEnv } from "../env"
+import { auth } from "./auth"
+import { errorResponse } from "./errors"
 
 /**
- * The prototype learner until Better Auth (#108). Routes never name a user id
- * themselves, so #108 only changes this function.
+ * Lets a request through only with a live session, and remembers whose it
+ * is. Without one the route answers 401 UNAUTHORIZED and never runs.
  */
-export function viewerId(_c: Context<AppEnv>): string {
-  return "usr_prototype_01"
+export const requireViewer: MiddlewareHandler<AppEnv> = async (c, next) => {
+  const session = await auth(c.env).api.getSession({
+    headers: c.req.raw.headers,
+  })
+  if (session === null) return errorResponse(c, "UNAUTHORIZED")
+
+  c.set("viewerId", session.user.id)
+  return next()
+}
+
+/**
+ * For public pages: remembers the learner when there is a session, and lets
+ * a visitor through without one. Read it with `optionalViewerId`.
+ */
+export const optionalViewer: MiddlewareHandler<AppEnv> = async (c, next) => {
+  const session = await auth(c.env).api.getSession({
+    headers: c.req.raw.headers,
+  })
+  if (session !== null) c.set("viewerId", session.user.id)
+  return next()
+}
+
+/** The signed-in learner, or `null` for a visitor on a public route. */
+export function optionalViewerId(c: Context<AppEnv>): string | null {
+  return (c.get("viewerId") as string | undefined) ?? null
+}
+
+/**
+ * The signed-in learner. Routes never read a user id from the request, so
+ * one learner can never ask for another's data (docs/security.md).
+ */
+export function viewerId(c: Context<AppEnv>): string {
+  const id = c.get("viewerId") as string | undefined
+  // Only a route mounted without `requireViewer` gets here: a bug, not a 401.
+  if (id === undefined) throw new Error("viewerId() needs requireViewer")
+  return id
 }

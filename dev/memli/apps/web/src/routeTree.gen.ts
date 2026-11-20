@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as CatalogRouteImport } from './routes/_catalog'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as SessionRouteImport } from './routes/_session'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
+import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as MarketingBlogRouteImport } from './routes/_marketing/blog'
@@ -24,6 +26,8 @@ import { Route as MarketingContactRouteImport } from './routes/_marketing/contac
 import { Route as MarketingPricingRouteImport } from './routes/_marketing/pricing'
 import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { Route as MarketingTermsRouteImport } from './routes/_marketing/terms'
+import { Route as CatalogCoursesIndexRouteImport } from './routes/_catalog/courses/index'
+import { Route as CatalogCoursesCourseIdRouteImport } from './routes/_catalog/courses/$courseId'
 import { Route as SessionStudyCourseIdRouteImport } from './routes/_session/study.$courseId'
 
 const AppRoute = AppRouteImport.update({
@@ -32,6 +36,10 @@ const AppRoute = AppRouteImport.update({
 } as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/_catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingRoute = MarketingRouteImport.update({
@@ -55,6 +63,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AuthSigninRoute = AuthSigninRouteImport.update({
   id: '/signin',
   path: '/signin',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => AuthRoute,
 } as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
@@ -97,6 +110,16 @@ const MarketingTermsRoute = MarketingTermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => MarketingRoute,
 } as any)
+const CatalogCoursesIndexRoute = CatalogCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => CatalogRoute,
+} as any)
+const CatalogCoursesCourseIdRoute = CatalogCoursesCourseIdRouteImport.update({
+  id: '/courses/$courseId',
+  path: '/courses/$courseId',
+  getParentRoute: () => CatalogRoute,
+} as any)
 const SessionStudyCourseIdRoute = SessionStudyCourseIdRouteImport.update({
   id: '/study/$courseId',
   path: '/study/$courseId',
@@ -108,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/settings': typeof AppSettingsRoute
   '/signin': typeof AuthSigninRoute
+  '/signup': typeof AuthSignupRoute
   '/about': typeof MarketingAboutRoute
   '/blog': typeof MarketingBlogRoute
   '/community': typeof MarketingCommunityRoute
@@ -115,13 +139,16 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof MarketingPricingRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
+  '/courses/$courseId': typeof CatalogCoursesCourseIdRoute
   '/study/$courseId': typeof SessionStudyCourseIdRoute
+  '/courses/': typeof CatalogCoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/settings': typeof AppSettingsRoute
   '/signin': typeof AuthSigninRoute
+  '/signup': typeof AuthSignupRoute
   '/about': typeof MarketingAboutRoute
   '/blog': typeof MarketingBlogRoute
   '/community': typeof MarketingCommunityRoute
@@ -129,17 +156,21 @@ export interface FileRoutesByTo {
   '/pricing': typeof MarketingPricingRoute
   '/privacy': typeof MarketingPrivacyRoute
   '/terms': typeof MarketingTermsRoute
+  '/courses/$courseId': typeof CatalogCoursesCourseIdRoute
   '/study/$courseId': typeof SessionStudyCourseIdRoute
+  '/courses': typeof CatalogCoursesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
+  '/_catalog': typeof CatalogRouteWithChildren
   '/_marketing': typeof MarketingRouteWithChildren
   '/_session': typeof SessionRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_auth/signin': typeof AuthSigninRoute
+  '/_auth/signup': typeof AuthSignupRoute
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/blog': typeof MarketingBlogRoute
   '/_marketing/community': typeof MarketingCommunityRoute
@@ -148,7 +179,9 @@ export interface FileRoutesById {
   '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/terms': typeof MarketingTermsRoute
   '/_marketing/': typeof MarketingIndexRoute
+  '/_catalog/courses/$courseId': typeof CatalogCoursesCourseIdRoute
   '/_session/study/$courseId': typeof SessionStudyCourseIdRoute
+  '/_catalog/courses/': typeof CatalogCoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +190,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/signin'
+    | '/signup'
     | '/about'
     | '/blog'
     | '/community'
@@ -164,13 +198,16 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/courses/$courseId'
     | '/study/$courseId'
+    | '/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
     | '/settings'
     | '/signin'
+    | '/signup'
     | '/about'
     | '/blog'
     | '/community'
@@ -178,16 +215,20 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/terms'
+    | '/courses/$courseId'
     | '/study/$courseId'
+    | '/courses'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
+    | '/_catalog'
     | '/_marketing'
     | '/_session'
     | '/_app/dashboard'
     | '/_app/settings'
     | '/_auth/signin'
+    | '/_auth/signup'
     | '/_marketing/about'
     | '/_marketing/blog'
     | '/_marketing/community'
@@ -196,12 +237,15 @@ export interface FileRouteTypes {
     | '/_marketing/privacy'
     | '/_marketing/terms'
     | '/_marketing/'
+    | '/_catalog/courses/$courseId'
     | '/_session/study/$courseId'
+    | '/_catalog/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  CatalogRoute: typeof CatalogRouteWithChildren
   MarketingRoute: typeof MarketingRouteWithChildren
   SessionRoute: typeof SessionRouteWithChildren
 }
@@ -220,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_catalog': {
+      id: '/_catalog'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_marketing': {
@@ -255,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/signin'
       fullPath: '/signin'
       preLoaderRoute: typeof AuthSigninRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/signup': {
+      id: '/_auth/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_marketing/': {
@@ -313,6 +371,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingTermsRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/_catalog/courses/': {
+      id: '/_catalog/courses/'
+      path: '/courses'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CatalogCoursesIndexRouteImport
+      parentRoute: typeof CatalogRoute
+    }
+    '/_catalog/courses/$courseId': {
+      id: '/_catalog/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/courses/$courseId'
+      preLoaderRoute: typeof CatalogCoursesCourseIdRouteImport
+      parentRoute: typeof CatalogRoute
+    }
     '/_session/study/$courseId': {
       id: '/_session/study/$courseId'
       path: '/study/$courseId'
@@ -337,13 +409,28 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface AuthRouteChildren {
   AuthSigninRoute: typeof AuthSigninRoute
+  AuthSignupRoute: typeof AuthSignupRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthSigninRoute: AuthSigninRoute,
+  AuthSignupRoute: AuthSignupRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface CatalogRouteChildren {
+  CatalogCoursesCourseIdRoute: typeof CatalogCoursesCourseIdRoute
+  CatalogCoursesIndexRoute: typeof CatalogCoursesIndexRoute
+}
+
+const CatalogRouteChildren: CatalogRouteChildren = {
+  CatalogCoursesCourseIdRoute: CatalogCoursesCourseIdRoute,
+  CatalogCoursesIndexRoute: CatalogCoursesIndexRoute,
+}
+
+const CatalogRouteWithChildren =
+  CatalogRoute._addFileChildren(CatalogRouteChildren)
 
 interface MarketingRouteChildren {
   MarketingAboutRoute: typeof MarketingAboutRoute
@@ -385,6 +472,7 @@ const SessionRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  CatalogRoute: CatalogRouteWithChildren,
   MarketingRoute: MarketingRouteWithChildren,
   SessionRoute: SessionRouteWithChildren,
 }

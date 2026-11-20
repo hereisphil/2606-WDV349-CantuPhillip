@@ -1,0 +1,7 @@
+# Local secrets for `wrangler dev`. Copy to .dev.vars (gitignored):
+#
+#   cp .dev.vars.example .dev.vars
+#
+# Then replace the value below with your own: `openssl rand -base64 32`.
+# Staging and production get theirs from `wrangler secret put`, never a file.
+BETTER_AUTH_SECRET=replace-me-with-openssl-rand-base64-32

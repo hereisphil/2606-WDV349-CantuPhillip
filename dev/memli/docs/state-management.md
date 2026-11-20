@@ -73,7 +73,6 @@ The shared `react` config turns the rule **on everywhere** so new route groups a
 | --- | --- | --- |
 | `packages/ui/**` | shadcn / Base UI primitives manage their own internal open/focus state | Never (library code) |
 | `apps/web/src/routes/_marketing/**` | Presentational toggles only (`Nav.tsx` `mobileOpen`), no lifecycle | If marketing grows interactive flows |
-| `apps/web/src/routes/_auth/**` | `signin.tsx` is frozen in prototype mode (#110); see below | **#108 — Better Auth** |
 
 `apps/web/src/routes/_app/**` and `apps/web/src/components/**` are **not** exempt. That is where the product lives.
 
@@ -180,17 +179,16 @@ The decision applies **going forward**. Existing components are not refactored f
 | --- | --- | --- |
 | `routes/_marketing/-components/Nav.tsx` | one `useState` (`mobileOpen`) + two `useEffect`s | **Keep.** Single toggle is the allowed `useState` case; the effects are DOM sync (focus trap, scroll lock), not state sync. |
 | `components/theme-provider.tsx` | one `useState` (the learner's choice) + `useSyncExternalStore` (the device's light or dark setting) + two `useEffect`s (apply the class to `<html>`, follow other tabs) | **Keep.** The device setting lives outside React, so `useSyncExternalStore` reads it instead of a second `useState` kept in sync by an effect. The resolved theme is derived, not stored. (#151) |
-| `routes/_auth/signin.tsx` | four coupled `useState` calls: `email`, `password`, `fieldErrors`, `formMessage` | **Exempt now; migrate at #108.** See below. |
+| `routes/_auth/signin.tsx` | `useAuthForm` over `createFormReducer` from `@workspace/core/form/form-reducer` | **Migrated at #108.** See below. |
 
-### `signin.tsx` — not now, but at Better Auth (#108)
+### Auth forms: migrated at Better Auth (#108)
 
-Why not now: the form is disabled during prototype mode (#110) and gets a "Skip & Continue to Prototype" button; churning it twice is waste. The `_auth/**` glob is opted out in `apps/web/eslint.config.js` with a comment pointing here.
+`signin.tsx` had four coupled `useState` calls and an `_auth/**` lint exemption while the form was disabled in prototype mode (#110). Both are gone.
 
-Why it must change at #108: those four hooks are already coupled (changing a field clears its error; submit clears the message). Wiring Better Auth adds `isSubmitting`, a server error, and a redirect-on-success — exactly the boolean soup this decision exists to prevent. The migration:
-
-1. Remove the `_auth/**` exemption from `apps/web/eslint.config.js` (lint now fails on `signin.tsx`).
-2. Replace the four `useState`s with one reducer: `status: "idle" | "submitting" | "error" | "success"`, `fields`, `fieldErrors`, `message`; events `FIELD_CHANGED`, `SUBMITTED`, `SUBMIT_SUCCEEDED`, `SUBMIT_FAILED`.
-3. Keep Zod validation (`signInSchema`) inside the `SUBMITTED` transition; the Better Auth call is the effect (plain `useEffect` keyed on `status === "submitting"`, or `use-effect-reducer` if it has been installed by then).
+- **The machine is in core.** `createFormReducer(validate)` in `packages/core/src/form/form-reducer.ts`: `status: "idle" | "submitting" | "error" | "success"`, with events `FIELD_CHANGED`, `SUBMITTED`, `SUBMIT_SUCCEEDED` and `SUBMIT_FAILED`. Its test covers every event from every status. It holds no copy: field messages come from the Zod schema the app passes in, and a refusal is the server's code.
+- **Validation runs inside `SUBMITTED`.** The app wraps a schema with `validateWith(signInSchema)`. An invalid form stays `idle` with `fieldErrors`. A valid one becomes `submitting`.
+- **The request starts in the submit handler, not in an effect.** `useAuthForm` (`routes/_auth/-components/use-auth-form.ts`) calls the pure reducer to learn what this submit does, dispatches the same event, and sends only when the next status is `submitting`. Nothing watches `status` in a `useEffect`, so there is no flag pattern and no need for `use-effect-reducer` here.
+- **A second submit is a no-op.** While `submitting`, the reducer returns the same state, and the hook sends nothing.
 
 ---
 
