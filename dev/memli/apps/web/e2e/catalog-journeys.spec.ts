@@ -64,6 +64,7 @@ test.describe("signed out, a visitor", () => {
     await page.getByLabel("Name").fill("Ana")
     await page.getByLabel("Email address").fill("ana@memli.test")
     await page.getByLabel("Password").fill("Correct-horse-battery!")
+    await page.getByRole("checkbox", { name: /13 or older/ }).check()
     await page.getByRole("button", { name: "Create account" }).click()
 
     // Straight into the course's first words, not the dashboard.

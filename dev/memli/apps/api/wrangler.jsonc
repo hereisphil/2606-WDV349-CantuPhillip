@@ -25,6 +25,11 @@
       "migrations_dir": "drizzle/migrations"
     }
   ],
+  // Daily at 04:00 UTC: delete idle rate-limit rows and expired sessions, as
+  // the Privacy Policy promises (src/lib/cleanup.ts, #170).
+  "triggers": {
+    "crons": ["0 4 * * *"]
+  },
   // Local only for now. `apps/web` proxies /api/* here (apps/web/vite.config.ts).
   "dev": {
     "port": 8787
@@ -49,7 +54,11 @@
           "database_id": "46bb4b9f-c8a4-45df-aff4-ed1b58973dcd",
           "migrations_dir": "drizzle/migrations"
         }
-      ]
+      ],
+      // Repeated on purpose, so staging runs the cleanup whatever wrangler inherits.
+      "triggers": {
+        "crons": ["0 4 * * *"]
+      }
     }
   }
 }

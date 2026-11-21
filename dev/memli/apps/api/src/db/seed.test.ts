@@ -1,11 +1,12 @@
 /// <reference types="node" />
-import { existsSync } from "node:fs"
+import { existsSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 import type { DatabaseSync } from "node:sqlite"
 import {
   courseCardsSchema,
   courseSchema,
 } from "@workspace/schemas/content/course"
+import { mnemonicImageSrcSchema } from "@workspace/schemas/content/mnemonic"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { apiRoot, countRows, migratedDatabase, seed } from "./test-database"
@@ -169,6 +170,15 @@ describe("the seeded mnemonics", () => {
       .filter((src) => !existsSync(join(webPublic, src)))
 
     expect(missing).toEqual([])
+  })
+
+  it("ship every picture under a name the image rule takes", () => {
+    const folder = join(apiRoot, "../web/public/mnemonics")
+    const refused = readdirSync(folder)
+      .map((file) => `/mnemonics/${file}`)
+      .filter((src) => !mnemonicImageSrcSchema.safeParse(src).success)
+
+    expect(refused).toEqual([])
   })
 
   it("leave some cards without one, so that state shows in a real course", () => {

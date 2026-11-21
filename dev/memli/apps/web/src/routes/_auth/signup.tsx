@@ -1,10 +1,11 @@
-import type { JSX } from "react"
+import type { JSX, ReactNode } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFormReducer } from "@workspace/core/form/form-reducer"
-import { signUpSchema } from "@workspace/schemas/auth/sign-up"
+import { signUpSchema, TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { Button } from "@workspace/ui/components/button"
 import { signUp } from "@/lib/auth"
+import { useFormatters } from "@/lib/formatters"
 import {
   HOME_PATH,
   redirectViewer,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/session"
 import { AuthCard, authLinkClass } from "./-components/AuthCard"
 import { AuthPreviewSwitcher } from "./-components/AuthPreviewSwitcher"
+import { ConsentField } from "./-components/ConsentField"
 import {
   isSignUpPreviewName,
   neverAnswers,
@@ -60,19 +62,38 @@ const messages = {
   submitting: "Creating your account…",
   haveAccount: "Already have an account?",
   signIn: "Sign in",
-  termsBefore: "Creating an account means you accept our",
-  terms: "Terms of Service",
-  termsJoin: "and",
-  privacy: "Privacy Policy",
+  acceptTerms:
+    "I am 13 or older, and I accept the <terms>Terms of Service</terms>.",
+  privacy:
+    "Read how we use your data in our <privacy>Privacy Policy</privacy>.",
 } as const
 
-type Field = "name" | "email" | "password"
+type Field = "name" | "email" | "password" | "acceptedTermsVersion"
 
 const inlineLinkClass =
   "font-semibold text-foreground underline underline-offset-4"
 
 const reducer = createFormReducer<Field>(validateWith(signUpSchema))
-const emptyForm = { name: "", email: "", password: "" }
+// The box holds the Terms' version once ticked, so the form stays all strings.
+const emptyForm = {
+  name: "",
+  email: "",
+  password: "",
+  acceptedTermsVersion: "",
+}
+
+const richTags = {
+  terms: (chunk: string): ReactNode => (
+    <Link to="/terms" target="_blank" className={inlineLinkClass}>
+      {chunk}
+    </Link>
+  ),
+  privacy: (chunk: string): ReactNode => (
+    <Link to="/privacy" target="_blank" className={inlineLinkClass}>
+      {chunk}
+    </Link>
+  ),
+}
 
 function SignUp(): JSX.Element {
   const { preview } = Route.useSearch()
@@ -102,6 +123,7 @@ function SignUp(): JSX.Element {
 function SignUpForm({ preview }: { preview?: SignUpPreviewName }): JSX.Element {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { rich } = useFormatters()
   const { redirect } = Route.useSearch()
   const seeded =
     import.meta.env.DEV && preview !== undefined
@@ -167,6 +189,21 @@ function SignUpForm({ preview }: { preview?: SignUpPreviewName }): JSX.Element {
           errors={fieldErrors.password}
           disabled={busy}
         />
+        <ConsentField
+          id="acceptedTermsVersion"
+          checked={state.fields.acceptedTermsVersion === TERMS_VERSION}
+          onChange={(checked) => {
+            dispatch({
+              type: "FIELD_CHANGED",
+              field: "acceptedTermsVersion",
+              value: checked ? TERMS_VERSION : "",
+            })
+          }}
+          errors={fieldErrors.acceptedTermsVersion}
+          disabled={busy}
+        >
+          {rich(messages.acceptTerms, richTags)}
+        </ConsentField>
 
         {state.status === "error" ? (
           <p role="alert" className="text-base text-destructive">
@@ -186,15 +223,7 @@ function SignUpForm({ preview }: { preview?: SignUpPreviewName }): JSX.Element {
 
       {/* Links inside a sentence stay inline: only the page switch is a target. */}
       <p className="mt-4 text-center text-base text-muted-foreground">
-        {messages.termsBefore}{" "}
-        <Link to="/terms" className={inlineLinkClass}>
-          {messages.terms}
-        </Link>{" "}
-        {messages.termsJoin}{" "}
-        <Link to="/privacy" className={inlineLinkClass}>
-          {messages.privacy}
-        </Link>
-        .
+        {rich(messages.privacy, richTags)}
       </p>
 
       <p className="mt-2 text-center text-base text-muted-foreground">

@@ -188,7 +188,7 @@ const brokenImage: StudyCard = {
       ...casaStory,
       mnemonicId: "preview-broken-image-1",
       image: {
-        src: "/missing-mnemonic.png",
+        src: "/mnemonics/missing.png",
         alt: "A picture that fails to load.",
       },
     },

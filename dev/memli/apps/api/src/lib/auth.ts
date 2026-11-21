@@ -1,7 +1,11 @@
 import {
-  DISPLAY_NAME_MAX_LENGTH,
+  isReservedDisplayName,
+  tidyDisplayName,
+} from "@workspace/schemas/auth/display-name"
+import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
+  TERMS_VERSION,
   meetsPasswordRules,
 } from "@workspace/schemas/auth/sign-up"
 import { parseApiEnv } from "@workspace/schemas/env/api"
@@ -20,6 +24,7 @@ import {
   users,
   verifications,
 } from "../db/schema"
+import { isTrustedOrigin } from "./same-origin"
 
 type Auth = ReturnType<typeof betterAuth<BetterAuthOptions>>
 
@@ -42,9 +47,29 @@ function newPassword(path: string, body: unknown): unknown {
   return (body as Record<string, unknown>)[field]
 }
 
-/** A display name as Memli stores it: trimmed and bounded. */
-function tidyName(name: string): string {
-  return name.trim().slice(0, DISPLAY_NAME_MAX_LENGTH)
+/** True when a sign-up body accepts the current Terms of Service (#170). */
+function acceptsTerms(body: unknown): boolean {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    (body as Record<string, unknown>).acceptedTermsVersion === TERMS_VERSION
+  )
+}
+
+/** The name a sign-up or rename wants to set, if the body has one. */
+function newName(body: unknown): unknown {
+  return typeof body === "object" && body !== null
+    ? (body as Record<string, unknown>).name
+    : undefined
+}
+
+/**
+ * A name Memli can save: tidied, not blank, and not one that looks like
+ * Memli's own (`@workspace/schemas/auth/display-name`). Otherwise `null`.
+ */
+function savableName(name: string): string | null {
+  const tidy = tidyDisplayName(name)
+  return tidy === "" || isReservedDisplayName(tidy) ? null : tidy
 }
 
 /**
@@ -56,8 +81,13 @@ function authOptions(env: Env): BetterAuthOptions {
 
   return {
     appName: "Memli",
-    // The only trusted origin, and `https` is what marks cookies `Secure`.
+    // The trusted origin, and `https` is what marks cookies `Secure`.
     baseURL: BETTER_AUTH_URL,
+    // Locally, also the dev server opened from a phone (`isTrustedOrigin`).
+    trustedOrigins: (request) => {
+      const origin = request?.headers.get("Origin")
+      return isTrustedOrigin(origin, BETTER_AUTH_URL) ? [origin] : []
+    },
     secret: BETTER_AUTH_SECRET,
     database: drizzleAdapter(database(env.DB), {
       provider: "sqlite",
@@ -79,32 +109,58 @@ function authOptions(env: Env): BetterAuthOptions {
           defaultValue: "en",
           input: false,
         },
+        // Which Terms the learner accepted, and when. Only the server sets them.
+        termsVersion: { type: "string", required: false, input: false },
+        termsAcceptedAt: { type: "date", required: false, input: false },
       },
     },
     databaseHooks: {
       user: {
         create: {
-          // A name is shown under a learner's mnemonics, so it is bounded
-          // however the learner signed up. `false` refuses a blank one.
+          // Tidies the name shown under mnemonics; `false` refuses a bad one.
+          // Records the Terms that `hooks.before` checked: Google (#107) must ask too.
           before: async (user) => {
-            const name = tidyName(user.name)
-            return name === "" ? false : { data: { ...user, name } }
+            const name = savableName(user.name)
+            if (name === null) return false
+            return {
+              data: {
+                ...user,
+                name,
+                termsVersion: TERMS_VERSION,
+                termsAcceptedAt: new Date(),
+              },
+            }
           },
         },
-        // The same bound when a learner renames themselves later.
+        // The same rule when a learner renames themselves later.
         update: {
           before: async (user) => {
             if (typeof user.name !== "string") return true
-            const name = tidyName(user.name)
-            return name === "" ? false : { data: { ...user, name } }
+            const name = savableName(user.name)
+            return name === null ? false : { data: { ...user, name } }
           },
         },
       },
     },
     hooks: {
-      // Better Auth checks a password's length. This adds Memli's own rules:
-      // a capital letter, a lowercase letter and a symbol.
+      // Memli's own rules on top of Better Auth's: the current Terms, no name
+      // that passes for Memli's, and a password with a capital, lowercase and symbol.
       before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === "/sign-up/email" && !acceptsTerms(ctx.body)) {
+          throw new APIError("BAD_REQUEST", {
+            code: "TERMS_NOT_ACCEPTED",
+            message: "Accept the Terms of Service to sign up",
+          })
+        }
+        const name = newName(ctx.body)
+        const naming =
+          ctx.path === "/sign-up/email" || ctx.path === "/update-user"
+        if (naming && typeof name === "string" && isReservedDisplayName(name)) {
+          throw new APIError("BAD_REQUEST", {
+            code: "NAME_RESERVED",
+            message: "That name is kept for the Memli team",
+          })
+        }
         const password = newPassword(ctx.path, ctx.body)
         if (typeof password === "string" && !meetsPasswordRules(password)) {
           throw new APIError("BAD_REQUEST", {

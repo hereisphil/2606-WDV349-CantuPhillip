@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright"
 import type { Page } from "@playwright/test"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { expect, test } from "./api"
 
 /** `/signin`, `/signup` and the route guards against the API stand-in (#108). */
@@ -16,6 +17,11 @@ async function fillSignUp(page: Page, password: string): Promise<void> {
   await page.getByLabel("Name").fill("Ana")
   await page.getByLabel("Email address").fill("ana@memli.test")
   await page.getByLabel("Password").fill(password)
+  await termsBox(page).check()
+}
+
+function termsBox(page: Page): ReturnType<Page["getByRole"]> {
+  return page.getByRole("checkbox", { name: /13 or older/ })
 }
 
 async function expectNoViolations(page: Page): Promise<void> {
@@ -150,8 +156,62 @@ test.describe("sign up", () => {
       name: "Ana",
       email: "ana@memli.test",
       password: "Correct-horse-battery",
+      acceptedTermsVersion: TERMS_VERSION,
     })
     await expect(page).toHaveURL(/\/dashboard$/)
+  })
+
+  test("asks for the Terms box before any request", async ({ page }) => {
+    let sent = false
+    page.on("request", (request) => {
+      if (request.url().includes("/api/auth/")) sent = true
+    })
+    await fillSignUp(page, "Correct-horse-battery")
+    await termsBox(page).uncheck()
+    await page.getByRole("button", { name: "Create account" }).click()
+
+    await expect(termsBox(page)).toBeFocused()
+    await expect(termsBox(page)).toHaveAccessibleDescription(
+      "Check the box to accept the Terms of Service."
+    )
+    expect(sent).toBe(false)
+
+    // Ticking it clears the message.
+    await termsBox(page).check()
+    await expect(
+      page.getByText("Check the box to accept the Terms of Service.")
+    ).toBeHidden()
+  })
+
+  test("says a name that passes for Memli's is taken, before any request", async ({
+    page,
+  }) => {
+    let sent = false
+    page.on("request", (request) => {
+      if (request.url().includes("/api/auth/")) sent = true
+    })
+    await fillSignUp(page, "Correct-horse-battery")
+    await page.getByLabel("Name").fill("Memli Team")
+    await page.getByRole("button", { name: "Create account" }).click()
+
+    await expect(page.getByLabel("Name")).toBeFocused()
+    await expect(page.getByLabel("Name")).toHaveAccessibleDescription(
+      /That name is kept for the Memli team\. Choose another one\./
+    )
+    expect(sent).toBe(false)
+  })
+
+  test("links the Terms and the Privacy Policy in a new tab", async ({
+    page,
+  }) => {
+    for (const [name, href] of [
+      ["Terms of Service", "/terms"],
+      ["Privacy Policy", "/privacy"],
+    ] as const) {
+      const link = page.locator("main").getByRole("link", { name })
+      await expect(link).toHaveAttribute("href", href)
+      await expect(link).toHaveAttribute("target", "_blank")
+    }
   })
 
   test("names every password rule that is missed, before any request", async ({
@@ -211,6 +271,16 @@ for (const [label, signUpRefusal, message] of [
     "a password found in a breach",
     { status: 400, code: "PASSWORD_COMPROMISED" },
     "That password appeared in a data breach. Choose another one.",
+  ],
+  [
+    "Terms the API does not accept",
+    { status: 400, code: "TERMS_NOT_ACCEPTED" },
+    "Check the box to accept the Terms of Service.",
+  ],
+  [
+    "a name that passes for Memli's",
+    { status: 400, code: "NAME_RESERVED" },
+    "That name is kept for the Memli team. Choose another one.",
   ],
   [
     "a code this app does not know",

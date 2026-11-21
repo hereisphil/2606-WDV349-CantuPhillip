@@ -1,4 +1,5 @@
 import { apiErrorSchema } from "@workspace/schemas/api/error"
+import { TERMS_VERSION } from "@workspace/schemas/auth/sign-up"
 import { eq } from "drizzle-orm"
 import {
   afterAll,
@@ -32,6 +33,7 @@ const learner = {
   name: "Ana",
   email: "ana@memli.test",
   password: "Correct-horse-battery",
+  acceptedTermsVersion: TERMS_VERSION,
 }
 
 let api: TestApi
@@ -95,6 +97,44 @@ describe("POST /api/auth/sign-up/email", () => {
     expect(await api.db.select().from(sessions)).toHaveLength(1)
   })
 
+  it("records which Terms of Service the learner accepted, and when", async () => {
+    const before = Date.now()
+    await post("/sign-up/email", learner)
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.termsVersion).toBe(TERMS_VERSION)
+    expect(user?.termsAcceptedAt?.getTime()).toBeGreaterThanOrEqual(before)
+  })
+
+  it.each([
+    ["no answer", undefined],
+    ["an unticked box", ""],
+    ["an older version", "2026-01-01"],
+  ])(
+    "refuses a sign-up with %s for the Terms, and makes no account",
+    async (_label, acceptedTermsVersion) => {
+      const res = await post("/sign-up/email", {
+        ...learner,
+        acceptedTermsVersion,
+      })
+
+      expect(res.status).toBe(400)
+      expect(await codeOf(res)).toBe("TERMS_NOT_ACCEPTED")
+      expect(await api.db.select().from(users)).toEqual([])
+    }
+  )
+
+  it("never lets a request set the accepted Terms itself", async () => {
+    const res = await post("/sign-up/email", {
+      ...learner,
+      termsVersion: "2099-01-01",
+      termsAcceptedAt: "2000-01-01T00:00:00.000Z",
+    })
+
+    expect(res.status).toBe(400)
+    expect(await api.db.select().from(users)).toEqual([])
+  })
+
   it("stores a hash, never the password", async () => {
     await post("/sign-up/email", learner)
 
@@ -128,6 +168,37 @@ describe("POST /api/auth/sign-up/email", () => {
     expect(res.ok).toBe(false)
     expect(await api.db.select().from(users)).toHaveLength(0)
   })
+
+  it("drops hidden characters from a name before saving it", async () => {
+    await post("/sign-up/email", {
+      ...learner,
+      name: "\u202EA\u200Bna\u2028López\u3164",
+    })
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe("Ana López")
+  })
+
+  it("refuses a name made only of hidden characters", async () => {
+    const res = await post("/sign-up/email", {
+      ...learner,
+      name: "\u200B\u2800",
+    })
+
+    expect(res.ok).toBe(false)
+    expect(await api.db.select().from(users)).toHaveLength(0)
+  })
+
+  it.each(["Memli", "Memli Team", "M\u0435mli", "Mem\u200Bli"])(
+    "refuses %s, which passes for Memli's own name",
+    async (name) => {
+      const res = await post("/sign-up/email", { ...learner, name })
+
+      expect(res.status).toBe(400)
+      expect(await codeOf(res)).toBe("NAME_RESERVED")
+      expect(await api.db.select().from(users)).toHaveLength(0)
+    }
+  )
 
   it("refuses an email that is not one", async () => {
     const res = await post("/sign-up/email", { ...learner, email: "ana" })
@@ -280,6 +351,31 @@ describe("a signed-in learner changing their account", () => {
 
     const [user] = await api.db.select().from(users)
     expect(user?.name).toBe("M".repeat(64))
+  })
+
+  it("can't rename themselves to a name that passes for Memli's", async () => {
+    const res = await post(
+      "/update-user",
+      { name: "MEMLI" },
+      { Cookie: cookie }
+    )
+
+    expect(res.status).toBe(400)
+    expect(await codeOf(res)).toBe("NAME_RESERVED")
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe(learner.name)
+  })
+
+  it("gets hidden characters dropped from a new name too", async () => {
+    const res = await post(
+      "/update-user",
+      { name: "\u202ELucía\u200B" },
+      { Cookie: cookie }
+    )
+    expect(res.status).toBe(200)
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe("Lucía")
   })
 })
 

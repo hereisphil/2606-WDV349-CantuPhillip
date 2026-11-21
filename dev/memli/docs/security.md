@@ -47,8 +47,12 @@ Mnemonics are the one place strangers' content will reach other learners.
 
 - **No HTML from data.** A mnemonic story is typed parts (`plain`, `term`, `keyword`), never markup (`packages/schemas/src/content/mnemonic.ts`). React escapes text, and the web app has no `dangerouslySetInnerHTML`.
 - **Bounded fields.** At most 24 story parts of up to 280 characters, alt text up to 250, display names up to 64.
-- **Pictures only from Memli's own origin.** An image `src` must be a root path like `/mnemonics/gato.svg`. Another host, `//host`, `/\host`, `javascript:` and `data:` URLs are refused, so a picture can't track who views it. When image uploads land, their host is added to `mnemonicImageSrcSchema` on purpose (#170).
+- **Display names say what they show** (#170). `tidyDisplayName` (`packages/schemas/src/auth/display-name.ts`) runs on every name the API saves, at sign-up and on rename. It drops controls, bidi marks, zero-width and other invisible characters, private-use glyphs and the blank braille cell. It keeps the joiners Persian, Hindi and emoji need, when they sit between two characters. It joins lines and spaces into single spaces, keeps at most 4 stacked accents, and cuts at 64 characters without splitting an emoji. So no name can hide, flip the text around it, or spill over other content.
+- **No learner passes for Memli** (#170). `isReservedDisplayName` refuses any name that reads as "memli" once accents, case, spacing, punctuation and common look-alikes are set aside: "Memli Team", "MEMLl", "Mernli", Cyrillic or fullwidth letters. The form says why, and the API refuses with `NAME_RESERVED`. A name with "memli" inside, like "Memling", is refused too. Names don't have to be unique, so one learner can still pick another's name.
+- **Pictures only from Memli's own folder** (#170). An image `src` must match `^/mnemonics/[a-z0-9]+(-[a-z0-9]+)*\.(svg|png|webp)$`, like `/mnemonics/gato.svg` (`mnemonicImageSrcSchema`). No other host, so a picture can't track who views it. No other folder on Memli's origin (`/api/...` once passed), no `..` or `%2e`, no subfolder and no query string. A test checks every file in `apps/web/public/mnemonics/` against the same rule (`apps/api/src/db/seed.test.ts`).
+- **SVG only from Memli itself.** An SVG can carry script, and one served from Memli's origin would run as Memli. `/mnemonics/` is part of the built web app, so only a commit can add a file there, never a learner. Learner uploads must go to a separate host, added to the schema on purpose, and that schema must refuse SVG (#187).
 - The seed file is checked against these schemas in `apps/api/src/db/seed.test.ts`, so seeded content follows the same rules.
+- **Checked again on every read** (#170). `apps/api/src/db/content.ts` parses each card and mnemonic row with `cardSchema` and `mnemonicSchema` before a route sends it. A row that breaks a rule is left out, not sent: a bad mnemonic drops alone and its card keeps the rest. The log names the row's id and the broken field, never the learner's text. So a rule the database doesn't enforce, like the picture path or a story part's length, still holds once learners can write mnemonics. Tested in `apps/api/src/db/content.test.ts`, which also checks that every seeded row loads.
 
 ## Supply chain and pipeline
 
@@ -67,7 +71,9 @@ Mnemonics are the one place strangers' content will reach other learners.
 ## Compliance
 
 - **Accessibility:** axe (WCAG 2.2 AA) runs in CI on every preview in both themes.
-- **Terms, privacy and community rules:** not written yet. `/terms` and `/privacy` say "Coming soon" (#170). Before any sign-up: a 13+ age requirement (COPPA), a license to show learners' mnemonics, a way to report copyrighted or harmful content, a Code of Conduct, and a privacy policy that lists the reviews log and how to export or delete data (GDPR / CCPA).
+- **Terms and community rules** (#170): `/terms` covers the 13+ age requirement (COPPA), the license to show learners' mnemonics, reporting, and DMCA notices. `/code-of-conduct` says what a mnemonic may and may not be. Both are in `apps/web/src/routes/_marketing/`. Reports and notices go to hello@phillipcantu.com, and Arizona law applies. Sign-up asks the learner to tick "I am 13 or older, and I accept the Terms of Service". The API refuses a sign-up without the current `TERMS_VERSION` (`TERMS_NOT_ACCEPTED`) and records `terms_version` and `terms_accepted_at` on the user, so a change to the Terms can tell who accepted which version.
+- **Privacy policy** (#170): `/privacy` lists every table that holds personal data, Cloudflare and Have I Been Pwned, how long each thing is kept, and how to ask for a copy or a deletion (GDPR / CCPA). Its promises rely on the daily cleanup (see Rate limiting). If a table, a third party or a retention period changes, change `privacy.tsx` in the same pull request.
+- [ ] **Register a DMCA designated agent before #114 opens sign-up.** The Terms describe DMCA notices, but the safe harbor only protects Memli once an agent is registered in the Copyright Office's [DMCA Designated Agent Directory](https://copyright.gov/dmca-directory/). Online only, $6, and it expires 3 years after it was filed or last changed (a reminder email comes first). The directory is public: a P.O. box is allowed for the agent's address. Afterwards, name the agent in the "Copyright complaints" section of `terms.tsx`, exactly as registered.
 - **Deleting an account** keeps the author's mnemonics with `author: null`.
 
 ## Sign-in checklist (Week 4: #108, #107)
@@ -94,7 +100,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 - [x] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck` to `true`. Both are set to `false` by name, because Better Auth skips the origin check by itself under a test runner. Tests refuse a write from another origin, with no origin, and from another site's page.
 - [x] Memli's own routes accept only `application/json` bodies (done in #111).
-- [x] Memli's own write routes check the `Origin` header too (#169). `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` refuses any write outside `/api/auth/*` whose `Origin` isn't `BETTER_AUTH_URL`'s, a missing one included, with `403 FORBIDDEN`. Reads are left alone: without CORS, another site's page can't read the answer.
+- [x] Memli's own write routes check the `Origin` header too (#169). `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` refuses any write outside `/api/auth/*` whose `Origin` isn't `BETTER_AUTH_URL`'s, a missing one included, with `403 FORBIDDEN`. On a developer's machine only (`BETTER_AUTH_URL` on `localhost`), `isTrustedOrigin` also lets in the dev server opened from a phone: `http`, the same port, a private network address (10.x, 172.16 to 172.31, 192.168.x). Better Auth gets the same rule through `trustedOrigins`. Reads are left alone: without CORS, another site's page can't read the answer.
 
 ### Rate limiting
 
@@ -106,6 +112,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] Rate limit adding and removing a course (#174): `PUT` and `DELETE /api/courses/:courseId/enrollment` allow 60 requests a minute per learner and 1,200 per address, the same shape as reviews (`ENROLLMENT_LIMITS` in `apps/api/src/routes/courses.ts`). They need a session and the app's own `Origin` like every write, tested in `apps/api/src/routes/enrollment.test.ts`.
 - [x] Rate limit the public catalog routes (#174): 300 requests a minute per address, since a visitor has no learner id to count (`limitAddress` in `apps/api/src/lib/rate-limit.ts`, `CATALOG_LIMIT` in `apps/api/src/routes/catalog.ts`). It costs one D1 write per request, on routes anyone can call. Serving the catalog as static or cached pages would remove that cost: see #178.
 - [x] A test proves a burst of sign-in attempts gets refused, and that the learner can try again once the window ends.
+- [x] Rate-limit rows hold an IP address, so they don't stay forever (#170). A daily cron (`0 4 * * *` in `apps/api/wrangler.jsonc`) deletes rows idle for more than 24 hours, expired sessions and expired verification codes (`deleteExpiredRows` in `apps/api/src/lib/cleanup.ts`, tested in `cleanup.test.ts`). The Privacy Policy promises these limits.
 
 ### Passwords and accounts (#108)
 
@@ -134,8 +141,8 @@ Not in the beta, for the same reason as Google sign-in.
 ### Logs and privacy
 
 - [x] Never log passwords, tokens, cookies or the body of an `/api/auth/*` request. `handleError` logs only the thrown error, and Memli logs nothing else. A test runs sign-up, refused sign-ups, wrong and right sign-ins, a cross-origin write, a rate-limited burst and sign-out, and proves no log line holds a password, a session token or a cookie name (`apps/api/src/lib/auth.test.ts`, "the logs").
-- [ ] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days). The Privacy Policy lists them: that is #170, whose Privacy Policy task now names them.
-- [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. Until #170 says how, a learner asks and the account is deleted by hand.
+- [x] Better Auth's session rows keep an IP address (from `cf-connecting-ip`) and a user agent until the session ends or expires (7 days after the last visit). The daily cleanup deletes an expired row within a day. The Privacy Policy lists both (#170).
+- [x] Deleting an account removes sessions, accounts, progress and reviews, and keeps mnemonics with `author: null`. The tables cascade that way, and a test deletes a signed-up learner and checks each one (`apps/api/src/lib/auth.test.ts`, "deleting a learner"). There is no "Delete my account" button yet: Better Auth's `deleteUser` is off. The Privacy Policy tells a learner to email from their account's address, and the account is deleted by hand.
 
 ## Open issues
 
