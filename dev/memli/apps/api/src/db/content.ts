@@ -1,7 +1,10 @@
 import type { SampleWord } from "@workspace/schemas/api/catalog"
-import type { Card } from "@workspace/schemas/content/card"
+import { cardSchema, type Card } from "@workspace/schemas/content/card"
 import type { Course } from "@workspace/schemas/content/course"
-import type { Mnemonic } from "@workspace/schemas/content/mnemonic"
+import {
+  mnemonicSchema,
+  type Mnemonic,
+} from "@workspace/schemas/content/mnemonic"
 import {
   and,
   asc,
@@ -24,6 +27,34 @@ import { cards, courses, enrollments, mnemonics, users } from "./schema"
 
 type CourseRow = typeof courses.$inferSelect
 type CardRow = typeof cards.$inferSelect
+type MnemonicRow = typeof mnemonics.$inferSelect
+
+type Schema<T> = {
+  safeParse: (
+    value: unknown
+  ) =>
+    | { success: true; data: T }
+    | { success: false; error: { issues: readonly Issue[] } }
+}
+type Issue = { path: readonly PropertyKey[]; code: string }
+
+/**
+ * A row as its schema allows, or `null`. A bad row is left out and logged by
+ * id, with only the broken fields' names, so learner text never reaches a log.
+ */
+function checked<T>(
+  schema: Schema<T>,
+  value: unknown,
+  label: string
+): T | null {
+  const result = schema.safeParse(value)
+  if (result.success) return result.data
+  const broken = result.error.issues.map(
+    (issue) => `${issue.path.map(String).join(".")} (${issue.code})`
+  )
+  console.error(`Left out ${label}: ${broken.join(", ")}`)
+  return null
+}
 
 function courseFromRow(row: CourseRow): Course {
   return {
@@ -34,18 +65,43 @@ function courseFromRow(row: CourseRow): Course {
   }
 }
 
-function cardFromRow(row: CardRow, cardMnemonics: Mnemonic[]): Card {
-  return {
-    cardId: row.id,
-    term: row.term,
-    partOfSpeech: row.partOfSpeech,
-    // Left out, not null, for words and languages with no gender.
-    ...(row.gender !== null && { gender: row.gender }),
-    answers: row.answers,
-    phonetic: row.phonetic,
-    example: { text: row.exampleText, translation: row.exampleTranslation },
-    mnemonics: cardMnemonics,
-  }
+function cardFromRow(row: CardRow, cardMnemonics: Mnemonic[]): Card | null {
+  return checked(
+    cardSchema,
+    {
+      cardId: row.id,
+      term: row.term,
+      partOfSpeech: row.partOfSpeech,
+      // Left out, not null, for words and languages with no gender.
+      ...(row.gender !== null && { gender: row.gender }),
+      answers: row.answers,
+      phonetic: row.phonetic,
+      example: { text: row.exampleText, translation: row.exampleTranslation },
+      mnemonics: cardMnemonics,
+    },
+    `card ${row.id}`
+  )
+}
+
+function mnemonicFromRow(
+  row: MnemonicRow,
+  authorName: string | null
+): Mnemonic | null {
+  return checked(
+    mnemonicSchema,
+    {
+      mnemonicId: row.id,
+      contentLocale: row.contentLocale,
+      story: row.story,
+      author: authorName === null ? null : { displayName: authorName },
+      upvotes: row.upvotes,
+      ...(row.imageSrc !== null &&
+        row.imageAlt !== null && {
+          image: { src: row.imageSrc, alt: row.imageAlt },
+        }),
+    },
+    `mnemonic ${row.id}`
+  )
 }
 
 /** The courses on a learner's dashboard: the ones they added (#174). */
@@ -200,9 +256,10 @@ export async function firstWords(
     .where(eq(cards.courseId, courseId))
     .orderBy(asc(cards.position))
     .limit(limit)
-  return rows.map((row) => {
-    const { cardId, term, partOfSpeech, gender, answers, phonetic } =
-      cardFromRow(row, [])
+  return rows.flatMap((row) => {
+    const card = cardFromRow(row, [])
+    if (card === null) return []
+    const { cardId, term, partOfSpeech, gender, answers, phonetic } = card
     return {
       cardId,
       term,
@@ -251,7 +308,7 @@ export async function studyableCourseIdsByCard(
 
 /**
  * Full cards by id, each with its mnemonics, most upvoted first. Ids that do
- * not exist are simply absent from the map.
+ * not exist, and cards their schema refuses, are absent from the map.
  */
 export async function cardsById(
   db: Database,
@@ -278,27 +335,17 @@ export async function cardsById(
 
   const mnemonicsByCard = new Map<string, Mnemonic[]>()
   for (const { mnemonic, authorName } of mnemonicRows.flat()) {
+    const checkedMnemonic = mnemonicFromRow(mnemonic, authorName)
+    if (checkedMnemonic === null) continue
     const list = mnemonicsByCard.get(mnemonic.cardId) ?? []
-    list.push({
-      mnemonicId: mnemonic.id,
-      contentLocale: mnemonic.contentLocale,
-      story: mnemonic.story,
-      author: authorName === null ? null : { displayName: authorName },
-      upvotes: mnemonic.upvotes,
-      ...(mnemonic.imageSrc !== null &&
-        mnemonic.imageAlt !== null && {
-          image: { src: mnemonic.imageSrc, alt: mnemonic.imageAlt },
-        }),
-    })
+    list.push(checkedMnemonic)
     mnemonicsByCard.set(mnemonic.cardId, list)
   }
 
   return new Map(
-    cardRows
-      .flat()
-      .map((row) => [
-        row.id,
-        cardFromRow(row, mnemonicsByCard.get(row.id) ?? []),
-      ])
+    cardRows.flat().flatMap((row) => {
+      const card = cardFromRow(row, mnemonicsByCard.get(row.id) ?? [])
+      return card === null ? [] : [[row.id, card] as const]
+    })
   )
 }
