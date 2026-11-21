@@ -152,7 +152,7 @@ async function expectFloors(page: Page): Promise<void> {
 test.describe("design floors", () => {
   for (const path of paths) {
     test(path, async ({ page }) => {
-      await page.goto(path, { waitUntil: "networkidle" })
+      await page.goto(path, { waitUntil: "load" })
       await expect(page.locator("main")).toBeVisible()
       await expectFloors(page)
     })

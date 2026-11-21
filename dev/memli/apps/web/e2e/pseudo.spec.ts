@@ -35,7 +35,7 @@ test.describe("study session pseudo-localization", () => {
         test(`${mode} ${width}x${height} ${path}`, async ({ page }) => {
           await page.setViewportSize({ width, height })
           await page.goto(`${path}&pseudo=${mode}`, {
-            waitUntil: "networkidle",
+            waitUntil: "load",
           })
           await expect(page.locator("main")).toBeVisible()
 
@@ -64,7 +64,7 @@ test.describe("dashboard pseudo-localization", () => {
           }, theme)
           await page.setViewportSize({ width, height })
           await page.goto(`/dashboard?pseudo=${mode}`, {
-            waitUntil: "networkidle",
+            waitUntil: "load",
           })
           const mainButton = page
             .locator("section[aria-labelledby=study-hero-heading] a")
@@ -114,7 +114,7 @@ test.describe("catalog pseudo-localization", () => {
               "/courses/spanish-core-1000?preview=added",
             ]) {
               await page.goto(`${path}&pseudo=${mode}`, {
-                waitUntil: "networkidle",
+                waitUntil: "load",
               })
               await expect(page.locator("main h1")).toBeVisible()
 
