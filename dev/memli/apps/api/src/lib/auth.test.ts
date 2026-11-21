@@ -169,6 +169,37 @@ describe("POST /api/auth/sign-up/email", () => {
     expect(await api.db.select().from(users)).toHaveLength(0)
   })
 
+  it("drops hidden characters from a name before saving it", async () => {
+    await post("/sign-up/email", {
+      ...learner,
+      name: "\u202EA\u200Bna\u2028López\u3164",
+    })
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe("Ana López")
+  })
+
+  it("refuses a name made only of hidden characters", async () => {
+    const res = await post("/sign-up/email", {
+      ...learner,
+      name: "\u200B\u2800",
+    })
+
+    expect(res.ok).toBe(false)
+    expect(await api.db.select().from(users)).toHaveLength(0)
+  })
+
+  it.each(["Memli", "Memli Team", "M\u0435mli", "Mem\u200Bli"])(
+    "refuses %s, which passes for Memli's own name",
+    async (name) => {
+      const res = await post("/sign-up/email", { ...learner, name })
+
+      expect(res.status).toBe(400)
+      expect(await codeOf(res)).toBe("NAME_RESERVED")
+      expect(await api.db.select().from(users)).toHaveLength(0)
+    }
+  )
+
   it("refuses an email that is not one", async () => {
     const res = await post("/sign-up/email", { ...learner, email: "ana" })
 
@@ -320,6 +351,31 @@ describe("a signed-in learner changing their account", () => {
 
     const [user] = await api.db.select().from(users)
     expect(user?.name).toBe("M".repeat(64))
+  })
+
+  it("can't rename themselves to a name that passes for Memli's", async () => {
+    const res = await post(
+      "/update-user",
+      { name: "MEMLI" },
+      { Cookie: cookie }
+    )
+
+    expect(res.status).toBe(400)
+    expect(await codeOf(res)).toBe("NAME_RESERVED")
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe(learner.name)
+  })
+
+  it("gets hidden characters dropped from a new name too", async () => {
+    const res = await post(
+      "/update-user",
+      { name: "\u202ELucía\u200B" },
+      { Cookie: cookie }
+    )
+    expect(res.status).toBe(200)
+
+    const [user] = await api.db.select().from(users)
+    expect(user?.name).toBe("Lucía")
   })
 })
 

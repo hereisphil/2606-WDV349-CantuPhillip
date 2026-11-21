@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { displayNameSchema } from "./display-name"
+
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 128
 
@@ -8,9 +10,6 @@ export const PASSWORD_MAX_LENGTH = 128
  * date. Change it whenever the Terms change in a way that matters (#170).
  */
 export const TERMS_VERSION = "2026-11-20"
-
-/** The same ceiling as a mnemonic author's display name. */
-export const DISPLAY_NAME_MAX_LENGTH = 64
 
 /**
  * What a password needs besides its length. Unicode classes, so "É" is a
@@ -41,11 +40,7 @@ export const passwordSchema = PASSWORD_RULES.reduce(
 
 /** Sign-up form input, and the body of `POST /api/auth/sign-up/email`. */
 export const signUpSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Enter your name.")
-    .max(DISPLAY_NAME_MAX_LENGTH, "Use 64 characters or fewer."),
+  name: displayNameSchema,
   email: z.email("Enter a valid email address."),
   password: passwordSchema,
   /** The Terms the learner ticked: `TERMS_VERSION`, or "" when unticked. */

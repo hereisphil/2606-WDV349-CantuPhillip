@@ -1,5 +1,8 @@
 import {
-  DISPLAY_NAME_MAX_LENGTH,
+  isReservedDisplayName,
+  tidyDisplayName,
+} from "@workspace/schemas/auth/display-name"
+import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   TERMS_VERSION,
@@ -53,9 +56,20 @@ function acceptsTerms(body: unknown): boolean {
   )
 }
 
-/** A display name as Memli stores it: trimmed and bounded. */
-function tidyName(name: string): string {
-  return name.trim().slice(0, DISPLAY_NAME_MAX_LENGTH)
+/** The name a sign-up or rename wants to set, if the body has one. */
+function newName(body: unknown): unknown {
+  return typeof body === "object" && body !== null
+    ? (body as Record<string, unknown>).name
+    : undefined
+}
+
+/**
+ * A name Memli can save: tidied, not blank, and not one that looks like
+ * Memli's own (`@workspace/schemas/auth/display-name`). Otherwise `null`.
+ */
+function savableName(name: string): string | null {
+  const tidy = tidyDisplayName(name)
+  return tidy === "" || isReservedDisplayName(tidy) ? null : tidy
 }
 
 /**
@@ -103,11 +117,11 @@ function authOptions(env: Env): BetterAuthOptions {
     databaseHooks: {
       user: {
         create: {
-          // Bounds the name shown under mnemonics; `false` refuses a blank one.
+          // Tidies the name shown under mnemonics; `false` refuses a bad one.
           // Records the Terms that `hooks.before` checked: Google (#107) must ask too.
           before: async (user) => {
-            const name = tidyName(user.name)
-            if (name === "") return false
+            const name = savableName(user.name)
+            if (name === null) return false
             return {
               data: {
                 ...user,
@@ -118,24 +132,33 @@ function authOptions(env: Env): BetterAuthOptions {
             }
           },
         },
-        // The same bound when a learner renames themselves later.
+        // The same rule when a learner renames themselves later.
         update: {
           before: async (user) => {
             if (typeof user.name !== "string") return true
-            const name = tidyName(user.name)
-            return name === "" ? false : { data: { ...user, name } }
+            const name = savableName(user.name)
+            return name === null ? false : { data: { ...user, name } }
           },
         },
       },
     },
     hooks: {
-      // Memli's own sign-up rules on top of Better Auth's: the current Terms,
-      // and a password with a capital, a lowercase letter and a symbol.
+      // Memli's own rules on top of Better Auth's: the current Terms, no name
+      // that passes for Memli's, and a password with a capital, lowercase and symbol.
       before: createAuthMiddleware(async (ctx) => {
         if (ctx.path === "/sign-up/email" && !acceptsTerms(ctx.body)) {
           throw new APIError("BAD_REQUEST", {
             code: "TERMS_NOT_ACCEPTED",
             message: "Accept the Terms of Service to sign up",
+          })
+        }
+        const name = newName(ctx.body)
+        const naming =
+          ctx.path === "/sign-up/email" || ctx.path === "/update-user"
+        if (naming && typeof name === "string" && isReservedDisplayName(name)) {
+          throw new APIError("BAD_REQUEST", {
+            code: "NAME_RESERVED",
+            message: "That name is kept for the Memli team",
           })
         }
         const password = newPassword(ctx.path, ctx.body)

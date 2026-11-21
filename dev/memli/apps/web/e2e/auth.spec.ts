@@ -183,6 +183,24 @@ test.describe("sign up", () => {
     ).toBeHidden()
   })
 
+  test("says a name that passes for Memli's is taken, before any request", async ({
+    page,
+  }) => {
+    let sent = false
+    page.on("request", (request) => {
+      if (request.url().includes("/api/auth/")) sent = true
+    })
+    await fillSignUp(page, "Correct-horse-battery")
+    await page.getByLabel("Name").fill("Memli Team")
+    await page.getByRole("button", { name: "Create account" }).click()
+
+    await expect(page.getByLabel("Name")).toBeFocused()
+    await expect(page.getByLabel("Name")).toHaveAccessibleDescription(
+      /That name is kept for the Memli team\. Choose another one\./
+    )
+    expect(sent).toBe(false)
+  })
+
   test("links the Terms and the Privacy Policy in a new tab", async ({
     page,
   }) => {
@@ -258,6 +276,11 @@ for (const [label, signUpRefusal, message] of [
     "Terms the API does not accept",
     { status: 400, code: "TERMS_NOT_ACCEPTED" },
     "Check the box to accept the Terms of Service.",
+  ],
+  [
+    "a name that passes for Memli's",
+    { status: 400, code: "NAME_RESERVED" },
+    "That name is kept for the Memli team. Choose another one.",
   ],
   [
     "a code this app does not know",
