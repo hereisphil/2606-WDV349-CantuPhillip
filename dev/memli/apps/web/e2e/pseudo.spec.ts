@@ -35,7 +35,7 @@ test.describe("study session pseudo-localization", () => {
         test(`${mode} ${width}x${height} ${path}`, async ({ page }) => {
           await page.setViewportSize({ width, height })
           await page.goto(`${path}&pseudo=${mode}`, {
-            waitUntil: "networkidle",
+            waitUntil: "load",
           })
           await expect(page.locator("main")).toBeVisible()
 
@@ -64,7 +64,7 @@ test.describe("dashboard pseudo-localization", () => {
           }, theme)
           await page.setViewportSize({ width, height })
           await page.goto(`/dashboard?pseudo=${mode}`, {
-            waitUntil: "networkidle",
+            waitUntil: "load",
           })
           const mainButton = page
             .locator("section[aria-labelledby=study-hero-heading] a")
@@ -92,5 +92,42 @@ test.describe("dashboard pseudo-localization", () => {
         })
       }
     }
+  }
+})
+
+test.describe("catalog pseudo-localization", () => {
+  test.skip(({ isMobile }) => isMobile, "Runs once, in the desktop project.")
+
+  // Signed out and in: the marketing frame and the app's around the same list.
+  for (const signedOut of [true, false]) {
+    test.describe(signedOut ? "visitor" : "learner", () => {
+      test.use({ api: { signedOut } })
+
+      for (const mode of modes) {
+        for (const { width, height } of sizes) {
+          test(`${mode} ${width}x${height}`, async ({ page }) => {
+            await page.setViewportSize({ width, height })
+            // The list, and the overview with its longest title, words and credit.
+            for (const path of [
+              "/courses?preview=long-text",
+              "/courses/german-a1?preview=long-text",
+              "/courses/spanish-core-1000?preview=added",
+            ]) {
+              await page.goto(`${path}&pseudo=${mode}`, {
+                waitUntil: "load",
+              })
+              await expect(page.locator("main h1")).toBeVisible()
+
+              const pageWidth = await page.evaluate(
+                () => document.documentElement.scrollWidth
+              )
+              expect(pageWidth, `${path} scrolls sideways`).toBeLessThanOrEqual(
+                width
+              )
+            }
+          })
+        }
+      }
+    })
   }
 })

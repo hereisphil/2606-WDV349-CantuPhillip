@@ -1,11 +1,12 @@
 /// <reference types="node" />
-import { existsSync } from "node:fs"
+import { existsSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 import type { DatabaseSync } from "node:sqlite"
 import {
   courseCardsSchema,
   courseSchema,
 } from "@workspace/schemas/content/course"
+import { mnemonicImageSrcSchema } from "@workspace/schemas/content/mnemonic"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { apiRoot, countRows, migratedDatabase, seed } from "./test-database"
@@ -92,6 +93,15 @@ describe("the seeded prototype learner", () => {
   it("starts with no progress, so every seeded card is new", () => {
     expect(countRows(db, "user_progress")).toBe(0)
   })
+
+  it("has added every seeded course, so the dashboard lists them all", () => {
+    const enrolled = all(
+      "SELECT course_id FROM enrollments WHERE user_id = ? ORDER BY course_id",
+      "usr_prototype_01"
+    ).map((row) => row.course_id)
+
+    expect(enrolled).toEqual(seededCourses().map((course) => course.courseId))
+  })
 })
 
 describe("the seeded courses", () => {
@@ -102,6 +112,15 @@ describe("the seeded courses", () => {
     for (const course of courses) {
       expect(courseSchema.safeParse(course).error?.issues).toBeUndefined()
     }
+  })
+
+  it("are all in the catalog, each saying what it teaches and where from", () => {
+    const unlisted = all(`
+      SELECT id FROM courses
+      WHERE published_at IS NULL OR description IS NULL
+        OR source IS NULL OR license IS NULL`)
+
+    expect(unlisted).toEqual([])
   })
 
   it("hold only valid cards and mnemonics, and are never empty", () => {
@@ -153,6 +172,15 @@ describe("the seeded mnemonics", () => {
     expect(missing).toEqual([])
   })
 
+  it("ship every picture under a name the image rule takes", () => {
+    const folder = join(apiRoot, "../web/public/mnemonics")
+    const refused = readdirSync(folder)
+      .map((file) => `/mnemonics/${file}`)
+      .filter((src) => !mnemonicImageSrcSchema.safeParse(src).success)
+
+    expect(refused).toEqual([])
+  })
+
   it("leave some cards without one, so that state shows in a real course", () => {
     const [bare] = all(`
       SELECT count(*) AS n FROM cards
@@ -163,7 +191,7 @@ describe("the seeded mnemonics", () => {
 })
 
 describe("seeding again", () => {
-  const tables = ["users", "courses", "cards", "mnemonics"]
+  const tables = ["users", "courses", "cards", "mnemonics", "enrollments"]
   const counts = (): number[] => tables.map((table) => countRows(db, table))
 
   it("adds no duplicate rows", () => {

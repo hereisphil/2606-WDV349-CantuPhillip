@@ -20,7 +20,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { Heading } from "@workspace/ui/components/heading"
 import { Text } from "@workspace/ui/components/text"
 import { ApiError } from "@/lib/api"
-import { studySessionQuery } from "@/lib/queries"
+import { sessionQuery, studySessionQuery } from "@/lib/queries"
 import { AnswerBreakdown } from "./-components/AnswerBreakdown"
 import { CardPrompt } from "./-components/CardPrompt"
 import { MnemonicFrame } from "./-components/MnemonicFrame"
@@ -94,12 +94,28 @@ export const Route = createFileRoute("/_session/study/$courseId")({
           : undefined,
     }
   },
-  loaderDeps: ({ search }) => ({ mode: search.mode, extra: search.extra }),
+  loaderDeps: ({ search }) => ({
+    mode: search.mode,
+    extra: search.extra,
+    preview: search.preview,
+  }),
   // A session is what was waiting when it started. Never show an old one
   // again: its words may have been studied since.
   staleTime: 0,
   gcTime: 0,
-  loader: async ({ context, params, deps }) => {
+  loader: async ({ context, params, deps: { preview, ...deps } }) => {
+    // Signed out, a dev preview studies a fixture course instead of the API.
+    if (import.meta.env.DEV && preview !== undefined) {
+      const viewer = await context.queryClient.ensureQueryData(sessionQuery)
+      if (viewer === null) {
+        const { spanishLearnSession } =
+          await import("./-components/study-fixture")
+        const session = spanishLearnSession()
+        return deps.mode === "learn"
+          ? session
+          : { ...session, mode: deps.mode, cards: [] }
+      }
+    }
     try {
       return await context.queryClient.fetchQuery(
         studySessionQuery({ courseId: params.courseId, ...deps })
@@ -119,6 +135,22 @@ export const Route = createFileRoute("/_session/study/$courseId")({
 function StudySession(): JSX.Element {
   const { course, cards } = Route.useLoaderData()
   const { mode, extra, preview } = Route.useSearch()
+
+  if (previewOf(preview)?.loadFailed === true && preview !== undefined) {
+    return (
+      <>
+        <div className="flex justify-center px-4 pt-6 sm:px-6">
+          <div className="w-full max-w-xl">
+            <StudyPreviewSwitcher
+              courseId={course.courseId}
+              current={preview}
+            />
+          </div>
+        </div>
+        <SessionLoadError error={new Error("preview")} reset={() => {}} />
+      </>
+    )
+  }
 
   return (
     // Keyed so switching course, session kind or preview starts a fresh session instead of keeping the old reducer state.
@@ -166,6 +198,11 @@ function initialSession({
   return events.reduce(sessionReducer<SessionStudyCard>, startSession(start))
 }
 
+const previewSaveFailed = {
+  failed: true,
+  retry: () => {},
+}
+
 function SessionWorkspace({
   course,
   cards,
@@ -179,9 +216,11 @@ function SessionWorkspace({
   )
   const seeded = previewOf(preview)
   // A preview's reviews are made up, so they are never saved.
-  const saving = useSaveReviews(session.reviews, {
+  const realSaving = useSaveReviews(session.reviews, {
     enabled: seeded === undefined,
   })
+  // A preview can show the notice for answers that didn't save. Its retry does nothing.
+  const saving = seeded?.saveFailed === true ? previewSaveFailed : realSaving
   const learningLanguage =
     seeded?.languages?.learning ?? course.learningLanguage
   const answerLanguage = seeded?.languages?.answer ?? course.answerLanguage

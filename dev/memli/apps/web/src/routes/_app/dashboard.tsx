@@ -11,7 +11,8 @@ import { Heading } from "@workspace/ui/components/heading"
 import { Section } from "@workspace/ui/components/section"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { Text } from "@workspace/ui/components/text"
-import { useViewer } from "@/components/session-provider"
+import { cn } from "@workspace/ui/lib/utils"
+import { useViewer, useViewerIfAny } from "@/components/session-provider"
 import { coursesQuery, historyQuery } from "@/lib/queries"
 import {
   metricsFromApi,
@@ -50,6 +51,10 @@ const messages = {
     retry: "Try again",
   },
 } as const
+
+// Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
+// Shared with the error screen, so the greeting never moves between them.
+const pageClass = "flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
 
 type DashboardSearch = {
   preview?: PreviewName | undefined
@@ -104,6 +109,9 @@ function Dashboard(): JSX.Element {
   const { preview } = Route.useSearch()
   if (import.meta.env.DEV && preview !== undefined) {
     const seeded: DashboardPreview = dashboardPreviews[preview]
+    if (seeded.loadFailed === true) {
+      return <DashboardError error={new Error("preview")} reset={() => {}} />
+    }
     return <DashboardView metrics={seeded.metrics} />
   }
   return <LiveDashboard />
@@ -148,16 +156,12 @@ function DashboardView({
       ? others
       : others.filter((course) => course.learningLanguage === studying)
   const tip = tipFor(allCourses, today)
-  // The finished hero already links to "Find another course".
-  const heroFindsAnother =
-    today.status === "caught-up" && today.keepGoing === null
+  // One course is the usual start, and enough: the page doesn't nudge a new
+  // learner toward a second one, so "Your other courses" waits until there is one.
+  const hasOtherCourses = others.length > 0
 
   return (
-    <Section
-      padding="compact"
-      // Phones: 16 px gutter and a tighter top, so both hero buttons fit the first screen (REDESIGN.md 5.2).
-      className="flex flex-col gap-4 px-4 pt-4 sm:gap-8 sm:px-6 sm:pt-8"
-    >
+    <Section padding="compact" className={pageClass}>
       {import.meta.env.DEV && preview !== undefined ? (
         <PreviewSwitcher current={preview} />
       ) : null}
@@ -175,7 +179,15 @@ function DashboardView({
           {/* DOM order is reading order, with no CSS order. The hero spans rows 1 and 2, and only row 2 is flexible,
               so row 1 is exactly as tall as This week and the tip starts right under it. */}
           <div className="@container">
-            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem] @[56rem]:grid-rows-[auto_1fr_auto_auto]">
+            {/* Without other courses their row is left out, not left empty: an empty row would add a second gap. */}
+            <div
+              className={cn(
+                "grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-10 @[56rem]:grid-cols-[minmax(0,1fr)_20rem]",
+                hasOtherCourses
+                  ? "@[56rem]:grid-rows-[auto_1fr_auto_auto]"
+                  : "@[56rem]:grid-rows-[auto_1fr_auto]"
+              )}
+            >
               <div className="@[56rem]:col-start-1 @[56rem]:row-span-2 @[56rem]:row-start-1">
                 <StudyHero state={today} />
               </div>
@@ -188,23 +200,34 @@ function DashboardView({
                   streakDays={daysOfStudy}
                 />
               </div>
-              <CourseList
-                courses={listedCourses}
-                filter={
-                  languages.length > 0 ? (
-                    <LanguageFilter languages={languages} current={studying} />
-                  ) : null
-                }
-                showFindAnother={!heroFindsAnother}
-                className="@[56rem]:col-start-1 @[56rem]:row-start-3"
-              />
+              {hasOtherCourses ? (
+                <CourseList
+                  courses={listedCourses}
+                  filter={
+                    languages.length > 0 ? (
+                      <LanguageFilter
+                        languages={languages}
+                        current={studying}
+                      />
+                    ) : null
+                  }
+                  className="@[56rem]:col-start-1 @[56rem]:row-start-3"
+                />
+              ) : null}
               {tip === null ? null : (
                 // Spans the courses' row too, so a tall tip never pushes the courses down.
                 <div className="@[56rem]:col-start-2 @[56rem]:row-span-2 @[56rem]:row-start-2">
                   <TipCard tip={tip} />
                 </div>
               )}
-              <div className="@[56rem]:col-start-1 @[56rem]:row-start-4">
+              <div
+                className={cn(
+                  "@[56rem]:col-start-1",
+                  hasOtherCourses
+                    ? "@[56rem]:row-start-4"
+                    : "@[56rem]:row-start-3"
+                )}
+              >
                 <ProgressDisclosure
                   retentionPercent={progressTrends.retentionPercent}
                   newCardsThisMonth={progressTrends.newCardsThisMonth}
@@ -235,15 +258,29 @@ function DashboardPending(): JSX.Element {
   )
 }
 
+/**
+ * Only the courses failed, so the greeting stays and the page keeps its shape.
+ * Time of day: without the courses, a new learner can't be told apart.
+ */
 function DashboardError({ reset }: ErrorComponentProps): JSX.Element {
   const router = useRouter()
+  const { preview } = Route.useSearch()
+  // An ended session also lands here, on its way to /signin: no one to greet.
+  const name = useViewerIfAny()?.displayName
   return (
-    <Section padding="compact" className="px-4 pt-4 sm:px-6 sm:pt-8">
+    <Section padding="compact" className={pageClass}>
+      {import.meta.env.DEV && preview !== undefined ? (
+        <PreviewSwitcher current={preview} />
+      ) : null}
+      {name === undefined ? null : (
+        <DashboardGreeting name={name} hasCourses now={new Date()} />
+      )}
       <div
         role="alert"
         className="flex max-w-xl flex-col items-start gap-4 rounded-xl border border-border bg-card p-6"
       >
-        <Heading level={1} size="3">
+        {/* The greeting is the page's heading; this card is a part of it. */}
+        <Heading level={name === undefined ? 1 : 2} size="3">
           {messages.error.heading}
         </Heading>
         <Text variant="muted">{messages.error.body}</Text>

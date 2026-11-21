@@ -41,6 +41,7 @@ The session reducer runs the whole loop for a queue of cards.
 | `@workspace/core/study/course-progress` | `summarizeCourseProgress`, `sessionCards`, `StudyMode`, `isSeen`, `isMastered`, `isTricky` and their thresholds |
 | `@workspace/core/study/history` | `summarizeHistory`, `daysOfStudy`, `newWordsStartedOn`, `localDate`, `shiftDate`, `DAILY_GOAL_WORDS` |
 | `@workspace/core/study/session-reducer` | `startSession`, `sessionReducer`, `SessionCard`, `SessionState`, `SessionEvent`, `SessionReview` |
+| `@workspace/core/form/form-reducer` | `createFormReducer`, `startForm`, `FormState`, `FormEvent`, `FieldErrors`, `Validate` |
 
 Apps should schedule through **outcomes** (`applyOutcome`), not ratings. The rating-level helpers stay exported for the API and tests.
 
@@ -126,6 +127,27 @@ prompt ──SUBMIT / REVEAL──▶ answered ──RESOLVE──▶ prompt (ne
 - `reviews` keeps every review (including each miss) with its `durationMs`, ready for `POST /api/reviews`.
 - Derive, don't store: the current card is `queue[0]`, and choices and suggestions are computed from `evaluation` during render.
 - Any other `status × event` pair leaves the state unchanged; the tests cover every pair.
+
+### A form sent to a server: `form/form-reducer`
+
+The state machine behind `/signin` and `/signup` (#108), and any later form that is checked and then sent.
+
+```ts
+const reducer = createFormReducer<"email" | "password">(validate)
+const [form, dispatch] = useReducer(reducer, { email: "", password: "" }, startForm)
+```
+
+| Status | Means | Leaves on |
+| --- | --- | --- |
+| `idle` | Being filled in. `fieldErrors` holds what the last submit got wrong | `SUBMITTED` |
+| `submitting` | Valid and on its way. The app sends `fields` now | `SUBMIT_SUCCEEDED`, `SUBMIT_FAILED` |
+| `error` | The server refused, with its stable `code` | `FIELD_CHANGED`, `SUBMITTED` |
+| `success` | Done. Nothing changes it | Never |
+
+- `validate` comes from the app (a Zod schema's verdict, messages by field), so no schema and no copy live in core.
+- `SUBMITTED` validates. An invalid form stays `idle` with every field's errors. Typing in a field clears that field's errors.
+- `SUBMITTED` while `submitting` returns the same state, so the app can tell a second submit from a first and send nothing.
+- The app starts the request from its submit handler by asking the reducer what the submit does. No effect watches `status` (`docs/state-management.md`).
 
 ### Course progress and session cards — `study/course-progress`
 

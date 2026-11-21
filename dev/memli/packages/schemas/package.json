@@ -12,6 +12,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/node": "26",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^10",
@@ -19,16 +20,23 @@
     "vitest": "^5.1.0"
   },
   "exports": {
+    "./api/catalog": "./src/api/catalog.ts",
     "./api/courses": "./src/api/courses.ts",
+    "./api/enrollment": "./src/api/enrollment.ts",
     "./api/error": "./src/api/error.ts",
     "./api/health": "./src/api/health.ts",
     "./api/history": "./src/api/history.ts",
     "./api/study": "./src/api/study.ts",
+    "./auth/display-name": "./src/auth/display-name.ts",
     "./auth/sign-in": "./src/auth/sign-in.ts",
+    "./auth/session": "./src/auth/session.ts",
+    "./auth/sign-up": "./src/auth/sign-up.ts",
     "./content/card": "./src/content/card.ts",
     "./content/course": "./src/content/course.ts",
+    "./content/course-file": "./src/content/course-file.ts",
     "./content/id": "./src/content/id.ts",
     "./content/mnemonic": "./src/content/mnemonic.ts",
+    "./env/api": "./src/env/api.ts",
     "./env/web": "./src/env/web.ts",
     "./locale/language-tag": "./src/locale/language-tag.ts",
     "./locale/time-zone": "./src/locale/time-zone.ts",

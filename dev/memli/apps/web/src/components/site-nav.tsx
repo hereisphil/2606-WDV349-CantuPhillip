@@ -5,6 +5,8 @@ import { marketingSections } from "@/components/marketing-sections"
 
 const pages = {
   home: { to: "/" as const, label: "Home", scrollToTop: true },
+  // The public course catalog (#174).
+  courses: { to: "/courses" as const, label: "Courses", scrollToTop: true },
   whyMnemonics: {
     to: "/" as const,
     hash: marketingSections.whyMnemonics,
@@ -21,12 +23,14 @@ const pages = {
   pricing: { to: "/pricing" as const, label: "Pricing" },
   terms: { to: "/terms" as const, label: "Terms of Service" },
   privacy: { to: "/privacy" as const, label: "Privacy Policy" },
+  conduct: { to: "/code-of-conduct" as const, label: "Code of Conduct" },
 }
 
 type PageId = keyof typeof pages
 
 export const headerNav = [
   "home",
+  "courses",
   "whyMnemonics",
   "features",
   "about",
@@ -36,6 +40,7 @@ export const headerNav = [
 
 export const footerNav = [
   "home",
+  "courses",
   "features",
   "about",
   "contact",
@@ -44,6 +49,7 @@ export const footerNav = [
   "pricing",
   "terms",
   "privacy",
+  "conduct",
 ] as const satisfies readonly PageId[]
 
 export function scrollWindowToTop(): void {

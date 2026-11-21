@@ -1,10 +1,24 @@
-import type { Card } from "@workspace/schemas/content/card"
+import type { SampleWord } from "@workspace/schemas/api/catalog"
+import { cardSchema, type Card } from "@workspace/schemas/content/card"
 import type { Course } from "@workspace/schemas/content/course"
-import type { Mnemonic } from "@workspace/schemas/content/mnemonic"
-import { asc, count, desc, eq, inArray } from "drizzle-orm"
+import {
+  mnemonicSchema,
+  type Mnemonic,
+} from "@workspace/schemas/content/mnemonic"
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  or,
+  type SQL,
+} from "drizzle-orm"
 
 import { idGroups, type Database } from "./client"
-import { cards, courses, mnemonics, users } from "./schema"
+import { cards, courses, enrollments, mnemonics, users } from "./schema"
 
 /**
  * Reads courses, cards and mnemonics as `@workspace/schemas` shapes, each card
@@ -13,6 +27,34 @@ import { cards, courses, mnemonics, users } from "./schema"
 
 type CourseRow = typeof courses.$inferSelect
 type CardRow = typeof cards.$inferSelect
+type MnemonicRow = typeof mnemonics.$inferSelect
+
+type Schema<T> = {
+  safeParse: (
+    value: unknown
+  ) =>
+    | { success: true; data: T }
+    | { success: false; error: { issues: readonly Issue[] } }
+}
+type Issue = { path: readonly PropertyKey[]; code: string }
+
+/**
+ * A row as its schema allows, or `null`. A bad row is left out and logged by
+ * id, with only the broken fields' names, so learner text never reaches a log.
+ */
+function checked<T>(
+  schema: Schema<T>,
+  value: unknown,
+  label: string
+): T | null {
+  const result = schema.safeParse(value)
+  if (result.success) return result.data
+  const broken = result.error.issues.map(
+    (issue) => `${issue.path.map(String).join(".")} (${issue.code})`
+  )
+  console.error(`Left out ${label}: ${broken.join(", ")}`)
+  return null
+}
 
 function courseFromRow(row: CourseRow): Course {
   return {
@@ -23,23 +65,115 @@ function courseFromRow(row: CourseRow): Course {
   }
 }
 
-function cardFromRow(row: CardRow, cardMnemonics: Mnemonic[]): Card {
+function cardFromRow(row: CardRow, cardMnemonics: Mnemonic[]): Card | null {
+  return checked(
+    cardSchema,
+    {
+      cardId: row.id,
+      term: row.term,
+      partOfSpeech: row.partOfSpeech,
+      // Left out, not null, for words and languages with no gender.
+      ...(row.gender !== null && { gender: row.gender }),
+      answers: row.answers,
+      phonetic: row.phonetic,
+      example: { text: row.exampleText, translation: row.exampleTranslation },
+      mnemonics: cardMnemonics,
+    },
+    `card ${row.id}`
+  )
+}
+
+function mnemonicFromRow(
+  row: MnemonicRow,
+  authorName: string | null
+): Mnemonic | null {
+  return checked(
+    mnemonicSchema,
+    {
+      mnemonicId: row.id,
+      contentLocale: row.contentLocale,
+      story: row.story,
+      author: authorName === null ? null : { displayName: authorName },
+      upvotes: row.upvotes,
+      ...(row.imageSrc !== null &&
+        row.imageAlt !== null && {
+          image: { src: row.imageSrc, alt: row.imageAlt },
+        }),
+    },
+    `mnemonic ${row.id}`
+  )
+}
+
+/** The courses on a learner's dashboard: the ones they added (#174). */
+export async function listAddedCourses(
+  db: Database,
+  userId: string
+): Promise<Course[]> {
+  const rows = await db
+    .select({ course: courses })
+    .from(courses)
+    .innerJoin(enrollments, eq(enrollments.courseId, courses.id))
+    .where(eq(enrollments.userId, userId))
+    .orderBy(asc(courses.id))
+  return rows.map((row) => courseFromRow(row.course))
+}
+
+/** A course the catalog lists, with the details a published course must have. */
+export type PublishedCourse = Course & {
+  description: string
+  publishedAt: Date
+  source: string
+  license: string
+  attribution: string | null
+}
+
+/**
+ * `null` for a draft. The triggers in 0008_published_courses.sql keep a
+ * published row complete; the checks here only narrow the types.
+ */
+function publishedFromRow(row: CourseRow): PublishedCourse | null {
+  const { description, publishedAt, source, license } = row
+  if (
+    publishedAt === null ||
+    description === null ||
+    source === null ||
+    license === null
+  ) {
+    return null
+  }
   return {
-    cardId: row.id,
-    term: row.term,
-    partOfSpeech: row.partOfSpeech,
-    // Left out, not null, for words and languages with no gender.
-    ...(row.gender !== null && { gender: row.gender }),
-    answers: row.answers,
-    phonetic: row.phonetic,
-    example: { text: row.exampleText, translation: row.exampleTranslation },
-    mnemonics: cardMnemonics,
+    ...courseFromRow(row),
+    description,
+    publishedAt,
+    source,
+    license,
+    attribution: row.attribution,
   }
 }
 
-export async function listCourses(db: Database): Promise<Course[]> {
-  const rows = await db.select().from(courses).orderBy(asc(courses.id))
-  return rows.map(courseFromRow)
+/** Every published course, by title. Drafts are left out. */
+export async function listPublishedCourses(
+  db: Database
+): Promise<PublishedCourse[]> {
+  const rows = await db
+    .select()
+    .from(courses)
+    .where(isNotNull(courses.publishedAt))
+    .orderBy(asc(courses.title), asc(courses.id))
+  return rows.flatMap((row) => publishedFromRow(row) ?? [])
+}
+
+/** A published course, or `null` for a draft or a course that does not exist. */
+export async function findPublishedCourse(
+  db: Database,
+  courseId: string
+): Promise<PublishedCourse | null> {
+  const [row] = await db
+    .select()
+    .from(courses)
+    .where(and(eq(courses.id, courseId), isNotNull(courses.publishedAt)))
+    .limit(1)
+  return row === undefined ? null : publishedFromRow(row)
 }
 
 export async function findCourse(
@@ -54,6 +188,40 @@ export async function findCourse(
   return row === undefined ? null : courseFromRow(row)
 }
 
+/** Joins this learner's own enrollment, if any, onto each course row. */
+function ownEnrollment(userId: string): SQL | undefined {
+  return and(
+    eq(enrollments.courseId, courses.id),
+    eq(enrollments.userId, userId)
+  )
+}
+
+/**
+ * Who may study a course: anyone once it is published, and a learner who
+ * added it before it became a draft. Needs `ownEnrollment` joined.
+ */
+function studyable(): SQL | undefined {
+  return or(isNotNull(courses.publishedAt), isNotNull(enrollments.userId))
+}
+
+/**
+ * A course this learner may study, or `null`. A draft they never added answers
+ * `null`, the same as a course that does not exist, as on the catalog.
+ */
+export async function findStudyableCourse(
+  db: Database,
+  userId: string,
+  courseId: string
+): Promise<Course | null> {
+  const [row] = await db
+    .select({ course: courses })
+    .from(courses)
+    .leftJoin(enrollments, ownEnrollment(userId))
+    .where(and(eq(courses.id, courseId), studyable()))
+    .limit(1)
+  return row === undefined ? null : courseFromRow(row.course)
+}
+
 /** How many cards each course has, by course id. A course with none is absent. */
 export async function cardCountByCourse(
   db: Database
@@ -63,6 +231,44 @@ export async function cardCountByCourse(
     .from(cards)
     .groupBy(cards.courseId)
   return new Map(rows.map((row) => [row.courseId, row.total]))
+}
+
+export async function cardCount(
+  db: Database,
+  courseId: string
+): Promise<number> {
+  const [row] = await db
+    .select({ total: count() })
+    .from(cards)
+    .where(eq(cards.courseId, courseId))
+  return row?.total ?? 0
+}
+
+/** A course's first `limit` words, in course order, without their stories. */
+export async function firstWords(
+  db: Database,
+  courseId: string,
+  limit: number
+): Promise<SampleWord[]> {
+  const rows = await db
+    .select()
+    .from(cards)
+    .where(eq(cards.courseId, courseId))
+    .orderBy(asc(cards.position))
+    .limit(limit)
+  return rows.flatMap((row) => {
+    const card = cardFromRow(row, [])
+    if (card === null) return []
+    const { cardId, term, partOfSpeech, gender, answers, phonetic } = card
+    return {
+      cardId,
+      term,
+      partOfSpeech,
+      ...(gender !== undefined && { gender }),
+      answers,
+      phonetic,
+    }
+  })
 }
 
 /** A course's card ids in the order new words are introduced. */
@@ -78,21 +284,31 @@ export async function cardIdsInOrder(
   return rows.map((row) => row.id)
 }
 
-export async function existingCardIds(
+/**
+ * Each card's course, by card id, for cards this learner may study. A card that
+ * does not exist and a card in a draft they never added are both absent.
+ */
+export async function studyableCourseIdsByCard(
   db: Database,
+  userId: string,
   cardIds: readonly string[]
-): Promise<Set<string>> {
+): Promise<Map<string, string>> {
   const groups = await Promise.all(
     idGroups(cardIds).map((ids) =>
-      db.select({ id: cards.id }).from(cards).where(inArray(cards.id, ids))
+      db
+        .select({ id: cards.id, courseId: cards.courseId })
+        .from(cards)
+        .innerJoin(courses, eq(courses.id, cards.courseId))
+        .leftJoin(enrollments, ownEnrollment(userId))
+        .where(and(inArray(cards.id, ids), studyable()))
     )
   )
-  return new Set(groups.flat().map((row) => row.id))
+  return new Map(groups.flat().map((row) => [row.id, row.courseId]))
 }
 
 /**
  * Full cards by id, each with its mnemonics, most upvoted first. Ids that do
- * not exist are simply absent from the map.
+ * not exist, and cards their schema refuses, are absent from the map.
  */
 export async function cardsById(
   db: Database,
@@ -119,27 +335,17 @@ export async function cardsById(
 
   const mnemonicsByCard = new Map<string, Mnemonic[]>()
   for (const { mnemonic, authorName } of mnemonicRows.flat()) {
+    const checkedMnemonic = mnemonicFromRow(mnemonic, authorName)
+    if (checkedMnemonic === null) continue
     const list = mnemonicsByCard.get(mnemonic.cardId) ?? []
-    list.push({
-      mnemonicId: mnemonic.id,
-      contentLocale: mnemonic.contentLocale,
-      story: mnemonic.story,
-      author: authorName === null ? null : { displayName: authorName },
-      upvotes: mnemonic.upvotes,
-      ...(mnemonic.imageSrc !== null &&
-        mnemonic.imageAlt !== null && {
-          image: { src: mnemonic.imageSrc, alt: mnemonic.imageAlt },
-        }),
-    })
+    list.push(checkedMnemonic)
     mnemonicsByCard.set(mnemonic.cardId, list)
   }
 
   return new Map(
-    cardRows
-      .flat()
-      .map((row) => [
-        row.id,
-        cardFromRow(row, mnemonicsByCard.get(row.id) ?? []),
-      ])
+    cardRows.flat().flatMap((row) => {
+      const card = cardFromRow(row, mnemonicsByCard.get(row.id) ?? [])
+      return card === null ? [] : [[row.id, card] as const]
+    })
   )
 }

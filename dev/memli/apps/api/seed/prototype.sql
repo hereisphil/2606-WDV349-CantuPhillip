@@ -43,17 +43,37 @@ ON CONFLICT (id) DO UPDATE SET
 -- ---------------------------------------------------------------------------
 -- `learning_language` is what the course teaches. `answer_language` is what
 -- the meanings are written in. Neither is anyone's `ui_locale`.
+--
+-- Catalog details (#174): `description` is written in the answer language.
+-- `published_at` lists the course in the catalog; NULL would make it a draft.
+-- A published course needs a description, a source and a license (a trigger
+-- refuses one without). These were written for Memli's prototype, so they
+-- name Memli as the source and need no attribution.
 
-INSERT INTO courses (id, title, learning_language, answer_language)
+INSERT INTO courses (id, title, learning_language, answer_language,
+  description, published_at, source, license, attribution)
 VALUES
-  ('spanish-core-1000', 'Spanish Core 1000', 'es', 'en'),
-  ('japanese-kana', 'Japanese Hiragana & Katakana', 'ja', 'en'),
-  ('french-travel-phrases', 'French Travel Phrases', 'fr', 'en'),
-  ('portuguese-essentials', 'Portuguese Essentials', 'pt', 'en')
+  ('spanish-core-1000', 'Spanish Core 1000', 'es', 'en',
+    'Everyday Spanish words you will hear first, each with a story to help it stick.',
+    1794700000000, 'Written for Memli', 'All rights reserved', NULL),
+  ('japanese-kana', 'Japanese Hiragana & Katakana', 'ja', 'en',
+    'Your first Japanese words, written in hiragana and katakana.',
+    1794700000000, 'Written for Memli', 'All rights reserved', NULL),
+  ('french-travel-phrases', 'French Travel Phrases', 'fr', 'en',
+    'The French you need on a trip: greetings, train stations and paying the bill.',
+    1794700000000, 'Written for Memli', 'All rights reserved', NULL),
+  ('portuguese-essentials', 'Portuguese Essentials', 'pt', 'en',
+    'A few Portuguese words for saying thanks, ordering food and starting to talk.',
+    1794700000000, 'Written for Memli', 'All rights reserved', NULL)
 ON CONFLICT (id) DO UPDATE SET
   title = excluded.title,
   learning_language = excluded.learning_language,
   answer_language = excluded.answer_language,
+  description = excluded.description,
+  published_at = excluded.published_at,
+  source = excluded.source,
+  license = excluded.license,
+  attribution = excluded.attribution,
   updated_at = cast(unixepoch('subsecond') * 1000 as integer);
 
 -- ---------------------------------------------------------------------------
@@ -226,3 +246,18 @@ ON CONFLICT (id) DO UPDATE SET
   image_src = excluded.image_src,
   image_alt = excluded.image_alt,
   updated_at = cast(unixepoch('subsecond') * 1000 as integer);
+
+-- ---------------------------------------------------------------------------
+-- Enrollments
+-- ---------------------------------------------------------------------------
+-- The courses on usr_prototype_01's dashboard (#174). It starts with all four
+-- seeded courses. Reseeding never removes one, but it adds back a course the
+-- learner removed.
+
+INSERT INTO enrollments (user_id, course_id)
+VALUES
+  ('usr_prototype_01', 'spanish-core-1000'),
+  ('usr_prototype_01', 'japanese-kana'),
+  ('usr_prototype_01', 'french-travel-phrases'),
+  ('usr_prototype_01', 'portuguese-essentials')
+ON CONFLICT (user_id, course_id) DO NOTHING;

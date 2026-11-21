@@ -28,6 +28,10 @@ export type StudyPreview = {
   events?: (cards: readonly StudyCard[]) => readonly SessionEvent[]
   /** Header-only overrides, for queues longer than the seeded cards. */
   view?: (derived: SessionView) => SessionView
+  /** Shows the notice for answers that didn't save, as after a 429 or a dropped connection. */
+  saveFailed?: true
+  /** Shows the page for a session that couldn't load, instead of the session. */
+  loadFailed?: true
 }
 
 export const studyPreviewGroups = {
@@ -35,6 +39,7 @@ export const studyPreviewGroups = {
   card: "Card",
   answer: "Answer",
   mnemonic: "Mnemonic",
+  errors: "Errors",
 } as const
 
 type StudyPreviewGroup = keyof typeof studyPreviewGroups
@@ -183,7 +188,7 @@ const brokenImage: StudyCard = {
       ...casaStory,
       mnemonicId: "preview-broken-image-1",
       image: {
-        src: "/missing-mnemonic.png",
+        src: "/mnemonics/missing.png",
         alt: "A picture that fails to load.",
       },
     },
@@ -393,6 +398,27 @@ export const studyPreviews = {
     cards: () => [otherLanguage],
     languages: spanish,
     events: () => [{ type: "REVEAL", elapsedMs: null }],
+  },
+  "save-failed": {
+    group: "errors",
+    description:
+      "Half done, and some answers didn't save (offline, or 429 from the rate limit)",
+    cards: (cards) => cards,
+    events: (cards) => finish(cards, Math.floor(cards.length / 2)),
+    saveFailed: true,
+  },
+  "save-failed-complete": {
+    group: "errors",
+    description: "The summary, with answers still waiting to save",
+    cards: (cards) => cards,
+    events: (cards) => finish(cards, cards.length),
+    saveFailed: true,
+  },
+  "load-error": {
+    group: "errors",
+    description:
+      "The session couldn't load: try again, or back to the dashboard",
+    loadFailed: true,
   },
 } as const satisfies Record<string, StudyPreview>
 

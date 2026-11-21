@@ -5,7 +5,7 @@ alwaysApply: true
 
 # UI design floors (always-on)
 
-Applies to learner-facing screens: `apps/web/src/routes/_app`, `_session` and `src/components`. Marketing and auth join when they get a design pass. Reasons and evidence: `docs/designs/REDESIGN.md` in the repository root (sections 6 to 11).
+Applies to learner-facing screens: `apps/web/src/routes/_app`, `_session`, `_catalog` (the public course catalog, #174) and `src/components`. Marketing and auth join when they get a design pass. Reasons and evidence: `docs/designs/REDESIGN.md` in the repository root (sections 6 to 11).
 
 These are floors, not a style guide. Each one exists because a real screen broke it.
 

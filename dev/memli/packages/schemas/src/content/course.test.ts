@@ -108,13 +108,36 @@ describe("mnemonicSchema", () => {
     ["a data URL", "data:image/svg+xml,<svg onload=alert(1)>"],
     ["a relative path", "mnemonics/gato.svg"],
     ["a path with spaces", "/mnemonics/gato cat.svg"],
-  ])("only takes a picture from Memli's own origin, not %s", (_name, src) => {
+    ["another folder on Memli's origin", "/api/courses"],
+    ["a file at the root", "/gato.svg"],
+    ["a way out of the folder", "/mnemonics/../api/courses"],
+    ["an encoded way out", "/mnemonics/%2e%2e/api/courses.svg"],
+    ["a subfolder", "/mnemonics/uploads/gato.svg"],
+    ["a query string", "/mnemonics/gato.svg?track=1"],
+    ["a capital letter", "/mnemonics/Gato.svg"],
+    ["an HTML file", "/mnemonics/gato.html"],
+    ["a file with no type", "/mnemonics/gato"],
+    ["a double extension", "/mnemonics/gato.svg.html"],
+  ])("only takes a picture Memli ships, not %s", (_name, src) => {
     expect(
       mnemonicSchema.safeParse({
         ...mnemonic,
         image: { src, alt: "A cat at a gala." },
       }).success
     ).toBe(false)
+  })
+
+  it.each([
+    "/mnemonics/gato.svg",
+    "/mnemonics/la-casa-2.png",
+    "/mnemonics/perro.webp",
+  ])("takes %s", (src) => {
+    expect(
+      mnemonicSchema.safeParse({
+        ...mnemonic,
+        image: { src, alt: "A cat at a gala." },
+      }).success
+    ).toBe(true)
   })
 
   it("caps how long a story part can be", () => {

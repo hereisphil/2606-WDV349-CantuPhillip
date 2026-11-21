@@ -415,6 +415,17 @@
   a {
     @apply cursor-pointer;
   }
+  /* Always keep room for the page's scrollbar. Without it, a centered page
+     sits about 7 px further right when it is too short to scroll, so content
+     jumps sideways between a long page and a short one (#174). */
+  html {
+    scrollbar-gutter: stable;
+  }
+  /* Under a sticky header, scrolling to a focused element stops below it, so
+     focus is never hidden behind the bar (WCAG 2.4.11). */
+  html:has([data-sticky-header]) {
+    scroll-padding-top: 6rem;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: "Inter Variable", sans-serif;

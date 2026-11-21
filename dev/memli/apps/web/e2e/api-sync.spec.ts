@@ -100,6 +100,9 @@ test.describe("when the courses cannot load", () => {
       afterRetries
     )
     await expect(error.getByRole("button", { name: "Try again" })).toBeVisible()
+    await expect(page.locator("main h1")).toHaveText(
+      /^Good (morning|afternoon|evening), Ana$/
+    )
   })
 })
 
