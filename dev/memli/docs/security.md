@@ -122,6 +122,23 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong. The API answers `INVALID_EMAIL_OR_PASSWORD` for both, and `/signin` maps that one code to that one sentence (`apps/web/e2e/auth.spec.ts`).
 - [x] Decide on email verification. Decided 2026-11-17: not for the beta, because it needs an email service and a domain. Until #175, sign-up answers `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` for a registered email, so the form can reveal who has an account. The beta is invite-only, which limits who can try. #175 adds the email service, `requireEmailVerification` (sign-up then answers the same either way) and password reset.
 
+### Password hashing and the Workers CPU limit (#176)
+
+Measured on staging on 2026-11-20, after sign-in first deployed there (#189). Workers Free lists 10 ms of CPU per request, and local `wrangler dev` doesn't enforce it, so only staging can answer this.
+
+How: 10 sign-ups and 10 sign-ins from a staging tab, through the gate, while `bunx wrangler tail --env staging --format json` ran from `apps/api`. Throwaway `@example.com` accounts with random passwords. Sign-ups were spaced so the 5-a-minute limit wouldn't refuse them. It refused 4 anyway, because Better Auth counts the minute from the most recent try. That is the limit working, not a CPU problem.
+
+| Request | Count | CPU time, min / median / max | Wall time, median |
+| --- | --- | --- | --- |
+| `POST /api/auth/sign-up/email` (200) | 11 | 103 / 121 / 180 ms | 387 ms |
+| `POST /api/auth/sign-in/email` (200) | 10 | 114 / 119 / 185 ms | 271 ms |
+| `POST /api/auth/sign-up/email` (429, rate limited) | 4 | 4 / 5 / 30 ms | 48 ms |
+| `GET /api/auth/get-session` | 4 | 8 / 11 / 31 ms | 91 ms |
+
+- Every request ended `ok`. None ended `exceededCpu`, and none answered Error 1102.
+- The Worker's Metrics agree: 0 errors, and 0 under "Exceeded CPU Time Limits" in Errors by invocation status. The 11 subrequests are the `haveibeenpwned` checks, one per sign-up. They add wall time, not CPU time.
+- So the scrypt hash costs about 110 ms of CPU, 11 to 12 times the Free limit. Cloudflare let every one through, but that leniency isn't documented, so the beta shouldn't count on it.
+
 ### Google OAuth (#107)
 
 Not in the beta. #107 moved to Going Beyond on 2026-11-17, so these stay open for it.
