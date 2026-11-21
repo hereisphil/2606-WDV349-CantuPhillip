@@ -22,7 +22,7 @@ async function openSession(
   await page.addInitScript((nextTheme) => {
     window.localStorage.setItem("theme", nextTheme)
   }, theme)
-  await page.goto(path, { waitUntil: "networkidle" })
+  await page.goto(path, { waitUntil: "load" })
   await expect(page.locator("main")).toBeVisible()
 }
 
