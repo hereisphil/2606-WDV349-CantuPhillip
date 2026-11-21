@@ -120,7 +120,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 - [x] `signUpSchema` sets a minimum and maximum password length (8 and 128), and Better Auth is given the same two numbers. A password also needs a capital letter, a lowercase letter and a symbol (decided 2026-11-17, replacing the earlier "no must-contain rules" line). `meetsPasswordRules` in `@workspace/schemas/auth/sign-up` is the one definition: the form uses it, and the API runs it on sign-up, password change and password reset, answering `PASSWORD_TOO_WEAK`.
 - [x] A new password found in a known breach is refused with `PASSWORD_COMPROMISED` (Better Auth's `haveibeenpwned` plugin, turned on 2026-11-17). It runs on sign-up, password change and password reset, never on sign-in. Only the first five characters of the password's SHA-1 hash go to `api.pwnedpasswords.com`, which answers with every hash ending that shares them, so the service never learns the password or whether it matched. If the service is down, the request fails with a 500 and no account is made: it fails closed. The Privacy Policy (#170) names this service.
 - [x] Sign-in failures say one thing, "That email or password isn't right," never which part was wrong. The API answers `INVALID_EMAIL_OR_PASSWORD` for both, and `/signin` maps that one code to that one sentence (`apps/web/e2e/auth.spec.ts`).
-- [x] Decide on email verification. Decided 2026-11-17: not for the beta, because it needs an email service and a domain. Until #175, sign-up answers `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` for a registered email, so the form can reveal who has an account. The beta is invite-only, which limits who can try. #175 adds the email service, `requireEmailVerification` (sign-up then answers the same either way) and password reset.
+- [x] Decide on email verification. Decided 2026-11-17: not for the beta, because it needs an email service and a domain. Until #175, sign-up answers `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` for a registered email, so the form can reveal who has an account. The beta is invite-only (single-use invite codes, #191), which limits who can try. #175 adds the email service, `requireEmailVerification` (sign-up then answers the same either way) and password reset.
 
 ### Password hashing and the Workers CPU limit (#176)
 
@@ -138,6 +138,14 @@ How: 10 sign-ups and 10 sign-ins from a staging tab, through the gate, while `bu
 - Every request ended `ok`. None ended `exceededCpu`, and none answered Error 1102.
 - The Worker's Metrics agree: 0 errors, and 0 under "Exceeded CPU Time Limits" in Errors by invocation status. The 11 subrequests are the `haveibeenpwned` checks, one per sign-up. They add wall time, not CPU time.
 - So the scrypt hash costs about 110 ms of CPU, 11 to 12 times the Free limit. Cloudflare let every one through, but that leniency isn't documented, so the beta shouldn't count on it.
+- The hash is Better Auth's: `@better-auth/utils` picks `node:crypto`'s native `scrypt` on workerd (`N=16384, r=16, p=1`, a 64-byte key, a random 16-byte salt, stored as `salt:key` in `accounts.password`). Sign-in runs the same hash again to compare, so it costs the same. The rate-limited sign-ups (5 ms) and `get-session` (11 ms) never hash, which is how we know the hash is the cost.
+
+Decided 2026-11-20: Workers Paid (5 USD a month, 30 seconds of CPU by default), but not yet. It comes with #175, which needs it for Cloudflare Email Service anyway. Until then the beta stays on Free, with two guards:
+
+- Sign-up is invite-only (#191), so only a known, small group signs up.
+- The owner watches "Exceeded CPU Time Limits" under Errors by invocation status in `memli-api-staging`'s Metrics, and the production API's once #114 adds it. Upgrade the day it rises above 0.
+
+Ruled out: a cheaper hash. OWASP's minimum settings for scrypt, Argon2id and PBKDF2 all cost far more than 10 ms, and Better Auth's defaults already sit a little below OWASP's scrypt minimums, so fitting Free would mean weakening the hash. Moving sign-in to an outside identity provider would also fit, but it means replacing Better Auth.
 
 ### Google OAuth (#107)
 
@@ -171,4 +179,5 @@ Not in the beta, for the same reason as Google sign-in.
 | #175 | Email verification and password reset, so sign-up stops revealing existing accounts |
 | #178 | Research: which pages are server-rendered or static, including what the public catalog may cache |
 | #176 | Measure password hashing against the Workers CPU limit on staging |
+| #191 | Invite-only sign-up: single-use invite codes for the beta |
 | #171 | Pin GitHub Actions to commit SHAs |
