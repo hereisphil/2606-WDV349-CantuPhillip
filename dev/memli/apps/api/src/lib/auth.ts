@@ -21,6 +21,7 @@ import {
   users,
   verifications,
 } from "../db/schema"
+import { isTrustedOrigin } from "./same-origin"
 
 type Auth = ReturnType<typeof betterAuth<BetterAuthOptions>>
 
@@ -66,8 +67,13 @@ function authOptions(env: Env): BetterAuthOptions {
 
   return {
     appName: "Memli",
-    // The only trusted origin, and `https` is what marks cookies `Secure`.
+    // The trusted origin, and `https` is what marks cookies `Secure`.
     baseURL: BETTER_AUTH_URL,
+    // Locally, also the dev server opened from a phone (`isTrustedOrigin`).
+    trustedOrigins: (request) => {
+      const origin = request?.headers.get("Origin")
+      return isTrustedOrigin(origin, BETTER_AUTH_URL) ? [origin] : []
+    },
     secret: BETTER_AUTH_SECRET,
     database: drizzleAdapter(database(env.DB), {
       provider: "sqlite",

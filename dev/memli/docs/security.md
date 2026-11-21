@@ -97,7 +97,7 @@ Real sign-in replaces `usr_prototype_01`. Better Auth already does much of this 
 
 - [x] Leave Better Auth's origin check on: never set `disableCSRFCheck` or `disableOriginCheck` to `true`. Both are set to `false` by name, because Better Auth skips the origin check by itself under a test runner. Tests refuse a write from another origin, with no origin, and from another site's page.
 - [x] Memli's own routes accept only `application/json` bodies (done in #111).
-- [x] Memli's own write routes check the `Origin` header too (#169). `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` refuses any write outside `/api/auth/*` whose `Origin` isn't `BETTER_AUTH_URL`'s, a missing one included, with `403 FORBIDDEN`. Reads are left alone: without CORS, another site's page can't read the answer.
+- [x] Memli's own write routes check the `Origin` header too (#169). `requireSameOrigin` in `apps/api/src/lib/same-origin.ts` refuses any write outside `/api/auth/*` whose `Origin` isn't `BETTER_AUTH_URL`'s, a missing one included, with `403 FORBIDDEN`. On a developer's machine only (`BETTER_AUTH_URL` on `localhost`), `isTrustedOrigin` also lets in the dev server opened from a phone: `http`, the same port, a private network address (10.x, 172.16 to 172.31, 192.168.x). Better Auth gets the same rule through `trustedOrigins`. Reads are left alone: without CORS, another site's page can't read the answer.
 
 ### Rate limiting
 
